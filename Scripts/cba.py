@@ -446,8 +446,8 @@ if __name__ == "__main__":
     results_filename = "cba_{}_{}".format(
         Path(args.projected_scenario).name,
         Path(args.baseline_scenario).name)
-    wb.save(Path(args.results_path, results_filename + ".xlsx"))
+    wb.save(Path(args.result_data_folder, results_filename + ".xlsx"))
     results.to_csv(
-        Path(args.results_path, results_filename + ".txt"),
+        Path(args.result_data_folder, results_filename + ".txt"),
         sep='\t', float_format="%8.1f")
     log.info("CBA results saved to file: {}".format(results_filename))

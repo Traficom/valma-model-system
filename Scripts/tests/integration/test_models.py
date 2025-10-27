@@ -20,7 +20,7 @@ class Config():
     log_format = None
     log_level = "DEBUG"
     scenario_name = "TEST"
-    results_path = TEST_DATA_PATH / "Results"
+    result_data_folder = TEST_DATA_PATH / "Results"
 
 
 class ModelTest(unittest.TestCase):

@@ -21,9 +21,9 @@ from parameters.commodity import commodity_conversion
 
 
 def main(args):
-    zonedata_path = Path(args.forecast_data_path)
-    cost_data_path = Path(args.cost_data_path)
-    results_path = Path(args.results_path, args.scenario_name)
+    zone_data_file = Path(args.zone_data_file)
+    cost_data_file = Path(args.cost_data_file)
+    result_data_folder = Path(args.result_data_folder, args.scenario_name)
     emme_project_path = Path(args.emme_path)
     parameters_path = Path(__file__).parent / "parameters" / "freight"
     save_matrices = True if args.specify_commodity_names else False
@@ -35,10 +35,10 @@ def main(args):
                                     submodel="freight",
                                     save_matrices=save_matrices,
                                     first_matrix_id=args.first_matrix_id)
-    zonedata = FreightZoneData(zonedata_path, ass_model.zone_numbers, "koko_suomi")
-    resultdata = ResultsData(results_path)
-    resultmatrices = MatrixData(results_path / "Matrices" / "koko_suomi")
-    costdata = json.loads(cost_data_path.read_text("utf-8"))
+    zonedata = FreightZoneData(zone_data_file, ass_model.zone_numbers, "koko_suomi")
+    resultdata = ResultsData(result_data_folder)
+    resultmatrices = MatrixData(result_data_folder / "Matrices" / "koko_suomi")
+    costdata = json.loads(cost_data_file.read_text("utf-8"))
     purposes = create_purposes(parameters_path / "domestic", zonedata, 
                                resultdata, costdata["freight"])
     purps_to_assign = list(filter(lambda purposes: purposes[0] in
@@ -165,15 +165,15 @@ if __name__ == "__main__":
         type=str,
         help="Scenario name.")
     parser.add_argument(
-        "--forecast-data-path",
+        "--zone-data-file",
         type=str,
         help="Path to file containing forecast zonedata.")
     parser.add_argument(
-        "--cost-data-path",
+        "--cost-data-file",
         type=str,
         help="Path to file containing transport cost data.")
     parser.add_argument(
-        "--results-path",
+        "--result-data-folder",
         type=str,
         help="Path to folder where result data is saved to.")
     parser.add_argument(

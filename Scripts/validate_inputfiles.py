@@ -17,10 +17,10 @@ from valma_travel import BASE_ZONEDATA_FILE
 
 
 def main(args):
-    base_zonedata_path = Path(args.baseline_data_path, BASE_ZONEDATA_FILE)
+    base_zonedata_path = Path(args.base_data_folder, BASE_ZONEDATA_FILE)
     emme_paths: Union[str,List[str]] = args.emme_paths
     first_scenario_ids: Union[int,List[int]] = args.first_scenario_ids
-    forecast_zonedata_paths: Union[str,List[str]] = args.forecast_data_paths
+    zone_data_paths: Union[str,List[str]] = args.zone_data_paths
 
     if not emme_paths:
         msg = "Missing required argument 'emme-paths'."
@@ -30,8 +30,8 @@ def main(args):
         msg = "Missing required argument 'first-scenario-ids'."
         log.error(msg)
         raise ValueError(msg)
-    if not forecast_zonedata_paths:
-        msg = "Missing required argument 'forecast-zonedata-paths'."
+    if not zone_data_paths:
+        msg = "Missing required argument 'zone-data-path'."
         log.error(msg)
         raise ValueError(msg)
     # Check arg lengths
@@ -40,9 +40,9 @@ def main(args):
                + "vs. number of first-scenario-ids")
         log.error(msg)
         raise ValueError(msg)
-    if not (len(emme_paths) == len(forecast_zonedata_paths)):
+    if not (len(emme_paths) == len(zone_data_paths)):
         msg = ("Non-matching number of emme-paths (.emp files) "
-               + "vs. number of forecast-zonedata-paths")
+               + "vs. number of zone-data-path")
         log.error(msg)
         raise ValueError(msg)
 
@@ -61,7 +61,7 @@ def main(args):
     for i, emp_path in enumerate(emme_paths):
         log.info("Checking input data for scenario #{} ...".format(i))
 
-        data_path = args.cost_data_paths[i]
+        data_path = args.cost_data_files[i]
         if not os.path.exists(data_path):
             msg = "Forecast data file '{}' does not exist.".format(
                 data_path)
@@ -83,7 +83,7 @@ def main(args):
         # Check network
         if args.do_not_use_emme:
             mock_result_path = Path(
-                args.results_path, args.scenario_name[i], "Matrices",
+                args.result_data_folder, args.scenario_name[i], "Matrices",
                 args.submodel[i])
             if not mock_result_path.exists():
                 msg = "Mock Results directory {} does not exist.".format(
@@ -195,7 +195,7 @@ def main(args):
         if submodel != "koko_suomi":
             # Check base matrices
             base_matrices_path = Path(
-                args.baseline_data_path, "Matrices", submodel)
+                args.base_data_folder, "Matrices", submodel)
             if not base_matrices_path.exists():
                 msg = "Baseline matrices' directory '{}' does not exist.".format(
                     base_matrices_path)
@@ -217,11 +217,11 @@ def main(args):
             args.scenario_name, args.long_dist_demand_forecast):
         if long_dist == "calc":
             long_dist_result_paths.append(
-                Path(args.results_path, name, "Matrices", "koko_suomi"))
+                Path(args.result_data_folder, name, "Matrices", "koko_suomi"))
     model_types = (args.model_types if args.model_types
-                   else ["passenger_transport" for _ in forecast_zonedata_paths])
+                   else ["passenger_transport" for _ in zone_data_paths])
     for model_type, data_path, submodel, long_dist_forecast, freight_path in zip(
-            model_types, forecast_zonedata_paths, args.submodel,
+            model_types, zone_data_paths, args.submodel,
             args.long_dist_demand_forecast, args.freight_matrix_paths):
         # Check forecasted zonedata
         if not os.path.exists(data_path):

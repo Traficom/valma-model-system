@@ -16,7 +16,7 @@ class Args:
     first_scenario_ids = ["test"]
     forecast_data_paths = [ZONEDATA_PATH]
     cost_data_paths = [COSTDATA_PATH]
-    results_path = TEST_DATA_PATH / "Results"
+    result_data_folder = TEST_DATA_PATH / "Results"
     scenario_name = ["test"]
     do_not_use_emme = True
     long_dist_demand_forecast = ["base"]

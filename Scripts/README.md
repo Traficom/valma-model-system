@@ -32,7 +32,7 @@ The default is `TEXT`, but this can be changed to `JSON`.
 Then, you need to set the name of your scenario.
 If you are trying the test model, write `"test"`.
 
-### `RESULTS_PATH`
+### `RESULT_DATA_FOLDER`
 
 You need to set the path to your results folder where you wish your
 result tables and matrices are written to.
@@ -64,11 +64,11 @@ EMME scenario ID of the network.
 First matrix ID within EMME project (.emp).
 Used only if `SAVE_MATRICES_IN_EMME` is set to `true`.
 
-### `BASELINE_DATA_PATH`
+### `BASE_DATA_FOLDER`
 
 You need data and matrices for the initialization phase.
 This data will not be written over at any point - it is read-only.
-The location of this data is defined in `BASELINE_DATA_PATH` key.
+The location of this data is defined in `BASE_DATA_FOLDER` key.
 
 If you are trying the test model, try
 `"C:\\FILL_YOUR_PATH\\model-system\\Scripts\\tests\\test_data\\Base_input_data"`.
@@ -85,32 +85,21 @@ which maps the data to the zone system of the network.
 `Matrices` contains `.omx` files for demand, external traffic and freight traffic.
 The matrices may have missing zones (compared to the network), but cannot have extra zones.
 
-### `FORECAST_DATA_PATH`
+### `ZONE_DATA_FILE`
 
-Then, you need data for the forecast scenario.
+Then, you need zonedata file for the forecast scenario.
 This data will also not be written over at any point - it is read-only.
-The location of this data is defined in `FORECAST_DATA_PATH` key.
+The location of this data is defined in `ZONE_DATA_FILE` key.
+Usually this data is in `GPKG` format.
 
 If you are trying the test model, try
-`"C:\\FILL_YOUR_PATH\\model-system\\Scripts\\tests\\test_data\\Scenario_input_data\\2030_test"`.
+`"C:\\FILL_YOUR_PATH\\model-system\\Scripts\\tests\\test_data\\Scenario_input_data\\2030_test\\zonedata_test.gpkg"`.
 If you are trying another model, fill in whatever the path is.
-
-There should be 12 or 13 different input vector files in your forecast data path.
-File extensions are similar to your `BASELINE_DATA_PATH\\2018_zonedata` files.
-The file `.car` is optional.
-
-In all files, excluding files .cco, .tco and .trk, there must be a value
-line for every internal zone in use.
-It means that if there are no inhabitants, workplaces, parking costs etc. in
-some zone a zero value line instead of a missing line must be used.
-
-There must also exist a .zmp file that matches the name of the chosen [`SUBMODEL`](#submodel)
-and zone system of the network.
 
 ### `LONG_DIST_DEMAND_FORECAST`
 
 If 'calc', runs assigment with free-flow speed and calculates demand for long-distance trips.
-If 'base', takes long-distance trips from [base matrices](#baseline_data_path).
+If 'base', takes long-distance trips from [base matrices](#BASE_DATA_FOLDER).
 If path, takes long-distance trips from that path.
 The zone system of the long-distance trips in path must match the baseline data
 in `2018_zonedata` directory.

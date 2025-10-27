@@ -29,13 +29,13 @@ def main(args):
     else:
         raise ArgumentTypeError(
             "Iteration number {} not valid".format(args.iterations))
-    base_zonedata_path = Path(args.baseline_data_path, BASE_ZONEDATA_FILE)
-    base_matrices_path = Path(args.baseline_data_path, "Matrices")
+    base_zonedata_path = Path(args.base_data_folder, BASE_ZONEDATA_FILE)
+    base_matrices_path = Path(args.base_data_folder, "Matrices")
     freight_matrices_path = (Path(args.freight_matrix_path)
         if args.freight_matrix_path is not None else None)
-    forecast_zonedata_path = Path(args.forecast_data_path)
-    cost_data_path = Path(args.cost_data_path)
-    results_path = Path(args.results_path, args.scenario_name)
+    zone_data_file = Path(args.zone_data_file)
+    cost_data_file = Path(args.cost_data_file)
+    result_data_folder = Path(args.result_data_folder, args.scenario_name)
     emme_project_path = Path(args.emme_path)
     log_extra = {
         "status": {
@@ -58,10 +58,10 @@ def main(args):
         raise NameError(
             "Baseline matrix directory '{}' does not exist.".format(
                 base_matrices_path))
-    if not forecast_zonedata_path.is_file():
+    if not zone_data_file.is_file():
         raise NameError(
             "Forecast data file '{}' does not exist.".format(
-                forecast_zonedata_path))
+                zone_data_file))
 
     # Choose and initialize the Traffic Assignment (supply)model
     kwargs = {
@@ -73,7 +73,7 @@ def main(args):
         kwargs["time_periods"] = {"vrk": "WholeDayPeriod"}
     if args.do_not_use_emme:
         log.info("Initializing MockAssignmentModel...")
-        mock_result_path = results_path / "Matrices" / args.submodel
+        mock_result_path = result_data_folder / "Matrices" / args.submodel
         if not mock_result_path.is_dir():
             raise NameError(
                 "Mock Results directory {} does not exist.".format(
@@ -99,8 +99,8 @@ def main(args):
     # and providing demand calculations as Python modules)
     # Read input matrices (.omx) and zonedata (.csv)
     log.info("Initializing matrices and models...", extra=log_extra)
-    model_args = (forecast_zonedata_path, cost_data_path, base_zonedata_path,
-                  base_matrices_path, results_path, ass_model, args.submodel,
+    model_args = (zone_data_file, cost_data_file, base_zonedata_path,
+                  base_matrices_path, result_data_folder, ass_model, args.submodel,
                   long_dist_matrices_path, freight_matrices_path)
     model = (AgentModelSystem(*model_args) if args.is_agent_model
              else ModelSystem(*model_args))
@@ -116,7 +116,7 @@ def main(args):
         else [Path(path) for path in args.stored_speed_assignment])
     try:
         if len(stored_speed_assignment) == 0:
-            stored_speed_assignment.append(results_path)
+            stored_speed_assignment.append(result_data_folder)
     except TypeError:
         pass
     impedance = model.assign_base_demand(
@@ -253,7 +253,7 @@ if __name__ == "__main__":
         type=str,
         help="Name of HELMET scenario. Influences result folder name and log file name."),
     parser.add_argument(
-        "--results-path",
+        "--result-data-folder",
         type=str,
         help="Path to folder where result data is saved to."),
     # HELMET scenario input data
@@ -274,15 +274,15 @@ if __name__ == "__main__":
         type=int,
         help="First matrix ID within EMME project (.emp). Used only if --save-emme-matrices."),
     parser.add_argument(
-        "--baseline-data-path",
+        "--base-data-folder",
         type=str,
         help="Path to folder containing both baseline zonedata and -matrices (Given privately by project manager)"),
     parser.add_argument(
-        "--forecast-data-path",
+        "--zone-data-file",
         type=str,
         help="Path to folder containing forecast zonedata"),
     parser.add_argument(
-        "--cost-data-path",
+        "--cost-data-file",
         type=str,
         help="Path to file containing transport cost data"),
     parser.add_argument(
@@ -320,7 +320,7 @@ if __name__ == "__main__":
     log.debug('sys.path=' + str(sys.path))
     json_dump = utils.config.dump(args_dict)
     log.debug(json_dump)
-    p = Path(args.results_path, args.scenario_name, "runtime_params.json")
+    p = Path(args.result_data_folder, args.scenario_name, "runtime_params.json")
     with open(p, 'w') as file:
         file.write(json_dump)
 
