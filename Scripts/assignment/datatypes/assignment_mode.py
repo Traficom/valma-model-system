@@ -132,41 +132,63 @@ class BikeMode(SoftMode):
 
 
 class WalkMode(SoftMode):
-    def _specify(self):
-        self.spec = {
-            "type": "STANDARD_TRANSIT_ASSIGNMENT",
+    def assign(self):
+        self.init_matrices()
+        no_penalty = dict.fromkeys(["at_nodes", "on_lines", "on_segments"])
+        no_penalty["global"] = {
+            "penalty": 0,
+            "perception_factor": 1,
+        }
+        num_proc = "number_of_processors"
+        spec = {
+            "type": "EXTENDED_TRANSIT_ASSIGNMENT",
             "modes": param.aux_modes,
             "demand": self.demand.id,
             "waiting_time": {
                 "headway_fraction": 0.01,
                 "effective_headways": "hdw",
+                "spread_factor": 1,
                 "perception_factor": 0,
             },
-            "boarding_time": {
-                "penalty": 0,
-                "perception_factor": 0,
-            },
-            "aux_transit_time": {
+            "boarding_time": no_penalty,
+            "boarding_cost": no_penalty,
+            "in_vehicle_time": {
                 "perception_factor": 1,
             },
-            "od_results": {
-                "transit_times": self.time.id,
+            "in_vehicle_cost": None,
+            "flow_distribution_at_origins": {
+                "choices_at_origins": "OPTIMAL_STRATEGY",
             },
-            "strategy_analysis": {
-                "sub_path_combination_operator": "+",
-                "sub_strategy_combination_operator": "average",
-                "trip_components": {
-                    "aux_transit": "length",
-                },
-                "selected_demand_and_transit_volumes": {
-                    "sub_strategies_to_retain": "ALL",
-                    "selection_threshold": {
-                        "lower": None,
-                        "upper": None,
-                    },
-                },
-                "results": {
-                    "od_values": self.dist.id,
-                },
+            "flow_distribution_at_regular_nodes_with_aux_transit_choices": {
+                "choices_at_regular_nodes": "OPTIMAL_STRATEGY",
+            },
+            "flow_distribution_between_lines": {
+                "consider_total_impedance": True,
+            },
+            "journey_levels": [],
+            "performance_settings": {
+                num_proc: param.performance_settings[num_proc],
             },
         }
+        spec["aux_transit_by_mode"] = [{
+            "mode": mode,
+            "cost": None,
+            "cost_perception_factor": 1.0,
+            "time": param.aux_transit_time_attr,
+            "time_perception_factor": 1.0,
+        } for mode in param.aux_modes]
+        subset = "by_mode_subset"
+        result_spec = {
+            "type": "EXTENDED_TRANSIT_MATRIX_RESULTS",
+            "total_impedance": self.time.id,
+            subset: {
+                "modes": param.aux_modes,
+                "distance": self.dist.id,
+            },
+        }
+        self.emme_project.transit_assignment(
+            specification=spec, scenario=self.emme_scenario,
+            add_volumes=True, save_strategies=True, class_name=self.name)
+        self.emme_project.matrix_results(
+            result_spec, scenario=self.emme_scenario,
+            class_name=self.name)

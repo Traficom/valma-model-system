@@ -120,17 +120,6 @@ class DemandModel:
         for model in self._income_models:
             model.predict()
 
-    def generate_tours(self):
-        """Generate vector of tours for each tour purpose.
-
-        Not used in agent-based simulation.
-        Result is stored in `purpose.gen_model.tours`.
-        """
-        for purpose in self.tour_purposes:
-            purpose.gen_model.init_tours()
-            purpose.gen_model.add_tours() 
-        log.info("Tours generated.")
-
     def generate_tour_probs(self) -> Dict[Tuple[int,int], numpy.ndarray]:
         """Generate matrices of cumulative tour combination probabilities.
 

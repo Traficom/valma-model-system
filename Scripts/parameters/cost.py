@@ -15,7 +15,8 @@ activity_time = {
     "hb_sport": 1.6,
     "hb_visit": 2.4,
     "hb_leisure_overnight": 8.9,
-    "hb_business": 4.9
+    "hb_business": 4.9,
+    "hb_escort": 0.4
 }
 
 share_paying = {
@@ -27,7 +28,8 @@ share_paying = {
     "hb_sport": 0.00,
     "hb_visit": 0.75,
     "hb_leisure_overnight": 1.00,
-    "hb_business": 0.5
+    "hb_business": 0.5,
+    "hb_escort": 0.00
 } 
 
 sharing_factor = {
@@ -39,7 +41,8 @@ sharing_factor = {
     "hb_sport": 1.00,
     "hb_visit": 0.25,
     "hb_leisure_overnight": 1.00,
-    "hb_business": 0.00
+    "hb_business": 0.00,
+    "hb_escort": 1.00
 }
 
 car_drv_occupancy = {
@@ -51,7 +54,8 @@ car_drv_occupancy = {
     "hb_sport": 1.651,
     "hb_visit": 1.739,
     "hb_leisure_overnight": 1.822,
-    "hb_business": 1.171
+    "hb_business": 1.171,
+    "hb_escort": 1.81
 }
 
 car_pax_occupancy = {
@@ -63,5 +67,6 @@ car_pax_occupancy = {
     "hb_sport": 2.791,
     "hb_visit": 2.936,
     "hb_leisure_overnight": 2.836,
-    "hb_business": 2.483
+    "hb_business": 2.483,
+    "hb_escort": 2.89
 }

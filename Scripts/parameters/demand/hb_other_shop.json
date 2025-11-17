@@ -107,7 +107,8 @@
     "destination_choice": {
         "car_leisure": {
             "attraction": {
-                "time*within_zone": -0.06305
+                "time*within_zone": -0.06305,
+                "cost*within_zone": -0.07622
             },
             "impedance": {
                 "time": -0.06305,
@@ -132,7 +133,8 @@
         },
         "car_pax": {
             "attraction": {
-                "time*within_zone": -0.05792
+                "time*within_zone": -0.05792,
+                "cost*within_zone": -0.07622
             },
             "impedance": {
                 "time": -0.05792,

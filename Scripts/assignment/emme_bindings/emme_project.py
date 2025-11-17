@@ -97,8 +97,6 @@ class EmmeProject:
             "inro.emme.network_calculation.network_calculator")
         self.car_assignment = self.modeller.tool(
             "inro.emme.traffic_assignment.sola_traffic_assignment")
-        self.pedestrian_assignment = self.modeller.tool(
-            "inro.emme.transit_assignment.standard_transit_assignment")
         self.transit_assignment = self.modeller.tool(
             "inro.emme.transit_assignment.extended_transit_assignment")
         self.congested_assignment = self.modeller.tool(

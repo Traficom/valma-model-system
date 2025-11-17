@@ -653,15 +653,6 @@ class AssignmentPeriod(Period):
             specification=self.bike_mode.spec, scenario=scen)
         log.info("Bike assignment performed for scenario " + str(scen.id))
 
-    def _assign_pedestrians(self):
-        """Perform pedestrian assignment for one scenario."""
-        self.walk_mode.init_matrices()
-        self._set_walk_time()
-        log.info("Pedestrian assignment started...")
-        self.emme_project.pedestrian_assignment(
-            specification=self.walk_mode.spec, scenario=self.emme_scenario)
-        log.info("Pedestrian assignment performed for scenario " + str(self.emme_scenario.id))
-
     def _calc_extra_wait_time(self):
         """Calculate extra waiting time for one scenario."""
         network = self.emme_scenario.get_network()
@@ -729,7 +720,6 @@ class AssignmentPeriod(Period):
                         calc_network_results=False, delete_strat_files=False):
         """Perform transit assignment for one scenario."""
         self._calc_extra_wait_time()
-        self._set_walk_time()
         log.info("Transit assignment started...")
         for i, transit_class in enumerate(transit_classes):
             tc: TransitMode = self.assignment_modes[transit_class]

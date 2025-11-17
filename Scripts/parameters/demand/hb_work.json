@@ -130,7 +130,8 @@
                 }
             },
             "attraction": {
-                "time*within_zone": -0.04167
+                "time*within_zone": -0.04167,
+                "cost*within_zone": -0.07247
             },
             "impedance": {
                 "time": -0.04167,
@@ -157,7 +158,8 @@
                 }
             },
             "attraction": {
-                "time*within_zone": -0.0692
+                "time*within_zone": -0.0692,
+                "cost*within_zone": -0.07247
             },
             "impedance": {
                 "time": -0.0692,

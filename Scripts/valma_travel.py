@@ -138,7 +138,7 @@ def main(args):
                 "Fatal error occured, simulation aborted.", extra=log_extra)
             break
         gap = model.convergence[-1] # Last iteration convergence
-        convergence_criteria_fulfilled = gap["max_gap"] < args.max_gap or gap["rel_gap"] < args.rel_gap
+        convergence_criteria_fulfilled = gap["max_gap"] < args.max_gap and gap["rel_gap"] < args.rel_gap
         if i == iterations:
             log_extra["status"]['state'] = 'finished'
         elif convergence_criteria_fulfilled:

@@ -6,10 +6,13 @@ import numpy
 import unittest
 import openmatrix as omx
 
-import parameters.assignment as param
 from datahandling.resultdata import ResultsData
 from datahandling.zonedata import FreightZoneData
 from utils.freight_utils import create_purposes
+from models.logistics import DetourDistributionInference, process_logistics_inference
+from utils.get_zone_indices import get_zone_indices
+from assignment.mock_assignment import MockAssignmentModel
+from datahandling.matrixdata import MatrixData
 
 TEST_PATH = Path(__file__).parent.parent / "test_data"
 TEST_DATA_PATH = TEST_PATH / "Scenario_input_data"
@@ -22,9 +25,9 @@ ZONE_NUMBERS = [202, 1344, 1755, 2037, 2129, 2224, 2333, 2413, 2519, 2621,
                 50107, 50127, 50201, 50205]
 
 
-class FreightModelTest(unittest.TestCase):
+class LogisticsModelTest(unittest.TestCase):
 
-    def test_freight_model(self):      
+    def test_logistics_model(self):      
         zonedata = FreightZoneData(
             TEST_DATA_PATH / "freight_zonedata.gpkg", numpy.array(ZONE_NUMBERS),
             "koko_suomi")
@@ -33,7 +36,10 @@ class FreightModelTest(unittest.TestCase):
             costdata = json.load(file)
         purposes = create_purposes(PARAMETERS_PATH / "domestic", zonedata, 
                                    resultdata, costdata["freight"])
-        self.assertGreaterEqual(len(purposes), 1)
+        
+        mapping = {}
+        for idx, zone in enumerate(zonedata.zone_numbers):
+            mapping[zone] = idx
         
         time_impedance = omx.open_file(TEST_MATRICES / "freight_time.omx", "r")
         dist_impedance = omx.open_file(TEST_MATRICES / "freight_dist.omx", "r")
@@ -66,10 +72,19 @@ class FreightModelTest(unittest.TestCase):
         
         for purpose in purposes.values():
             demand = purpose.calc_traffic(impedance)
-            costs = purpose.get_costs(impedance)
-            for mode in demand:
-                self.assertTrue(numpy.isfinite(demand[mode]).all())
-                if mode == param.truck_classes[0]:
-                    self.assertTrue(numpy.isfinite(costs[mode]["cost"]).all())
-                else:
-                    self.assertTrue(numpy.isfinite(costs[mode]["cost"]).any())
+            if hasattr(purpose, "logistics_module"):
+                lcs_areas = zonedata[f"lc_area_{purpose.name}"] if hasattr(zonedata, f"lc_area_{purpose.name}") else zonedata["lc_area"]
+                lcs_sizes = lcs_areas[lcs_areas > 0]
+                lc_indices = get_zone_indices(mapping, lcs_sizes.index.to_list())
+                purpose_truck_costs = purpose.get_costs(impedance)["truck"]["cost"]
+                logistics_module = DetourDistributionInference(cost_matrix=purpose_truck_costs,
+                                                            ddm_params=purpose.logistics_params,
+                                                            lc_indices=numpy.array(lc_indices),
+                                                            lc_sizes=numpy.array(lcs_sizes.values))
+                final_demand = process_logistics_inference(model=logistics_module,
+                                                            n_zones=zonedata.nr_zones,
+                                                            demand=demand["truck"])
+                demand["truck"] = final_demand
+                self.assertTrue(numpy.isfinite(demand["truck"]).all())
+                self.assertTrue((demand["truck"] >= 0).all())
+                self.assertTrue(demand["truck"].shape == (zonedata.nr_zones, zonedata.nr_zones))

@@ -65,5 +65,13 @@
             "constant": 13.02
         }
     },
-    "demand_share": {}
+    "demand_share": {},
+    "logistics_module": {
+        "orig_lc_detour": -0.9104,
+        "lc_dest_detour": -0.9999,
+        "constant_detour": 13.5688,
+        "orig_dest_direct": -0.9955,
+        "constant_direct": -18.5684,
+        "size_factor": 3.8269
+    }
 }
