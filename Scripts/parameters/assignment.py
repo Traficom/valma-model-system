@@ -600,6 +600,7 @@ assignment_classes = {
     "hb_grocery": "leisure",
     "hb_other_shop": "leisure",
     "hb_leisure": "leisure",
+    "hb_escort": "leisure",
     "hb_sport": "leisure",
     "hb_visit": "leisure",
     "hb_leisure_overnight": "leisure",
