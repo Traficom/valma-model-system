@@ -105,10 +105,10 @@ class ZoneData:
         couples_children = avg_two_adult_share["hh3"] * self["sh_pop_hh3"]
         couples = couples_no_children + couples_children
         singles = singles_no_children + singles_children
-        self.share["sh_hh_1_adult_children"] = singles_children / singles
-        self.share["sh_hh_1_adult_no_children"] = singles_no_children / singles
-        self.share["sh_hh_2_adults_children"] = couples_children / couples
-        self.share["sh_hh_2_adults_no_children"] = couples_no_children / couples
+        self.share["sh_hh_1_adult_children"] = divide(singles_children, singles)
+        self.share["sh_hh_1_adult_no_children"] = divide(singles_no_children, singles)
+        self.share["sh_hh_2_adults_children"] = divide(couples_children, couples)
+        self.share["sh_hh_2_adults_no_children"] = divide(couples_no_children, couples)
 
         # Simple combinatorial household license share calculations assuming
         # no correlation between license distribution in population and
