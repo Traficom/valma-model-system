@@ -416,14 +416,15 @@ class ModelSystem:
                     mtx[ass_class] = impedance[mtx_type][ass_class]
 
     def _calculate_noise_areas(self):
-        data = {}
-        zd = self._zone_datas["domestic"]
-        data["area"] = self.ass_model.calc_noise(
-            zd.aggregations.municipality_mapping)
-        pop = zd.aggregations.aggregate_array(zd["population"], "county")
-        conversion = pandas.Series(zone_param.pop_share_per_noise_area)
-        data["population"] = conversion * data["area"] * pop
-        self.resultdata.print_data(data, "noise_areas.txt")
+        if not self.ass_model.use_free_flow_speeds:
+            data = {}
+            zd = self._zone_datas["domestic"]
+            data["area"] = self.ass_model.calc_noise(
+                zd.aggregations.municipality_mapping)
+            pop = zd.aggregations.aggregate_array(zd["population"], "county")
+            conversion = pandas.Series(zone_param.pop_share_per_noise_area)
+            data["population"] = conversion * data["area"] * pop
+            self.resultdata.print_data(data, "noise_areas.txt")
 
     def _export_accessibility(self):
         for purpose in self.dm.tour_purposes:

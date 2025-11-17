@@ -352,6 +352,7 @@ def read_zonedata(path: Path,
     data = data.groupby(zone_mapping_name).agg(aggs)
     data.index = data.index.astype(int)
     data.index.name = "analysis_zone_id"
+    data = data.loc[zone_numbers[0]:zone_numbers[-1]]
     if data.index.size != zone_numbers.size or (data.index != zone_numbers).any():
         for i in data.index:
             if int(i) not in zone_numbers:

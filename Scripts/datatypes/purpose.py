@@ -651,28 +651,26 @@ class FreightPurpose(Purpose):
     ----------
     specification : dict
         Model parameter specifications
-    zone_data : ZoneData
-        Data used for all demand calculations
+    zone_data : Dict[str, FreightZoneData]
+        Model area (domestic/foreign) : Data used for all demand calculations
     resultdata : ResultData
         Writer object to result directory
     costdata : Dict[str, dict]
         Freight mode (truck/freight_train/ship) : mode
             Mode (truck/trailer_truck...) : unit cost name
                 unit cost name : unit cost value
-    category : str
-        purpose modelling category, within Finland as 'domestic, 
-        outside Finland as 'foreign'
     """
-    def __init__(self, specification, zone_data, resultdata, costdata, category):
-        args = (self, specification, zone_data, resultdata)
-        Purpose.__init__(*args)
+    def __init__(self, specification, zone_data, resultdata, costdata):
+        Purpose.__init__(self, specification, zone_data, resultdata)
         self.costdata = costdata
-        self.model_category = category
+        self.model_category = list(zone_data)[0]
 
         if specification["struct"] == "dest>mode":
-            self.model = logit.DestModeModel(*args)
+            self.model = logit.DestModeModel(self, specification, zone_data[self.model_category], 
+                                             resultdata)
         else:
-            self.model = logit.ModeDestModel(*args)
+            self.model = logit.ModeDestModel(self, specification, zone_data[self.model_category], 
+                                             resultdata)
         self.modes = list(self.model.mode_choice_param)
 
         if specification.get("logistics_module"):

@@ -396,9 +396,6 @@ class MockProject:
         }
         return report
 
-    def pedestrian_assignment(self, *args, **kwargs):
-        pass
-
     _transit_classes = set()
 
     def transit_assignment(self, specification, scenario=None,

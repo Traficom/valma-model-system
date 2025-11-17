@@ -2,6 +2,7 @@ from typing import Dict, Iterable
 from numpy import ndarray
 import copy
 
+import utils.log as log
 from assignment.assignment_period import AssignmentPeriod
 from assignment.long_dist_period import WholeDayPeriod
 from assignment.datatypes.transit import TransitMode
@@ -55,7 +56,9 @@ class OffPeakPeriod(AssignmentPeriod):
 
     def init_assign(self):
         self._init_assign_transit()
-        self._assign_pedestrians()
+        log.info("Pedestrian assignment started...")
+        self.walk_mode.assign()
+        log.info(f"Pedestrians assigned for scenario {self.emme_scenario.id}")
         self._set_bike_vdfs()
         self._assign_bikes()
         return self.get_soft_mode_impedances()

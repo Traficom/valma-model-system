@@ -33,6 +33,7 @@ class FreightModelTest(unittest.TestCase):
             costdata = json.load(file)
         purposes = create_purposes(PARAMETERS_PATH / "domestic", zonedata, 
                                    resultdata, costdata["freight"])
+        self.assertGreaterEqual(len(purposes), 1)
         
         time_impedance = omx.open_file(TEST_MATRICES / "freight_time.omx", "r")
         dist_impedance = omx.open_file(TEST_MATRICES / "freight_dist.omx", "r")
