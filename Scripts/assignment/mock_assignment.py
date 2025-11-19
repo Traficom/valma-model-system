@@ -128,8 +128,9 @@ class MockPeriod(Period):
         """
         mtxs = self._get_impedances(modes)
         for ass_cl in param.car_classes:
-            mtxs["cost"][ass_cl] = (self.dist_unit_cost[ass_cl]
-                                    * mtxs["dist"][ass_cl])
+            if ass_cl in modes:
+                mtxs["cost"][ass_cl] = (self.dist_unit_cost[ass_cl]
+                                        * mtxs["dist"][ass_cl])
         if "toll_cost" in mtxs:
             for ass_cl in mtxs["toll_cost"]:
                 mtxs["cost"][ass_cl] += mtxs["toll_cost"][ass_cl]
