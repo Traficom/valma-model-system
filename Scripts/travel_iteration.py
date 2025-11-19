@@ -96,7 +96,8 @@ class ModelSystem:
         sec_dest_purposes = []
         other_work_purposes = []
         other_leisure_purposes = []
-        for file in parameters_path.rglob("*.json"):
+        purpose_names = []
+        for file in parameters_path.glob("*.json"):
             specification = json.loads(file.read_text("utf-8"))
             for dummies in extra_dummies.values():
                 for subarea in dummies:
@@ -110,6 +111,7 @@ class ModelSystem:
             required_time_periods = sorted(
                 {tp for m in purpose.impedance_share.values() for tp in m})
             if required_time_periods == sorted(assignment_model.time_periods):
+                purpose_names.append(purpose.name)
                 if isinstance(purpose, SecDestPurpose):
                     sec_dest_purposes.append(purpose)
                 elif purpose.orig == "home":
@@ -122,6 +124,10 @@ class ModelSystem:
                         other_work_purposes.append(purpose)
                     else:
                         other_leisure_purposes.append(purpose)
+        if len(purpose_names) != len(set(purpose_names)):
+            msg = f"Duplicate tour purposes in demand parameters."
+            log.error(msg)
+            raise ValueError(msg)
         self.dm = self._init_demand_model(
             home_based_work_purposes + other_work_purposes
             + home_based_leisure_purposes + other_leisure_purposes
