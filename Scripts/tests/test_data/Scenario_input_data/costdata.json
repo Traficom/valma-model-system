@@ -41,13 +41,6 @@
             "car_pax": 1.0
         }
     },
-    "area_calibration": {
-        "subarea": {
-            "Helsingin kantakaupunki": {
-                "car_work":  0.0
-            }
-        }
-    },
     "freight": {
         "kemiat": {
             "truck": {

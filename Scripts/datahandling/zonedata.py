@@ -11,9 +11,8 @@ import json
 import parameters.zone as param
 import utils.log as log
 from datatypes.zone import Zone, ZoneAggregations, avg
+from models.logit import divide, log as ln
 
-def divide(a, b):
-    return numpy.divide(a, b, out=numpy.zeros_like(a), where=b!=0)
 
 class ZoneData:
     """Container for zone data read from input file.
@@ -27,6 +26,11 @@ class ZoneData:
     zone_mapping : str
             Name of column where mapping between data zones (index)
             and assignment zones
+    municipality_calibration : dict
+        key : str
+            Transport mode (car_work/bike/...)
+        value : pandas.Series
+            Municipality-pair calibration factors
     extra_dummies : dict
         key : str
             Name of aggregation level
@@ -41,6 +45,7 @@ class ZoneData:
     def _init_data(self, data_path: Path, zone_numbers: Sequence,
                  zone_mapping: str, data_type: str = "domestic_travel",
                  model_area: str = "domestic",
+                 municipality_calibration: Dict[str, pandas.Series] = {},
                  extra_dummies: Dict[str, Sequence[str]] = {},
                  car_dist_cost: Optional[float] = None):
         self._values = {}
@@ -68,6 +73,8 @@ class ZoneData:
         self.zones = {number: Zone(number, self.aggregations)
             for number in self.zone_numbers}
         self.nr_zones = len(self.zone_numbers)
+        self._municipality_calib: Dict[str, pandas.Series] = {mode: ln(params)
+                       for mode, params in municipality_calibration.items()}
         self._add_transformations(data, extra_dummies, car_dist_cost)
 
     def _add_transformations(self,
@@ -227,6 +234,16 @@ class ZoneData:
                 beeline, lower, upper, _ = key.split('_')
                 mtx = self[beeline]
                 return (mtx > int(lower)) & (mtx <= int(upper))[bounds, :]
+            elif "municipality_calibration" in key:
+                try:
+                    # Try to find mode-specific calibration matrix
+                    calib = self._municipality_calib[key.split('_')[-1]]
+                except KeyError:
+                    return 0
+                else:
+                    idx = self.aggregations.mappings["municipality"].values
+                    return calib.unstack("attraction").reindex(
+                        index=idx, columns=idx, fill_value=0.0).values[bounds, :]
             else:
                 raise KeyError(err)
         if val.ndim == 1: # If not a compound (i.e., matrix)
