@@ -11,7 +11,7 @@ import json
 import parameters.zone as param
 import utils.log as log
 from datatypes.zone import Zone, ZoneAggregations, avg
-from models.logit import divide, log as ln
+from models.logit import divide
 
 
 class ZoneData:
@@ -73,8 +73,8 @@ class ZoneData:
         self.zones = {number: Zone(number, self.aggregations)
             for number in self.zone_numbers}
         self.nr_zones = len(self.zone_numbers)
-        self._municipality_calib: Dict[str, pandas.Series] = {mode: ln(params)
-                       for mode, params in municipality_calibration.items()}
+        self._municip_calib: Dict[str, pandas.Series] = {mode: numpy.log(params)
+            for mode, params in municipality_calibration.items()}
         self._add_transformations(data, extra_dummies, car_dist_cost)
 
     def _add_transformations(self,
@@ -237,7 +237,7 @@ class ZoneData:
             elif "municipality_calibration" in key:
                 try:
                     # Try to find mode-specific calibration matrix
-                    calib = self._municipality_calib[key.split('_')[-1]]
+                    calib = self._municip_calib[key.split('_')[-1]]
                 except KeyError:
                     return 0
                 else:
