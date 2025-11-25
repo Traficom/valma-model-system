@@ -184,6 +184,12 @@ class Purpose:
                                                     cost.car_pax_occupancy[self.name])
                     except KeyError:
                         pass
+                airpl_access_modes = ["airpl_car_acc", "airpl_taxi_acc"]
+                transit_access_modes = ["pt_car_acc", "pt_taxi_acc"]
+                if mtx_type == "time" and mode in airpl_access_modes:
+                    day_imp[mode][mtx_type] -= day_imp[mode]["car_time"] * 1.5
+                if mtx_type == "time" and mode in transit_access_modes:
+                    day_imp[mode][mtx_type] -= day_imp[mode]["car_time"] * 6.5
         return day_imp
 
 def new_tour_purpose(*args):
