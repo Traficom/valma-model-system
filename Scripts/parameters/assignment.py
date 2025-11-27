@@ -30,7 +30,7 @@ roadclasses = {
     18: RoadClass("arterial", "any", 3, 1400, 97, 0.309),
     19: RoadClass("arterial", "any", 3, 1400, 90, 0.309),
     20: RoadClass("arterial", "any", 3, 1350, 81, 0.370),
-    21: RoadClass("arterial", "any", 3, 1450, 61, 0.492),
+    21: RoadClass("arterial", "any", 3, 1200, 58, 0.492),
     22: RoadClass("arterial", "any", 3, 1100, 73, 0.492),
     23: RoadClass("arterial", "any", 3, 1250, 54, 0.556),
     24: RoadClass("arterial", "any", 3, 1100, 63, 0.492),
@@ -43,16 +43,18 @@ roadclasses = {
     31: RoadClass("collector", "any", 5, 900, 41, 0.732),
     32: RoadClass("collector", "any", 5, 900, 36, 0.833),
     33: RoadClass("collector", "any", 5, 750, 36, 0.833),
-    34: RoadClass("collector", "any", 5, 700, 41, 0.732),
+    34: RoadClass("collector", "any", 5, 600, 36, 0.732),
     35: RoadClass("local", "any", 5, 700, 30, 1.000),
-    36: RoadClass("local", "any", 5, 600, 30, 1.000),
-    37: RoadClass("local", "any", 5, 500, 30, 1.000),
-    38: RoadClass("local", "any", 5, 500, 23, 1.304),
+    36: RoadClass("local", "any", 5, 600, 25, 1.000),
+    37: RoadClass("local", "any", 5, 550, 20, 1.000),
+    38: RoadClass("local", "any", 5, 500, 18, 1.304),
     39: RoadClass("local", "any", 5, 700, 20, 1.304),
-    40: RoadClass("local", "any", 5, 600, 20, 1.304),
-    41: RoadClass("local", "any", 5, 500, 20, 1.304),
+    40: RoadClass("local", "any", 5, 600, 15, 1.304),
+    41: RoadClass("local", "any", 5, 500, 12, 1.304),
     44: RoadClass("ferry", "any", 11, 500, 20, 1.000),
 }
+traffic_light_capacity_factor = 0.9
+traffic_light_speed_factor = 0.85
 connector_link_types = (84, 85, 86, 87, 88, 98, 99)
 connector = RoadClass("connector", "any", 99, 0, 50, 0)
 roadclasses.update({linktype: connector for linktype in connector_link_types})
