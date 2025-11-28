@@ -129,6 +129,7 @@ class ZoneData:
         self["within_municipality"] = within_municipality
         self["outside_municipality"] = ~within_municipality
         dummies = {
+            "zone": {},
             "subarea": {
                 "Helsingin_kantakaupunki",
                 "Tampereen_kantakaupunki",
@@ -145,7 +146,11 @@ class ZoneData:
                 self[dummy] = self.dummy(division_type, dummy)
 
     def dummy(self, division_type, name, bounds=slice(None)):
-        dummy = self.aggregations.mappings[division_type][bounds] == name
+        if division_type == "zone":
+            dummy = pandas.Series(
+                self.zone_numbers == int(name), self.zone_numbers)
+        else:
+            dummy = self.aggregations.mappings[division_type][bounds] == name
         if not dummy.any():
             log.warn(f"Dummy variable {name} not found in {division_type}")
         return dummy

@@ -7,6 +7,11 @@
         }
     },
     "destination_choice_calibration": {
+        "zone": {
+            "202": {
+                "car_work": 0.0
+            }
+        },
         "subarea": {
             "Helsingin kantakaupunki": {
                 "transit_work":  0.0
