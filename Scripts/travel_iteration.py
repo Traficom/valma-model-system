@@ -480,9 +480,10 @@ class ModelSystem:
     def _get_mode_tours(self, generation = True):
         tours: Dict[str, pandas.Series] = {}
         dists: Dict[str, pandas.Series] = {}
+        idx = pandas.Index(self.zone_numbers, name="analysis_zone_id")
         for mode in self.travel_modes:
-            demand = pandas.Series(0.0, self.zone_numbers, name=mode)
-            dist = pandas.Series(0.0, self.zone_numbers, name=mode)
+            demand = pandas.Series(0.0, idx, name=mode)
+            dist = pandas.Series(0.0, idx, name=mode)
             for purpose in self.dm.tour_purposes:
                 if mode in purpose.modes and purpose.dest != "source":
                     if generation:
