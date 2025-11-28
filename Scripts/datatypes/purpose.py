@@ -301,7 +301,7 @@ class TourPurpose(Purpose):
     @property
     def tour_lengths(self):
         lengths = {mode: self.histograms[mode].histogram for mode in self.histograms}
-        return pandas.concat(lengths, names=["mode", "purpose", ">", "<="])
+        return pandas.concat(lengths, names=["mode", "purpose", "interval"])
 
     def init_sums(self):
         for name in self.aggregates:
