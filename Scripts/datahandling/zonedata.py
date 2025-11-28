@@ -73,8 +73,7 @@ class ZoneData:
         self.zones = {number: Zone(number, self.aggregations)
             for number in self.zone_numbers}
         self.nr_zones = len(self.zone_numbers)
-        self._municip_calib: Dict[str, pandas.Series] = {mode: numpy.log(params)
-            for mode, params in municipality_calibration.items()}
+        self._municip_calib = municipality_calibration
         self._add_transformations(data, extra_dummies, car_dist_cost)
 
     def _add_transformations(self,
