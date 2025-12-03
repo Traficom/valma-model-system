@@ -167,6 +167,10 @@ class DemandModel:
         zd = self.zone_data
         prob = {hh_size: model.calc_prob()
             for hh_size, model in self.car_ownership_models.items()}
+        # The following shares of the population have own dummies in
+        # mode-choice models.
+        # They represent shares of the population living
+        # in households with given number of cars and *adults*.
         zd.share["sh_cars1_hh1"] = zd["sh_pop_hh1_lic1"]*prob["hh1_lic1"]["1"]
         zd.share["sh_cars1_hh2"] = (zd["sh_pop_hh2_lic1"]*prob["hh2_lic1"]["1"]
                                     + zd["sh_pop_hh2_lic2"]*prob["hh2_lic2"]["1"])
@@ -177,15 +181,15 @@ class DemandModel:
         result = {"cars": numpy.zeros_like(zd["population"])}
         for n_cars in range(3):
             result[f"sh_cars{n_cars}"] = numpy.zeros_like(zd["population"])
-            for hh_size in prob:
-                pop_hh_size = zd[f"sh_pop_{hh_size}"] * zd["population"]
-                if str(n_cars) in prob[hh_size]:
-                    hh_car = prob[hh_size][str(n_cars)] * pop_hh_size
+            for hh_type in prob:
+                pop_hh_type = zd[f"sh_{hh_type}"] * zd["households"]
+                if str(n_cars) in prob[hh_type]:
+                    hh_car = prob[hh_type][str(n_cars)] * pop_hh_type
                     result["cars"] += hh_car * n_cars
-                    national_share = sum(hh_car) / sum(pop_hh_size)
+                    national_share = sum(hh_car) / sum(pop_hh_type)
                     self.resultdata.print_line(
-                        f"{hh_size},cars{n_cars},{national_share}", "car_ownership")
-                    result[f"sh_cars{n_cars}"] += (prob[hh_size][str(n_cars)]
-                                                   * zd[f"sh_pop_{hh_size}"])
+                        f"{hh_type},cars{n_cars},{national_share}", "car_ownership")
+                    result[f"sh_cars{n_cars}"] += (prob[hh_type][str(n_cars)]
+                                                   * zd[f"sh_{hh_type}"])
         self.resultdata.print_data(result, "zone_car_ownership.txt")
         log.info("New car-ownership values calculated.")
