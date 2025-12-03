@@ -182,11 +182,11 @@ class DemandModel:
         for n_cars in range(3):
             result[f"sh_cars{n_cars}"] = numpy.zeros_like(zd["population"])
             for hh_type in prob:
-                pop_hh_type = zd[f"sh_{hh_type}"] * zd["households"]
+                households = zd[f"sh_{hh_type}"] * zd["households"]
                 if str(n_cars) in prob[hh_type]:
-                    hh_car = prob[hh_type][str(n_cars)] * pop_hh_type
+                    hh_car = prob[hh_type][str(n_cars)] * households
                     result["cars"] += hh_car * n_cars
-                    national_share = sum(hh_car) / sum(pop_hh_type)
+                    national_share = sum(hh_car) / sum(households)
                     self.resultdata.print_line(
                         f"{hh_type},cars{n_cars},{national_share}", "car_ownership")
                     result[f"sh_cars{n_cars}"] += (prob[hh_type][str(n_cars)]
