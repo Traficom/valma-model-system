@@ -170,9 +170,14 @@ class DemandModel:
         # The following shares of the population have own dummies in
         # mode-choice models.
         # They represent shares of the population living
-        # in households with given number of cars and *adults*.
-        zd.share["sh_cars1_hh1"] = zd["sh_pop_hh1_lic1"]*prob["hh1_lic1"]["1"]
-        zd.share["sh_cars1_hh2"] = (zd["sh_pop_hh2_lic1"]*prob["hh2_lic1"]["1"]
+        # in households with given number of cars and *persons*.
+        # TODO: Re-estimate mode and destination choice models with
+        # household shares based on number of *adults*.
+        hh_cars1_adult1 = zd["sh_pop_hh1_lic1"] * prob["hh1_lic1"]["1"]
+        zd.share["sh_cars1_hh1"] = (zd["sh_hh_1_adult_no_children"]
+                                    * hh_cars1_adult1)
+        zd.share["sh_cars1_hh2"] = (zd["sh_hh_1_adult_children"]*hh_cars1_adult1
+                                    + zd["sh_pop_hh2_lic1"]*prob["hh2_lic1"]["1"]
                                     + zd["sh_pop_hh2_lic2"]*prob["hh2_lic2"]["1"])
         zd.share["sh_cars2_hh2"] = zd["sh_pop_hh2_lic2"]*prob["hh2_lic2"]["2"]
         zd.share["sh_car"] = (zd["sh_cars1_hh1"]
