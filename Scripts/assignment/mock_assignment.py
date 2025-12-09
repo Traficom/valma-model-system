@@ -157,7 +157,7 @@ class MockPeriod(Period):
             self, assignment_classes: Iterable[str],
             impedance_output: Iterable[str] = param.basic_impedance_output):
         impedance_output = [mtx_type for mtx_type in impedance_output
-            if mtx_type != "toll_cost"]
+            if mtx_type not in ("toll_cost", "train_users")]
         mtxs = {mtx_type: self._get_matrices(mtx_type, assignment_classes)
             for mtx_type in impedance_output}
         # TODO This is a temporary solution to maintain backwards compability.
