@@ -136,7 +136,6 @@ class TransitMode(AssignmentMode):
         self.gen_cost = self._create_matrix("gen_cost")
         self.inv_cost = self._create_matrix("inv_cost")
         self.board_cost = self._create_matrix("board_cost")
-        self.dist = self._create_matrix("dist")
         self.main_mode_dist = self._create_matrix("main_mode_dist")
 
     def _add_park_and_ride(self):
@@ -149,7 +148,6 @@ class TransitMode(AssignmentMode):
             "total_impedance": self.gen_cost.id,
             subset: {
                 "modes": modes,
-                "distance": self.dist.id,
                 "actual_in_vehicle_costs": self.inv_cost.id,
                 "actual_total_boarding_costs": self.board_cost.id,
                 "avg_boardings": self.num_board.id,
