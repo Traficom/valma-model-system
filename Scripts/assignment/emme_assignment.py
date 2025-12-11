@@ -376,8 +376,7 @@ class EmmeAssignmentModel(AssignmentModel):
 
         # Print mode boardings per municipality
         boardings = defaultdict(lambda: defaultdict(float))
-        modes = self.assignment_periods[0].assignment_modes
-        attrs = [modes[transit_class].segment_results["total_boardings"]
+        attrs = [self._netfield(f"{transit_class}_total_board")
             for transit_class in self.transit_classes]
         for line in network.transit_lines():
             mode = line.mode.id
