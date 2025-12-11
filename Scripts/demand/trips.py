@@ -10,10 +10,11 @@ from datatypes.person import Person
 
 import utils.log as log
 import parameters.zone as param
-from parameters.tour_generation import tour_combination_area
+from parameters.tour_combinations import tour_combination_area
 from datatypes.purpose import SecDestPurpose
-from models import car_use, car_ownership, linear, tour_combinations
-from parameters.car import cars_hh1, cars_hh2, cars_hh3
+from models import linear
+from models.logit import GenerationLogit
+from parameters.car import car_ownership
 
 
 
@@ -41,6 +42,7 @@ class DemandModel:
         self.zone_data = zone_data
         self.tour_purposes = tour_purposes
         self.purpose_dict = {purpose.name: purpose for purpose in tour_purposes}
+        self._use_tour_combination_model = False
         for purpose in tour_purposes:
             try:
                 sources = purpose.sources
@@ -54,19 +56,11 @@ class DemandModel:
         bounds = param.purpose_areas[tour_combination_area]
         self.bounds = slice(*zone_data.all_zone_numbers.searchsorted(
             [bounds[0], bounds[-1]]))
-        self.car_use_model = car_use.CarUseModel(
-            zone_data, self.bounds, param.age_groups, self.resultdata)
         self.car_ownership_models = {
-            "hh1": car_ownership.CarOwnershipModel(cars_hh1, zone_data, 
-                                            self.bounds, self.resultdata),
-            "hh2": car_ownership.CarOwnershipModel(cars_hh2, zone_data, 
-                                            self.bounds, self.resultdata),
-            "hh3": car_ownership.CarOwnershipModel(cars_hh3, zone_data, 
-                                            self.bounds, self.resultdata)
-        }
+            hh_size: GenerationLogit(
+                car_ownership[hh_size], zone_data, self.bounds, self.resultdata)
+            for hh_size in car_ownership}
     
-        self.tour_generation_model = tour_combinations.TourCombinationModel(
-            self.zone_data)
         # Income models used only in agent modelling
         self._income_models = [
             linear.IncomeModel(
@@ -82,28 +76,6 @@ class DemandModel:
     def _age_strings(self):
         for age_group in param.age_groups:
             yield "age_{}_{}".format(*age_group)
-
-    def create_population_segments(self):
-        """Create population segments.
-
-        Store dict of dicts of `pandas.Series`, where each series is a
-        zone array with number of people belonging to segment.
-        Upper-level dict keys are age group strings (age_7-17/...).
-        Lower-level dict keys are strings car_user and no_car.
-        """
-        cm = self.car_use_model
-        self.zone_data["car_users"] = cm.calc_prob()
-        self.segments = {}
-        pop = self.zone_data["population"][self.bounds]
-        for age in self._age_strings():
-            age_pop = self.zone_data["sh_" + age][self.bounds] * pop
-            car_share = sum(self.zone_data["share_" + gender][self.bounds]
-                            * cm.calc_individual_prob(age, gender)
-                for gender in cm.genders)
-            self.segments[age] = {
-                "car_users": car_share * age_pop,
-                "no_car": (1-car_share) * age_pop,
-            }
 
     def create_population(self):
         """Create population for agent-based simulation.
@@ -148,43 +120,6 @@ class DemandModel:
         for model in self._income_models:
             model.predict()
 
-    def generate_tours(self):
-        """Generate vector of tours for each tour purpose.
-
-        Not used in agent-based simulation.
-        Result is stored in `purpose.gen_model.tours`.
-        """
-        gm = self.tour_generation_model
-        combination_purposes = {purpose for combination in gm.tour_combinations
-            for purpose in combination}
-        use_tour_combination_model = False
-        for purpose in self.tour_purposes:
-            purpose.gen_model.init_tours()
-            if not isinstance(purpose, SecDestPurpose):
-                purpose.gen_model.add_tours()
-            if purpose.name in combination_purposes:
-                use_tour_combination_model = True
-        if use_tour_combination_model:
-            self._generate_tour_combinations()
-
-    def _generate_tour_combinations(self):
-        gm = self.tour_generation_model
-        for age in self._age_strings():
-            segments = self.segments[age]
-            prob_c = gm.calc_prob(age, is_car_user=True, zones=self.bounds)
-            prob_n = gm.calc_prob(age, is_car_user=False, zones=self.bounds)
-            nr_tours_sums = pandas.Series(name="nr_tours")
-            for combination in prob_c:
-                # Each combination is a tuple of tours performed during a day
-                nr_tours = ( prob_c[combination] * segments["car_users"]
-                           + prob_n[combination] * segments["no_car"])
-                for purpose in combination:
-                    try:
-                        self.purpose_dict[purpose].gen_model.tours += nr_tours
-                    except KeyError:
-                        pass
-                nr_tours_sums["-".join(combination)] = nr_tours.sum()
-
     def generate_tour_probs(self) -> Dict[Tuple[int,int], numpy.ndarray]:
         """Generate matrices of cumulative tour combination probabilities.
 
@@ -221,21 +156,24 @@ class DemandModel:
         zd = self.zone_data
         prob = {hh_size: model.calc_prob()
             for hh_size, model in self.car_ownership_models.items()}
-        zd.share["sh_cars1_hh1"] = zd["sh_pop_hh1"]*prob["hh1"][1]
-        zd.share["sh_cars1_hh2"] = (zd["sh_pop_hh2"]*prob["hh2"][1]
-                                    + zd["sh_pop_hh3"]*prob["hh3"][1])
-        zd.share["sh_cars2_hh2"] = (zd["sh_pop_hh2"]*prob["hh2"][2]
-                                    + zd["sh_pop_hh3"]*prob["hh3"][2])
+        zd.share["sh_cars1_hh1"] = zd["sh_pop_hh1"]*prob["hh1"]["1"]
+        zd.share["sh_cars1_hh2"] = (zd["sh_pop_hh2"]*prob["hh2"]["1"]
+                                    + zd["sh_pop_hh3"]*prob["hh3"]["1"])
+        zd.share["sh_cars2_hh2"] = (zd["sh_pop_hh2"]*prob["hh2"]["2"]
+                                    + zd["sh_pop_hh3"]*prob["hh3"]["2"])
+        zd.share["sh_car"] = (zd["sh_cars1_hh1"]
+                              + zd["sh_cars1_hh2"]
+                              + zd["sh_cars2_hh2"])
         result = {"cars": numpy.zeros_like(zd["population"])}
         for n_cars in range(3):
             result[f"sh_cars{n_cars}"] = numpy.zeros_like(zd["population"])
             for hh_size in prob:
-                if n_cars in prob[hh_size]:
-                    hh_car = prob[hh_size][n_cars] * zd[hh_size]
+                if str(n_cars) in prob[hh_size]:
+                    hh_car = prob[hh_size][str(n_cars)] * zd[hh_size]
                     result["cars"] += hh_car * n_cars
                     national_share = sum(hh_car) / sum(zd[hh_size])
                     self.resultdata.print_line(
                         f"{hh_size},cars{n_cars},{national_share}", "car_ownership")
-                    result[f"sh_cars{n_cars}"] += prob[hh_size][n_cars] * zd[f"sh_{hh_size}"]                
+                    result[f"sh_cars{n_cars}"] += prob[hh_size][str(n_cars)] * zd[f"sh_{hh_size}"]                
         self.resultdata.print_data(result, "zone_car_ownership.txt")
         log.info("New car-ownership values calculated.")

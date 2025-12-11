@@ -1,6 +1,7 @@
 from __future__ import annotations
-from typing import Any, List, Sequence, Union
+from typing import Any, List, Sequence, Union, Dict, Optional
 from pathlib import Path
+from collections import defaultdict
 import numpy # type: ignore
 import pandas
 import fiona
@@ -26,19 +27,29 @@ class ZoneData:
     zone_mapping : str
             Name of column where mapping between data zones (index)
             and assignment zones
+    extra_dummies : dict
+        key : str
+            Name of aggregation level
+        value : list
+            Additional dummy variables to create
+    car_dist_cost : float
+        Car cost (eur) per km
     """
     def __init__(self, *args, **kwargs):
         self._init_data(*args, **kwargs)
 
     def _init_data(self, data_path: Path, zone_numbers: Sequence,
-                 zone_mapping: str, data_type: str = "trips"):
+                 zone_mapping: str, data_type: str = "domestic_travel",
+                 model_area: str = "domestic",
+                 extra_dummies: Dict[str, Sequence[str]] = {},
+                 car_dist_cost: Optional[float] = None):
         self._values = {}
         self.share = ShareChecker(self)
         all_zone_numbers = numpy.array(zone_numbers)
         self.all_zone_numbers = all_zone_numbers
-        peripheral = param.purpose_areas["peripheral"]
+        area = param.purpose_areas[model_area]
         self.zone_numbers = pandas.Index(
-            all_zone_numbers[:all_zone_numbers.searchsorted(peripheral[1])],
+            all_zone_numbers[slice(*all_zone_numbers.searchsorted(area))],
             name="analysis_zone_id")
         Zone.counter = 0
         data, mapping = read_zonedata(
@@ -57,51 +68,51 @@ class ZoneData:
         self.zones = {number: Zone(number, self.aggregations)
             for number in self.zone_numbers}
         self.nr_zones = len(self.zone_numbers)
-        self._add_transformations(data)
+        self._add_transformations(data, extra_dummies, car_dist_cost)
 
-    def _add_transformations(self, data):
+    def _add_transformations(self,
+                             data: pandas.DataFrame,
+                             extra_dummies: Dict[str, Sequence[str]],
+                             car_dist_cost: float):
+        self["car_density"].clip(upper=1, inplace=True)
         self.share["share_female"] = pandas.Series(
             0.5, self.zone_numbers, dtype=numpy.float32)
         self.share["share_male"] = pandas.Series(
             0.5, self.zone_numbers, dtype=numpy.float32)
-        share_7_99 = pandas.Series(0, self.zone_numbers, dtype=numpy.float32)
-        pop = data["population"]
-        wp = data["workplaces"]
-        hh = data["households"]
-        for col in data:
-            if col.startswith("sh_age"):
-                pop_share = data[col]
-                self.share[col] = pop_share
-                col_name = col.replace("sh_", "")
-                self[col_name] = pop_share * pop
-                self[col_name + "_female"] = 0.5 * pop_share * pop
-                self[col_name + "_male"] = 0.5 * pop_share * pop
-                share_7_99 += pop_share
-            if col.startswith("sh_income"):
-                self[col.replace("sh_", "")] = data[col] * pop
-            if col.startswith("sh_wrk_"):
-                self[col.replace("sh_wrk_", "")] = data[col] * wp
-            if col.startswith("sh_hh"):
-                self[col.replace("sh_", "")] = data[col] * hh
-        self.share["share_age_7-99"] = share_7_99
+
         # Convert household shares to population shares
-        hh_population = (self["sh_hh1"] + 2*self["sh_hh2"] + 4.13*self["sh_hh3"])
-        self.share["sh_pop_hh1"] = divide(self["sh_hh1"], hh_population)
-        self.share["sh_pop_hh2"] = divide(2*self["sh_hh2"], hh_population)
-        self.share["sh_pop_hh3"] = divide(4.13*self["sh_hh3"], hh_population)
-        self.share["sh_cars1_hh1"] = divide(self["sh_cars1_hh1"], hh_population)
-        self.share["sh_cars1_hh2"] = divide((2*self["sh_cars1_hh2"]
-                                             + 4.13*self["sh_cars1_hh3"]),
-                                            hh_population)
-        self.share["sh_cars2_hh2"] = divide((2*self["sh_cars2_hh2"]
-                                             + 4.13*self["sh_cars2_hh3"]),
-                                            hh_population)
+        avg_hh_size = {
+            "hh1": 1,
+            "hh2": 2,
+            "hh3": 4.13,  # Average size of 3+ households
+        }
+        hh_pop = sum(avg_hh_size[hh] * self[f"sh_{hh}"] for hh in avg_hh_size)
+        for hh, avg_size in avg_hh_size.items():
+            self.share[f"sh_pop_{hh}"] = divide(
+                avg_size*self[f"sh_{hh}"], hh_pop)
+            self[hh] = self[f"sh_pop_{hh}"] * self["population"] / avg_size
+        self.share["sh_cars1_hh1"] = divide(self["sh_cars1_hh1"], hh_pop)
+        self.share["sh_cars1_hh2"] = divide(
+            (avg_hh_size["hh2"]*self["sh_cars1_hh2"]
+             + avg_hh_size["hh3"]*self["sh_cars1_hh3"]),
+            hh_pop)
+        self.share["sh_cars2_hh2"] = divide(
+            (avg_hh_size["hh2"]*self["sh_cars2_hh2"]
+             + avg_hh_size["hh3"]*self["sh_cars2_hh3"]),
+            hh_pop)
+        self.share["sh_car"] = (self["sh_cars1_hh1"]
+                                + self["sh_cars1_hh2"]
+                                + self["sh_cars2_hh2"])
+        self["pop_density"] = divide(data["population"], data["land_area"])
+        self["log_pop_density"] = numpy.log(self["pop_density"]+1)
+
         # Create diagonal matrix
         self["within_zone"] = numpy.full((self.nr_zones, self.nr_zones), 0.0)
         self["within_zone"][numpy.diag_indices(self.nr_zones)] = 1.0
         # Two-way intrazonal distances from building distances
         self["dist"] = data["avg_building_distance"] * 2
         self["time"] = self["dist"] / (20/60) # 20 km/h
+        self["cost"] = car_dist_cost * self["dist"]
         # Unavailability of intrazonal tours
         self["within_zone_inf"] = numpy.full((self.nr_zones, self.nr_zones), 0.0)
         self["within_zone_inf"][numpy.diag_indices(self.nr_zones)] = numpy.inf
@@ -111,14 +122,26 @@ class ZoneData:
         within_municipality = municipalities[:, numpy.newaxis] == municipalities
         self["within_municipality"] = within_municipality
         self["outside_municipality"] = ~within_municipality
-        for dummy in ("Helsingin_kantakaupunki", "Tampereen_kantakaupunki"):
-            self[dummy] = self.dummy("subarea", dummy)
-        self["Lappi"] = self.dummy("county", "Lappi")
-        for key in ["Uusimaa", "Lounais-Suomi", "Ita-Suomi", "Pohjois-Suomi"]:
-            self["population_" + key] = self.dummy("submodel", key) * pop
+        dummies = {
+            "subarea": {
+                "Helsingin_kantakaupunki",
+                "Tampereen_kantakaupunki",
+            },
+            "county": {
+                "Lappi",
+            },
+            "municipality": {},
+            "submodel": {},
+        }
+        for division_type in dummies:
+            dummies[division_type].update(extra_dummies.get(division_type, []))
+            for dummy in dummies[division_type]:
+                self[dummy] = self.dummy(division_type, dummy)
 
     def dummy(self, division_type, name, bounds=slice(None)):
         dummy = self.aggregations.mappings[division_type][bounds] == name
+        if not dummy.any():
+            log.warn(f"Dummy variable {name} not found in {division_type}")
         return dummy
 
     @property
@@ -200,6 +223,10 @@ class ZoneData:
                 # If parameter is two-fold, they will be multiplied
                 return (self.get_data(keyl[0], bounds, generation)
                         * self.get_data(keyl[1], bounds, generation))
+            elif "beeline" in key:
+                beeline, lower, upper, _ = key.split('_')
+                mtx = self[beeline]
+                return (mtx > int(lower)) & (mtx <= int(upper))[bounds, :]
             else:
                 raise KeyError(err)
         if val.ndim == 1: # If not a compound (i.e., matrix)
@@ -209,6 +236,17 @@ class ZoneData:
                 return val.values
         else:  # Return matrix (purpose zones -> all zones)
             return val[bounds, :]
+
+    @property
+    def is_in_submodel(self) -> pandas.Series:
+        """Boolean mapping of zones, whether in proper sub-model area."""
+        mapping = self.aggregations.mappings["submodel"]
+        submodels = mapping.drop_duplicates()
+        for submodel in submodels:
+            if self.mapping.name == submodel.lower().replace('-', '_'):
+                return mapping == submodel
+        else:
+            return pandas.Series(True, self.zone_numbers)
 
 
 class FreightZoneData(ZoneData):
@@ -294,23 +332,27 @@ def read_zonedata(path: Path,
         data.sort_index(inplace=True)
         log.warn("File {} is not sorted in ascending order".format(path))
     zone_mapping = data[zone_mapping_name]
-    zone_variables = json.loads(
+    zone_variables: dict = json.loads(
         (Path(__file__).parent / "zone_variables.json").read_text("utf-8")
     )[data_type]
     aggs = {}
+    shares: Dict[str, Dict[str, List[str]]] = {}
     for func, cols in zone_variables.items():
         for col in cols:
             try:
                 total = col["total"]
+                shares[total] = defaultdict(list)
             except TypeError:
                 aggs[col] = func
             else:
                 aggs[total] = func
                 for share in col["shares"]:
                     aggs[share] = lambda x: avg(x, weights=data[total])
+                    shares[total][share.split('_')[1]].append(share)
     data = data.groupby(zone_mapping_name).agg(aggs)
     data.index = data.index.astype(int)
     data.index.name = "analysis_zone_id"
+    data = data.loc[zone_numbers[0]:zone_numbers[-1]]
     if data.index.size != zone_numbers.size or (data.index != zone_numbers).any():
         for i in data.index:
             if int(i) not in zone_numbers:
@@ -327,4 +369,16 @@ def read_zonedata(path: Path,
         msg = "Zone numbers did not match for file {}".format(path)
         log.error(msg)
         raise IndexError(msg)
+    for total in shares:
+        for share_type, type_shares in shares[total].items():
+            for share in type_shares:
+                data[share.replace("sh_", "")] = data[share] * data[total]
+            if len(type_shares[0].split('_')) == 4:
+                # Example: Sum sh_age_7_17 .. sh_age_65_99 in sh_age_7_99
+                total_interval = "sh_{}_{}_{}".format(
+                    share_type, type_shares[0].split('_')[2],
+                    type_shares[-1].split('_')[3])
+            else:
+                total_interval = f"sh_{share_type}_all"
+            data[total_interval] = data[type_shares].sum(axis="columns")
     return data, zone_mapping

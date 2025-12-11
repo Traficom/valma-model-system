@@ -41,52 +41,88 @@
             "car_pax": 1.0
         }
     },
+    "area_calibration": {
+        "subarea": {
+            "Helsingin kantakaupunki": {
+                "car_work":  0.0
+            }
+        }
+    },
     "freight": {
-        "mameka": {
+        "kemiat": {
             "truck": {
                 "truck": {
-                    "time": 0.5,
-                    "dist": 0.55,
+                    "time": 0.35,
+                    "dist": 0.26,
                     "toll_cost": 1.0,
-                    "terminal_cost": 2.0,
-                    "avg_load": 7.0,
-                    "empty_share": 1.5,
-                    "distribution": 0.1
+                    "terminal_cost": 14.0,
+                    "domestic_distribution": 0.2,
+                    "foreign_distribution": 0.1,
+                    "avg_load": 5.76,
+                    "empty_share": 0.5
+                },
+                "semi_trailer": {
+                    "time": 0.11,
+                    "dist": 0.10,
+                    "toll_cost": 1.0,
+                    "terminal_cost": 8.0,
+                    "domestic_distribution": 0.3,
+                    "foreign_distribution": 0.4,
+                    "avg_load": 15.01,
+                    "empty_share": 0.5
                 },
                 "trailer_truck": {
-                    "time": 0.9,
-                    "dist": 0.7,
+                    "time": 0.06,
+                    "dist": 0.05,
                     "toll_cost": 1.0,
-                    "terminal_cost": 1.5,
-                    "avg_load": 32,
-                    "empty_share": 1.5,
-                    "distribution": 0.9
+                    "terminal_cost": 5.0,
+                    "domestic_distribution": 0.5,
+                    "foreign_distribution": 0.5,
+                    "avg_load": 30.24,
+                    "empty_share": 0.5
                 }
             },
             "freight_train": {
                 "electric_train": {
-                    "time": 7.0,
-                    "dist": 4.0,
-                    "terminal_cost": 3.0,
-                    "wagon_annual_cost": 10.0,
-                    "avg_load": 300
+                    "time": 0.08,
+                    "dist": 0.03,
+                    "terminal_cost": 12.5
                 },
                 "diesel_train": {
-                    "time": 6.0,
-                    "dist": 8.0,
-                    "terminal_cost": 2.5,
-                    "wagon_annual_cost": 10.0,
-                    "avg_load": 300
+                    "time": 0.07,
+                    "dist": 0.06,
+                    "terminal_cost": 11.5
                 }
             },
             "ship": {
-                "other_dry_cargo": {
-                    "4m": {
-                        "time": 0.001,
-                        "terminal_cost": 9.0,
-                        "other_costs": 0.2,
-                        "empty_share": 1.9,
-                        "speed": 0.3
+                "domestic_vessel": {
+                    "time": 0.0037,
+                    "dist": 0.0032,
+                    "terminal_cost": 22.0,
+                    "canal_cost": 1.0
+                },
+                "container_ship": {
+                    "4": {
+                        "time": 0.00199,
+                        "dist": 0.00172,
+                        "terminal_cost": 25.7523
+                    },
+                    "8": {
+                        "time": 0.00061,
+                        "dist": 0.00132,
+                        "terminal_cost": 25.7994
+                    },
+                    "15": {
+                        "time": 0.00032,
+                        "dist": 0.0009,
+                        "terminal_cost": 28.03951
+                    }
+                },
+                "roro_vessel": {
+                    "5": {
+                        "time": 0.00554,
+                        "dist": 0.01407,
+                        "terminal_cost": 22.7679
                     }
                 }
             }

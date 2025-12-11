@@ -1,5 +1,5 @@
 {
-    "trips": {
+    "domestic_travel": {
         "sum": [
             {
                 "total": "population",
@@ -14,7 +14,15 @@
                     "sh_income_40_59",
                     "sh_income_60_79",
                     "sh_income_80_99",
-                    "sh_income_100_"
+                    "sh_income_100_",
+                    "sh_hh1",
+                    "sh_hh2",
+                    "sh_hh3",
+                    "sh_cars1_hh1",
+                    "sh_cars1_hh2",
+                    "sh_cars1_hh3",
+                    "sh_cars2_hh2",
+                    "sh_cars2_hh3"
                 ]
             },
             {
@@ -33,19 +41,7 @@
             "area_leisure_buildings",
             "area_university_buildings",
             "students_comprehensive",
-            {
-                "total": "households",
-                "shares": [
-                    "sh_hh1",
-                    "sh_hh2",
-                    "sh_hh3",
-                    "sh_cars1_hh1",
-                    "sh_cars1_hh2",
-                    "sh_cars1_hh3",
-                    "sh_cars2_hh2",
-                    "sh_cars2_hh3"
-                ]
-            }
+            "land_area"
         ],
         "mean": [
             "avg_park_cost",
@@ -68,7 +64,6 @@
             "gen_metsat",
             "gen_kalevi",
             "gen_krhiil",
-            "gen_rkoljy",
             "gen_metkai",
             "gen_turve",
             "gen_elint",
@@ -77,11 +72,7 @@
             "gen_papsel",
             "gen_pappai",
             "gen_kokbri",
-            "gen_bensa",
-            "gen_diesel",
-            "gen_kpoljy",
-            "gen_kroljy",
-            "gen_mpoljy",
+            "gen_oljytu",
             "gen_kemlaa",
             "gen_kummuo",
             "gen_minkai",
@@ -97,7 +88,6 @@
             "att_metsat",
             "att_kalevi",
             "att_krhiil",
-            "att_rkoljy",
             "att_metkai",
             "att_turve",
             "att_elint",
@@ -106,11 +96,7 @@
             "att_papsel",
             "att_pappai",
             "att_kokbri",
-            "att_bensa",
-            "att_diesel",
-            "att_kpoljy",
-            "att_kroljy",
-            "att_mpoljy",
+            "att_oljytu",
             "att_kemlaa",
             "att_kummuo",
             "att_minkai",
@@ -121,7 +107,9 @@
             "att_konela",
             "att_majon",
             "att_huonek",
-            "att_jate"
+            "att_jate",
+            "lc_area",
+            "lc_area_elint"
         ],
         "first": [
             "aggregate_results_municipality",

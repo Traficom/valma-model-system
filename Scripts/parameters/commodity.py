@@ -1,12 +1,11 @@
 # Commodity classification conversions
-# between 29 and 12 classes
+# between 24 and 12 classes
 
 commodity_conversion = {
     "marita": "mameka",
 	"metsat": "metsat",
 	"kalevi": "mameka",
 	"krhiil": "energy",
-	"rkoljy": "energy",
 	"metkai": "kaivan",
 	"turve": "energy",
 	"elint": "elint",
@@ -15,11 +14,7 @@ commodity_conversion = {
 	"papsel": "papsel",
 	"pappai": "papsel",
 	"kokbri": "energy",
-	"bensa": "oljytu",
-	"diesel": "oljytu",
-	"kpoljy": "oljytu",
-	"kroljy": "oljytu",
-	"mpoljy": "oljytu",
+	"oljytu": "oljytu",
 	"kemlaa": "kemiat",
 	"kummuo": "kemiat",
 	"minkai": "kaivan",

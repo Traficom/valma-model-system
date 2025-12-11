@@ -6,7 +6,6 @@ from datatypes.purpose import TourPurpose
 
 from datatypes.tour import Tour
 from datatypes.zone import Zone
-from models.car_use import CarUseModel
 from models.linear import IncomeModel
 from models.tour_combinations import TourCombinationModel
 
@@ -39,7 +38,6 @@ class Person:
                  zone: Zone, 
                  age_group: Tuple[int,int], 
                  generation_model: TourCombinationModel, 
-                 car_use_model: CarUseModel, 
                  income_model: IncomeModel):
         self.id = Person.id_counter
         Person.id_counter += 1
@@ -49,15 +47,9 @@ class Person:
         self.sex = random.random() < 0.5
         self.tours: List[Tour] = []
         self.generation_model = generation_model
-        self._cm = car_use_model
         self._im = income_model
         self._car_use_draw = random.random()
         self._tour_combination_draw = random.random()
-
-    def decide_car_use(self):
-        car_use_prob = self._cm.calc_individual_prob(
-            self.age_group, self.gender, self.zone.number)
-        self.is_car_user = self._car_use_draw < car_use_prob
 
     def calc_income(self):
         if self.age < 17:
@@ -65,8 +57,6 @@ class Person:
         else:
             log_income = self._im.log_income[self.zone.number]
             param = self._im.param
-            if self.is_car_user:
-                log_income += param["car_users"]
             if self.gender in param:
                 log_income += param[self.gender]
             if self.age_group in param["age_dummies"]:
@@ -104,7 +94,7 @@ class Person:
                     for all zones
         """
         tour_comb_idx = numpy.searchsorted(
-            tour_probs[self.age_group][self.is_car_user][self.zone.index, :],
+            tour_probs[self.age_group][self.zone.index, :],
             self._tour_combination_draw)
         new_tours = list(self.generation_model.tour_combinations[tour_comb_idx])
         old_tours = self.tours

@@ -1,6 +1,6 @@
 import unittest
 
-from lem_validate_inputfiles import main
+from validate_inputfiles import main
 import utils.log as log
 from tests.integration.test_data_handling import (
     TEST_DATA_PATH, ZONEDATA_PATH, COSTDATA_PATH)
@@ -9,6 +9,7 @@ from tests.integration.test_data_handling import (
 class Args:
     log_format = None
     log_level = "DEBUG"
+    model_types = ["passenger_transport"]
     end_assignment_only = False
     baseline_data_path = TEST_DATA_PATH / "Scenario_input_data"
     emme_paths = [ZONEDATA_PATH / "2016.cco"]

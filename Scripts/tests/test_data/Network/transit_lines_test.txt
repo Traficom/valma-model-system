@@ -1,11 +1,11 @@
 c Modeller - Transit Line Transaction
-c Date: 2024-11-21 10:00:33
-c Project:        mock_project                                                
+c Date: 2025-05-26 15:41:38
+c Project:        mock_project
 c Scenario 5:     test network
 t lines
 c Transit Lines
 c Line  Mod Veh Headwy Speed Description             Data1  Data2  Data3
-a'10000_S' S  22   1.00  30.00 'Kotkahamina-Turku'       4      0      0
+a'10002_W' W  20   1.00  30.00 'KotkaHamina-Hanko'       4     10      0
   path=no
    834513      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
    834495      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
@@ -20,52 +20,6 @@ a'10000_S' S  22   1.00  30.00 'Kotkahamina-Turku'       4      0      0
    831731      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
    832620      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
    831291      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
-   831298      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
-   831297      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
-   833887      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
-   831778      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
-   831292      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
-   833172      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
-   831647      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
-   831908      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
-   832576      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
-   834493      dwt=>0.01   ttf=0   us1=0   us2=0   us3=0
-   834516        lay=0.00
-c '10000_S' first:      dwt=<0.01 hidden:    us1=0   us2=0   us3=0
-a'10001_S' S  22   1.00  30.00 'Turku-Kotkahamina'       4      0      0
-  path=no
-   834516      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
-   834493      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
-   832576      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
-   831908      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
-   831647      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
-   833172      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
-   831292      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
-   831778      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
-   833887      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
-   831297      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
-   831298      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
-   831291      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
-   832620      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
-   831731      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
-   831557      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
-   833334      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
-   832504      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
-   831754      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
-   831180      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
-   832245      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
-   831616      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
-   831615      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
-   834495         dwt=>0   ttf=0   us1=0   us2=0   us3=0
-   834513        lay=0.00
-c '10001_S' first:         dwt=<0 hidden:    us1=0   us2=0   us3=0
-a'10002_W' W  20   1.00  30.00 'Kantvik-Turku'           4      0      0
-  path=no
-   834538      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
-   834065      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
-   833564      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
-   831215      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
-   832515      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
    831298      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
    831297      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
    833887      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
@@ -78,7 +32,7 @@ a'10002_W' W  20   1.00  30.00 'Kantvik-Turku'           4      0      0
    834493      dwt=>0.01   ttf=0   us1=0   us2=0   us3=0
    834516        lay=0.00
 c '10002_W' first:      dwt=<0.01 hidden:    us1=0   us2=0   us3=0
-a'10003_W' W  20   1.00  30.00 'Turku-Kantvik'           4      0      0
+a'10003_W' W  20   1.00  30.00 'Hanko-KotkaHamina'       4     10      0
   path=no
    834516      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
    834493      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
@@ -91,42 +45,6 @@ a'10003_W' W  20   1.00  30.00 'Turku-Kantvik'           4      0      0
    833887      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
    831297      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
    831298      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
-   832515      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
-   831215      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
-   833564      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
-   834065         dwt=>0   ttf=0   us1=0   us2=0   us3=0
-   834538        lay=0.00
-c '10003_W' first:         dwt=<0 hidden:    us1=0   us2=0   us3=0
-a'10004_s' s  21   1.00  30.00 'Kotkahamina-Kantvik'      4      0      0
-  path=no
-   834513      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
-   834495      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
-   831615      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
-   831616      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
-   832245      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
-   831180      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
-   831754      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
-   832504      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
-   833334      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
-   831557      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
-   831731      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
-   832620      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
-   831291      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
-   831298      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
-   832515      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
-   831215      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
-   833564      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
-   834065      dwt=>0.01   ttf=0   us1=0   us2=0   us3=0
-   834538        lay=0.00
-c '10004_s' first:      dwt=<0.01 hidden:    us1=0   us2=0   us3=0
-a'10005_s' s  21   1.00  30.00 'Kantvik-Kotkahamina'      4      0      0
-  path=no
-   834538      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
-   834065      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
-   833564      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
-   831215      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
-   832515      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
-   831298      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
    831291      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
    832620      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
    831731      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
@@ -138,10 +56,10 @@ a'10005_s' s  21   1.00  30.00 'Kantvik-Kotkahamina'      4      0      0
    832245      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
    831616      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
    831615      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
-   834495         dwt=>0   ttf=0   us1=0   us2=0   us3=0
+   834495      dwt=>0.01   ttf=0   us1=0   us2=0   us3=0
    834513        lay=0.00
-c '10005_s' first:         dwt=<0 hidden:    us1=0   us2=0   us3=0
-a'10006_d' d  30   1.00  30.00 'Loviisa-Hameenlinna'      4      0      0
+c '10003_W' first:         dwt=<0 hidden:    us1=0   us2=0   us3=0
+a'10006_D' D  30   1.00  30.00 'Loviisa-Hameenlinna'      4     10      0
   path=no
    247457      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
    247400      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
@@ -170,8 +88,8 @@ a'10006_d' d  30   1.00  30.00 'Loviisa-Hameenlinna'      4      0      0
    247749      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
    247428      dwt=>0.01   ttf=0   us1=0   us2=0   us3=0
    247362        lay=0.00
-c '10006_d' first:      dwt=<0.01 hidden:    us1=0   us2=0   us3=0
-a'10007_d' d  30   1.00  30.00 'Hameenlinna-Loviisa'      4      0      0
+c '10006_D' first:      dwt=<0.01 hidden:    us1=0   us2=0   us3=0
+a'10007_D' D  30   1.00  30.00 'Hameenlinna-Loviisa'      4     10      0
   path=no
    247362      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
    247428      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
@@ -200,8 +118,8 @@ a'10007_d' d  30   1.00  30.00 'Hameenlinna-Loviisa'      4      0      0
    247650      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
    247400      dwt=>0.01   ttf=0   us1=0   us2=0   us3=0
    247457        lay=0.00
-c '10007_d' first:      dwt=<0.01 hidden:    us1=0   us2=0   us3=0
-a'10008_J' J  31   1.00  30.00 'Turku-Tampere'           4      0      0
+c '10007_D' first:      dwt=<0.01 hidden:    us1=0   us2=0   us3=0
+a'10008_J' J  31   1.00  30.00 'Turku-Tampere'           4     10      0
   path=no
    247507      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
    247629      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
@@ -217,7 +135,7 @@ a'10008_J' J  31   1.00  30.00 'Turku-Tampere'           4      0      0
    247436      dwt=>0.01   ttf=0   us1=0   us2=0   us3=0
    247437        lay=0.00
 c '10008_J' first:      dwt=<0.01 hidden:    us1=0   us2=0   us3=0
-a'10009_J' J  31   1.00  30.00 'Tampere-Turku'           4      0      0
+a'10009_J' J  31   1.00  30.00 'Tampere-Turku'           4     10      0
   path=no
    247437      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
    247436      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
@@ -230,7 +148,7 @@ a'10009_J' J  31   1.00  30.00 'Tampere-Turku'           4      0      0
    247731      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
    247674      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
    248059      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
-   247629         dwt=>0   ttf=0   us1=0   us2=0   us3=0
+   247629      dwt=>0.01   ttf=0   us1=0   us2=0   us3=0
    247507        lay=0.00
 c '10009_J' first:         dwt=<0 hidden:    us1=0   us2=0   us3=0
 a'1000_w' w  11   1.00  30.00 'Helsinki-Espoo'          5      0      0
@@ -247,17 +165,166 @@ a'1001_w' w  11   1.00  30.00 'Espoo-Helsinki'          5      0      0
    900300         dwt=>0   ttf=0   us1=0   us2=0   us3=0
    900136        lay=0.00
 c '1001_w' first:         dwt=<0 hidden:    us1=0   us2=0   us3=0
+a'EETLL-FIHMN_kaasu' L  23   1.00  30.00 'EETLL-FIHMN_kaasu'     254    118  11.54
+  path=no
+   900400      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831298      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831291      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   832620      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831731      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831557      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   833334      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   832504      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831754      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831180      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   832245      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831616      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831615      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   834495      dwt=>0.01   ttf=0   us1=0   us2=0   us3=0
+   834513        lay=0.00
+c 'EETLL-FIHMN_kaasu' first:         dwt=<0 hidden:    us1=0   us2=0   us3=0
+a'EETLL-FIHNK_kuivalasti' G  22   1.00  30.00 'EETLL-FIHNK_kuivalasti'    126     93   3.31
+  path=no
+   900400      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831298      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831297      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   833887      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831778      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831292      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   833172      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831647      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831908      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   832576      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   834493      dwt=>0.01   ttf=0   us1=0   us2=0   us3=0
+   834516        lay=0.00
+c 'EETLL-FIHNK_kuivalasti' first:         dwt=<0 hidden:    us1=0   us2=0   us3=0
+a'EETLL-FIHNK_roro' R  26   1.00  30.00 'EETLL-FIHNK_roro'      126    162   2.52
+  path=no
+   900400      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831298      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831297      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   833887      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831778      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831292      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   833172      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831647      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831908      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   832576      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   834493      dwt=>0.01   ttf=0   us1=0   us2=0   us3=0
+   834516        lay=0.00
+c 'EETLL-FIHNK_roro' first:         dwt=<0 hidden:    us1=0   us2=0   us3=0
+a'FIHMN-EETLL_kaasu' L  23   1.00  30.00 'FIHMN-EETLL_kaasu'     254    118  11.54
+  path=no
+   834513      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   834495      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831615      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831616      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   832245      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831180      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831754      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   832504      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   833334      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831557      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831731      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   832620      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831291      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831298      dwt=>0.01   ttf=0   us1=0   us2=0   us3=0
+   900400        lay=0.00
+c 'FIHMN-EETLL_kaasu' first:      dwt=<0.01 hidden:    us1=0   us2=0   us3=0
+a'FIHMN-SESTO_irtolasti' P  25   1.00  30.00 'FIHMN-SESTO_irtolasti'    532     50  11.82
+  path=no
+   834513      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   834495      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831615      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831616      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   832245      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831180      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831754      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   832504      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   833334      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831557      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831731      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   832620      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831291      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831298      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831297      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   833887      dwt=>0.01   ttf=0   us1=0   us2=0   us3=0
+   900402        lay=0.00
+c 'FIHMN-SESTO_irtolasti' first:      dwt=<0.01 hidden:    us1=0   us2=0   us3=0
+a'FIHMN-SESTO_kontti' C  21   1.00  30.00 'FIHMN-SESTO_kontti'    532     38  10.03
+  path=no
+   834513      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   834495      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831615      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831616      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   832245      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831180      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831754      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   832504      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   833334      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831557      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831731      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   832620      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831291      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831298      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831297      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   833887      dwt=>0.01   ttf=0   us1=0   us2=0   us3=0
+   900402        lay=0.00
+c 'FIHMN-SESTO_kontti' first:      dwt=<0.01 hidden:    us1=0   us2=0   us3=0
+a'FIHNK-EETLL_kuivalasti' G  22   1.00  30.00 'FIHNK-EETLL_kuivalasti'    126     93   3.31
+  path=no
+   834516      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   834493      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   832576      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831908      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831647      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   833172      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831292      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831778      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   833887      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831297      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831298      dwt=>0.01   ttf=0   us1=0   us2=0   us3=0
+   900400        lay=0.00
+c 'FIHNK-EETLL_kuivalasti' first:      dwt=<0.01 hidden:    us1=0   us2=0   us3=0
+a'FIHNK-EETLL_roro' R  26   1.00  30.00 'FIHNK-EETLL_roro'      126    162   2.52
+  path=no
+   834516      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   834493      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   832576      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831908      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831647      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   833172      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831292      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831778      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   833887      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831297      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831298      dwt=>0.01   ttf=0   us1=0   us2=0   us3=0
+   900400        lay=0.00
+c 'FIHNK-EETLL_roro' first:      dwt=<0.01 hidden:    us1=0   us2=0   us3=0
+a'FIHNK-SESTO_sailio' O  24   1.00  30.00 'FIHNK-SESTO_sailio'    301      5  11.14
+  path=no
+   834516      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   834493      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   832576      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831908      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831647      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   833172      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831292      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831778      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   833887      dwt=>0.01   ttf=0   us1=0   us2=0   us3=0
+   900402        lay=0.00
+c 'FIHNK-SESTO_sailio' first:      dwt=<0.01 hidden:    us1=0   us2=0   us3=0
 a'Finnair-AY285-1' l   6 999.00  30.00 'AY285-EFJY'              3      0      0
   path=no
-   249870      dwt=>0.01   ttf=0   us1=0   us2=0   us3=0
+   249870      dwt=>0.01   ttf=0   us1=50   us2=0   us3=0
    249881        lay=0.00
 c 'Finnair-AY285-1' first:      dwt=<0.01 hidden:    us1=0   us2=0   us3=0
 a'Finnair-AY285-2' l   6 999.00  30.00 'AY285-EFJY'              3      0      0
   path=no
-   249881         dwt=>0   ttf=0   us1=0   us2=0   us3=0
+   249881         dwt=>0   ttf=0   us1=50   us2=0   us3=0
    249870        lay=0.00
 c 'Finnair-AY285-2' first:         dwt=<0 hidden:    us1=0   us2=0   us3=0
-a'Helsingin-15-1' p   7   8.90  30.00 'Itäkeskus-Keilaniemi'      0      0      0
+a'Helsingin-15-1' p   7   8.90  30.00 'Itakeskus-Keilaniemi'      0      0      0
   path=no
    831111      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
    249857      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
@@ -294,7 +361,7 @@ a'Helsingin-15-1' p   7   8.90  30.00 'Itäkeskus-Keilaniemi'      0      0      
    249867      dwt=>0.01   ttf=0   us1=0   us2=0   us3=0
    249869        lay=0.00
 c 'Helsingin-15-1' first:      dwt=<0.01 hidden:    us1=0   us2=0   us3=0
-a'Helsingin-15-2' p   7   8.90  30.00 'Keilaniemi-Itäkeskus'      0      0      0
+a'Helsingin-15-2' p   7   8.90  30.00 'Keilaniemi-Itakeskus'      0      0      0
   path=no
    249869      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
    249867      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
@@ -683,6 +750,59 @@ a'J.Vainion-Helsinki-2' e   8 240.00  30.00 'Turku-Salo-Helsinki'      2      0 
    900001      dwt=>0.01   ttf=0   us1=0   us2=0   us3=0
    900152        lay=0.00
 c 'J.Vainion-Helsinki-2' first:      dwt=<0.01 hidden:    us1=0   us2=0   us3=0
+a'SESTO-FIHMN_irtolasti' P  25   1.00  30.00 'SESTO-FIHMN_irtolasti'    532     50  11.82
+  path=no
+   900402      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   833887      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831297      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831298      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831291      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   832620      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831731      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831557      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   833334      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   832504      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831754      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831180      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   832245      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831616      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831615      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   834495         dwt=>0   ttf=0   us1=0   us2=0   us3=0
+   834513        lay=0.00
+c 'SESTO-FIHMN_irtolasti' first:         dwt=<0 hidden:    us1=0   us2=0   us3=0
+a'SESTO-FIHMN_kontti' C  21   1.00  30.00 'SESTO-FIHMN_kontti'    532     38  10.03
+  path=no
+   900402      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   833887      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831297      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831298      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831291      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   832620      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831731      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831557      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   833334      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   832504      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831754      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831180      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   832245      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831616      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831615      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   834495      dwt=>0.01   ttf=0   us1=0   us2=0   us3=0
+   834513        lay=0.00
+c 'SESTO-FIHMN_kontti' first:         dwt=<0 hidden:    us1=0   us2=0   us3=0
+a'SESTO-FIHNK_sailio' O  24   1.00  30.00 'SESTO-FIHNK_sailio'    301      5  11.14
+  path=no
+   900402      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   833887      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831778      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831292      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   833172      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831647      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   831908      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   832576      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   834493      dwt=>0.01   ttf=0   us1=0   us2=0   us3=0
+   834516        lay=0.00
+c 'SESTO-FIHNK_sailio' first:         dwt=<0 hidden:    us1=0   us2=0   us3=0
 a'VR-I' r   9 999.00  30.00 'Helsinki-Helsinki'       0      0      0
   path=no
    248067      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0

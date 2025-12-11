@@ -29,8 +29,7 @@ class PersonTest(unittest.TestCase):
         class Zone:
             number = 101
             index = 0
-        p = Person(Zone(), (18, 29), GenMod(), None, ZoneData())
-        p.is_car_user = True
+        p = Person(Zone(), (18, 29), GenMod(), ZoneData())
         purposes = {
             "hb_work": Purpose("hb_work"),
             "hb_other": Purpose("hb_other"),
@@ -44,6 +43,6 @@ class PersonTest(unittest.TestCase):
             [0.3, 0.6, 1.0],
             [0.3, 0.6, 1.0],
         ])
-        probs = {"age_18_29": {True: data}}
+        probs = {"age_18_29": data}
         p.add_tours(purposes, probs)
         p.add_tours(purposes, probs)

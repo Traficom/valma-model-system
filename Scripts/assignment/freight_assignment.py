@@ -1,8 +1,10 @@
-from typing import Dict
+from typing import Dict, Tuple
 from pathlib import Path
+import numpy
 
 import utils.log as log
 import parameters.assignment as param
+from parameters.zone import finland_border_points, cluster_border_points
 from assignment.assignment_period import AssignmentPeriod
 from assignment.datatypes.freight_specification import FreightMode
 
@@ -96,7 +98,10 @@ class FreightAssignmentPeriod(AssignmentPeriod):
     def _set_freight_vdfs(self):
         network = self.emme_scenario.get_network()
         for segment in network.transit_segments():
-            segment.transit_time_func = 7
+            if segment.data1 > 0:
+                segment.transit_time_func = 6
+            else:
+                segment.transit_time_func = 7
         self.emme_scenario.publish_network(network)
 
     def _assign_freight(self):
@@ -125,3 +130,118 @@ class FreightAssignmentPeriod(AssignmentPeriod):
                 class_name=ass_class)
         log.info("Freight assignment performed for scenario {}".format(
             self.emme_scenario.id))
+
+    def read_ship_impedances(self, is_export: bool) -> Tuple[dict, dict, dict]:
+        """Create impedance matrices for freight ships using transit line
+        attribute data.
+
+        Parameters
+        ----------
+        is_export : bool
+            Whether data should be fetched for export (True) or import (False)
+
+        Returns
+        -------
+        dict
+            Mode (container_ship/general_cargo...) : attribute
+                Type (dist/frequency) : numpy.ndarray
+        dict
+            Origin border id (FIHEL/SESTO...) : str
+                Centroid id : int
+        dict
+            Destination border id (FIHEL/SESTO...) : str
+                Centroid id : int
+        """
+        if is_export:
+            origins = finland_border_points
+            destinations = cluster_border_points
+        else:
+            origins = cluster_border_points
+            destinations = finland_border_points
+        origins = self._filter_border_points(origins)
+        destinations = self._filter_border_points(destinations)
+        orig_mapping = {pid: idx for idx, pid in enumerate(origins)}
+        dest_mapping = {pid: idx for idx, pid in enumerate(destinations)}
+        ship_impedances = {}
+        for ship, modes in param.freight_marine_modes.items():
+            ship_impedances[ship] = {}
+            ship_mode = next(iter(modes))
+            for key, attr in param.ship_attrs.items():
+                ship_impedances[ship][key] = self._line_data_to_matrix(
+                    ship_mode, attr, orig_mapping, dest_mapping, is_export)
+        return ship_impedances, origins, destinations
+
+    def _filter_border_points(self, border_data: dict) -> Dict[str, int]:
+        """Filter out border centroids that don't exist in scenario's network.
+
+        Parameters
+        ----------
+        border_data : dict
+            key : str
+                Border id (FIHEL/SESTO...)
+            value : dict
+                key : str
+                    Attribute type (name/id)
+                value : str | int
+                    Attribute value
+
+        Returns
+        -------
+        dict
+            key : str
+                Border id (FIHEL/SESTO...)
+            value : int
+                Centroid id
+        """
+        zone_numbers = self.emme_scenario.zone_numbers
+        port_ids = {pid: border_data[pid]["id"] for pid in border_data
+                    if border_data[pid]["id"] in zone_numbers}
+        return port_ids
+
+    def _line_data_to_matrix(self, ship_mode: str,
+                             attribute: str,
+                             orig_mapping: Dict[str, int],
+                             dest_mapping: Dict[str, int],
+                             is_export: bool) -> numpy.ndarray:
+        """Create inf matrix and insert attribute values into origin and
+        destination indices of the matrix.
+
+        OD pairs without trade route will retain their inf attribute value.
+        Fetching is performed only for those transit lines that match
+        trade direction (export/import).
+
+        Parameters
+        ----------
+        ship_mode : str
+            Mode of freight ship
+        attribute : str
+            Name of attribute
+        orig_mapping : dict
+            key : str
+                Border id (FIHEL/SESTO...)
+            value : int
+                Index number (0, 1, 2, ...)
+        dest_mapping : dict
+            key : str
+                Border id (FIHEL/SESTO...)
+            value : int
+                Index number (0, 1, 2, ...)
+        is_export : bool
+            Whether data should be fetched for export (True) or import (False)
+
+        Returns
+        -------
+        numpy.ndarray
+            Impedance matrix with index inserted transit line attribute data
+        """
+        attr = attribute.replace("ut", "data")
+        impedance_matrix = numpy.full(
+            (len(orig_mapping), len(dest_mapping)), numpy.inf, dtype="float32")
+        for line in self.emme_scenario.get_network().transit_lines():
+            starts_in_fi = line.id[0:2] == "FI"
+            if (line.mode.id == ship_mode
+                and ((starts_in_fi and is_export)
+                     or (not starts_in_fi and not is_export))):
+                o, d = line.id.split("_")[0].split("-")
+                impedance_matrix[orig_mapping[o], dest_mapping[d]] = line[attr]
+        return impedance_matrix

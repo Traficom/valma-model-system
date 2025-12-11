@@ -1,5 +1,6 @@
 t network_fields
 #municipality NODE STRING 'municipality'
+#park_cost_n NODE REAL ''
 #subarea NODE INTEGER32 'subarea'
 #transit_stop_b NODE BOOLEAN 'transit_stop_b'
 #transit_stop_e NODE BOOLEAN 'transit_stop_e'
@@ -7,1850 +8,1855 @@ t network_fields
 #transit_stop_p NODE BOOLEAN 'transit_stop_p'
 #transit_stop_t NODE BOOLEAN 'transit_stop_t'
 end network_fields
-inode #municipality #subarea #transit_stop_b #transit_stop_e #transit_stop_g #transit_stop_p #transit_stop_t
-202 'Helsinki' 2 0 0 0 0 0
-1344 'Espoo' 2 0 0 0 0 0
-1755 'Vantaa' 2 0 0 0 0 0
-2037 'Hyvinkaa' 0 0 0 0 0 0
-2129 'Lohja' 0 0 0 0 0 0
-2224 'Jarvenpaa' 0 0 0 0 0 0
-2333 'Nurmijarvi' 0 0 0 0 0 0
-2413 'Kirkkonummi' 0 0 0 0 0 0
-2519 'Tuusula' 0 0 0 0 0 0
-2621 'Kerava' 0 0 0 0 0 0
-2707 'Vihti' 0 0 0 0 0 0
-2814 'Sipoo' 0 0 0 0 0 0
-2918 'Mantsala' 0 0 0 0 0 0
-3000 'Kauniainen' 2 0 0 0 0 0
-3003 'Kauniainen' 2 0 0 0 0 0
-3203 'Siuntio' 0 0 0 0 0 0
-3302 'Pornainen' 0 0 0 0 0 0
-3416 'Loviisa' 0 0 0 0 0 0
-3639 'Porvoo' 0 0 0 0 0 0
-3705 'Askola' 0 0 0 0 0 0
-3800 'Pukkila' 0 0 0 0 0 0
-4013 'Raasepori' 0 0 0 0 0 0
-4101 'Hanko' 0 0 0 0 0 0
-4202 'Inkoo' 0 0 0 0 0 0
-7043 'Hameenlinna' 0 0 0 0 0 0
-8284 'Tampere' 0 0 0 0 0 0
-12614 'Turku' 0 0 0 0 0 0
-17278 'Jyvaskyla' 0 0 0 0 0 0
-19419 'Kotka' 0 0 0 0 0 0
-23678 'Lahti' 0 0 0 0 0 0
-100097 'Vantaa' 2 0 0 0 0 0
-100351 'Espoo' 2 0 0 0 0 0
-100352 'Espoo' 2 1 0 1 0 0
-100397 'Helsinki' 2 0 0 0 0 0
-100405 'Helsinki' 2 0 0 0 0 0
-100414 'Espoo' 2 0 0 0 0 0
-100448 'Helsinki' 2 0 1 1 0 0
-100453 'Espoo' 2 0 0 0 0 0
-100467 'Espoo' 2 0 0 0 0 0
-100468 'Espoo' 2 0 0 0 0 0
-100472 'Espoo' 2 1 0 0 0 0
-100546 'Loviisa' 0 0 0 0 0 0
-100557 'Helsinki' 2 1 1 0 0 0
-100611 'Vihti' 0 1 0 0 0 0
-100618 'Helsinki' 2 1 0 0 0 0
-100619 'Espoo' 2 1 0 0 0 0
-100745 'Espoo' 2 0 0 0 0 0
-100752 'Helsinki' 2 1 0 1 0 0
-100753 'Helsinki' 2 0 0 0 0 0
-100774 'Vantaa' 2 1 0 0 0 0
-100788 'Helsinki' 2 0 0 0 0 0
-100828 'Helsinki' 2 1 0 0 0 0
-101074 'Vihti' 0 0 0 0 0 0
-101144 'Helsinki' 2 0 0 0 0 0
-101145 'Helsinki' 2 0 0 0 0 0
-101362 'Espoo' 2 0 0 0 0 0
-101485 'Espoo' 2 0 0 0 0 0
-101546 'Espoo' 2 0 0 0 0 0
-101699 'Espoo' 2 0 0 0 0 0
-101753 'Helsinki' 2 0 0 0 0 0
-101762 'Espoo' 0 0 0 0 0 0
-101776 'Helsinki' 2 0 0 0 0 0
-101864 'Vantaa' 2 0 0 0 0 0
-102050 'Hollola' 0 0 0 0 0 0
-102051 'Hollola' 0 0 0 0 0 0
-102185 'Vantaa' 2 0 0 0 0 0
-102220 'Helsinki' 2 0 1 0 0 0
-102221 'Helsinki' 2 1 0 1 0 0
-102267 'Helsinki' 2 0 0 0 0 0
-102349 'Vantaa' 2 0 0 0 0 0
-102514 'Helsinki' 2 0 0 0 0 0
-102564 'Helsinki' 2 0 0 0 0 0
-102575 'Espoo' 2 0 0 0 0 0
-102576 'Espoo' 2 0 0 0 0 0
-102594 'Espoo' 2 0 0 0 0 0
-102606 'Vantaa' 2 1 0 0 0 0
-102679 'Vantaa' 2 0 0 0 0 0
-102680 'Vantaa' 2 0 0 0 0 0
-102706 'Vantaa' 2 0 0 0 0 0
-102707 'Vantaa' 2 0 0 0 0 0
-102819 'Helsinki' 2 0 0 0 0 0
-102820 'Helsinki' 2 0 0 0 0 0
-102836 'Helsinki' 2 1 0 0 0 0
-102844 'Vihti' 0 0 0 0 0 0
-102894 'Espoo' 2 0 0 0 0 0
-102895 'Espoo' 2 0 0 0 0 0
-102959 'Helsinki' 2 0 0 0 0 0
-103208 'Helsinki' 2 0 0 0 0 0
-103265 'Vantaa' 2 0 0 0 0 0
-103451 'Espoo' 2 0 0 0 0 0
-103567 'Mantsala' 0 0 0 0 0 0
-103583 'Helsinki' 2 0 0 0 0 0
-103698 'Salo' 0 0 0 0 0 0
-103735 'Vantaa' 2 0 0 0 0 0
-103753 'Espoo' 2 0 0 0 0 0
-103825 'Vantaa' 2 0 0 0 0 0
-103929 'Vantaa' 2 0 0 0 0 0
-103946 'Helsinki' 2 0 0 1 0 0
-103971 'Helsinki' 2 0 0 0 0 0
-104012 'Helsinki' 2 0 0 0 0 0
-104104 'Helsinki' 2 0 0 0 0 0
-104204 'Vantaa' 2 0 0 0 0 0
-104222 'Vantaa' 2 0 0 0 0 0
-104252 'Vantaa' 2 0 0 0 0 0
-104347 'Espoo' 2 0 0 0 0 0
-104479 'Vantaa' 2 0 0 0 0 0
-104486 'Vantaa' 2 0 0 0 0 0
-104517 'Espoo' 2 0 0 0 0 0
-104590 'Tampere' 0 0 0 0 0 0
-104647 'Raasepori' 0 0 1 0 0 0
-104947 'Helsinki' 2 0 0 0 0 0
-105091 'Hanko' 0 0 0 0 0 0
-105158 'Espoo' 2 0 0 0 0 0
-105555 'Espoo' 2 0 0 0 0 0
-105556 'Espoo' 2 0 0 0 0 0
-105573 'Vantaa' 2 0 0 0 0 0
-105621 'Espoo' 2 0 0 0 0 0
-105622 'Espoo' 2 0 0 1 0 0
-105656 'Helsinki' 2 0 0 0 0 0
-105700 'Helsinki' 2 1 0 1 0 0
-105899 'Helsinki' 2 0 0 0 0 0
-106033 'Vantaa' 2 0 0 0 0 0
-106063 'Espoo' 2 0 1 0 0 0
-106064 'Espoo' 2 0 0 0 0 0
-106108 'Espoo' 2 0 0 0 0 0
-106109 'Espoo' 2 0 0 0 0 0
-106114 'Espoo' 2 0 1 1 0 0
-106242 'Vantaa' 2 0 0 0 0 0
-106288 'Espoo' 2 0 0 0 0 0
-106388 'Espoo' 2 0 0 0 0 0
-106541 'Espoo' 2 1 0 0 0 0
-106609 'Espoo' 2 0 0 0 0 0
-106665 'Helsinki' 2 1 0 0 0 0
-106794 'Vantaa' 2 0 0 0 0 0
-106874 'Helsinki' 2 1 0 1 0 0
-106880 'Espoo' 2 0 0 0 0 0
-106881 'Espoo' 2 0 0 0 0 0
-107058 'Vantaa' 2 0 0 0 0 0
-107181 'Vantaa' 2 0 0 0 0 0
-107182 'Vantaa' 2 0 0 0 0 0
-107234 'Helsinki' 2 1 0 0 0 0
-107259 'Espoo' 2 0 0 0 0 0
-107377 'Helsinki' 2 0 1 0 0 0
-107454 'Espoo' 2 0 0 0 0 0
-107499 'Helsinki' 2 0 0 0 0 0
-107553 'Hameenlinna' 0 0 0 0 0 0
-107679 'Helsinki' 2 1 0 1 0 0
-107680 'Helsinki' 2 0 0 0 0 0
-107817 'Helsinki' 2 0 0 0 0 0
-107841 'Espoo' 2 0 0 1 0 0
-107883 'Helsinki' 2 1 0 1 0 0
-107997 'Forssa' 0 0 0 0 0 0
-107998 'Forssa' 0 0 0 0 0 0
-108073 'Helsinki' 2 0 0 0 0 0
-108113 'Vantaa' 2 0 0 0 0 0
-108241 'Helsinki' 2 1 0 0 0 0
-108280 'Lahti' 0 0 0 0 0 0
-108350 'Vantaa' 2 0 0 1 0 0
-108396 'Espoo' 2 0 0 0 0 0
-108452 'Espoo' 2 0 0 0 0 0
-108454 'Espoo' 2 0 0 0 0 0
-108455 'Espoo' 2 0 0 0 0 0
-108554 'Espoo' 2 1 0 0 0 0
-108593 'Vantaa' 2 0 0 0 0 0
-108627 'Hameenlinna' 0 0 0 0 0 0
-108734 'Vantaa' 2 0 0 0 0 0
-108754 'Espoo' 2 0 0 0 0 0
-108772 'Hameenlinna' 0 0 0 0 0 0
-108833 'Vantaa' 2 0 0 0 0 0
-108887 'Helsinki' 2 1 1 0 0 0
-108904 'Lohja' 0 0 0 0 0 0
-108946 'Vantaa' 2 1 1 0 0 0
-109048 'Helsinki' 2 0 0 1 0 0
-109141 'Helsinki' 2 1 0 0 0 0
-109196 'Espoo' 2 1 0 0 0 0
-109239 'Vantaa' 2 0 0 0 0 0
-109240 'Vantaa' 2 0 0 0 0 0
-109245 'Vantaa' 2 0 0 0 0 0
-109277 'Espoo' 2 0 0 0 0 0
-109322 'Espoo' 2 0 0 0 0 0
-109328 'Espoo' 2 0 0 1 0 0
-109329 'Espoo' 2 0 0 0 0 0
-109355 'Vantaa' 2 0 0 0 0 0
-109374 'Akaa' 0 0 0 0 0 0
-109404 'Vantaa' 2 0 0 0 0 0
-109548 'Espoo' 2 1 0 1 0 0
-109673 'Helsinki' 2 0 0 1 0 0
-109744 'Vihti' 0 0 0 0 0 0
-109833 'Helsinki' 2 0 0 0 0 0
-109944 'Jyvaskyla' 0 0 0 0 0 0
-109945 'Jyvaskyla' 0 0 1 0 0 0
-110069 'Espoo' 2 0 0 0 0 0
-110151 'Vantaa' 2 1 0 0 0 0
-110306 'Vantaa' 2 0 0 0 0 0
-110633 'Espoo' 2 0 0 0 0 0
-110890 'Helsinki' 2 0 0 0 0 0
-110919 'Vantaa' 2 0 0 0 0 0
-110961 'Helsinki' 2 0 0 0 0 0
-110993 'Helsinki' 2 1 1 0 0 0
-110994 'Helsinki' 2 0 0 0 0 0
-111078 'Vantaa' 2 1 0 0 0 0
-111112 'Vantaa' 2 0 0 0 0 0
-111185 'Espoo' 2 0 0 0 0 0
-111186 'Espoo' 2 1 1 1 0 0
-111231 'Vihti' 0 0 1 0 0 0
-111232 'Vihti' 0 0 0 0 0 0
-111284 'Vantaa' 2 0 0 0 0 0
-111358 'Helsinki' 2 0 0 0 0 0
-111394 'Helsinki' 2 0 0 0 0 0
-111499 'Vihti' 0 0 1 0 0 0
-111503 'Helsinki' 2 1 1 1 0 0
-111513 'Vantaa' 2 0 0 0 0 0
-111521 'Vantaa' 2 0 0 0 0 0
-111522 'Vantaa' 2 0 0 0 0 0
-111543 'Vantaa' 2 1 1 1 0 0
-111544 'Kerava' 0 0 0 0 0 0
-111681 'Hameenlinna' 0 0 0 0 0 0
-111682 'Hameenlinna' 0 0 0 0 0 0
-111703 'Vantaa' 2 0 0 0 0 0
-111859 'Hameenlinna' 0 0 0 0 0 0
-111890 'Helsinki' 2 0 0 0 0 0
-112015 'Helsinki' 2 0 0 0 0 0
-112373 'Helsinki' 2 0 0 0 0 0
-112390 'Vantaa' 2 0 0 0 0 0
-112456 'Helsinki' 2 0 0 0 0 0
-112612 'Lohja' 0 0 0 0 0 0
-112819 'Espoo' 2 0 0 0 0 0
-112829 'Espoo' 2 0 0 0 0 0
-112830 'Espoo' 2 0 0 0 0 0
-112857 'Espoo' 2 1 0 0 0 0
-112910 'Akaa' 0 0 0 0 0 0
-112918 'Espoo' 2 0 0 0 0 0
-112955 'Helsinki' 2 0 0 1 0 0
-112956 'Helsinki' 2 0 0 0 0 0
-113026 'Espoo' 2 0 0 0 0 0
-113052 'Hameenlinna' 0 0 0 0 0 0
-113289 'Helsinki' 2 0 0 0 0 0
-113342 'Vantaa' 2 0 0 0 0 0
-113447 'Espoo' 2 0 0 0 0 0
-113564 'Helsinki' 2 1 0 0 0 0
-113565 'Helsinki' 2 0 0 0 0 0
-113632 'Helsinki' 2 0 0 0 0 0
-113785 'Espoo' 2 0 0 0 0 0
-113810 'Helsinki' 2 0 0 1 0 0
-113811 'Helsinki' 2 1 0 1 0 0
-114087 'Akaa' 0 0 0 0 0 0
-114120 'Helsinki' 2 1 0 0 0 0
-114222 'Helsinki' 2 0 0 0 0 0
-114228 'Valkeakoski' 0 0 0 0 0 0
-114247 'Helsinki' 2 0 0 0 0 0
-114274 'Helsinki' 2 0 0 0 0 0
-114275 'Helsinki' 2 0 0 0 0 0
-114354 'Vantaa' 2 0 0 0 0 0
-114634 'Helsinki' 2 0 0 1 0 0
-114767 'Vantaa' 2 0 0 0 0 0
-114807 'Tampere' 0 0 0 0 0 0
-114828 'Helsinki' 2 0 0 0 0 0
-114862 'Helsinki' 2 0 0 0 0 0
-115063 'Espoo' 2 1 0 0 0 0
-115266 'Vantaa' 2 1 1 1 0 0
-115318 'Helsinki' 2 0 0 0 0 0
-115439 'Espoo' 2 0 1 0 0 0
-115448 'Espoo' 2 0 0 0 0 0
-115520 'Orimattila' 0 0 0 0 0 0
-115554 'Akaa' 0 0 0 0 0 0
-115631 'Espoo' 2 0 0 0 0 0
-115900 'Vantaa' 2 0 0 0 0 0
-115922 'Vantaa' 2 0 0 0 0 0
-115923 'Vantaa' 2 0 0 1 0 0
-115936 'Espoo' 2 0 0 0 0 0
-115997 'Vantaa' 2 0 0 0 0 0
-116003 'Helsinki' 2 0 0 1 0 0
-116068 'Espoo' 2 1 0 0 0 0
-116105 'Tampere' 0 0 0 0 0 0
-116106 'Tampere' 0 0 0 0 0 0
-116397 'Espoo' 2 0 0 0 0 0
-116506 'Vantaa' 2 0 0 0 0 0
-116579 'Espoo' 2 0 0 0 0 0
-116580 'Espoo' 2 1 0 0 0 0
-116737 'Vantaa' 2 0 0 0 0 0
-116775 'Helsinki' 2 1 1 1 0 0
-116787 'Mantsala' 0 0 0 0 0 0
-116875 'Vantaa' 2 0 0 0 0 0
-116880 'Vantaa' 2 1 1 0 0 0
-116926 'Kauniainen' 2 0 0 0 0 0
-117021 'Espoo' 2 0 0 0 0 0
-117193 'Espoo' 2 1 0 1 0 0
-117235 'Hanko' 0 0 0 0 0 0
-117245 'Vantaa' 2 0 0 0 0 0
-117283 'Helsinki' 2 0 1 1 0 0
-117284 'Helsinki' 2 1 1 0 0 0
-117372 'Vantaa' 2 1 0 0 0 0
-117462 'Espoo' 2 1 0 0 0 0
-117509 'Helsinki' 2 0 0 0 0 0
-117528 'Espoo' 2 0 0 0 0 0
-117608 'Helsinki' 2 0 0 0 0 0
-117713 'Vantaa' 2 0 0 0 0 0
-117805 'Helsinki' 2 0 0 0 0 1
-117847 'Helsinki' 2 0 0 0 0 0
-117882 'Helsinki' 2 0 0 0 0 0
-117897 'Vantaa' 2 0 0 0 0 0
-117898 'Helsinki' 2 1 1 1 0 0
-117920 'Vantaa' 2 0 0 0 0 0
-118027 'Helsinki' 2 0 0 0 0 0
-118046 'Vantaa' 2 1 1 0 0 0
-118088 'Vantaa' 2 0 0 0 0 0
-118089 'Vantaa' 2 0 0 0 0 0
-118156 'Helsinki' 2 0 0 0 0 0
-118212 'Espoo' 2 0 0 1 0 0
-118251 'Helsinki' 2 1 0 0 0 0
-118308 'Espoo' 2 0 1 0 0 0
-118375 'Mantsala' 0 0 0 0 0 0
-118583 'Helsinki' 2 0 0 0 0 0
-118717 'Helsinki' 2 1 0 0 0 0
-118925 'Lahti' 0 0 0 0 0 0
-119352 'Espoo' 2 1 0 0 0 0
-119473 'Espoo' 2 0 0 0 0 0
-119668 'Helsinki' 2 1 0 1 0 0
-119755 'Helsinki' 2 1 0 0 0 0
-119782 'Espoo' 2 0 0 0 0 0
-119793 'Helsinki' 2 1 0 0 0 0
-119848 'Helsinki' 2 0 0 0 0 0
-119849 'Helsinki' 2 1 0 0 0 0
-119995 'Vantaa' 2 0 0 0 0 0
-120564 'Espoo' 2 0 0 0 0 0
-120698 'Vantaa' 2 1 0 0 0 0
-120742 'Helsinki' 2 0 0 0 0 0
-120760 'Espoo' 2 0 0 0 0 0
-120840 'Vantaa' 2 0 0 0 0 0
-120863 'Vantaa' 2 0 0 0 0 0
-120864 'Vantaa' 2 0 0 0 0 0
-120906 'Espoo' 2 0 0 0 0 0
-121001 'Helsinki' 2 1 1 0 0 0
-121223 'Vantaa' 2 0 0 0 0 0
-121363 'Vantaa' 2 0 0 0 0 0
-121413 'Vantaa' 2 0 0 0 0 0
-121419 'Tampere' 0 0 0 0 0 0
-121421 'Vantaa' 2 0 0 0 0 0
-121568 'Helsinki' 2 1 0 0 0 0
-121639 'Loviisa' 0 0 0 0 0 0
-121640 'Loviisa' 0 0 0 0 0 0
-121768 'Espoo' 2 0 0 0 0 0
-121858 'Vantaa' 2 0 0 0 0 0
-121873 'Lahti' 0 0 0 0 0 0
-121898 'Helsinki' 2 0 0 0 0 0
-121963 'Helsinki' 2 0 0 0 0 0
-122269 'Vantaa' 2 0 0 0 0 0
-122319 'Helsinki' 2 0 0 0 0 1
-122519 'Helsinki' 2 0 0 0 0 0
-122576 'Espoo' 2 0 0 0 0 0
-122602 'Helsinki' 2 1 0 0 0 0
-122613 'Helsinki' 2 1 0 0 0 0
-122690 'Helsinki' 2 0 0 0 0 0
-122783 'Humppila' 0 0 0 0 0 0
-122796 'Vihti' 0 0 0 0 0 0
-122811 'Espoo' 2 0 0 0 0 0
-122822 'Helsinki' 2 0 0 0 0 0
-122916 'Helsinki' 2 0 0 0 0 0
-123170 'Helsinki' 2 0 0 0 0 0
-123174 'Helsinki' 2 1 0 0 0 0
-123189 'Helsinki' 2 1 0 0 0 0
-123469 'Helsinki' 2 0 0 0 0 0
-123575 'Espoo' 2 0 0 0 0 0
-123576 'Helsinki' 2 0 0 0 0 0
-123584 'Vantaa' 2 0 0 0 0 0
-123654 'Helsinki' 2 0 0 0 0 0
-123655 'Helsinki' 2 0 0 0 0 0
-123723 'Vantaa' 2 0 0 0 0 0
-123910 'Helsinki' 2 0 0 0 0 0
-123949 'Helsinki' 2 1 0 0 0 0
-124288 'Espoo' 2 0 0 0 0 0
-124423 'Vantaa' 2 0 0 0 0 0
-124450 'Vantaa' 2 0 0 0 0 0
-124481 'Espoo' 2 0 0 0 0 0
-124503 'Vantaa' 2 0 0 0 0 0
-124530 'Vantaa' 2 0 0 0 0 0
-124607 'Helsinki' 2 0 0 0 0 0
-124608 'Helsinki' 2 0 0 0 0 0
-124641 'Helsinki' 2 1 1 0 0 0
-124698 'Vantaa' 2 0 0 0 0 0
-124732 'Helsinki' 2 0 0 0 0 0
-124864 'Espoo' 2 0 0 0 0 0
-125050 'Helsinki' 2 0 0 0 0 0
-125051 'Helsinki' 2 0 0 0 0 0
-125106 'Hameenlinna' 0 0 0 0 0 0
-125117 'Hyvinkaa' 0 0 0 0 0 0
-125119 'Helsinki' 2 1 1 1 0 0
-125120 'Helsinki' 2 0 0 0 0 0
-125127 'Espoo' 2 0 0 0 0 0
-125182 'Espoo' 2 0 0 1 0 0
-125215 'Hollola' 0 0 0 0 0 0
-125329 'Helsinki' 2 0 0 0 0 0
-125361 'Helsinki' 2 0 0 0 0 0
-125395 'Vantaa' 2 0 0 1 0 0
-125405 'Hameenlinna' 0 0 0 0 0 0
-125449 'Helsinki' 2 1 0 0 0 0
-125514 'Helsinki' 2 0 0 0 0 0
-125545 'Vantaa' 2 0 0 0 0 0
-125606 'Espoo' 2 0 0 0 0 0
-125722 'Espoo' 2 0 0 0 0 0
-125762 'Vantaa' 2 0 0 0 0 0
-125835 'Helsinki' 2 0 0 0 0 0
-125836 'Helsinki' 2 0 0 0 0 0
-125857 'Vantaa' 2 0 0 0 0 0
-125889 'Espoo' 2 0 0 0 0 0
-126048 'Espoo' 2 0 0 0 0 0
-126140 'Espoo' 2 0 0 0 0 0
-126215 'Espoo' 2 0 0 0 0 0
-126355 'Vantaa' 2 0 0 0 0 0
-126394 'Tampere' 0 0 0 0 0 0
-126535 'Vantaa' 2 1 0 0 0 0
-126777 'Helsinki' 2 1 0 0 0 0
-126796 'Vantaa' 2 1 0 0 0 0
-126912 'Helsinki' 2 0 0 0 0 0
-126993 'Helsinki' 2 0 0 0 0 0
-127089 'Vantaa' 2 0 0 0 0 0
-127102 'Vantaa' 2 0 0 0 0 0
-127155 'Hameenlinna' 0 0 0 0 0 0
-127231 'Espoo' 2 0 0 0 0 0
-127273 'Helsinki' 2 0 0 0 0 0
-127342 'Kauniainen' 2 0 0 0 0 0
-127343 'Kauniainen' 2 0 0 0 0 0
-127420 'Helsinki' 2 0 0 0 0 0
-127429 'Helsinki' 2 1 0 0 0 0
-127439 'Espoo' 2 0 0 0 0 0
-127449 'Helsinki' 2 1 0 0 0 0
-127604 'Helsinki' 2 0 0 0 0 0
-127667 'Vantaa' 2 1 1 0 0 0
-127733 'Vantaa' 2 0 0 0 0 0
-127837 'Helsinki' 2 1 0 0 0 0
-127865 'Vihti' 0 0 0 0 0 0
-127977 'Helsinki' 2 0 0 0 0 0
-128002 'Helsinki' 2 0 0 0 0 0
-128003 'Helsinki' 2 0 0 0 0 0
-128052 'Lohja' 0 0 0 0 0 0
-128228 'Helsinki' 2 0 0 0 0 0
-128244 'Espoo' 2 0 0 0 0 0
-128313 'Espoo' 2 0 0 0 0 0
-128333 'Espoo' 2 0 0 0 0 0
-128412 'Espoo' 2 1 0 0 0 0
-128442 'Helsinki' 2 1 0 0 0 0
-128496 'Kotka' 0 0 1 0 0 0
-128528 'Vantaa' 2 0 0 0 0 0
-128534 'Espoo' 2 0 0 0 0 0
-128535 'Espoo' 2 0 0 0 0 0
-128676 'Vantaa' 2 0 0 0 0 0
-128788 'Helsinki' 2 0 0 0 0 0
-129141 'Helsinki' 2 0 0 0 0 0
-129142 'Helsinki' 2 0 0 0 0 0
-129201 'Espoo' 2 1 1 1 0 0
-129202 'Espoo' 2 0 0 0 0 0
-129516 'Hameenlinna' 0 0 0 0 0 0
-129616 'Espoo' 2 0 0 0 0 0
-129796 'Vantaa' 2 0 1 0 0 0
-129830 'Espoo' 2 0 0 0 0 0
-129954 'Helsinki' 2 1 1 0 0 0
-129998 'Vihti' 0 0 0 0 0 0
-130022 'Helsinki' 2 0 0 0 0 0
-130071 'Hameenlinna' 0 0 0 0 0 0
-130147 'Vantaa' 2 0 0 0 0 0
-130262 'Tampere' 0 0 0 0 0 0
-130274 'Espoo' 2 1 0 0 0 0
-130284 'Helsinki' 2 0 0 0 0 0
-130285 'Helsinki' 2 1 1 0 0 0
-130432 'Lahti' 0 0 0 0 0 0
-130483 'Kauniainen' 2 0 0 0 0 0
-130484 'Kauniainen' 2 0 0 0 0 0
-130495 'Helsinki' 2 0 0 0 0 0
-130617 'Helsinki' 2 0 0 0 0 0
-130646 'Espoo' 2 0 0 0 0 0
-130662 'Espoo' 2 0 0 0 0 0
-130706 'Espoo' 2 0 0 0 0 0
-130707 'Espoo' 2 0 0 0 0 0
-130767 'Kauniainen' 2 0 0 0 0 0
-130814 'Vantaa' 2 0 0 0 0 0
-130917 'Helsinki' 2 0 0 0 0 0
-131007 'Vantaa' 2 0 0 0 0 0
-131008 'Vantaa' 2 0 0 0 0 0
-131022 'Vantaa' 2 0 0 0 0 0
-131126 'Akaa' 0 0 0 0 0 0
-131154 'Vantaa' 2 0 0 0 0 0
-131188 'Helsinki' 2 1 0 0 0 0
-131189 'Helsinki' 2 1 1 1 0 0
-131234 'Tampere' 0 0 0 0 0 0
-131241 'Helsinki' 2 0 0 0 0 0
-131293 'Helsinki' 2 0 0 0 0 0
-131441 'Vantaa' 2 1 0 0 0 0
-131444 'Helsinki' 2 0 0 0 0 0
-131483 'Helsinki' 2 1 0 0 0 0
-131546 'Vantaa' 2 0 0 0 0 0
-131636 'Espoo' 2 0 0 0 0 0
-131822 'Vantaa' 2 0 0 0 0 0
-131823 'Vantaa' 2 0 0 0 0 0
-131874 'Lohja' 0 0 0 0 0 0
-131918 'Espoo' 2 1 0 0 0 0
-131982 'Helsinki' 2 1 0 0 0 0
-132044 'Helsinki' 2 0 0 0 0 0
-132073 'Vantaa' 2 0 0 0 0 0
-132088 'Vantaa' 2 1 1 0 0 0
-132281 'Helsinki' 2 0 0 0 0 0
-132311 'Espoo' 2 0 0 0 0 0
-132407 'Vantaa' 2 1 0 0 0 0
-132435 'Vantaa' 2 1 1 0 0 0
-132436 'Vantaa' 2 0 0 0 0 0
-132449 'Hanko' 0 0 0 0 0 0
-132513 'Hameenlinna' 0 0 0 0 0 0
-132640 'Espoo' 2 0 0 0 0 0
-132641 'Espoo' 2 0 0 0 0 0
-133008 'Espoo' 2 0 0 0 0 0
-133017 'Helsinki' 2 0 0 0 0 0
-133044 'Helsinki' 2 0 0 0 0 0
-133051 'Espoo' 2 0 0 0 0 0
-133158 'Nurmijarvi' 0 0 0 0 0 0
-133159 'Nurmijarvi' 0 0 1 0 0 0
-133237 'Helsinki' 2 0 0 0 0 0
-133248 'Vantaa' 2 0 0 0 0 0
-133249 'Vantaa' 2 0 0 0 0 0
-133338 'Vantaa' 2 0 0 0 0 0
-133425 'Espoo' 2 0 0 0 0 0
-133436 'Vantaa' 2 0 0 0 0 0
-133496 'Vantaa' 2 0 0 0 0 0
-133497 'Vantaa' 2 0 0 0 0 0
-133504 'Helsinki' 2 0 0 0 0 0
-133672 'Helsinki' 2 0 0 0 0 0
-133735 'Vantaa' 2 0 0 0 0 0
-133736 'Vantaa' 2 0 0 0 0 0
-133872 'Helsinki' 2 0 0 0 0 0
-134147 'Helsinki' 2 0 0 0 0 0
-134334 'Helsinki' 2 0 0 0 0 0
-134369 'Vantaa' 2 0 0 0 0 0
-134425 'Espoo' 2 1 1 0 0 0
-134462 'Helsinki' 2 0 0 0 0 0
-134489 'Vantaa' 2 0 0 0 0 0
-134611 'Vantaa' 2 0 0 0 0 0
-134625 'Helsinki' 2 0 0 0 0 0
-134640 'Vantaa' 2 0 0 0 0 0
-134641 'Vantaa' 2 1 0 0 0 0
-134703 'Espoo' 2 0 0 0 0 0
-134710 'Vantaa' 2 0 0 0 0 0
-134741 'Helsinki' 2 0 0 0 0 0
-134742 'Helsinki' 2 0 0 0 0 0
-134774 'Espoo' 2 1 0 0 0 0
-135157 'Vantaa' 2 1 0 0 0 0
-135173 'Vantaa' 2 0 0 0 0 0
-135233 'Helsinki' 2 0 0 0 0 0
-135318 'Helsinki' 2 0 0 0 0 0
-135381 'Espoo' 2 0 0 0 0 0
-135382 'Espoo' 2 0 0 0 0 0
-135397 'Helsinki' 2 0 0 0 0 0
-135398 'Helsinki' 2 0 0 0 0 0
-135423 'Hameenlinna' 0 0 0 0 0 0
-135502 'Helsinki' 2 0 0 0 0 0
-135542 'Sipoo' 0 0 0 0 0 0
-135572 'Espoo' 2 0 0 0 0 0
-135676 'Helsinki' 2 0 0 0 0 0
-135702 'Helsinki' 2 1 0 0 0 0
-135783 'Espoo' 2 1 1 1 0 0
-135797 'Espoo' 2 1 0 1 0 0
-135962 'Vantaa' 2 0 0 0 0 0
-136000 'Vantaa' 2 1 0 1 0 0
-136061 'Vantaa' 2 0 0 0 0 0
-136109 'Vihti' 0 0 1 0 0 0
-136170 'Vantaa' 2 0 0 0 0 0
-136171 'Vantaa' 2 0 0 0 0 0
-136275 'Espoo' 2 1 0 0 0 0
-136384 'Helsinki' 2 0 0 0 0 0
-136421 'Espoo' 2 0 0 0 0 0
-136422 'Espoo' 2 0 0 0 0 0
-136511 'Espoo' 2 1 1 0 0 0
-136512 'Espoo' 2 0 0 0 0 0
-136577 'Espoo' 2 0 0 0 0 0
-136634 'Vantaa' 2 1 0 0 0 0
-136737 'Vantaa' 2 0 0 0 0 0
-136752 'Helsinki' 2 0 0 0 0 0
-136753 'Helsinki' 2 0 0 1 0 0
-136754 'Espoo' 2 0 0 0 0 0
-136768 'Vantaa' 2 0 0 0 0 0
-136788 'Helsinki' 2 0 0 0 0 0
-136789 'Helsinki' 2 0 0 0 0 0
-136803 'Helsinki' 2 0 0 0 0 0
-136869 'Helsinki' 2 0 1 0 0 0
-136870 'Helsinki' 2 0 0 0 0 0
-136911 'Helsinki' 2 0 0 0 0 0
-136938 'Hameenlinna' 0 0 0 0 0 0
-137171 'Espoo' 2 0 0 0 0 0
-137436 'Vantaa' 2 0 0 0 0 0
-137483 'Helsinki' 2 1 1 0 0 0
-137508 'Helsinki' 2 0 0 0 0 0
-137624 'Espoo' 2 0 0 0 0 0
-137775 'Jyvaskyla' 0 0 0 0 0 0
-137828 'Vantaa' 2 0 0 0 0 0
-137839 'Helsinki' 2 0 0 0 0 0
-137964 'Humppila' 0 0 0 0 0 0
-138175 'Espoo' 2 0 0 0 0 0
-138212 'Helsinki' 2 0 0 0 0 0
-138275 'Helsinki' 2 0 0 0 0 0
-138305 'Jamsa' 0 0 0 0 0 0
-138368 'Akaa' 0 0 0 0 0 0
-138380 'Espoo' 2 0 0 0 0 0
-138460 'Vantaa' 2 0 0 0 0 0
-138570 'Tampere' 0 0 0 0 0 0
-138677 'Espoo' 2 0 0 0 0 0
-138678 'Espoo' 2 1 0 0 0 0
-138679 'Espoo' 2 0 0 1 0 0
-138707 'Espoo' 2 0 0 0 0 0
-138708 'Espoo' 2 0 0 0 0 0
-138852 'Espoo' 2 0 0 0 0 0
-139051 'Lohja' 0 0 0 0 0 0
-139111 'Helsinki' 2 1 0 0 0 0
-139116 'Helsinki' 2 1 0 0 0 0
-139117 'Helsinki' 2 0 0 1 0 0
-139136 'Helsinki' 2 0 1 0 0 0
-139194 'Raasepori' 0 0 0 0 0 0
-139281 'Helsinki' 2 0 0 1 0 0
-139315 'Helsinki' 2 0 0 0 0 0
-139420 'Helsinki' 2 1 1 1 0 0
-139421 'Helsinki' 2 1 1 1 0 0
-139435 'Vantaa' 2 0 0 0 0 0
-139657 'Vantaa' 2 0 0 0 0 0
-139702 'Vantaa' 2 0 0 0 0 0
-139747 'Espoo' 2 1 0 1 0 0
-139847 'Vantaa' 2 0 0 0 0 0
-139869 'Helsinki' 2 1 1 1 0 0
-139947 'Vantaa' 2 1 0 0 0 0
-139979 'Vantaa' 2 0 0 0 0 0
-140054 'Lahti' 0 0 0 0 0 0
-140088 'Helsinki' 2 0 0 0 0 0
-140130 'Helsinki' 2 0 0 0 0 0
-140167 'Helsinki' 2 0 0 0 0 0
-140267 'Vantaa' 2 0 0 0 0 0
-140286 'Helsinki' 2 0 0 0 0 0
-140441 'Helsinki' 2 1 0 0 0 0
-140547 'Vantaa' 2 1 1 1 0 0
-140673 'Vantaa' 2 0 0 0 0 0
-140752 'Raasepori' 0 0 0 0 0 0
-140768 'Vantaa' 2 0 0 0 0 0
-140769 'Vantaa' 2 0 0 0 0 0
-140871 'Helsinki' 2 1 0 0 0 0
-140914 'Lohja' 0 0 0 0 0 0
-140937 'Helsinki' 2 0 0 0 0 0
-141203 'Helsinki' 2 0 1 0 0 0
-141214 'Helsinki' 2 0 0 0 0 0
-141278 'Vantaa' 2 0 0 0 0 0
-141305 'Espoo' 2 0 0 0 0 0
-141320 'Espoo' 2 0 0 0 0 0
-141389 'Vantaa' 2 0 0 0 0 0
-141491 'Helsinki' 2 1 0 0 0 0
-141492 'Helsinki' 2 1 1 1 0 0
-141522 'Hyvinkaa' 0 0 0 0 0 0
-141544 'Akaa' 0 0 0 0 0 0
-141547 'Helsinki' 2 0 0 0 0 0
-141716 'Helsinki' 2 0 1 0 0 0
-141906 'Espoo' 2 1 0 0 0 0
-141907 'Espoo' 2 0 0 0 0 0
-142083 'Vantaa' 2 0 0 0 0 0
-142084 'Vantaa' 2 0 0 0 0 0
-142090 'Vantaa' 2 0 0 0 0 0
-142190 'Espoo' 2 0 0 0 0 0
-142201 'Espoo' 2 0 0 0 0 0
-142478 'Helsinki' 2 1 1 0 0 0
-142499 'Jyvaskyla' 0 0 0 0 0 0
-142598 'Vantaa' 2 1 0 0 0 0
-142613 'Vantaa' 2 1 0 1 0 0
-142705 'Helsinki' 2 0 0 0 0 0
-142785 'Helsinki' 2 1 0 0 0 0
-142799 'Vantaa' 2 0 0 0 0 0
-142847 'Vantaa' 2 0 0 0 0 0
-142886 'Vantaa' 2 0 0 0 0 0
-142891 'Helsinki' 2 0 0 0 0 0
-142903 'Hanko' 0 0 0 0 0 0
-143056 'Vihti' 0 1 1 0 0 0
-143106 'Orimattila' 0 0 0 0 0 0
-143150 'Espoo' 2 0 0 0 0 0
-143151 'Espoo' 2 0 0 0 0 0
-143178 'Helsinki' 2 1 0 0 0 0
-143204 'Hameenlinna' 0 0 0 0 0 0
-143257 'Jamsa' 0 0 0 0 0 0
-143271 'Vantaa' 2 1 1 1 0 0
-143272 'Vantaa' 2 1 0 0 0 0
-143420 'Espoo' 2 0 0 0 0 0
-143457 'Helsinki' 2 0 0 0 0 0
-143458 'Helsinki' 2 0 0 0 0 0
-143756 'Vantaa' 2 0 0 0 0 0
-143869 'Vantaa' 2 0 0 0 0 0
-143902 'Espoo' 2 0 0 0 0 0
-143933 'Lahti' 0 0 0 0 0 0
-144060 'Helsinki' 2 0 0 0 0 0
-144061 'Helsinki' 2 0 0 0 0 0
-144109 'Vantaa' 2 1 0 0 0 0
-144260 'Helsinki' 2 0 0 0 0 0
-144283 'Helsinki' 2 0 0 0 0 0
-144360 'Espoo' 2 0 0 0 0 0
-144364 'Forssa' 0 0 0 0 0 0
-144443 'Helsinki' 2 0 0 0 0 0
-144444 'Helsinki' 2 1 0 0 0 0
-144521 'Vantaa' 2 0 0 0 0 0
-144648 'Tampere' 0 0 0 0 0 0
-144777 'Vihti' 0 0 0 0 0 0
-144893 'Espoo' 2 0 0 0 0 0
-144894 'Jamsa' 0 0 0 0 0 0
-144946 'Vantaa' 2 0 0 0 0 0
-145013 'Helsinki' 2 0 0 0 0 0
-145072 'Helsinki' 2 0 0 0 0 0
-145151 'Helsinki' 2 0 0 0 0 0
-145280 'Espoo' 2 0 0 0 0 0
-145297 'Helsinki' 2 1 1 1 0 0
-145341 'Helsinki' 2 1 0 0 0 0
-145352 'Helsinki' 2 0 0 0 0 0
-145393 'Vantaa' 2 0 0 0 0 0
-145394 'Vantaa' 2 0 0 0 0 0
-145399 'Espoo' 2 0 0 0 0 0
-145466 'Helsinki' 2 0 0 0 0 0
-145467 'Helsinki' 2 0 0 0 0 0
-145495 'Kauniainen' 2 0 0 0 0 0
-145497 'Hameenlinna' 0 0 0 0 0 0
-145498 'Hameenlinna' 0 0 0 0 0 0
-145499 'Espoo' 2 1 0 0 0 0
-145532 'Espoo' 2 1 0 1 0 0
-145698 'Espoo' 2 0 0 0 0 0
-145751 'Vantaa' 2 0 0 0 0 0
-146007 'Espoo' 2 0 0 0 0 0
-146177 'Akaa' 0 0 0 0 0 0
-146292 'Kauniainen' 2 0 0 0 0 0
-146329 'Vihti' 0 0 0 0 0 0
-146383 'Lahti' 0 0 0 0 0 0
-146564 'Vantaa' 2 1 0 1 0 0
-146904 'Helsinki' 2 1 0 0 0 0
-146905 'Lahti' 0 0 0 0 0 0
-146970 'Helsinki' 2 0 0 0 0 0
-147122 'Kauniainen' 2 0 0 0 0 0
-147279 'Helsinki' 2 1 0 0 0 0
-147290 'Helsinki' 2 0 0 0 0 0
-147535 'Espoo' 2 1 0 0 0 0
-147700 'Vantaa' 2 0 0 0 0 0
-147775 'Espoo' 2 0 0 0 0 0
-147776 'Espoo' 2 0 0 0 0 0
-147837 'Vantaa' 2 0 0 0 0 0
-147849 'Helsinki' 2 0 0 0 0 0
-147965 'Vantaa' 2 0 0 0 0 0
-148546 'Espoo' 2 0 0 0 0 0
-148547 'Helsinki' 2 0 0 0 0 0
-148548 'Helsinki' 2 0 0 0 0 0
-148642 'Lohja' 0 0 0 0 0 0
-148723 'Espoo' 2 1 0 0 0 0
-149011 'Helsinki' 2 0 0 0 0 0
-149119 'Helsinki' 2 0 0 0 0 0
-149220 'Helsinki' 2 0 0 0 0 0
-149225 'Espoo' 2 0 0 0 0 0
-149250 'Espoo' 2 0 0 0 0 0
-149251 'Espoo' 2 0 0 0 0 0
-149280 'Espoo' 2 0 0 0 0 0
-149353 'Vantaa' 2 1 1 1 0 0
-149505 'Helsinki' 2 0 1 0 0 0
-149510 'Vantaa' 2 0 0 0 0 0
-149623 'Vantaa' 2 1 1 0 0 0
-149808 'Espoo' 2 1 0 0 0 0
-149893 'Kotka' 0 0 0 0 0 0
-149955 'Vantaa' 2 0 0 0 0 0
-149956 'Vantaa' 2 1 0 0 0 0
-150220 'Helsinki' 2 0 0 1 0 0
-150351 'Lohja' 0 0 0 0 0 0
-150457 'Vantaa' 2 0 0 0 0 0
-150695 'Espoo' 2 0 0 0 0 0
-150706 'Vantaa' 2 0 0 0 0 0
-150868 'Kauniainen' 2 1 0 0 0 0
-150959 'Vantaa' 2 0 0 0 0 0
-151050 'Espoo' 2 0 0 0 0 0
-151085 'Espoo' 2 0 0 0 0 0
-151156 'Helsinki' 2 0 1 0 0 0
-151362 'Helsinki' 2 0 0 0 0 0
-151393 'Turku' 0 0 0 0 0 0
-151439 'Helsinki' 2 0 0 0 0 0
-151694 'Espoo' 2 1 1 1 0 0
-151964 'Helsinki' 2 1 0 1 0 0
-152076 'Espoo' 2 0 0 0 0 0
-152230 'Helsinki' 2 0 0 0 0 0
-152267 'Espoo' 2 1 0 0 0 0
-152280 'Helsinki' 2 0 0 0 0 0
-152369 'Espoo' 2 0 0 0 0 0
-152545 'Helsinki' 2 0 0 1 0 0
-152563 'Helsinki' 2 1 0 0 0 0
-152570 'Espoo' 2 0 0 0 0 0
-152702 'Helsinki' 2 0 0 0 0 0
-152776 'Vantaa' 2 0 0 0 0 0
-152782 'Helsinki' 2 1 0 0 0 0
-152872 'Vantaa' 2 0 0 1 0 0
-153082 'Vantaa' 2 0 0 0 0 0
-153216 'Helsinki' 2 0 0 0 0 0
-153296 'Lohja' 0 0 0 0 0 0
-153375 'Lohja' 0 0 0 0 0 0
-153385 'Vantaa' 2 0 0 0 0 0
-153540 'Helsinki' 2 0 0 0 0 0
-153598 'Vantaa' 2 0 0 0 0 0
-153875 'Turku' 0 0 0 0 0 0
-153940 'Espoo' 2 0 0 1 0 0
-154055 'Hollola' 0 0 0 0 0 0
-154136 'Espoo' 2 0 0 0 0 0
-154249 'Espoo' 2 0 0 0 0 0
-154259 'Espoo' 2 0 0 0 0 0
-154260 'Espoo' 2 0 0 0 0 0
-154268 'Helsinki' 2 1 0 0 0 0
-154330 'Espoo' 2 0 0 0 0 0
-154356 'Hollola' 0 0 0 0 0 0
-154360 'Espoo' 2 0 0 0 0 0
-154393 'Vantaa' 2 0 0 0 0 0
-154410 'Hollola' 0 0 0 0 0 0
-154435 'Helsinki' 2 0 0 0 0 0
-154750 'Espoo' 2 0 0 0 0 0
-154786 'Vantaa' 2 0 0 0 0 0
-154789 'Helsinki' 2 0 0 0 0 0
-154790 'Helsinki' 2 0 0 0 0 0
-154877 'Espoo' 2 0 0 0 0 0
-154913 'Vantaa' 2 0 0 0 0 0
-154936 'Espoo' 2 0 0 0 0 0
-154981 'Espoo' 2 1 0 0 0 0
-154986 'Helsinki' 2 0 0 0 0 0
-155167 'Espoo' 2 0 0 0 0 0
-155271 'Vantaa' 2 0 0 0 0 0
-155323 'Helsinki' 2 0 0 0 0 0
-155549 'Helsinki' 2 0 0 0 0 0
-155552 'Jamsa' 0 0 1 0 0 0
-155603 'Helsinki' 2 0 0 0 0 0
-155611 'Helsinki' 2 0 0 0 0 0
-155621 'Espoo' 2 0 0 0 0 0
-155722 'Vantaa' 2 0 0 0 0 0
-155977 'Lohja' 0 0 0 0 0 0
-156138 'Espoo' 2 0 0 0 0 0
-156156 'Hameenlinna' 0 0 0 0 0 0
-156260 'Vantaa' 2 0 0 0 0 0
-156269 'Helsinki' 2 0 0 0 0 0
-156295 'Vantaa' 2 0 0 0 0 0
-156352 'Hanko' 0 0 0 0 0 0
-156360 'Tampere' 0 0 0 0 0 0
-156366 'Espoo' 2 0 0 1 0 0
-156433 'Vantaa' 2 1 0 0 0 0
-156448 'Helsinki' 2 0 0 0 0 0
-156481 'Espoo' 2 0 0 0 0 0
-156482 'Espoo' 2 0 0 0 0 0
-156520 'Helsinki' 2 0 0 0 0 0
-156532 'Forssa' 0 0 0 0 0 0
-156540 'Espoo' 2 0 0 0 0 0
-156735 'Helsinki' 2 0 0 0 0 0
-156772 'Vantaa' 2 0 0 0 0 0
-156970 'Vantaa' 2 0 0 0 0 0
-156997 'Vantaa' 2 1 0 0 0 0
-156998 'Espoo' 2 0 0 0 0 0
-157043 'Espoo' 2 0 1 1 0 0
-157046 'Vantaa' 2 0 0 0 0 0
-157151 'Helsinki' 2 0 0 0 0 0
-157234 'Vantaa' 2 0 0 0 0 0
-157268 'Espoo' 2 0 0 0 0 0
-157297 'Turku' 0 0 0 0 0 0
-157324 'Helsinki' 2 0 1 0 0 0
-157436 'Turku' 0 0 0 0 0 0
-157444 'Helsinki' 2 1 0 1 0 0
-157568 'Helsinki' 2 0 0 0 0 0
-157606 'Espoo' 2 0 0 0 0 0
-157644 'Kangasala' 0 0 0 0 0 0
-157645 'Espoo' 2 0 0 0 0 0
-157678 'Vantaa' 2 0 0 0 0 0
-157825 'Hameenlinna' 0 0 0 0 0 0
-157870 'Espoo' 2 1 0 0 0 0
-157919 'Espoo' 2 0 0 0 0 0
-158118 'Espoo' 2 0 0 0 0 0
-158140 'Tampere' 0 0 0 0 0 0
-158200 'Helsinki' 2 0 0 0 0 0
-158283 'Helsinki' 2 0 0 0 0 0
-158327 'Vantaa' 2 0 0 0 0 0
-158492 'Kotka' 0 0 0 0 0 0
-158615 'Vantaa' 2 0 0 0 0 0
-158710 'Helsinki' 2 0 1 0 0 0
-158721 'Espoo' 2 0 0 0 0 0
-158731 'Helsinki' 2 0 0 0 0 0
-158732 'Helsinki' 2 0 0 0 0 0
-158763 'Helsinki' 2 1 0 1 0 0
-158795 'Espoo' 2 0 0 0 0 0
-158994 'Mantsala' 0 0 0 0 0 0
-159030 'Helsinki' 2 0 0 0 0 0
-159067 'Espoo' 2 0 0 0 0 0
-159140 'Espoo' 2 0 0 0 0 0
-159144 'Espoo' 2 0 0 0 0 0
-159282 'Espoo' 2 0 0 0 0 0
-159449 'Espoo' 2 0 0 0 0 0
-159466 'Vantaa' 2 1 1 0 0 0
-159475 'Helsinki' 2 1 0 0 0 0
-159582 'Helsinki' 2 0 0 0 0 0
-159666 'Helsinki' 2 1 0 0 0 0
-159673 'Espoo' 2 0 0 1 0 0
-159685 'Espoo' 2 0 0 0 0 0
-159699 'Lohja' 0 1 0 0 0 0
-159729 'Espoo' 2 0 0 0 0 0
-159731 'Vantaa' 2 0 1 0 0 0
-159756 'Espoo' 2 0 0 0 0 0
-159765 'Helsinki' 2 0 0 0 0 0
-159794 'Mantsala' 0 0 0 0 0 0
-159850 'Lohja' 0 0 0 0 0 0
-160083 'Vantaa' 2 0 0 0 0 0
-160316 'Helsinki' 2 1 0 0 0 0
-160325 'Helsinki' 2 0 0 0 0 0
-160480 'Helsinki' 2 0 0 0 0 0
-160483 'Helsinki' 2 1 1 0 0 0
-160532 'Espoo' 2 0 0 0 0 0
-160558 'Lohja' 0 0 0 0 0 0
-160560 'Helsinki' 2 1 0 0 0 0
-160707 'Espoo' 2 0 0 0 0 0
-160753 'Helsinki' 2 0 0 1 0 0
-160803 'Vantaa' 2 0 0 0 0 0
-160804 'Espoo' 2 0 0 0 0 0
-161455 'Vantaa' 2 0 0 0 0 0
-161486 'Lohja' 0 1 0 0 0 0
-161503 'Loviisa' 0 0 0 0 0 0
-161818 'Vantaa' 2 0 0 0 0 0
-161861 'Helsinki' 2 0 1 0 0 0
-161869 'Vantaa' 2 0 0 0 0 0
-161875 'Vantaa' 2 0 0 0 0 0
-161890 'Lohja' 0 0 0 0 0 0
-161908 'Espoo' 2 0 0 0 0 0
-162199 'Helsinki' 2 0 0 0 0 0
-162205 'Helsinki' 2 1 0 0 0 0
-162242 'Jamsa' 0 0 0 0 0 0
-162246 'Helsinki' 2 0 0 0 0 0
-162247 'Helsinki' 2 0 0 0 0 0
-162302 'Helsinki' 2 0 0 0 0 0
-162393 'Muurame' 0 0 0 0 0 0
-162467 'Vantaa' 2 1 0 1 0 0
-162639 'Helsinki' 2 0 0 0 0 0
-162734 'Vantaa' 2 1 0 0 0 0
-162757 'Vantaa' 2 0 0 0 0 0
-162870 'Espoo' 2 0 0 0 0 0
-162906 'Helsinki' 2 0 0 0 0 0
-163086 'Helsinki' 2 1 1 1 0 0
-163226 'Helsinki' 2 1 1 0 0 0
-163264 'Helsinki' 2 0 0 0 0 0
-163309 'Espoo' 2 0 0 0 0 0
-163310 'Espoo' 2 1 0 0 0 0
-163486 'Helsinki' 2 1 0 1 0 0
-163500 'Vihti' 0 0 0 0 0 0
-163533 'Vantaa' 2 0 0 0 0 0
-163563 'Helsinki' 2 0 0 0 0 0
-163630 'Helsinki' 2 0 0 0 0 0
-163645 'Espoo' 2 0 0 0 0 0
-163717 'Espoo' 2 0 0 0 0 0
-163733 'Vantaa' 2 0 0 0 0 0
-163735 'Hameenlinna' 0 0 0 0 0 0
-163799 'Vantaa' 2 0 0 0 0 0
-163814 'Helsinki' 2 0 0 0 0 0
-163887 'Vantaa' 2 1 0 0 0 0
-163894 'Mantsala' 0 0 0 0 0 0
-163952 'Hameenlinna' 0 0 0 0 0 0
-164016 'Vantaa' 2 0 0 0 0 0
-164283 'Helsinki' 2 0 0 0 0 0
-164298 'Vantaa' 2 1 1 1 0 0
-164451 'Helsinki' 2 0 0 0 0 0
-164496 'Helsinki' 2 0 0 0 0 0
-164570 'Espoo' 2 0 0 0 0 0
-164644 'Helsinki' 2 0 0 0 0 0
-164678 'Espoo' 2 0 0 0 0 0
-164712 'Vantaa' 2 0 0 1 0 0
-164723 'Hanko' 0 0 0 0 0 0
-164781 'Vantaa' 2 0 0 0 0 0
-164789 'Espoo' 2 0 0 0 0 0
-164940 'Hyvinkaa' 0 0 0 0 0 0
-164976 'Hyvinkaa' 0 0 0 0 0 0
-164989 'Vihti' 0 0 0 0 0 0
-165318 'Espoo' 2 0 0 0 0 0
-165374 'Vantaa' 2 0 1 1 0 0
-165382 'Helsinki' 2 1 0 0 0 0
-165420 'Orimattila' 0 0 0 0 0 0
-165425 'Espoo' 2 0 0 0 0 0
-165491 'Espoo' 2 1 0 1 0 0
-165508 'Nurmijarvi' 0 0 0 0 0 0
-165586 'Vantaa' 2 0 0 0 0 0
-165685 'Espoo' 2 0 0 0 0 0
-165846 'Espoo' 2 1 0 0 0 0
-166039 'Vantaa' 2 0 0 0 0 0
-166044 'Espoo' 2 0 0 0 0 0
-166077 'Helsinki' 2 0 1 0 0 0
-166115 'Lohja' 0 0 0 0 0 0
-166181 'Vantaa' 2 0 0 0 0 0
-166236 'Espoo' 2 0 0 0 0 0
-166237 'Espoo' 2 0 0 0 0 0
-166238 'Helsinki' 2 0 0 0 0 0
-166351 'Helsinki' 2 0 0 0 0 0
-166410 'Helsinki' 2 0 0 0 0 0
-166424 'Helsinki' 2 0 0 0 0 0
-166431 'Helsinki' 2 0 0 0 0 0
-166432 'Helsinki' 2 0 0 0 0 0
-166507 'Espoo' 2 0 0 0 0 0
-166542 'Espoo' 2 0 0 0 0 0
-166572 'Helsinki' 2 0 0 0 0 0
-166608 'Helsinki' 2 0 0 0 0 0
-166910 'Helsinki' 2 1 0 1 0 0
-166985 'Vantaa' 2 0 0 0 0 0
-167005 'Vantaa' 2 1 1 0 0 0
-167146 'Helsinki' 2 1 0 0 0 0
-167287 'Espoo' 2 0 0 0 0 0
-167303 'Vantaa' 2 0 0 0 0 0
-167320 'Helsinki' 2 1 1 1 0 1
-167351 'Lahti' 0 0 0 0 0 0
-167484 'Helsinki' 2 0 0 0 0 0
-167521 'Helsinki' 2 0 0 0 0 0
-167527 'Vantaa' 2 0 0 0 0 0
-167633 'Turku' 0 0 0 0 0 0
-167667 'Tuusula' 0 0 0 0 0 0
-167688 'Helsinki' 2 1 1 1 0 0
-167689 'Helsinki' 2 0 1 0 0 0
-167795 'Lahti' 0 0 0 0 0 0
-167797 'Vantaa' 2 0 0 0 0 0
-167842 'Turku' 0 0 0 0 0 0
-167911 'Hameenlinna' 0 0 0 0 0 0
-167914 'Helsinki' 2 1 1 0 0 0
-167955 'Vantaa' 2 0 0 0 0 0
-168076 'Helsinki' 2 0 0 0 0 0
-168131 'Hameenlinna' 0 0 0 0 0 0
-168157 'Espoo' 2 0 0 0 0 0
-168208 'Helsinki' 2 0 0 0 0 0
-168216 'Espoo' 2 0 0 0 0 0
-168272 'Vantaa' 2 0 0 0 0 0
-168292 'Espoo' 2 0 0 0 0 0
-168309 'Hyvinkaa' 0 0 0 0 0 0
-168527 'Vihti' 0 0 0 0 0 0
-168550 'Helsinki' 2 1 0 0 0 0
-168810 'Mantsala' 0 0 0 0 0 0
-168837 'Lahti' 0 0 0 0 0 0
-168878 'Espoo' 2 0 0 0 0 0
-168947 'Kauniainen' 2 1 0 0 0 0
-169041 'Espoo' 2 0 0 0 0 0
-169106 'Mantsala' 0 0 0 0 0 0
-169175 'Helsinki' 2 0 0 0 0 1
-169191 'Kotka' 0 0 0 0 0 0
-169297 'Espoo' 2 0 0 0 0 0
-169298 'Espoo' 2 0 0 0 0 0
-169622 'Vantaa' 2 0 0 0 0 0
-169788 'Vantaa' 2 0 0 0 0 0
-169836 'Espoo' 2 0 1 0 0 0
-169848 'Espoo' 2 0 0 0 0 0
-169854 'Forssa' 0 0 0 0 0 0
-169924 'Espoo' 2 0 0 0 0 0
-169981 'Lohja' 0 0 0 0 0 0
-170045 'Vantaa' 2 0 0 0 0 0
-170306 'Vantaa' 2 0 0 0 0 0
-170331 'Vantaa' 2 1 0 0 0 0
-170401 'Espoo' 2 1 0 0 0 0
-170458 'Vantaa' 2 1 0 0 0 0
-170471 'Orimattila' 0 0 0 0 0 0
-170545 'Vantaa' 2 0 0 0 0 0
-170554 'Vantaa' 2 0 0 0 0 0
-170595 'Mantsala' 0 0 0 0 0 0
-170623 'Helsinki' 2 0 0 0 0 0
-170741 'Vantaa' 2 0 1 0 0 0
-170754 'Vantaa' 2 0 0 0 0 0
-170823 'Helsinki' 2 1 0 0 0 0
-170892 'Vantaa' 2 0 0 0 0 0
-171009 'Vantaa' 2 1 1 0 0 0
-171101 'Espoo' 2 0 0 0 0 0
-171147 'Lahti' 0 0 0 0 0 0
-171283 'Hyvinkaa' 0 0 0 0 0 0
-171291 'Espoo' 2 0 0 0 0 0
-171345 'Vantaa' 2 0 0 0 0 0
-171393 'Espoo' 2 0 0 0 0 0
-171398 'Helsinki' 2 0 0 0 0 0
-171445 'Helsinki' 2 0 0 0 0 0
-171515 'Helsinki' 2 0 0 0 0 0
-171709 'Vantaa' 2 0 0 0 0 0
-171863 'Forssa' 0 0 0 0 0 0
-172004 'Helsinki' 2 0 0 0 0 0
-172010 'Espoo' 2 0 0 1 0 0
-172071 'Espoo' 2 1 0 1 0 0
-172105 'Lahti' 0 0 0 0 0 0
-172116 'Helsinki' 2 0 0 0 0 0
-172152 'Espoo' 2 0 0 0 0 0
-172169 'Helsinki' 2 1 0 0 0 0
-172174 'Helsinki' 2 0 0 0 0 0
-172263 'Espoo' 2 0 0 0 0 0
-172495 'Vantaa' 2 0 0 0 0 0
-172579 'Helsinki' 2 0 0 0 0 0
-172649 'Hameenlinna' 0 0 0 0 0 0
-172665 'Vantaa' 2 0 1 0 0 0
-172685 'Hameenlinna' 0 0 1 0 0 0
-172702 'Espoo' 2 0 0 0 0 0
-172704 'Espoo' 2 0 0 0 0 0
-172716 'Espoo' 2 0 0 0 0 0
-172751 'Helsinki' 2 0 0 0 0 0
-172820 'Vantaa' 2 1 0 0 0 0
-172922 'Vantaa' 2 0 0 0 0 0
-173023 'Orimattila' 0 0 0 0 0 0
-173078 'Helsinki' 2 0 0 0 0 0
-173350 'Vantaa' 2 0 0 0 0 0
-173353 'Helsinki' 2 0 0 0 0 0
-173412 'Espoo' 2 0 0 0 0 0
-173442 'Helsinki' 2 0 0 0 0 0
-173486 'Vantaa' 2 0 0 0 0 0
-173537 'Hyvinkaa' 0 0 0 0 0 0
-173602 'Lohja' 0 0 1 0 0 0
-173613 'Muurame' 0 0 1 0 0 0
-173672 'Helsinki' 2 0 0 0 0 0
-173810 'Espoo' 2 1 1 1 0 0
-173819 'Loviisa' 0 0 0 0 0 0
-173893 'Vantaa' 2 0 0 0 0 0
-173979 'Helsinki' 2 0 0 0 0 0
-174104 'Vantaa' 2 0 0 0 0 0
-174113 'Helsinki' 2 0 0 0 0 0
-174335 'Espoo' 2 0 0 0 0 0
-174378 'Helsinki' 2 1 0 0 0 0
-174428 'Vantaa' 2 0 0 0 0 0
-174490 'Vantaa' 2 0 0 0 0 0
-174506 'Helsinki' 2 0 0 0 0 0
-174690 'Vantaa' 2 0 0 0 0 0
-174702 'Vantaa' 2 0 0 0 0 0
-174707 'Espoo' 2 0 0 0 0 0
-174796 'Helsinki' 2 0 0 0 0 0
-174823 'Tampere' 0 0 0 0 0 0
-174839 'Espoo' 2 0 0 1 0 0
-174983 'Helsinki' 2 0 0 0 0 0
-175004 'Forssa' 0 0 0 0 0 0
-175072 'Vantaa' 2 0 0 0 0 0
-175163 'Espoo' 2 0 0 0 0 0
-175408 'Vantaa' 2 1 0 0 0 0
-175445 'Helsinki' 2 0 0 1 0 0
-175446 'Helsinki' 2 1 0 0 0 0
-175472 'Espoo' 2 0 0 0 0 0
-175473 'Helsinki' 2 0 0 0 0 0
-175502 'Vantaa' 2 0 0 0 0 0
-175614 'Lohja' 0 0 0 0 0 0
-175655 'Vantaa' 2 0 0 0 0 0
-175674 'Vantaa' 2 0 0 0 0 0
-175675 'Vantaa' 2 0 0 0 0 0
-175729 'Espoo' 2 0 0 0 0 0
-175772 'Turku' 0 0 1 0 0 0
-175796 'Forssa' 0 0 0 0 0 0
-175844 'Loviisa' 0 0 0 0 0 0
-175947 'Helsinki' 2 1 0 0 0 0
-175948 'Helsinki' 2 0 0 0 0 0
-175994 'Helsinki' 2 0 0 0 0 0
-175997 'Helsinki' 2 0 1 0 0 0
-176006 'Espoo' 2 0 0 0 0 0
-176286 'Vantaa' 2 1 0 0 0 0
-176324 'Vantaa' 2 1 0 0 0 0
-176372 'Helsinki' 2 0 1 1 0 0
-176396 'Helsinki' 2 0 0 0 0 0
-176399 'Espoo' 2 0 0 0 0 0
-176419 'Vantaa' 2 0 0 0 0 0
-176426 'Helsinki' 2 0 1 0 0 0
-176446 'Helsinki' 2 0 0 0 0 0
-176518 'Kauniainen' 2 0 0 0 0 0
-176577 'Espoo' 2 0 0 0 0 0
-176582 'Espoo' 2 0 0 0 0 0
-176603 'Helsinki' 2 0 0 0 0 0
-176677 'Vantaa' 2 0 0 0 0 0
-176684 'Espoo' 2 1 0 0 0 0
-176769 'Helsinki' 2 0 0 0 0 0
-177003 'Espoo' 2 0 0 0 0 0
-177109 'Vantaa' 2 0 0 0 0 0
-177232 'Espoo' 2 0 0 1 0 0
-177234 'Espoo' 2 0 0 0 0 0
-177235 'Espoo' 2 0 0 0 0 0
-177236 'Helsinki' 2 0 0 0 0 0
-177282 'Helsinki' 2 0 0 0 0 0
-177345 'Vantaa' 2 0 0 0 0 0
-177541 'Jamsa' 0 0 1 0 0 0
-177641 'Hameenlinna' 0 0 0 0 0 0
-177652 'Espoo' 2 0 0 0 0 0
-177671 'Hanko' 0 0 0 0 0 0
-177776 'Espoo' 2 0 0 0 0 0
-177987 'Helsinki' 2 1 1 0 0 0
-178137 'Vantaa' 2 0 1 0 0 0
-178328 'Vantaa' 2 0 0 0 0 0
-178407 'Espoo' 2 0 0 0 0 0
-178409 'Helsinki' 2 0 0 0 0 0
-178514 'Vantaa' 2 0 0 0 0 0
-178526 'Helsinki' 2 0 1 1 0 0
-178534 'Vantaa' 2 1 1 0 0 0
-178574 'Espoo' 2 0 0 0 0 0
-178600 'Turku' 0 0 0 0 0 0
-178814 'Vantaa' 2 0 0 0 0 0
-179098 'Vantaa' 2 0 0 0 0 0
-179176 'Vantaa' 2 1 1 1 0 0
-179208 'Vantaa' 2 0 0 0 0 0
-179405 'Vantaa' 2 0 0 0 0 0
-179422 'Espoo' 2 0 0 0 0 0
-179449 'Espoo' 2 0 0 0 0 0
-179450 'Espoo' 2 1 0 0 0 0
-179746 'Espoo' 2 0 0 0 0 0
-179790 'Espoo' 2 0 0 1 0 0
-179840 'Espoo' 2 1 1 1 0 0
-179876 'Espoo' 2 0 0 0 0 0
-180082 'Vantaa' 2 0 0 0 0 0
-180126 'Espoo' 2 1 0 1 0 0
-180227 'Helsinki' 2 0 0 0 0 0
-180322 'Hanko' 0 0 0 0 0 0
-180323 'Orimattila' 0 0 0 0 0 0
-180386 'Espoo' 2 0 0 0 0 0
-180499 'Vantaa' 2 1 1 0 0 0
-180524 'Turku' 0 0 0 0 0 0
-180699 'Helsinki' 2 0 0 0 0 0
-180925 'Vantaa' 2 0 0 0 0 0
-180928 'Vantaa' 2 1 0 0 0 0
-180968 'Vantaa' 2 0 0 0 0 0
-180971 'Vantaa' 2 0 0 0 0 0
-180981 'Vantaa' 2 0 0 0 0 0
-181003 'Espoo' 2 0 0 0 0 0
-181063 'Helsinki' 2 1 1 0 0 0
-181085 'Helsinki' 2 0 0 0 0 0
-181113 'Espoo' 2 0 0 0 0 0
-181117 'Vantaa' 2 0 0 0 0 0
-181124 'Helsinki' 2 0 0 0 0 0
-181368 'Mantsala' 0 0 0 0 0 0
-181643 'Helsinki' 2 0 0 0 0 0
-181772 'Helsinki' 2 0 1 0 0 0
-182173 'Espoo' 2 0 0 0 0 0
-182197 'Orivesi' 0 0 0 0 0 0
-182342 'Helsinki' 2 0 0 0 0 0
-182736 'Helsinki' 2 1 0 1 0 0
-182743 'Vantaa' 2 0 0 0 0 0
-182773 'Vantaa' 2 0 0 0 0 0
-182959 'Espoo' 2 0 0 0 0 0
-183054 'Espoo' 2 0 0 0 0 0
-183115 'Espoo' 2 0 0 0 0 0
-183214 'Vantaa' 2 0 0 0 0 0
-183380 'Espoo' 2 1 0 0 0 0
-183565 'Helsinki' 2 0 0 0 0 0
-183636 'Espoo' 2 0 0 0 0 0
-183644 'Vantaa' 2 0 0 0 0 0
-183669 'Vantaa' 2 0 0 0 0 0
-183674 'Espoo' 2 0 0 0 0 0
-183793 'Loviisa' 0 0 0 0 0 0
-183808 'Tampere' 0 0 0 0 0 0
-183944 'Vantaa' 2 1 0 0 0 0
-183960 'Vantaa' 2 0 0 0 0 0
-183961 'Vantaa' 2 1 0 1 0 0
-184033 'Vantaa' 2 1 0 1 0 0
-184094 'Helsinki' 2 0 0 0 0 0
-184169 'Espoo' 2 0 0 0 0 0
-184228 'Vantaa' 2 0 0 0 0 0
-184302 'Espoo' 2 0 0 0 0 0
-184381 'Helsinki' 2 0 0 0 0 0
-184400 'Helsinki' 2 0 0 0 0 0
-184408 'Helsinki' 2 0 0 0 0 0
-184476 'Helsinki' 2 0 0 0 0 0
-184806 'Espoo' 2 0 0 0 0 0
-184919 'Vantaa' 2 0 0 0 0 0
-184967 'Espoo' 2 1 1 0 0 0
-184971 'Helsinki' 2 1 0 0 0 0
-185016 'Vantaa' 2 1 0 1 0 0
-185083 'Vantaa' 2 0 0 0 0 0
-185086 'Kauniainen' 2 1 0 1 0 0
-185129 'Helsinki' 2 0 0 0 0 0
-185189 'Espoo' 2 0 0 0 0 0
-185263 'Tampere' 0 0 0 0 0 0
-185283 'Vantaa' 2 0 0 0 0 0
-185311 'Helsinki' 2 0 0 0 0 0
-185348 'Helsinki' 2 0 0 0 0 0
-185375 'Helsinki' 2 0 0 0 0 0
-185408 'Helsinki' 2 0 0 0 0 0
-185413 'Vantaa' 2 0 0 0 0 0
-185426 'Helsinki' 2 0 0 0 0 0
-185497 'Helsinki' 2 0 0 0 0 0
-185604 'Helsinki' 2 1 0 0 0 0
-185617 'Humppila' 0 0 0 0 0 0
-185639 'Espoo' 2 0 0 0 0 0
-185646 'Espoo' 2 1 0 0 0 0
-185662 'Vantaa' 2 0 0 0 0 0
-185731 'Helsinki' 2 0 0 0 0 0
-185739 'Vantaa' 2 0 0 0 0 0
-185758 'Helsinki' 2 0 0 0 0 0
-185816 'Vihti' 0 0 1 0 0 0
-185875 'Helsinki' 2 0 0 0 0 0
-185911 'Espoo' 2 0 0 0 0 0
-185939 'Helsinki' 2 0 0 0 0 0
-185961 'Espoo' 2 0 0 0 0 0
-185969 'Espoo' 2 0 0 0 0 0
-185973 'Helsinki' 2 0 0 0 0 0
-185983 'Vantaa' 2 0 0 0 0 0
-186008 'Helsinki' 2 0 0 0 0 0
-186043 'Helsinki' 2 0 0 0 0 0
-186123 'Espoo' 2 0 0 0 0 0
-186213 'Tampere' 0 0 0 0 0 0
-186276 'Espoo' 2 0 0 0 0 0
-186318 'Helsinki' 2 0 0 0 0 0
-186338 'Espoo' 2 0 0 0 0 0
-186360 'Helsinki' 2 0 0 0 0 0
-186440 'Vantaa' 2 0 0 0 0 0
-186544 'Espoo' 2 0 0 0 0 0
-186611 'Espoo' 2 0 0 0 0 0
-186616 'Espoo' 2 0 0 0 0 0
-186648 'Helsinki' 2 0 0 0 0 0
-186845 'Vantaa' 2 0 0 0 0 0
-186885 'Espoo' 2 0 0 0 0 0
-186935 'Vantaa' 2 0 0 0 0 0
-187136 'Helsinki' 2 0 0 0 0 0
-187373 'Vantaa' 2 0 0 0 0 0
-187375 'Helsinki' 2 0 0 0 0 0
-187393 'Helsinki' 2 1 0 1 0 0
-187397 'Espoo' 2 0 0 0 0 0
-187398 'Helsinki' 2 1 0 0 0 0
-200733 'Vantaa' 2 0 0 0 0 0
-202505 'Vantaa' 2 1 0 0 0 0
-202842 'Espoo' 2 1 0 0 0 0
-202960 'Vantaa' 2 0 0 0 0 0
-202972 'Helsinki' 2 0 0 0 0 0
-203099 'Kauniainen' 2 0 0 0 0 0
-209739 'Jamsa' 0 0 0 0 0 0
-210001 'Vantaa' 2 0 0 0 0 0
-211215 'Vantaa' 2 1 1 1 0 0
-212993 'Helsinki' 2 1 0 0 0 0
-213614 'Janakkala' 0 0 0 0 0 0
-215126 'Espoo' 2 1 0 0 0 0
-215195 'Vantaa' 2 1 0 0 0 0
-215401 'Lohja' 0 0 1 0 0 0
-216232 'Helsinki' 2 0 0 0 0 0
-216923 'Espoo' 2 1 1 1 0 0
-218694 'Vantaa' 2 0 0 0 0 0
-219746 'Mantsala' 0 0 0 0 0 0
-219747 'Mantsala' 0 0 0 0 0 0
-219926 'Helsinki' 2 0 0 0 0 0
-222351 'Helsinki' 2 0 0 0 0 0
-222521 'Vantaa' 2 0 0 0 0 0
-222942 'Kauniainen' 2 1 0 0 0 0
-224447 'Helsinki' 2 1 0 0 0 0
-226206 'Helsinki' 2 0 0 0 0 0
-228474 'Espoo' 2 0 0 1 0 0
-231338 'Hanko' 0 0 0 0 0 0
-231367 'Espoo' 2 0 0 0 0 0
-231400 'Helsinki' 2 0 0 0 0 0
-232197 'Janakkala' 0 0 0 0 0 0
-233676 'Espoo' 2 1 0 0 0 0
-234862 'Raasepori' 0 0 0 0 0 0
-238237 'Helsinki' 2 1 1 1 0 0
-238817 'Helsinki' 2 0 0 0 0 0
-239770 'Janakkala' 0 0 0 0 0 0
-240049 'Espoo' 2 0 0 0 0 0
-243514 'Helsinki' 2 1 1 0 0 0
-245231 'Helsinki' 2 0 0 0 0 0
-245612 'Helsinki' 2 0 0 0 0 0
-245901 'Espoo' 2 1 1 0 0 0
-246472 'Helsinki' 2 0 0 0 0 0
-247362 'Hameenlinna' 0 0 0 0 0 0
-247363 'Helsinki' 2 0 0 0 0 0
-247368 'Helsinki' 2 0 0 0 0 0
-247369 'Helsinki' 2 0 0 0 0 0
-247378 'Vantaa' 2 0 0 0 0 0
-247382 'Helsinki' 2 0 0 0 0 0
-247383 'Helsinki' 2 0 0 0 0 0
-247385 'Kerava' 0 0 0 0 0 0
-247389 'Helsinki' 2 0 0 0 0 0
-247393 'Helsinki' 2 0 0 0 0 0
-247398 'Vantaa' 2 0 0 0 0 0
-247400 'Porvoo' 0 0 0 0 0 0
-247419 'Orivesi' 0 0 0 0 0 0
-247424 'Vantaa' 2 0 0 0 0 0
-247425 'Helsinki' 2 0 0 0 0 0
-247428 'Janakkala' 0 0 0 0 0 0
-247436 'Tampere' 0 0 0 0 0 0
-247437 'Tampere' 0 0 0 0 0 0
-247442 'Helsinki' 2 0 0 0 0 0
-247445 'Kerava' 0 0 0 0 0 0
-247454 'Janakkala' 0 0 0 0 0 0
-247457 'Porvoo' 0 0 0 0 0 0
-247470 'Jamsa' 0 0 0 0 0 0
-247479 'Vantaa' 2 0 0 0 0 0
-247480 'Helsinki' 2 0 0 0 0 0
-247486 'Vantaa' 2 0 0 0 0 0
-247487 'Lempaala' 0 0 0 0 0 0
-247491 'Vantaa' 2 0 0 0 0 0
-247492 'Kerava' 0 0 0 0 0 0
-247507 'Turku' 0 0 0 0 0 0
-247510 'Vantaa' 2 0 0 0 0 0
-247517 'Kauniainen' 2 0 0 0 0 0
-247518 'Nurmijarvi' 0 0 0 0 0 0
-247524 'Lohja' 0 0 0 0 0 0
-247529 'Espoo' 2 0 0 0 0 0
-247542 'Raasepori' 0 0 0 0 0 0
-247560 'Helsinki' 2 0 0 0 0 0
-247567 'Espoo' 2 0 0 0 0 0
-247570 'Inkoo' 0 0 0 0 0 0
-247571 'Hanko' 0 0 0 0 0 0
-247573 'Riihimaki' 0 0 0 0 0 0
-247580 'Hanko' 0 0 0 0 0 0
-247582 'Hanko' 0 0 0 0 0 0
-247593 'Porvoo' 0 0 0 0 0 0
-247614 'Vantaa' 2 0 0 0 0 0
-247619 'Hanko' 0 0 0 0 0 0
-247629 'Humppila' 0 0 0 0 0 0
-247634 'Raasepori' 0 0 0 0 0 0
-247644 'Vantaa' 2 0 0 0 0 0
-247647 'Salo' 0 0 0 0 0 0
-247650 'Porvoo' 0 0 0 0 0 0
-247668 'Jarvenpaa' 0 0 0 0 0 0
-247669 'Jarvenpaa' 0 0 0 0 0 0
-247674 'Akaa' 0 0 0 0 0 0
-247695 'Raasepori' 0 0 0 0 0 0
-247701 'Espoo' 2 0 0 0 0 0
-247703 'Raasepori' 0 0 0 0 0 0
-247708 'Vantaa' 2 0 0 0 0 0
-247709 'Helsinki' 2 0 0 0 0 0
-247720 'Hanko' 0 0 0 0 0 0
-247722 'Vihti' 0 0 0 0 0 0
-247731 'Lempaala' 0 0 0 0 0 0
-247741 'Vantaa' 2 0 0 0 0 0
-247742 'Helsinki' 2 0 0 0 0 0
-247743 'Helsinki' 2 0 0 0 0 0
-247747 'Sipoo' 0 0 0 0 0 0
-247749 'Janakkala' 0 0 0 0 0 0
-247750 'Vantaa' 2 0 0 0 0 0
-247751 'Vantaa' 2 0 0 0 0 0
-247755 'Kirkkonummi' 0 0 0 0 0 0
-247775 'Lohja' 0 0 0 0 0 0
-247777 'Helsinki' 2 0 0 0 0 0
-247783 'Kauniainen' 2 0 0 0 0 0
-247792 'Hausjarvi' 0 0 0 0 0 0
-247794 'Vantaa' 2 0 0 0 0 0
-247804 'Vantaa' 2 0 0 0 0 0
-247816 'Espoo' 2 0 0 0 0 0
-247832 'Turku' 0 0 0 0 0 0
-247837 'Tampere' 0 0 0 0 0 0
-247846 'Lempaala' 0 0 0 0 0 0
-247852 'Riihimaki' 0 0 0 0 0 0
-247853 'Jarvenpaa' 0 0 0 0 0 0
-247855 'Helsinki' 2 0 0 0 0 0
-247857 'Hausjarvi' 0 0 0 0 0 0
-247858 'Espoo' 2 0 0 0 0 0
-247867 'Kirkkonummi' 0 0 0 0 0 0
-247910 'Espoo' 2 0 0 0 0 0
-247926 'Lempaala' 0 0 0 0 0 0
-247951 'Kangasala' 0 0 0 0 0 0
-247959 'Tuusula' 0 0 0 0 0 0
-247986 'Vantaa' 2 0 0 0 0 0
-247987 'Vantaa' 2 0 0 0 0 0
-248000 'Hanko' 0 0 0 0 0 0
-248015 'Hyvinkaa' 0 0 0 0 0 0
-248016 'Hyvinkaa' 0 0 0 0 0 0
-248021 'Riihimaki' 0 0 0 0 0 0
-248022 'Riihimaki' 0 0 0 0 0 0
-248030 'Jarvenpaa' 0 0 0 0 0 0
-248032 'Porvoo' 0 0 0 0 0 0
-248034 'Raasepori' 0 0 0 0 0 0
-248040 'Helsinki' 2 0 0 0 0 0
-248041 'Kerava' 0 0 0 0 0 0
-248045 'Espoo' 2 0 0 0 0 0
-248046 'Vantaa' 2 0 0 0 0 0
-248049 'Jyvaskyla' 0 0 0 0 0 0
-248053 'Vantaa' 2 0 0 0 0 0
-248059 'Akaa' 0 0 0 0 0 0
-248067 'Helsinki' 2 0 0 0 0 0
-248070 'Kerava' 0 0 0 0 0 0
-248072 'Riihimaki' 0 0 0 0 0 0
-248164 'Hyvinkaa' 0 0 0 0 0 0
-248184 'Helsinki' 2 0 0 0 0 0
-248195 'Tampere' 0 0 0 0 0 0
-248249 'Tampere' 0 0 0 0 0 0
-248936 'Tampere' 0 0 0 0 0 0
-249035 'Riihimaki' 0 0 0 0 0 0
-249524 'Helsinki' 2 0 0 0 0 0
-249525 'Helsinki' 2 0 0 0 0 0
-249526 'Helsinki' 2 0 0 0 0 0
-249527 'Helsinki' 2 0 0 0 0 0
-249528 'Helsinki' 2 0 0 0 0 0
-249529 'Helsinki' 2 0 0 0 0 0
-249530 'Helsinki' 2 0 0 0 0 0
-249531 'Helsinki' 2 0 0 0 0 0
-249532 'Helsinki' 2 0 0 0 0 0
-249533 'Helsinki' 2 0 0 0 0 0
-249534 'Helsinki' 2 0 0 0 0 0
-249535 'Helsinki' 2 0 0 0 0 0
-249536 'Helsinki' 2 0 0 0 0 0
-249537 'Helsinki' 2 0 0 0 0 0
-249538 'Helsinki' 2 0 0 0 0 0
-249539 'Helsinki' 2 0 0 0 0 0
-249540 'Helsinki' 2 0 0 0 0 0
-249541 'Helsinki' 2 0 0 0 0 0
-249542 'Helsinki' 2 0 0 0 0 0
-249543 'Espoo' 2 0 0 0 0 0
-249544 'Espoo' 2 0 0 0 0 0
-249545 'Espoo' 2 0 0 0 0 0
-249546 'Espoo' 2 0 0 0 0 0
-249547 'Espoo' 2 0 0 0 0 0
-249548 'Espoo' 2 0 0 0 0 0
-249549 'Espoo' 2 0 0 0 0 0
-249550 'Espoo' 2 0 0 0 0 0
-249551 'Espoo' 2 0 0 0 0 0
-249552 'Espoo' 2 0 0 0 0 0
-249553 'Espoo' 2 0 0 0 0 0
-249592 'Helsinki' 2 0 0 0 0 0
-249597 'Helsinki' 2 0 0 0 0 0
-249600 'Helsinki' 2 0 0 0 0 0
-249605 'Helsinki' 2 0 0 0 0 0
-249606 'Helsinki' 2 0 0 0 0 0
-249610 'Helsinki' 2 0 0 0 0 0
-249619 'Helsinki' 2 0 0 0 0 0
-249627 'Helsinki' 2 0 0 0 0 0
-249639 'Helsinki' 2 0 0 0 0 0
-249643 'Helsinki' 2 0 0 0 0 0
-249646 'Helsinki' 2 0 0 0 0 0
-249648 'Helsinki' 2 0 0 0 0 0
-249649 'Helsinki' 2 0 0 0 0 0
-249657 'Helsinki' 2 0 0 0 0 0
-249665 'Helsinki' 2 0 0 0 0 1
-249671 'Helsinki' 2 0 0 0 0 1
-249672 'Helsinki' 2 0 0 0 0 1
-249675 'Helsinki' 2 0 0 0 0 1
-249680 'Helsinki' 2 0 0 0 0 0
-249683 'Helsinki' 2 0 0 0 0 0
-249686 'Helsinki' 2 0 0 0 0 0
-249689 'Helsinki' 2 0 0 0 0 0
-249718 'Helsinki' 2 0 0 0 0 0
-249720 'Helsinki' 2 0 0 0 0 1
-249723 'Helsinki' 2 0 0 0 0 0
-249741 'Helsinki' 2 0 0 0 0 0
-249742 'Helsinki' 2 0 0 0 0 0
-249747 'Helsinki' 2 0 0 0 0 0
-249751 'Helsinki' 2 0 0 0 0 1
-249756 'Helsinki' 2 0 0 0 0 1
-249769 'Helsinki' 2 0 0 0 0 0
-249782 'Helsinki' 2 0 0 0 0 0
-249786 'Helsinki' 2 0 0 0 0 1
-249791 'Helsinki' 2 0 0 0 0 0
-249792 'Helsinki' 2 0 0 0 0 0
-249808 'Helsinki' 2 0 0 0 0 1
-249818 'Helsinki' 2 0 0 0 0 0
-249828 'Helsinki' 2 0 0 0 1 0
-249829 'Helsinki' 2 0 0 0 1 0
-249831 'Helsinki' 2 0 0 0 1 0
-249832 'Helsinki' 2 0 0 0 1 0
-249833 'Helsinki' 2 0 0 0 1 0
-249834 'Helsinki' 2 0 0 0 1 0
-249835 'Helsinki' 2 0 0 0 1 0
-249836 'Helsinki' 2 0 0 0 1 0
-249837 'Helsinki' 2 0 0 0 1 0
-249839 'Helsinki' 2 0 0 0 1 0
-249840 'Helsinki' 2 0 0 0 1 0
-249841 'Helsinki' 2 0 0 0 1 0
-249842 'Helsinki' 2 0 0 0 1 0
-249843 'Helsinki' 2 0 0 0 1 0
-249844 'Helsinki' 2 0 0 0 1 0
-249845 'Helsinki' 2 0 0 0 1 0
-249846 'Helsinki' 2 0 0 0 1 0
-249847 'Helsinki' 2 0 0 0 1 0
-249848 'Helsinki' 2 0 0 0 1 0
-249849 'Helsinki' 2 0 0 0 1 0
-249850 'Helsinki' 2 0 0 0 1 0
-249851 'Helsinki' 2 0 0 0 1 0
-249852 'Helsinki' 2 0 0 0 1 0
-249854 'Helsinki' 2 0 0 0 1 0
-249855 'Helsinki' 2 0 0 0 1 0
-249856 'Helsinki' 2 0 0 0 1 0
-249857 'Helsinki' 2 0 0 0 1 0
-249860 'Helsinki' 2 0 0 0 1 0
-249864 'Helsinki' 2 0 0 0 1 0
-249865 'Helsinki' 2 0 0 0 1 0
-249867 'Helsinki' 2 0 0 0 1 0
-249869 'Helsinki' 2 0 0 0 1 0
-249870 'Vantaa' 2 0 0 0 0 0
-249881 'Jyvaskyla' 0 0 0 0 0 0
-250634 'Helsinki' 2 1 0 0 0 0
-253095 'Helsinki' 2 0 0 0 0 0
-253096 'Helsinki' 2 0 0 0 0 0
-256802 'Kerava' 0 0 0 0 0 0
-260022 'Helsinki' 2 0 0 0 0 0
-260247 'Kauniainen' 2 0 0 0 0 0
-270878 'Helsinki' 2 0 0 0 0 0
-277327 'Espoo' 2 1 0 0 0 0
-279932 'Helsinki' 2 1 0 0 0 0
-287408 'Helsinki' 2 0 0 0 0 0
-295309 'Espoo' 2 0 0 0 0 0
-295866 'Hameenlinna' 0 0 0 0 0 0
-299440 'Vantaa' 2 0 1 0 0 0
-300542 'Helsinki' 2 0 1 0 0 0
-304659 'Helsinki' 2 0 0 0 0 0
-309120 'Lahti' 0 0 0 0 0 0
-313017 'Helsinki' 2 1 0 0 0 0
-315034 'Vantaa' 2 0 1 0 0 0
-317233 'Helsinki' 2 0 0 0 0 0
-323000 'Helsinki' 2 0 0 0 0 0
-325606 'Espoo' 2 0 0 0 0 0
-329863 'Hyvinkaa' 0 0 0 0 0 0
-330155 'Helsinki' 2 1 0 0 0 0
-331615 'Vantaa' 2 0 0 0 0 0
-332608 'Vantaa' 2 0 0 0 0 0
-367822 'Helsinki' 2 0 0 0 0 0
-369326 'Vihti' 0 0 0 0 0 0
-372499 'Raasepori' 0 0 1 0 0 0
-378686 'Espoo' 2 0 0 0 0 0
-385213 'Jarvenpaa' 0 0 0 0 0 0
-386530 'Vantaa' 2 0 0 0 0 0
-388237 'Loviisa' 0 0 0 0 0 0
-388238 'Loviisa' 0 0 0 0 0 0
-389598 'Mantsala' 0 0 0 0 0 0
-389599 'Mantsala' 0 0 0 0 0 0
-392971 'Vantaa' 2 0 0 0 0 0
-393031 'Espoo' 2 0 0 0 0 0
-396690 'Kauniainen' 2 0 0 0 0 0
-399855 'Espoo' 2 1 0 0 0 0
-416308 'Helsinki' 2 1 0 0 0 0
-418567 'Hyvinkaa' 0 0 0 0 0 0
-420354 'Vantaa' 2 0 0 0 0 0
-428987 'Helsinki' 2 0 0 0 0 0
-430123 'Vantaa' 2 1 0 0 0 0
-432990 'Espoo' 2 0 0 0 0 0
-434255 'Vantaa' 2 0 0 0 0 0
-437274 'Vantaa' 2 0 0 0 0 0
-452786 'Espoo' 2 0 0 0 0 0
-453328 'Hanko' 0 0 0 0 0 0
-455533 'Hyvinkaa' 0 0 0 0 0 0
-459393 'Vantaa' 2 0 0 0 0 0
-461069 'Janakkala' 0 0 0 0 0 0
-474847 'Helsinki' 2 0 0 0 0 0
-475794 'Vantaa' 2 0 0 0 0 0
-477634 'Helsinki' 2 0 0 0 0 0
-480382 'Helsinki' 2 1 1 1 0 0
-480505 'Jarvenpaa' 0 0 0 0 0 0
-480506 'Jarvenpaa' 0 0 0 0 0 0
-483846 'Helsinki' 2 0 0 0 0 0
-490941 'Helsinki' 2 0 0 0 0 0
-492735 'Helsinki' 2 0 0 0 0 0
-495378 'Helsinki' 2 0 0 0 0 0
-495833 'Helsinki' 2 0 0 0 0 0
-496968 'Helsinki' 2 1 1 1 0 0
-504186 'Vantaa' 2 0 0 0 0 0
-510636 'Espoo' 2 0 0 0 0 0
-513874 'Helsinki' 2 1 0 1 0 0
-526501 'Porvoo' 0 0 0 0 0 0
-526689 'Vantaa' 2 0 0 0 0 0
-533014 'Helsinki' 2 0 0 1 0 0
-536776 'Kirkkonummi' 0 1 1 0 0 0
-538828 'Lohja' 0 0 1 0 0 0
-540317 'Tuusula' 0 1 0 0 0 0
-541744 'Kotka' 0 0 0 0 0 0
-541745 'Kotka' 0 0 0 0 0 0
-546892 'Porvoo' 0 0 0 0 0 0
-546893 'Porvoo' 0 0 0 0 0 0
-561132 'Espoo' 2 0 0 0 0 0
-570625 'Helsinki' 2 0 0 0 0 0
-573986 'Porvoo' 0 0 0 0 0 0
-573987 'Porvoo' 0 0 0 0 0 0
-577617 'Vantaa' 2 0 0 0 0 0
-578165 'Sipoo' 0 1 0 0 0 0
-581564 'Helsinki' 2 0 0 0 0 0
-583805 'Helsinki' 2 0 0 0 0 0
-591964 'Helsinki' 2 0 0 0 0 0
-593065 'Helsinki' 2 0 0 0 0 0
-603077 'Kauniainen' 2 0 0 0 0 0
-609871 'Vantaa' 2 0 0 0 0 0
-620255 'Lohja' 0 0 0 0 0 0
-623500 'Helsinki' 2 0 0 1 0 0
-630003 'Helsinki' 2 0 0 0 0 0
-630407 'Espoo' 2 0 0 0 0 0
-633078 'Vantaa' 2 0 0 0 0 0
-633079 'Vantaa' 2 0 0 0 0 0
-641262 'Humppila' 0 0 0 0 0 0
-642933 'Vantaa' 2 0 0 0 0 0
-644280 'Espoo' 2 0 0 0 0 0
-644565 'Espoo' 2 0 0 0 0 0
-645894 'Espoo' 2 0 0 0 0 0
-652560 'Helsinki' 2 0 0 0 0 0
-654387 'Helsinki' 2 0 0 0 0 0
-660837 'Helsinki' 2 0 0 0 0 0
-662095 'Helsinki' 2 1 0 0 0 0
-669425 'Helsinki' 2 1 0 0 0 0
-670438 'Espoo' 2 1 0 0 0 0
-673282 'Tampere' 0 0 1 0 0 0
-677329 'Vantaa' 2 0 0 0 0 0
-679451 'Mantsala' 0 0 0 0 0 0
-679452 'Mantsala' 0 0 0 0 0 0
-686567 'Vantaa' 2 0 0 0 0 0
-686836 'Helsinki' 2 0 0 0 0 0
-687446 'Espoo' 2 0 0 0 0 0
-688384 'Helsinki' 2 0 0 0 0 0
-715999 'Helsinki' 2 0 0 0 0 0
-717180 'Nurmijarvi' 0 0 0 0 0 0
-718349 'Helsinki' 2 0 0 0 0 0
-723640 'Espoo' 2 0 0 0 0 0
-724624 'Hameenlinna' 0 0 0 0 0 0
-726332 'Kerava' 0 0 0 0 0 0
-726333 'Kerava' 0 0 0 0 0 0
-729971 'Helsinki' 2 0 0 0 0 0
-739263 'Vantaa' 2 1 0 0 0 0
-740234 'Raasepori' 0 0 0 0 0 0
-744726 'Vantaa' 2 0 0 0 0 0
-748016 'Hameenlinna' 0 0 0 0 0 0
-748017 'Hameenlinna' 0 0 0 0 0 0
-753230 'Helsinki' 2 1 0 1 0 0
-763714 'Helsinki' 2 1 1 0 0 0
-764160 'Vantaa' 2 1 0 0 0 0
-772048 'Helsinki' 2 0 0 1 0 0
-778071 'Helsinki' 2 0 0 0 0 0
-779553 'Porvoo' 0 0 0 0 0 0
-786341 'Vantaa' 2 1 0 0 0 0
-788699 'Raasepori' 0 0 1 0 0 0
-789812 'Lohja' 0 0 0 0 0 0
-793080 'Kauniainen' 2 0 0 0 0 0
-794582 'Kerava' 0 0 0 0 0 0
-806237 'Espoo' 2 0 0 0 0 0
-812525 'Helsinki' 2 0 0 0 0 0
-816386 'Vantaa' 2 1 0 0 0 0
-816707 'Helsinki' 2 0 0 0 0 0
-820985 'Vantaa' 2 1 0 0 0 0
-823845 'Helsinki' 2 1 0 0 0 0
-828722 'Helsinki' 2 1 0 0 0 0
-830438 'Espoo' 2 0 0 0 0 0
-830451 'Espoo' 2 0 0 0 0 0
-830457 'Helsinki' 2 1 1 0 0 0
-830474 'Helsinki' 2 0 0 0 0 0
-830518 'Vantaa' 2 0 0 0 0 0
-830645 'Espoo' 2 0 0 0 0 0
-830646 'Espoo' 2 0 0 0 0 0
-830915 'Raasepori' 0 0 0 0 0 0
-831111 'Helsinki' 2 0 0 0 1 0
-831180 'Kotka' 0 0 0 0 0 0
-831215 'Kirkkonummi' 0 0 0 0 0 0
-831291 'Kirkkonummi' 0 0 0 0 0 0
-831292 'Hanko' 0 0 0 0 0 0
-831297 'Raasepori' 0 0 0 0 0 0
-831298 'Inkoo' 0 0 0 0 0 0
-831557 'Porvoo' 0 0 0 0 0 0
-831615 'Kotka' 0 0 0 0 0 0
-831616 'Kotka' 0 0 0 0 0 0
-831647 'Hanko' 0 0 0 0 0 0
-831731 'Helsinki' 2 0 0 0 0 0
-831754 'Kotka' 0 0 0 0 0 0
-831778 'Hanko' 0 0 0 0 0 0
-831908 'Hanko' 0 0 0 0 0 0
-832245 'Kotka' 0 0 0 0 0 0
-832504 'Kotka' 0 0 0 0 0 0
-832515 'Inkoo' 0 0 0 0 0 0
-832576 'Hanko' 0 0 0 0 0 0
-832620 'Helsinki' 2 0 0 0 0 0
-833172 'Hanko' 0 0 0 0 0 0
-833334 'Porvoo' 0 0 0 0 0 0
-833564 'Kirkkonummi' 0 0 0 0 0 0
-833887 'Hanko' 0 0 0 0 0 0
-834065 'Kirkkonummi' 0 0 0 0 0 0
-834493 'Hanko' 0 0 0 0 0 0
-834495 'Kotka' 0 0 0 0 0 0
-834513 'Kotka' 0 0 0 0 0 0
-834515 'Helsinki' 2 0 0 0 0 0
-834516 'Hanko' 0 0 0 0 0 0
-834538 'Kirkkonummi' 0 0 0 0 0 0
-834608 'Helsinki' 2 1 0 1 0 0
-900001 'Helsinki' 2 0 0 0 0 0
-900002 'Helsinki' 2 0 0 0 0 0
-900003 'Helsinki' 2 0 0 0 0 0
-900004 'Espoo' 2 1 0 0 0 0
-900005 'Vantaa' 2 0 0 0 0 0
-900006 'Helsinki' 2 0 0 0 0 0
-900007 'Vantaa' 2 0 0 1 0 0
-900008 'Espoo' 2 0 0 1 0 0
-900009 'Lohja' 0 0 0 0 0 0
-900010 'Espoo' 2 0 0 0 0 0
-900011 'Vantaa' 2 1 1 1 0 0
-900013 'Helsinki' 2 1 1 1 0 0
-900014 'Helsinki' 2 0 0 0 0 0
-900015 'Helsinki' 2 1 0 0 0 0
-900016 'Helsinki' 2 0 0 0 0 0
-900018 'Hyvinkaa' 0 0 0 0 0 0
-900019 'Vantaa' 2 0 0 0 0 0
-900021 'Helsinki' 2 0 0 0 0 0
-900024 'Espoo' 2 0 0 0 0 0
-900025 'Vantaa' 2 0 0 0 0 0
-900027 'Vantaa' 2 0 0 0 0 0
-900029 'Helsinki' 2 1 0 1 0 0
-900031 'Vantaa' 2 0 0 0 0 0
-900032 'Helsinki' 2 0 0 0 0 0
-900033 'Kauniainen' 2 0 0 0 0 0
-900036 'Vantaa' 2 1 0 0 0 0
-900037 'Vantaa' 2 1 0 0 0 0
-900040 'Espoo' 2 0 0 0 0 0
-900041 'Mantsala' 0 0 1 0 0 0
-900042 'Helsinki' 2 0 0 0 0 0
-900043 'Vantaa' 2 0 1 1 0 0
-900044 'Helsinki' 2 1 0 0 0 0
-900046 'Helsinki' 2 1 0 0 0 0
-900047 'Helsinki' 2 0 0 0 0 0
-900048 'Vantaa' 2 0 0 0 0 0
-900049 'Helsinki' 2 0 0 0 0 0
-900052 'Helsinki' 2 0 0 0 0 0
-900053 'Helsinki' 2 1 1 1 0 0
-900054 'Helsinki' 2 1 0 0 0 0
-900056 'Helsinki' 2 1 0 0 0 0
-900057 'Kotka' 0 0 0 0 0 0
-900058 'Helsinki' 2 0 0 0 0 0
-900060 'Vantaa' 2 0 0 0 0 0
-900064 'Vihti' 0 0 0 0 0 0
-900065 'Vantaa' 2 0 0 0 0 0
-900066 'Vantaa' 2 1 1 1 0 0
-900067 'Helsinki' 2 0 0 0 0 0
-900070 'Helsinki' 2 0 0 0 0 0
-900075 'Helsinki' 2 1 1 0 0 0
-900076 'Helsinki' 2 1 0 0 0 0
-900078 'Vantaa' 2 0 0 0 0 0
-900082 'Vantaa' 2 1 0 0 0 0
-900084 'Vantaa' 2 1 0 1 0 0
-900087 'Lohja' 0 0 0 0 0 0
-900090 'Espoo' 2 1 0 0 0 0
-900092 'Vantaa' 2 1 0 0 0 0
-900098 'Vantaa' 2 1 0 0 0 0
-900100 'Vihti' 0 0 0 0 0 0
-900101 'Hyvinkaa' 0 0 0 0 0 0
-900102 'Helsinki' 2 1 1 1 0 0
-900104 'Vantaa' 2 0 0 0 0 0
-900108 'Vantaa' 2 1 0 0 0 0
-900110 'Helsinki' 2 0 0 0 0 0
-900111 'Turku' 0 0 0 0 0 0
-900112 'Vantaa' 2 0 0 0 0 0
-900113 'Helsinki' 2 1 0 0 0 0
-900114 'Helsinki' 2 0 0 0 0 0
-900115 'Mantsala' 0 0 0 0 0 0
-900116 'Vantaa' 2 1 0 0 0 0
-900117 'Vantaa' 2 0 0 0 0 0
-900121 'Hanko' 0 0 0 0 0 0
-900123 'Vantaa' 2 1 1 1 0 0
-900124 'Vantaa' 2 1 1 0 0 0
-900125 'Porvoo' 0 0 0 0 0 0
-900126 'Espoo' 2 0 0 0 0 0
-900129 'Helsinki' 2 0 0 0 0 0
-900135 'Helsinki' 2 1 1 1 0 0
-900136 'Helsinki' 2 0 0 0 0 0
-900138 'Espoo' 2 1 0 1 0 0
-900140 'Vantaa' 2 1 0 0 0 0
-900149 'Espoo' 2 0 0 0 0 0
-900152 'Helsinki' 2 1 0 1 0 0
-900158 'Vihti' 0 0 0 0 0 0
-900162 'Helsinki' 2 0 0 0 0 0
-900163 'Helsinki' 2 1 1 1 0 0
-900168 'Mantsala' 0 0 0 0 0 0
-900170 'Helsinki' 2 0 0 0 0 0
-900172 'Helsinki' 2 0 0 0 0 0
-900174 'Helsinki' 2 0 0 0 0 0
-900179 'Espoo' 2 0 0 0 0 0
-900182 'Vihti' 0 1 0 0 0 0
-900185 'Helsinki' 2 0 0 0 0 0
-900187 'Helsinki' 2 1 0 1 0 0
-900191 'Espoo' 2 0 0 0 0 0
-900192 'Muurame' 0 0 0 0 0 0
-900194 'Vihti' 0 0 0 0 0 0
-900196 'Vihti' 0 0 0 0 0 0
-900200 'Vantaa' 2 0 0 0 0 0
-900202 'Lohja' 0 0 0 0 0 0
-900203 'Turku' 0 0 0 0 0 0
-900206 'Vantaa' 2 1 0 0 0 0
-900211 'Vantaa' 2 0 0 0 0 0
-900218 'Lohja' 0 0 0 0 0 0
-900220 'Helsinki' 2 1 0 1 0 0
-900223 'Helsinki' 2 1 0 0 0 1
-900235 'Helsinki' 2 1 0 0 0 0
-900300 'Helsinki' 2 0 0 0 0 0
-900301 'Espoo' 2 0 0 0 0 0
+inode #municipality #subarea #park_cost_n #transit_stop_b #transit_stop_e #transit_stop_g #transit_stop_p #transit_stop_t
+202 'Helsinki' 2 0 0 0 0 0 0
+1344 'Espoo' 2 0 0 0 0 0 0
+1755 'Vantaa' 2 0 0 0 0 0 0
+2037 'Hyvinkaa' 0 0 0 0 0 0 0
+2129 'Lohja' 0 0 0 0 0 0 0
+2224 'Jarvenpaa' 0 0 0 0 0 0 0
+2333 'Nurmijarvi' 0 0 0 0 0 0 0
+2413 'Kirkkonummi' 0 0 0 0 0 0 0
+2519 'Tuusula' 0 0 0 0 0 0 0
+2621 'Kerava' 0 0 0 0 0 0 0
+2707 'Vihti' 0 0 0 0 0 0 0
+2814 'Sipoo' 0 0 0 0 0 0 0
+2918 'Mantsala' 0 0 0 0 0 0 0
+3000 'Kauniainen' 2 0 0 0 0 0 0
+3003 'Kauniainen' 2 0 0 0 0 0 0
+3203 'Siuntio' 0 0 0 0 0 0 0
+3302 'Pornainen' 0 0 0 0 0 0 0
+3416 'Loviisa' 0 0 0 0 0 0 0
+3639 'Porvoo' 0 0 0 0 0 0 0
+3705 'Askola' 0 0 0 0 0 0 0
+3800 'Pukkila' 0 0 0 0 0 0 0
+4013 'Raasepori' 0 0 0 0 0 0 0
+4102 'Hanko' 0 0 0 0 0 0 0
+4202 'Inkoo' 0 0 0 0 0 0 0
+7043 'Hameenlinna' 0 0 0 0 0 0 0
+8284 'Tampere' 0 0 0 0 0 0 0
+12614 'Turku' 0 0 0 0 0 0 0
+17278 'Jyvaskyla' 0 0 0 0 0 0 0
+19401 'Kotka' 0 0 0 0 0 0 0
+23678 'Lahti' 0 0 0 0 0 0 0
+50107 'Ulkomaa' 0 0 0 0 0 0 0
+50127 'Ulkomaa' 0 0 0 0 0 0 0
+60021 'Ulkomaa' 0 0 0 0 0 0 0
+60031 'Ulkomaa' 0 0 0 0 0 0 0
+100097 'Vantaa' 2 0 0 0 0 0 0
+100351 'Espoo' 2 0 0 0 0 0 0
+100352 'Espoo' 2 0 1 0 1 0 0
+100397 'Helsinki' 2 0 0 0 0 0 0
+100405 'Helsinki' 2 0 0 0 0 0 0
+100414 'Espoo' 2 0 0 0 0 0 0
+100448 'Helsinki' 2 0 0 1 1 0 0
+100453 'Espoo' 2 0 0 0 0 0 0
+100467 'Espoo' 2 0 0 0 0 0 0
+100468 'Espoo' 2 0 0 0 0 0 0
+100472 'Espoo' 2 0 1 0 0 0 0
+100546 'Loviisa' 0 0 0 0 0 0 0
+100557 'Helsinki' 2 0 1 1 0 0 0
+100611 'Vihti' 0 0 1 0 0 0 0
+100618 'Helsinki' 2 0 1 0 0 0 0
+100619 'Espoo' 2 0 1 0 0 0 0
+100745 'Espoo' 2 0 0 0 0 0 0
+100752 'Helsinki' 2 0 1 0 1 0 0
+100753 'Helsinki' 2 0 0 0 0 0 0
+100774 'Vantaa' 2 0 1 0 0 0 0
+100788 'Helsinki' 2 0 0 0 0 0 0
+100828 'Helsinki' 2 0 1 0 0 0 0
+101074 'Vihti' 0 0 0 0 0 0 0
+101144 'Helsinki' 2 0 0 0 0 0 0
+101145 'Helsinki' 2 0 0 0 0 0 0
+101362 'Espoo' 2 0 0 0 0 0 0
+101485 'Espoo' 2 0 0 0 0 0 0
+101546 'Espoo' 2 0 0 0 0 0 0
+101699 'Espoo' 2 0 0 0 0 0 0
+101753 'Helsinki' 2 0 0 0 0 0 0
+101762 'Espoo' 0 0 0 0 0 0 0
+101776 'Helsinki' 2 0 0 0 0 0 0
+101864 'Vantaa' 2 0 0 0 0 0 0
+102050 'Hollola' 0 0 0 0 0 0 0
+102051 'Hollola' 0 0 0 0 0 0 0
+102185 'Vantaa' 2 0 0 0 0 0 0
+102220 'Helsinki' 2 0 0 1 0 0 0
+102221 'Helsinki' 2 0 1 0 1 0 0
+102267 'Helsinki' 2 0 0 0 0 0 0
+102349 'Vantaa' 2 0 0 0 0 0 0
+102514 'Helsinki' 2 0 0 0 0 0 0
+102564 'Helsinki' 2 0 0 0 0 0 0
+102575 'Espoo' 2 0 0 0 0 0 0
+102576 'Espoo' 2 0 0 0 0 0 0
+102594 'Espoo' 2 0 0 0 0 0 0
+102606 'Vantaa' 2 0 1 0 0 0 0
+102679 'Vantaa' 2 0 0 0 0 0 0
+102680 'Vantaa' 2 0 0 0 0 0 0
+102706 'Vantaa' 2 0 0 0 0 0 0
+102707 'Vantaa' 2 0 0 0 0 0 0
+102819 'Helsinki' 2 0 0 0 0 0 0
+102820 'Helsinki' 2 0 0 0 0 0 0
+102836 'Helsinki' 2 0 1 0 0 0 0
+102844 'Vihti' 0 0 0 0 0 0 0
+102894 'Espoo' 2 0 0 0 0 0 0
+102895 'Espoo' 2 0 0 0 0 0 0
+102959 'Helsinki' 2 0 0 0 0 0 0
+103208 'Helsinki' 2 0 0 0 0 0 0
+103265 'Vantaa' 2 0 0 0 0 0 0
+103451 'Espoo' 2 0 0 0 0 0 0
+103567 'Mantsala' 0 0 0 0 0 0 0
+103583 'Helsinki' 2 0 0 0 0 0 0
+103698 'Salo' 0 0 0 0 0 0 0
+103735 'Vantaa' 2 0 0 0 0 0 0
+103753 'Espoo' 2 0 0 0 0 0 0
+103825 'Vantaa' 2 0 0 0 0 0 0
+103929 'Vantaa' 2 0 0 0 0 0 0
+103946 'Helsinki' 2 0 0 0 1 0 0
+103971 'Helsinki' 2 0 0 0 0 0 0
+104012 'Helsinki' 2 0 0 0 0 0 0
+104104 'Helsinki' 2 0 0 0 0 0 0
+104204 'Vantaa' 2 0 0 0 0 0 0
+104222 'Vantaa' 2 0 0 0 0 0 0
+104252 'Vantaa' 2 0 0 0 0 0 0
+104347 'Espoo' 2 0 0 0 0 0 0
+104479 'Vantaa' 2 0 0 0 0 0 0
+104486 'Vantaa' 2 0 0 0 0 0 0
+104517 'Espoo' 2 0 0 0 0 0 0
+104590 'Tampere' 0 0 0 0 0 0 0
+104647 'Raasepori' 0 0 0 1 0 0 0
+104947 'Helsinki' 2 0 0 0 0 0 0
+105091 'Hanko' 0 0 0 0 0 0 0
+105158 'Espoo' 2 0 0 0 0 0 0
+105555 'Espoo' 2 0 0 0 0 0 0
+105556 'Espoo' 2 0 0 0 0 0 0
+105573 'Vantaa' 2 0 0 0 0 0 0
+105621 'Espoo' 2 0 0 0 0 0 0
+105622 'Espoo' 2 0 0 0 1 0 0
+105656 'Helsinki' 2 0 0 0 0 0 0
+105700 'Helsinki' 2 0 1 0 1 0 0
+105899 'Helsinki' 2 0 0 0 0 0 0
+106033 'Vantaa' 2 0 0 0 0 0 0
+106063 'Espoo' 2 0 0 1 0 0 0
+106064 'Espoo' 2 0 0 0 0 0 0
+106108 'Espoo' 2 0 0 0 0 0 0
+106109 'Espoo' 2 0 0 0 0 0 0
+106114 'Espoo' 2 0 0 1 1 0 0
+106242 'Vantaa' 2 0 0 0 0 0 0
+106288 'Espoo' 2 0 0 0 0 0 0
+106388 'Espoo' 2 0 0 0 0 0 0
+106541 'Espoo' 2 0 1 0 0 0 0
+106609 'Espoo' 2 0 0 0 0 0 0
+106665 'Helsinki' 2 0 1 0 0 0 0
+106794 'Vantaa' 2 0 0 0 0 0 0
+106874 'Helsinki' 2 0 1 0 1 0 0
+106880 'Espoo' 2 0 0 0 0 0 0
+106881 'Espoo' 2 0 0 0 0 0 0
+107058 'Vantaa' 2 0 0 0 0 0 0
+107181 'Vantaa' 2 0 0 0 0 0 0
+107182 'Vantaa' 2 0 0 0 0 0 0
+107234 'Helsinki' 2 0 1 0 0 0 0
+107259 'Espoo' 2 0 0 0 0 0 0
+107377 'Helsinki' 2 0 0 1 0 0 0
+107454 'Espoo' 2 0 0 0 0 0 0
+107499 'Helsinki' 2 0 0 0 0 0 0
+107553 'Hameenlinna' 0 0 0 0 0 0 0
+107679 'Helsinki' 2 0 1 0 1 0 0
+107680 'Helsinki' 2 0 0 0 0 0 0
+107817 'Helsinki' 2 0 0 0 0 0 0
+107841 'Espoo' 2 0 0 0 1 0 0
+107883 'Helsinki' 2 0 1 0 1 0 0
+107997 'Forssa' 0 0 0 0 0 0 0
+107998 'Forssa' 0 0 0 0 0 0 0
+108073 'Helsinki' 2 0 0 0 0 0 0
+108113 'Vantaa' 2 0 0 0 0 0 0
+108241 'Helsinki' 2 0 1 0 0 0 0
+108280 'Lahti' 0 0 0 0 0 0 0
+108350 'Vantaa' 2 0 0 0 1 0 0
+108396 'Espoo' 2 0 0 0 0 0 0
+108452 'Espoo' 2 0 0 0 0 0 0
+108454 'Espoo' 2 0 0 0 0 0 0
+108455 'Espoo' 2 0 0 0 0 0 0
+108554 'Espoo' 2 0 1 0 0 0 0
+108593 'Vantaa' 2 0 0 0 0 0 0
+108627 'Hameenlinna' 0 0 0 0 0 0 0
+108734 'Vantaa' 2 0 0 0 0 0 0
+108754 'Espoo' 2 0 0 0 0 0 0
+108772 'Hameenlinna' 0 0 0 0 0 0 0
+108833 'Vantaa' 2 0 0 0 0 0 0
+108887 'Helsinki' 2 0 1 1 0 0 0
+108904 'Lohja' 0 0 0 0 0 0 0
+108946 'Vantaa' 2 0 1 1 0 0 0
+109048 'Helsinki' 2 0 0 0 1 0 0
+109141 'Helsinki' 2 0 1 0 0 0 0
+109196 'Espoo' 2 0 1 0 0 0 0
+109239 'Vantaa' 2 0 0 0 0 0 0
+109240 'Vantaa' 2 0 0 0 0 0 0
+109245 'Vantaa' 2 0 0 0 0 0 0
+109277 'Espoo' 2 0 0 0 0 0 0
+109322 'Espoo' 2 0 0 0 0 0 0
+109328 'Espoo' 2 0 0 0 1 0 0
+109329 'Espoo' 2 0 0 0 0 0 0
+109355 'Vantaa' 2 0 0 0 0 0 0
+109374 'Akaa' 0 0 0 0 0 0 0
+109404 'Vantaa' 2 0 0 0 0 0 0
+109548 'Espoo' 2 0 1 0 1 0 0
+109673 'Helsinki' 2 0 0 0 1 0 0
+109744 'Vihti' 0 0 0 0 0 0 0
+109833 'Helsinki' 2 0 0 0 0 0 0
+109944 'Jyvaskyla' 0 0 0 0 0 0 0
+109945 'Jyvaskyla' 0 0 0 1 0 0 0
+110069 'Espoo' 2 0 0 0 0 0 0
+110151 'Vantaa' 2 0 1 0 0 0 0
+110306 'Vantaa' 2 0 0 0 0 0 0
+110633 'Espoo' 2 0 0 0 0 0 0
+110890 'Helsinki' 2 0 0 0 0 0 0
+110919 'Vantaa' 2 0 0 0 0 0 0
+110961 'Helsinki' 2 0 0 0 0 0 0
+110993 'Helsinki' 2 0 1 1 0 0 0
+110994 'Helsinki' 2 0 0 0 0 0 0
+111078 'Vantaa' 2 0 1 0 0 0 0
+111112 'Vantaa' 2 0 0 0 0 0 0
+111185 'Espoo' 2 0 0 0 0 0 0
+111186 'Espoo' 2 0 1 1 1 0 0
+111231 'Vihti' 0 0 0 1 0 0 0
+111232 'Vihti' 0 0 0 0 0 0 0
+111284 'Vantaa' 2 0 0 0 0 0 0
+111358 'Helsinki' 2 0 0 0 0 0 0
+111394 'Helsinki' 2 0 0 0 0 0 0
+111499 'Vihti' 0 0 0 1 0 0 0
+111503 'Helsinki' 2 0 1 1 1 0 0
+111513 'Vantaa' 2 0 0 0 0 0 0
+111521 'Vantaa' 2 0 0 0 0 0 0
+111522 'Vantaa' 2 0 0 0 0 0 0
+111543 'Vantaa' 2 0 1 1 1 0 0
+111544 'Kerava' 0 0 0 0 0 0 0
+111681 'Hameenlinna' 0 0 0 0 0 0 0
+111682 'Hameenlinna' 0 0 0 0 0 0 0
+111703 'Vantaa' 2 0 0 0 0 0 0
+111859 'Hameenlinna' 0 0 0 0 0 0 0
+111890 'Helsinki' 2 0 0 0 0 0 0
+112015 'Helsinki' 2 0 0 0 0 0 0
+112373 'Helsinki' 2 0 0 0 0 0 0
+112390 'Vantaa' 2 0 0 0 0 0 0
+112456 'Helsinki' 2 0 0 0 0 0 0
+112612 'Lohja' 0 0 0 0 0 0 0
+112819 'Espoo' 2 0 0 0 0 0 0
+112829 'Espoo' 2 0 0 0 0 0 0
+112830 'Espoo' 2 0 0 0 0 0 0
+112857 'Espoo' 2 0 1 0 0 0 0
+112910 'Akaa' 0 0 0 0 0 0 0
+112918 'Espoo' 2 0 0 0 0 0 0
+112955 'Helsinki' 2 0 0 0 1 0 0
+112956 'Helsinki' 2 0 0 0 0 0 0
+113026 'Espoo' 2 0 0 0 0 0 0
+113052 'Hameenlinna' 0 0 0 0 0 0 0
+113289 'Helsinki' 2 0 0 0 0 0 0
+113342 'Vantaa' 2 0 0 0 0 0 0
+113447 'Espoo' 2 0 0 0 0 0 0
+113564 'Helsinki' 2 0 1 0 0 0 0
+113565 'Helsinki' 2 0 0 0 0 0 0
+113632 'Helsinki' 2 0 0 0 0 0 0
+113785 'Espoo' 2 0 0 0 0 0 0
+113810 'Helsinki' 2 0 0 0 1 0 0
+113811 'Helsinki' 2 0 1 0 1 0 0
+114087 'Akaa' 0 0 0 0 0 0 0
+114120 'Helsinki' 2 0 1 0 0 0 0
+114222 'Helsinki' 2 0 0 0 0 0 0
+114228 'Valkeakoski' 0 0 0 0 0 0 0
+114247 'Helsinki' 2 0 0 0 0 0 0
+114274 'Helsinki' 2 0 0 0 0 0 0
+114275 'Helsinki' 2 0 0 0 0 0 0
+114354 'Vantaa' 2 0 0 0 0 0 0
+114634 'Helsinki' 2 0 0 0 1 0 0
+114767 'Vantaa' 2 0 0 0 0 0 0
+114807 'Tampere' 0 0 0 0 0 0 0
+114828 'Helsinki' 2 0 0 0 0 0 0
+114862 'Helsinki' 2 0 0 0 0 0 0
+115063 'Espoo' 2 0 1 0 0 0 0
+115266 'Vantaa' 2 0 1 1 1 0 0
+115318 'Helsinki' 2 0 0 0 0 0 0
+115439 'Espoo' 2 0 0 1 0 0 0
+115448 'Espoo' 2 0 0 0 0 0 0
+115520 'Orimattila' 0 0 0 0 0 0 0
+115554 'Akaa' 0 0 0 0 0 0 0
+115631 'Espoo' 2 0 0 0 0 0 0
+115900 'Vantaa' 2 0 0 0 0 0 0
+115922 'Vantaa' 2 0 0 0 0 0 0
+115923 'Vantaa' 2 0 0 0 1 0 0
+115936 'Espoo' 2 0 0 0 0 0 0
+115997 'Vantaa' 2 0 0 0 0 0 0
+116003 'Helsinki' 2 0 0 0 1 0 0
+116068 'Espoo' 2 0 1 0 0 0 0
+116105 'Tampere' 0 0 0 0 0 0 0
+116106 'Tampere' 0 0 0 0 0 0 0
+116397 'Espoo' 2 0 0 0 0 0 0
+116506 'Vantaa' 2 0 0 0 0 0 0
+116579 'Espoo' 2 0 0 0 0 0 0
+116580 'Espoo' 2 0 1 0 0 0 0
+116737 'Vantaa' 2 0 0 0 0 0 0
+116775 'Helsinki' 2 0 1 1 1 0 0
+116787 'Mantsala' 0 0 0 0 0 0 0
+116875 'Vantaa' 2 0 0 0 0 0 0
+116880 'Vantaa' 2 0 1 1 0 0 0
+116926 'Kauniainen' 2 0 0 0 0 0 0
+117021 'Espoo' 2 0 0 0 0 0 0
+117193 'Espoo' 2 0 1 0 1 0 0
+117235 'Hanko' 0 0 0 0 0 0 0
+117245 'Vantaa' 2 0 0 0 0 0 0
+117283 'Helsinki' 2 0 0 1 1 0 0
+117284 'Helsinki' 2 0 1 1 0 0 0
+117372 'Vantaa' 2 0 1 0 0 0 0
+117462 'Espoo' 2 0 1 0 0 0 0
+117509 'Helsinki' 2 0 0 0 0 0 0
+117528 'Espoo' 2 0 0 0 0 0 0
+117608 'Helsinki' 2 0 0 0 0 0 0
+117713 'Vantaa' 2 0 0 0 0 0 0
+117805 'Helsinki' 2 0 0 0 0 0 1
+117847 'Helsinki' 2 0 0 0 0 0 0
+117882 'Helsinki' 2 0 0 0 0 0 0
+117897 'Vantaa' 2 0 0 0 0 0 0
+117898 'Helsinki' 2 0 1 1 1 0 0
+117920 'Vantaa' 2 0 0 0 0 0 0
+118027 'Helsinki' 2 0 0 0 0 0 0
+118046 'Vantaa' 2 0 1 1 0 0 0
+118088 'Vantaa' 2 0 0 0 0 0 0
+118089 'Vantaa' 2 0 0 0 0 0 0
+118156 'Helsinki' 2 0 0 0 0 0 0
+118212 'Espoo' 2 0 0 0 1 0 0
+118251 'Helsinki' 2 0 1 0 0 0 0
+118308 'Espoo' 2 0 0 1 0 0 0
+118375 'Mantsala' 0 0 0 0 0 0 0
+118583 'Helsinki' 2 0 0 0 0 0 0
+118717 'Helsinki' 2 0 1 0 0 0 0
+118925 'Lahti' 0 0 0 0 0 0 0
+119352 'Espoo' 2 0 1 0 0 0 0
+119473 'Espoo' 2 0 0 0 0 0 0
+119668 'Helsinki' 2 0 1 0 1 0 0
+119755 'Helsinki' 2 0 1 0 0 0 0
+119782 'Espoo' 2 0 0 0 0 0 0
+119793 'Helsinki' 2 0 1 0 0 0 0
+119848 'Helsinki' 2 0 0 0 0 0 0
+119849 'Helsinki' 2 0 1 0 0 0 0
+119995 'Vantaa' 2 0 0 0 0 0 0
+120564 'Espoo' 2 0 0 0 0 0 0
+120698 'Vantaa' 2 0 1 0 0 0 0
+120742 'Helsinki' 2 0 0 0 0 0 0
+120760 'Espoo' 2 0 0 0 0 0 0
+120840 'Vantaa' 2 0 0 0 0 0 0
+120863 'Vantaa' 2 0 0 0 0 0 0
+120864 'Vantaa' 2 0 0 0 0 0 0
+120906 'Espoo' 2 0 0 0 0 0 0
+121001 'Helsinki' 2 0 1 1 0 0 0
+121223 'Vantaa' 2 0 0 0 0 0 0
+121363 'Vantaa' 2 0 0 0 0 0 0
+121413 'Vantaa' 2 0 0 0 0 0 0
+121419 'Tampere' 0 0 0 0 0 0 0
+121421 'Vantaa' 2 0 0 0 0 0 0
+121568 'Helsinki' 2 0 1 0 0 0 0
+121639 'Loviisa' 0 0 0 0 0 0 0
+121640 'Loviisa' 0 0 0 0 0 0 0
+121768 'Espoo' 2 0 0 0 0 0 0
+121858 'Vantaa' 2 0 0 0 0 0 0
+121873 'Lahti' 0 0 0 0 0 0 0
+121898 'Helsinki' 2 0 0 0 0 0 0
+121963 'Helsinki' 2 0 0 0 0 0 0
+122269 'Vantaa' 2 0 0 0 0 0 0
+122319 'Helsinki' 2 0 0 0 0 0 1
+122519 'Helsinki' 2 0 0 0 0 0 0
+122576 'Espoo' 2 0 0 0 0 0 0
+122602 'Helsinki' 2 0 1 0 0 0 0
+122613 'Helsinki' 2 0 1 0 0 0 0
+122690 'Helsinki' 2 0 0 0 0 0 0
+122783 'Humppila' 0 0 0 0 0 0 0
+122796 'Vihti' 0 0 0 0 0 0 0
+122811 'Espoo' 2 0 0 0 0 0 0
+122822 'Helsinki' 2 0 0 0 0 0 0
+122916 'Helsinki' 2 0 0 0 0 0 0
+123170 'Helsinki' 2 0 0 0 0 0 0
+123174 'Helsinki' 2 0 1 0 0 0 0
+123189 'Helsinki' 2 0 1 0 0 0 0
+123469 'Helsinki' 2 0 0 0 0 0 0
+123575 'Espoo' 2 0 0 0 0 0 0
+123576 'Helsinki' 2 0 0 0 0 0 0
+123584 'Vantaa' 2 0 0 0 0 0 0
+123654 'Helsinki' 2 0 0 0 0 0 0
+123655 'Helsinki' 2 0 0 0 0 0 0
+123723 'Vantaa' 2 0 0 0 0 0 0
+123910 'Helsinki' 2 0 0 0 0 0 0
+123949 'Helsinki' 2 0 1 0 0 0 0
+124288 'Espoo' 2 0 0 0 0 0 0
+124423 'Vantaa' 2 0 0 0 0 0 0
+124450 'Vantaa' 2 0 0 0 0 0 0
+124481 'Espoo' 2 0 0 0 0 0 0
+124503 'Vantaa' 2 0 0 0 0 0 0
+124530 'Vantaa' 2 0 0 0 0 0 0
+124607 'Helsinki' 2 0 0 0 0 0 0
+124608 'Helsinki' 2 0 0 0 0 0 0
+124641 'Helsinki' 2 0 1 1 0 0 0
+124698 'Vantaa' 2 0 0 0 0 0 0
+124732 'Helsinki' 2 0 0 0 0 0 0
+124864 'Espoo' 2 0 0 0 0 0 0
+125050 'Helsinki' 2 0 0 0 0 0 0
+125051 'Helsinki' 2 0 0 0 0 0 0
+125106 'Hameenlinna' 0 0 0 0 0 0 0
+125117 'Hyvinkaa' 0 0 0 0 0 0 0
+125119 'Helsinki' 2 0 1 1 1 0 0
+125120 'Helsinki' 2 0 0 0 0 0 0
+125127 'Espoo' 2 0 0 0 0 0 0
+125182 'Espoo' 2 0 0 0 1 0 0
+125215 'Hollola' 0 0 0 0 0 0 0
+125329 'Helsinki' 2 0 0 0 0 0 0
+125361 'Helsinki' 2 0 0 0 0 0 0
+125395 'Vantaa' 2 0 0 0 1 0 0
+125405 'Hameenlinna' 0 0 0 0 0 0 0
+125449 'Helsinki' 2 0 1 0 0 0 0
+125514 'Helsinki' 2 0 0 0 0 0 0
+125545 'Vantaa' 2 0 0 0 0 0 0
+125606 'Espoo' 2 0 0 0 0 0 0
+125722 'Espoo' 2 0 0 0 0 0 0
+125762 'Vantaa' 2 0 0 0 0 0 0
+125835 'Helsinki' 2 0 0 0 0 0 0
+125836 'Helsinki' 2 0 0 0 0 0 0
+125857 'Vantaa' 2 0 0 0 0 0 0
+125889 'Espoo' 2 0 0 0 0 0 0
+126048 'Espoo' 2 0 0 0 0 0 0
+126140 'Espoo' 2 0 0 0 0 0 0
+126215 'Espoo' 2 0 0 0 0 0 0
+126355 'Vantaa' 2 0 0 0 0 0 0
+126394 'Tampere' 0 0 0 0 0 0 0
+126535 'Vantaa' 2 0 1 0 0 0 0
+126777 'Helsinki' 2 0 1 0 0 0 0
+126796 'Vantaa' 2 0 1 0 0 0 0
+126912 'Helsinki' 2 0 0 0 0 0 0
+126993 'Helsinki' 2 0 0 0 0 0 0
+127089 'Vantaa' 2 0 0 0 0 0 0
+127102 'Vantaa' 2 0 0 0 0 0 0
+127155 'Hameenlinna' 0 0 0 0 0 0 0
+127231 'Espoo' 2 0 0 0 0 0 0
+127273 'Helsinki' 2 0 0 0 0 0 0
+127342 'Kauniainen' 2 0 0 0 0 0 0
+127343 'Kauniainen' 2 0 0 0 0 0 0
+127420 'Helsinki' 2 0 0 0 0 0 0
+127429 'Helsinki' 2 0 1 0 0 0 0
+127439 'Espoo' 2 0 0 0 0 0 0
+127449 'Helsinki' 2 0 1 0 0 0 0
+127604 'Helsinki' 2 0 0 0 0 0 0
+127667 'Vantaa' 2 0 1 1 0 0 0
+127733 'Vantaa' 2 0 0 0 0 0 0
+127837 'Helsinki' 2 0 1 0 0 0 0
+127865 'Vihti' 0 0 0 0 0 0 0
+127977 'Helsinki' 2 0 0 0 0 0 0
+128002 'Helsinki' 2 0 0 0 0 0 0
+128003 'Helsinki' 2 0 0 0 0 0 0
+128052 'Lohja' 0 0 0 0 0 0 0
+128228 'Helsinki' 2 0 0 0 0 0 0
+128244 'Espoo' 2 0 0 0 0 0 0
+128313 'Espoo' 2 0 0 0 0 0 0
+128333 'Espoo' 2 0 0 0 0 0 0
+128412 'Espoo' 2 0 1 0 0 0 0
+128442 'Helsinki' 2 0 1 0 0 0 0
+128496 'Kotka' 0 0 0 1 0 0 0
+128528 'Vantaa' 2 0 0 0 0 0 0
+128534 'Espoo' 2 0 0 0 0 0 0
+128535 'Espoo' 2 0 0 0 0 0 0
+128676 'Vantaa' 2 0 0 0 0 0 0
+128788 'Helsinki' 2 0 0 0 0 0 0
+129141 'Helsinki' 2 0 0 0 0 0 0
+129142 'Helsinki' 2 0 0 0 0 0 0
+129201 'Espoo' 2 0 1 1 1 0 0
+129202 'Espoo' 2 0 0 0 0 0 0
+129516 'Hameenlinna' 0 0 0 0 0 0 0
+129616 'Espoo' 2 0 0 0 0 0 0
+129796 'Vantaa' 2 0 0 1 0 0 0
+129830 'Espoo' 2 0 0 0 0 0 0
+129954 'Helsinki' 2 0 1 1 0 0 0
+129998 'Vihti' 0 0 0 0 0 0 0
+130022 'Helsinki' 2 0 0 0 0 0 0
+130071 'Hameenlinna' 0 0 0 0 0 0 0
+130147 'Vantaa' 2 0 0 0 0 0 0
+130262 'Tampere' 0 0 0 0 0 0 0
+130274 'Espoo' 2 0 1 0 0 0 0
+130284 'Helsinki' 2 0 0 0 0 0 0
+130285 'Helsinki' 2 0 1 1 0 0 0
+130432 'Lahti' 0 0 0 0 0 0 0
+130483 'Kauniainen' 2 0 0 0 0 0 0
+130484 'Kauniainen' 2 0 0 0 0 0 0
+130495 'Helsinki' 2 0 0 0 0 0 0
+130617 'Helsinki' 2 0 0 0 0 0 0
+130646 'Espoo' 2 0 0 0 0 0 0
+130662 'Espoo' 2 0 0 0 0 0 0
+130706 'Espoo' 2 0 0 0 0 0 0
+130707 'Espoo' 2 0 0 0 0 0 0
+130767 'Kauniainen' 2 0 0 0 0 0 0
+130814 'Vantaa' 2 0 0 0 0 0 0
+130917 'Helsinki' 2 0 0 0 0 0 0
+131007 'Vantaa' 2 0 0 0 0 0 0
+131008 'Vantaa' 2 0 0 0 0 0 0
+131022 'Vantaa' 2 0 0 0 0 0 0
+131126 'Akaa' 0 0 0 0 0 0 0
+131154 'Vantaa' 2 0 0 0 0 0 0
+131188 'Helsinki' 2 0 1 0 0 0 0
+131189 'Helsinki' 2 0 1 1 1 0 0
+131234 'Tampere' 0 0 0 0 0 0 0
+131241 'Helsinki' 2 0 0 0 0 0 0
+131293 'Helsinki' 2 0 0 0 0 0 0
+131441 'Vantaa' 2 0 1 0 0 0 0
+131444 'Helsinki' 2 0 0 0 0 0 0
+131483 'Helsinki' 2 0 1 0 0 0 0
+131546 'Vantaa' 2 0 0 0 0 0 0
+131636 'Espoo' 2 0 0 0 0 0 0
+131822 'Vantaa' 2 0 0 0 0 0 0
+131823 'Vantaa' 2 0 0 0 0 0 0
+131874 'Lohja' 0 0 0 0 0 0 0
+131918 'Espoo' 2 0 1 0 0 0 0
+131982 'Helsinki' 2 0 1 0 0 0 0
+132044 'Helsinki' 2 0 0 0 0 0 0
+132073 'Vantaa' 2 0 0 0 0 0 0
+132088 'Vantaa' 2 0 1 1 0 0 0
+132281 'Helsinki' 2 0 0 0 0 0 0
+132311 'Espoo' 2 0 0 0 0 0 0
+132407 'Vantaa' 2 0 1 0 0 0 0
+132435 'Vantaa' 2 0 1 1 0 0 0
+132436 'Vantaa' 2 0 0 0 0 0 0
+132449 'Hanko' 0 0 0 0 0 0 0
+132513 'Hameenlinna' 0 0 0 0 0 0 0
+132640 'Espoo' 2 0 0 0 0 0 0
+132641 'Espoo' 2 0 0 0 0 0 0
+133008 'Espoo' 2 0 0 0 0 0 0
+133017 'Helsinki' 2 0 0 0 0 0 0
+133044 'Helsinki' 2 0 0 0 0 0 0
+133051 'Espoo' 2 0 0 0 0 0 0
+133158 'Nurmijarvi' 0 0 0 0 0 0 0
+133159 'Nurmijarvi' 0 0 0 1 0 0 0
+133237 'Helsinki' 2 0 0 0 0 0 0
+133248 'Vantaa' 2 0 0 0 0 0 0
+133249 'Vantaa' 2 0 0 0 0 0 0
+133338 'Vantaa' 2 0 0 0 0 0 0
+133425 'Espoo' 2 0 0 0 0 0 0
+133436 'Vantaa' 2 0 0 0 0 0 0
+133496 'Vantaa' 2 0 0 0 0 0 0
+133497 'Vantaa' 2 0 0 0 0 0 0
+133504 'Helsinki' 2 0 0 0 0 0 0
+133672 'Helsinki' 2 0 0 0 0 0 0
+133735 'Vantaa' 2 0 0 0 0 0 0
+133736 'Vantaa' 2 0 0 0 0 0 0
+133872 'Helsinki' 2 0 0 0 0 0 0
+134147 'Helsinki' 2 0 0 0 0 0 0
+134334 'Helsinki' 2 0 0 0 0 0 0
+134369 'Vantaa' 2 0 0 0 0 0 0
+134425 'Espoo' 2 0 1 1 0 0 0
+134462 'Helsinki' 2 0 0 0 0 0 0
+134489 'Vantaa' 2 0 0 0 0 0 0
+134611 'Vantaa' 2 0 0 0 0 0 0
+134625 'Helsinki' 2 0 0 0 0 0 0
+134640 'Vantaa' 2 0 0 0 0 0 0
+134641 'Vantaa' 2 0 1 0 0 0 0
+134703 'Espoo' 2 0 0 0 0 0 0
+134710 'Vantaa' 2 0 0 0 0 0 0
+134741 'Helsinki' 2 0 0 0 0 0 0
+134742 'Helsinki' 2 0 0 0 0 0 0
+134774 'Espoo' 2 0 1 0 0 0 0
+135157 'Vantaa' 2 0 1 0 0 0 0
+135173 'Vantaa' 2 0 0 0 0 0 0
+135233 'Helsinki' 2 0 0 0 0 0 0
+135318 'Helsinki' 2 0 0 0 0 0 0
+135381 'Espoo' 2 0 0 0 0 0 0
+135382 'Espoo' 2 0 0 0 0 0 0
+135397 'Helsinki' 2 0 0 0 0 0 0
+135398 'Helsinki' 2 0 0 0 0 0 0
+135423 'Hameenlinna' 0 0 0 0 0 0 0
+135502 'Helsinki' 2 0 0 0 0 0 0
+135542 'Sipoo' 0 0 0 0 0 0 0
+135572 'Espoo' 2 0 0 0 0 0 0
+135676 'Helsinki' 2 0 0 0 0 0 0
+135702 'Helsinki' 2 0 1 0 0 0 0
+135783 'Espoo' 2 0 1 1 1 0 0
+135797 'Espoo' 2 0 1 0 1 0 0
+135962 'Vantaa' 2 0 0 0 0 0 0
+136000 'Vantaa' 2 0 1 0 1 0 0
+136061 'Vantaa' 2 0 0 0 0 0 0
+136109 'Vihti' 0 0 0 1 0 0 0
+136170 'Vantaa' 2 0 0 0 0 0 0
+136171 'Vantaa' 2 0 0 0 0 0 0
+136275 'Espoo' 2 0 1 0 0 0 0
+136384 'Helsinki' 2 0 0 0 0 0 0
+136421 'Espoo' 2 0 0 0 0 0 0
+136422 'Espoo' 2 0 0 0 0 0 0
+136511 'Espoo' 2 0 1 1 0 0 0
+136512 'Espoo' 2 0 0 0 0 0 0
+136577 'Espoo' 2 0 0 0 0 0 0
+136634 'Vantaa' 2 0 1 0 0 0 0
+136737 'Vantaa' 2 0 0 0 0 0 0
+136752 'Helsinki' 2 0 0 0 0 0 0
+136753 'Helsinki' 2 0 0 0 1 0 0
+136754 'Espoo' 2 0 0 0 0 0 0
+136768 'Vantaa' 2 0 0 0 0 0 0
+136788 'Helsinki' 2 0 0 0 0 0 0
+136789 'Helsinki' 2 0 0 0 0 0 0
+136803 'Helsinki' 2 0 0 0 0 0 0
+136869 'Helsinki' 2 0 0 1 0 0 0
+136870 'Helsinki' 2 0 0 0 0 0 0
+136911 'Helsinki' 2 0 0 0 0 0 0
+136938 'Hameenlinna' 0 0 0 0 0 0 0
+137171 'Espoo' 2 0 0 0 0 0 0
+137436 'Vantaa' 2 0 0 0 0 0 0
+137483 'Helsinki' 2 0 1 1 0 0 0
+137508 'Helsinki' 2 0 0 0 0 0 0
+137624 'Espoo' 2 0 0 0 0 0 0
+137775 'Jyvaskyla' 0 0 0 0 0 0 0
+137828 'Vantaa' 2 0 0 0 0 0 0
+137839 'Helsinki' 2 0 0 0 0 0 0
+137964 'Humppila' 0 0 0 0 0 0 0
+138175 'Espoo' 2 0 0 0 0 0 0
+138212 'Helsinki' 2 0 0 0 0 0 0
+138275 'Helsinki' 2 0 0 0 0 0 0
+138305 'Jamsa' 0 0 0 0 0 0 0
+138368 'Akaa' 0 0 0 0 0 0 0
+138380 'Espoo' 2 0 0 0 0 0 0
+138460 'Vantaa' 2 0 0 0 0 0 0
+138570 'Tampere' 0 0 0 0 0 0 0
+138677 'Espoo' 2 0 0 0 0 0 0
+138678 'Espoo' 2 0 1 0 0 0 0
+138679 'Espoo' 2 0 0 0 1 0 0
+138707 'Espoo' 2 0 0 0 0 0 0
+138708 'Espoo' 2 0 0 0 0 0 0
+138852 'Espoo' 2 0 0 0 0 0 0
+139051 'Lohja' 0 0 0 0 0 0 0
+139111 'Helsinki' 2 0 1 0 0 0 0
+139116 'Helsinki' 2 0 1 0 0 0 0
+139117 'Helsinki' 2 0 0 0 1 0 0
+139136 'Helsinki' 2 0 0 1 0 0 0
+139194 'Raasepori' 0 0 0 0 0 0 0
+139281 'Helsinki' 2 0 0 0 1 0 0
+139315 'Helsinki' 2 0 0 0 0 0 0
+139420 'Helsinki' 2 0 1 1 1 0 0
+139421 'Helsinki' 2 0 1 1 1 0 0
+139435 'Vantaa' 2 0 0 0 0 0 0
+139657 'Vantaa' 2 0 0 0 0 0 0
+139702 'Vantaa' 2 0 0 0 0 0 0
+139747 'Espoo' 2 0 1 0 1 0 0
+139847 'Vantaa' 2 0 0 0 0 0 0
+139869 'Helsinki' 2 0 1 1 1 0 0
+139947 'Vantaa' 2 0 1 0 0 0 0
+139979 'Vantaa' 2 0 0 0 0 0 0
+140054 'Lahti' 0 0 0 0 0 0 0
+140088 'Helsinki' 2 0 0 0 0 0 0
+140130 'Helsinki' 2 0 0 0 0 0 0
+140167 'Helsinki' 2 0 0 0 0 0 0
+140267 'Vantaa' 2 0 0 0 0 0 0
+140286 'Helsinki' 2 0 0 0 0 0 0
+140441 'Helsinki' 2 0 1 0 0 0 0
+140547 'Vantaa' 2 0 1 1 1 0 0
+140673 'Vantaa' 2 0 0 0 0 0 0
+140752 'Raasepori' 0 0 0 0 0 0 0
+140768 'Vantaa' 2 0 0 0 0 0 0
+140769 'Vantaa' 2 0 0 0 0 0 0
+140871 'Helsinki' 2 0 1 0 0 0 0
+140914 'Lohja' 0 0 0 0 0 0 0
+140937 'Helsinki' 2 0 0 0 0 0 0
+141203 'Helsinki' 2 0 0 1 0 0 0
+141214 'Helsinki' 2 0 0 0 0 0 0
+141278 'Vantaa' 2 0 0 0 0 0 0
+141305 'Espoo' 2 0 0 0 0 0 0
+141320 'Espoo' 2 0 0 0 0 0 0
+141389 'Vantaa' 2 0 0 0 0 0 0
+141491 'Helsinki' 2 0 1 0 0 0 0
+141492 'Helsinki' 2 0 1 1 1 0 0
+141522 'Hyvinkaa' 0 0 0 0 0 0 0
+141544 'Akaa' 0 0 0 0 0 0 0
+141547 'Helsinki' 2 0 0 0 0 0 0
+141716 'Helsinki' 2 0 0 1 0 0 0
+141906 'Espoo' 2 0 1 0 0 0 0
+141907 'Espoo' 2 0 0 0 0 0 0
+142083 'Vantaa' 2 0 0 0 0 0 0
+142084 'Vantaa' 2 0 0 0 0 0 0
+142090 'Vantaa' 2 0 0 0 0 0 0
+142190 'Espoo' 2 0 0 0 0 0 0
+142201 'Espoo' 2 0 0 0 0 0 0
+142478 'Helsinki' 2 0 1 1 0 0 0
+142499 'Jyvaskyla' 0 0 0 0 0 0 0
+142598 'Vantaa' 2 0 1 0 0 0 0
+142613 'Vantaa' 2 0 1 0 1 0 0
+142705 'Helsinki' 2 0 0 0 0 0 0
+142785 'Helsinki' 2 0 1 0 0 0 0
+142799 'Vantaa' 2 0 0 0 0 0 0
+142847 'Vantaa' 2 0 0 0 0 0 0
+142886 'Vantaa' 2 0 0 0 0 0 0
+142891 'Helsinki' 2 0 0 0 0 0 0
+142903 'Hanko' 0 0 0 0 0 0 0
+143056 'Vihti' 0 0 1 1 0 0 0
+143106 'Orimattila' 0 0 0 0 0 0 0
+143150 'Espoo' 2 0 0 0 0 0 0
+143151 'Espoo' 2 0 0 0 0 0 0
+143178 'Helsinki' 2 0 1 0 0 0 0
+143204 'Hameenlinna' 0 0 0 0 0 0 0
+143257 'Jamsa' 0 0 0 0 0 0 0
+143271 'Vantaa' 2 0 1 1 1 0 0
+143272 'Vantaa' 2 0 1 0 0 0 0
+143420 'Espoo' 2 0 0 0 0 0 0
+143457 'Helsinki' 2 0 0 0 0 0 0
+143458 'Helsinki' 2 0 0 0 0 0 0
+143756 'Vantaa' 2 0 0 0 0 0 0
+143869 'Vantaa' 2 0 0 0 0 0 0
+143902 'Espoo' 2 0 0 0 0 0 0
+143933 'Lahti' 0 0 0 0 0 0 0
+144060 'Helsinki' 2 0 0 0 0 0 0
+144061 'Helsinki' 2 0 0 0 0 0 0
+144109 'Vantaa' 2 0 1 0 0 0 0
+144260 'Helsinki' 2 0 0 0 0 0 0
+144283 'Helsinki' 2 0 0 0 0 0 0
+144360 'Espoo' 2 0 0 0 0 0 0
+144364 'Forssa' 0 0 0 0 0 0 0
+144443 'Helsinki' 2 0 0 0 0 0 0
+144444 'Helsinki' 2 0 1 0 0 0 0
+144521 'Vantaa' 2 0 0 0 0 0 0
+144648 'Tampere' 0 0 0 0 0 0 0
+144777 'Vihti' 0 0 0 0 0 0 0
+144893 'Espoo' 2 0 0 0 0 0 0
+144894 'Jamsa' 0 0 0 0 0 0 0
+144946 'Vantaa' 2 0 0 0 0 0 0
+145013 'Helsinki' 2 0 0 0 0 0 0
+145072 'Helsinki' 2 0 0 0 0 0 0
+145151 'Helsinki' 2 0 0 0 0 0 0
+145280 'Espoo' 2 0 0 0 0 0 0
+145297 'Helsinki' 2 0 1 1 1 0 0
+145341 'Helsinki' 2 0 1 0 0 0 0
+145352 'Helsinki' 2 0 0 0 0 0 0
+145393 'Vantaa' 2 0 0 0 0 0 0
+145394 'Vantaa' 2 0 0 0 0 0 0
+145399 'Espoo' 2 0 0 0 0 0 0
+145466 'Helsinki' 2 0 0 0 0 0 0
+145467 'Helsinki' 2 0 0 0 0 0 0
+145495 'Kauniainen' 2 0 0 0 0 0 0
+145497 'Hameenlinna' 0 0 0 0 0 0 0
+145498 'Hameenlinna' 0 0 0 0 0 0 0
+145499 'Espoo' 2 0 1 0 0 0 0
+145532 'Espoo' 2 0 1 0 1 0 0
+145698 'Espoo' 2 0 0 0 0 0 0
+145751 'Vantaa' 2 0 0 0 0 0 0
+146007 'Espoo' 2 0 0 0 0 0 0
+146177 'Akaa' 0 0 0 0 0 0 0
+146292 'Kauniainen' 2 0 0 0 0 0 0
+146329 'Vihti' 0 0 0 0 0 0 0
+146383 'Lahti' 0 0 0 0 0 0 0
+146564 'Vantaa' 2 0 1 0 1 0 0
+146904 'Helsinki' 2 0 1 0 0 0 0
+146905 'Lahti' 0 0 0 0 0 0 0
+146970 'Helsinki' 2 0 0 0 0 0 0
+147122 'Kauniainen' 2 0 0 0 0 0 0
+147279 'Helsinki' 2 0 1 0 0 0 0
+147290 'Helsinki' 2 0 0 0 0 0 0
+147535 'Espoo' 2 0 1 0 0 0 0
+147700 'Vantaa' 2 0 0 0 0 0 0
+147775 'Espoo' 2 0 0 0 0 0 0
+147776 'Espoo' 2 0 0 0 0 0 0
+147837 'Vantaa' 2 0 0 0 0 0 0
+147849 'Helsinki' 2 0 0 0 0 0 0
+147965 'Vantaa' 2 0 0 0 0 0 0
+148546 'Espoo' 2 0 0 0 0 0 0
+148547 'Helsinki' 2 0 0 0 0 0 0
+148548 'Helsinki' 2 0 0 0 0 0 0
+148642 'Lohja' 0 0 0 0 0 0 0
+148723 'Espoo' 2 0 1 0 0 0 0
+149011 'Helsinki' 2 0 0 0 0 0 0
+149119 'Helsinki' 2 0 0 0 0 0 0
+149220 'Helsinki' 2 0 0 0 0 0 0
+149225 'Espoo' 2 0 0 0 0 0 0
+149250 'Espoo' 2 0 0 0 0 0 0
+149251 'Espoo' 2 0 0 0 0 0 0
+149280 'Espoo' 2 0 0 0 0 0 0
+149353 'Vantaa' 2 0 1 1 1 0 0
+149505 'Helsinki' 2 0 0 1 0 0 0
+149510 'Vantaa' 2 0 0 0 0 0 0
+149623 'Vantaa' 2 0 1 1 0 0 0
+149808 'Espoo' 2 0 1 0 0 0 0
+149893 'Kotka' 0 0 0 0 0 0 0
+149955 'Vantaa' 2 0 0 0 0 0 0
+149956 'Vantaa' 2 0 1 0 0 0 0
+150220 'Helsinki' 2 0 0 0 1 0 0
+150351 'Lohja' 0 0 0 0 0 0 0
+150457 'Vantaa' 2 0 0 0 0 0 0
+150695 'Espoo' 2 0 0 0 0 0 0
+150706 'Vantaa' 2 0 0 0 0 0 0
+150868 'Kauniainen' 2 0 1 0 0 0 0
+150959 'Vantaa' 2 0 0 0 0 0 0
+151050 'Espoo' 2 0 0 0 0 0 0
+151085 'Espoo' 2 0 0 0 0 0 0
+151156 'Helsinki' 2 0 0 1 0 0 0
+151362 'Helsinki' 2 0 0 0 0 0 0
+151393 'Turku' 0 0 0 0 0 0 0
+151439 'Helsinki' 2 0 0 0 0 0 0
+151694 'Espoo' 2 0 1 1 1 0 0
+151964 'Helsinki' 2 0 1 0 1 0 0
+152076 'Espoo' 2 0 0 0 0 0 0
+152230 'Helsinki' 2 0 0 0 0 0 0
+152267 'Espoo' 2 0 1 0 0 0 0
+152280 'Helsinki' 2 0 0 0 0 0 0
+152369 'Espoo' 2 0 0 0 0 0 0
+152545 'Helsinki' 2 0 0 0 1 0 0
+152563 'Helsinki' 2 0 1 0 0 0 0
+152570 'Espoo' 2 0 0 0 0 0 0
+152702 'Helsinki' 2 0 0 0 0 0 0
+152776 'Vantaa' 2 0 0 0 0 0 0
+152782 'Helsinki' 2 0 1 0 0 0 0
+152872 'Vantaa' 2 0 0 0 1 0 0
+153082 'Vantaa' 2 0 0 0 0 0 0
+153216 'Helsinki' 2 0 0 0 0 0 0
+153296 'Lohja' 0 0 0 0 0 0 0
+153375 'Lohja' 0 0 0 0 0 0 0
+153385 'Vantaa' 2 0 0 0 0 0 0
+153540 'Helsinki' 2 0 0 0 0 0 0
+153598 'Vantaa' 2 0 0 0 0 0 0
+153875 'Turku' 0 0 0 0 0 0 0
+153940 'Espoo' 2 0 0 0 1 0 0
+154055 'Hollola' 0 0 0 0 0 0 0
+154136 'Espoo' 2 0 0 0 0 0 0
+154249 'Espoo' 2 0 0 0 0 0 0
+154259 'Espoo' 2 0 0 0 0 0 0
+154260 'Espoo' 2 0 0 0 0 0 0
+154268 'Helsinki' 2 0 1 0 0 0 0
+154330 'Espoo' 2 0 0 0 0 0 0
+154356 'Hollola' 0 0 0 0 0 0 0
+154360 'Espoo' 2 0 0 0 0 0 0
+154393 'Vantaa' 2 0 0 0 0 0 0
+154410 'Hollola' 0 0 0 0 0 0 0
+154435 'Helsinki' 2 0 0 0 0 0 0
+154750 'Espoo' 2 0 0 0 0 0 0
+154786 'Vantaa' 2 0 0 0 0 0 0
+154789 'Helsinki' 2 0 0 0 0 0 0
+154790 'Helsinki' 2 0 0 0 0 0 0
+154877 'Espoo' 2 0 0 0 0 0 0
+154913 'Vantaa' 2 0 0 0 0 0 0
+154936 'Espoo' 2 0 0 0 0 0 0
+154981 'Espoo' 2 0 1 0 0 0 0
+154986 'Helsinki' 2 0 0 0 0 0 0
+155167 'Espoo' 2 0 0 0 0 0 0
+155271 'Vantaa' 2 0 0 0 0 0 0
+155323 'Helsinki' 2 0 0 0 0 0 0
+155549 'Helsinki' 2 0 0 0 0 0 0
+155552 'Jamsa' 0 0 0 1 0 0 0
+155603 'Helsinki' 2 0 0 0 0 0 0
+155611 'Helsinki' 2 0 0 0 0 0 0
+155621 'Espoo' 2 0 0 0 0 0 0
+155722 'Vantaa' 2 0 0 0 0 0 0
+155977 'Lohja' 0 0 0 0 0 0 0
+156138 'Espoo' 2 0 0 0 0 0 0
+156156 'Hameenlinna' 0 0 0 0 0 0 0
+156260 'Vantaa' 2 0 0 0 0 0 0
+156269 'Helsinki' 2 0 0 0 0 0 0
+156295 'Vantaa' 2 0 0 0 0 0 0
+156352 'Hanko' 0 0 0 0 0 0 0
+156360 'Tampere' 0 0 0 0 0 0 0
+156366 'Espoo' 2 0 0 0 1 0 0
+156433 'Vantaa' 2 0 1 0 0 0 0
+156448 'Helsinki' 2 0 0 0 0 0 0
+156481 'Espoo' 2 0 0 0 0 0 0
+156482 'Espoo' 2 0 0 0 0 0 0
+156520 'Helsinki' 2 0 0 0 0 0 0
+156532 'Forssa' 0 0 0 0 0 0 0
+156540 'Espoo' 2 0 0 0 0 0 0
+156735 'Helsinki' 2 0 0 0 0 0 0
+156772 'Vantaa' 2 0 0 0 0 0 0
+156970 'Vantaa' 2 0 0 0 0 0 0
+156997 'Vantaa' 2 0 1 0 0 0 0
+156998 'Espoo' 2 0 0 0 0 0 0
+157043 'Espoo' 2 0 0 1 1 0 0
+157046 'Vantaa' 2 0 0 0 0 0 0
+157151 'Helsinki' 2 0 0 0 0 0 0
+157234 'Vantaa' 2 0 0 0 0 0 0
+157268 'Espoo' 2 0 0 0 0 0 0
+157297 'Turku' 0 0 0 0 0 0 0
+157324 'Helsinki' 2 0 0 1 0 0 0
+157436 'Turku' 0 0 0 0 0 0 0
+157444 'Helsinki' 2 0 1 0 1 0 0
+157568 'Helsinki' 2 0 0 0 0 0 0
+157606 'Espoo' 2 0 0 0 0 0 0
+157644 'Kangasala' 0 0 0 0 0 0 0
+157645 'Espoo' 2 0 0 0 0 0 0
+157678 'Vantaa' 2 0 0 0 0 0 0
+157825 'Hameenlinna' 0 0 0 0 0 0 0
+157870 'Espoo' 2 0 1 0 0 0 0
+157919 'Espoo' 2 0 0 0 0 0 0
+158118 'Espoo' 2 0 0 0 0 0 0
+158140 'Tampere' 0 0 0 0 0 0 0
+158200 'Helsinki' 2 0 0 0 0 0 0
+158283 'Helsinki' 2 0 0 0 0 0 0
+158327 'Vantaa' 2 0 0 0 0 0 0
+158492 'Kotka' 0 0 0 0 0 0 0
+158615 'Vantaa' 2 0 0 0 0 0 0
+158710 'Helsinki' 2 0 0 1 0 0 0
+158721 'Espoo' 2 0 0 0 0 0 0
+158731 'Helsinki' 2 0 0 0 0 0 0
+158732 'Helsinki' 2 0 0 0 0 0 0
+158763 'Helsinki' 2 0 1 0 1 0 0
+158795 'Espoo' 2 0 0 0 0 0 0
+158994 'Mantsala' 0 0 0 0 0 0 0
+159030 'Helsinki' 2 0 0 0 0 0 0
+159067 'Espoo' 2 0 0 0 0 0 0
+159140 'Espoo' 2 0 0 0 0 0 0
+159144 'Espoo' 2 0 0 0 0 0 0
+159282 'Espoo' 2 0 0 0 0 0 0
+159449 'Espoo' 2 0 0 0 0 0 0
+159466 'Vantaa' 2 0 1 1 0 0 0
+159475 'Helsinki' 2 0 1 0 0 0 0
+159582 'Helsinki' 2 0 0 0 0 0 0
+159666 'Helsinki' 2 0 1 0 0 0 0
+159673 'Espoo' 2 0 0 0 1 0 0
+159685 'Espoo' 2 0 0 0 0 0 0
+159699 'Lohja' 0 0 1 0 0 0 0
+159729 'Espoo' 2 0 0 0 0 0 0
+159731 'Vantaa' 2 0 0 1 0 0 0
+159756 'Espoo' 2 0 0 0 0 0 0
+159765 'Helsinki' 2 0 0 0 0 0 0
+159794 'Mantsala' 0 0 0 0 0 0 0
+159850 'Lohja' 0 0 0 0 0 0 0
+160083 'Vantaa' 2 0 0 0 0 0 0
+160316 'Helsinki' 2 0 1 0 0 0 0
+160325 'Helsinki' 2 0 0 0 0 0 0
+160480 'Helsinki' 2 0 0 0 0 0 0
+160483 'Helsinki' 2 0 1 1 0 0 0
+160532 'Espoo' 2 0 0 0 0 0 0
+160558 'Lohja' 0 0 0 0 0 0 0
+160560 'Helsinki' 2 0 1 0 0 0 0
+160707 'Espoo' 2 0 0 0 0 0 0
+160753 'Helsinki' 2 0 0 0 1 0 0
+160803 'Vantaa' 2 0 0 0 0 0 0
+160804 'Espoo' 2 0 0 0 0 0 0
+161455 'Vantaa' 2 0 0 0 0 0 0
+161486 'Lohja' 0 0 1 0 0 0 0
+161503 'Loviisa' 0 0 0 0 0 0 0
+161818 'Vantaa' 2 0 0 0 0 0 0
+161861 'Helsinki' 2 0 0 1 0 0 0
+161869 'Vantaa' 2 0 0 0 0 0 0
+161875 'Vantaa' 2 0 0 0 0 0 0
+161890 'Lohja' 0 0 0 0 0 0 0
+161908 'Espoo' 2 0 0 0 0 0 0
+162199 'Helsinki' 2 0 0 0 0 0 0
+162205 'Helsinki' 2 0 1 0 0 0 0
+162242 'Jamsa' 0 0 0 0 0 0 0
+162246 'Helsinki' 2 0 0 0 0 0 0
+162247 'Helsinki' 2 0 0 0 0 0 0
+162302 'Helsinki' 2 0 0 0 0 0 0
+162393 'Muurame' 0 0 0 0 0 0 0
+162467 'Vantaa' 2 0 1 0 1 0 0
+162639 'Helsinki' 2 0 0 0 0 0 0
+162734 'Vantaa' 2 0 1 0 0 0 0
+162757 'Vantaa' 2 0 0 0 0 0 0
+162870 'Espoo' 2 0 0 0 0 0 0
+162906 'Helsinki' 2 0 0 0 0 0 0
+163086 'Helsinki' 2 0 1 1 1 0 0
+163226 'Helsinki' 2 0 1 1 0 0 0
+163264 'Helsinki' 2 0 0 0 0 0 0
+163309 'Espoo' 2 0 0 0 0 0 0
+163310 'Espoo' 2 0 1 0 0 0 0
+163486 'Helsinki' 2 0 1 0 1 0 0
+163500 'Vihti' 0 0 0 0 0 0 0
+163533 'Vantaa' 2 0 0 0 0 0 0
+163563 'Helsinki' 2 0 0 0 0 0 0
+163630 'Helsinki' 2 0 0 0 0 0 0
+163645 'Espoo' 2 0 0 0 0 0 0
+163717 'Espoo' 2 0 0 0 0 0 0
+163733 'Vantaa' 2 0 0 0 0 0 0
+163735 'Hameenlinna' 0 0 0 0 0 0 0
+163799 'Vantaa' 2 0 0 0 0 0 0
+163814 'Helsinki' 2 0 0 0 0 0 0
+163887 'Vantaa' 2 0 1 0 0 0 0
+163894 'Mantsala' 0 0 0 0 0 0 0
+163952 'Hameenlinna' 0 0 0 0 0 0 0
+164016 'Vantaa' 2 0 0 0 0 0 0
+164283 'Helsinki' 2 0 0 0 0 0 0
+164298 'Vantaa' 2 0 1 1 1 0 0
+164451 'Helsinki' 2 0 0 0 0 0 0
+164496 'Helsinki' 2 0 0 0 0 0 0
+164570 'Espoo' 2 0 0 0 0 0 0
+164644 'Helsinki' 2 0 0 0 0 0 0
+164678 'Espoo' 2 0 0 0 0 0 0
+164712 'Vantaa' 2 0 0 0 1 0 0
+164723 'Hanko' 0 0 0 0 0 0 0
+164781 'Vantaa' 2 0 0 0 0 0 0
+164789 'Espoo' 2 0 0 0 0 0 0
+164940 'Hyvinkaa' 0 0 0 0 0 0 0
+164976 'Hyvinkaa' 0 0 0 0 0 0 0
+164989 'Vihti' 0 0 0 0 0 0 0
+165318 'Espoo' 2 0 0 0 0 0 0
+165374 'Vantaa' 2 0 0 1 1 0 0
+165382 'Helsinki' 2 0 1 0 0 0 0
+165420 'Orimattila' 0 0 0 0 0 0 0
+165425 'Espoo' 2 0 0 0 0 0 0
+165491 'Espoo' 2 0 1 0 1 0 0
+165508 'Nurmijarvi' 0 0 0 0 0 0 0
+165586 'Vantaa' 2 0 0 0 0 0 0
+165685 'Espoo' 2 0 0 0 0 0 0
+165846 'Espoo' 2 0 1 0 0 0 0
+166039 'Vantaa' 2 0 0 0 0 0 0
+166044 'Espoo' 2 0 0 0 0 0 0
+166077 'Helsinki' 2 0 0 1 0 0 0
+166115 'Lohja' 0 0 0 0 0 0 0
+166181 'Vantaa' 2 0 0 0 0 0 0
+166236 'Espoo' 2 0 0 0 0 0 0
+166237 'Espoo' 2 0 0 0 0 0 0
+166238 'Helsinki' 2 0 0 0 0 0 0
+166351 'Helsinki' 2 0 0 0 0 0 0
+166410 'Helsinki' 2 0 0 0 0 0 0
+166424 'Helsinki' 2 0 0 0 0 0 0
+166431 'Helsinki' 2 0 0 0 0 0 0
+166432 'Helsinki' 2 0 0 0 0 0 0
+166507 'Espoo' 2 0 0 0 0 0 0
+166542 'Espoo' 2 0 0 0 0 0 0
+166572 'Helsinki' 2 0 0 0 0 0 0
+166608 'Helsinki' 2 0 0 0 0 0 0
+166910 'Helsinki' 2 0 1 0 1 0 0
+166985 'Vantaa' 2 0 0 0 0 0 0
+167005 'Vantaa' 2 0 1 1 0 0 0
+167146 'Helsinki' 2 0 1 0 0 0 0
+167287 'Espoo' 2 0 0 0 0 0 0
+167303 'Vantaa' 2 0 0 0 0 0 0
+167320 'Helsinki' 2 0 1 1 1 0 1
+167351 'Lahti' 0 0 0 0 0 0 0
+167484 'Helsinki' 2 0 0 0 0 0 0
+167521 'Helsinki' 2 0 0 0 0 0 0
+167527 'Vantaa' 2 0 0 0 0 0 0
+167633 'Turku' 0 0 0 0 0 0 0
+167667 'Tuusula' 0 0 0 0 0 0 0
+167688 'Helsinki' 2 0 1 1 1 0 0
+167689 'Helsinki' 2 0 0 1 0 0 0
+167795 'Lahti' 0 0 0 0 0 0 0
+167797 'Vantaa' 2 0 0 0 0 0 0
+167842 'Turku' 0 0 0 0 0 0 0
+167911 'Hameenlinna' 0 0 0 0 0 0 0
+167914 'Helsinki' 2 0 1 1 0 0 0
+167955 'Vantaa' 2 0 0 0 0 0 0
+168076 'Helsinki' 2 0 0 0 0 0 0
+168131 'Hameenlinna' 0 0 0 0 0 0 0
+168157 'Espoo' 2 0 0 0 0 0 0
+168208 'Helsinki' 2 0 0 0 0 0 0
+168216 'Espoo' 2 0 0 0 0 0 0
+168272 'Vantaa' 2 0 0 0 0 0 0
+168292 'Espoo' 2 0 0 0 0 0 0
+168309 'Hyvinkaa' 0 0 0 0 0 0 0
+168527 'Vihti' 0 0 0 0 0 0 0
+168550 'Helsinki' 2 0 1 0 0 0 0
+168810 'Mantsala' 0 0 0 0 0 0 0
+168837 'Lahti' 0 0 0 0 0 0 0
+168878 'Espoo' 2 0 0 0 0 0 0
+168947 'Kauniainen' 2 0 1 0 0 0 0
+169041 'Espoo' 2 0 0 0 0 0 0
+169106 'Mantsala' 0 0 0 0 0 0 0
+169175 'Helsinki' 2 0 0 0 0 0 1
+169191 'Kotka' 0 0 0 0 0 0 0
+169297 'Espoo' 2 0 0 0 0 0 0
+169298 'Espoo' 2 0 0 0 0 0 0
+169622 'Vantaa' 2 0 0 0 0 0 0
+169788 'Vantaa' 2 0 0 0 0 0 0
+169836 'Espoo' 2 0 0 1 0 0 0
+169848 'Espoo' 2 0 0 0 0 0 0
+169854 'Forssa' 0 0 0 0 0 0 0
+169924 'Espoo' 2 0 0 0 0 0 0
+169981 'Lohja' 0 0 0 0 0 0 0
+170045 'Vantaa' 2 0 0 0 0 0 0
+170306 'Vantaa' 2 0 0 0 0 0 0
+170331 'Vantaa' 2 0 1 0 0 0 0
+170401 'Espoo' 2 0 1 0 0 0 0
+170458 'Vantaa' 2 0 1 0 0 0 0
+170471 'Orimattila' 0 0 0 0 0 0 0
+170545 'Vantaa' 2 0 0 0 0 0 0
+170554 'Vantaa' 2 0 0 0 0 0 0
+170595 'Mantsala' 0 0 0 0 0 0 0
+170623 'Helsinki' 2 0 0 0 0 0 0
+170741 'Vantaa' 2 0 0 1 0 0 0
+170754 'Vantaa' 2 0 0 0 0 0 0
+170823 'Helsinki' 2 0 1 0 0 0 0
+170892 'Vantaa' 2 0 0 0 0 0 0
+171009 'Vantaa' 2 0 1 1 0 0 0
+171101 'Espoo' 2 0 0 0 0 0 0
+171147 'Lahti' 0 0 0 0 0 0 0
+171283 'Hyvinkaa' 0 0 0 0 0 0 0
+171291 'Espoo' 2 0 0 0 0 0 0
+171345 'Vantaa' 2 0 0 0 0 0 0
+171393 'Espoo' 2 0 0 0 0 0 0
+171398 'Helsinki' 2 0 0 0 0 0 0
+171445 'Helsinki' 2 0 0 0 0 0 0
+171515 'Helsinki' 2 0 0 0 0 0 0
+171709 'Vantaa' 2 0 0 0 0 0 0
+171863 'Forssa' 0 0 0 0 0 0 0
+172004 'Helsinki' 2 0 0 0 0 0 0
+172010 'Espoo' 2 0 0 0 1 0 0
+172071 'Espoo' 2 0 1 0 1 0 0
+172105 'Lahti' 0 0 0 0 0 0 0
+172116 'Helsinki' 2 0 0 0 0 0 0
+172152 'Espoo' 2 0 0 0 0 0 0
+172169 'Helsinki' 2 0 1 0 0 0 0
+172174 'Helsinki' 2 0 0 0 0 0 0
+172263 'Espoo' 2 0 0 0 0 0 0
+172495 'Vantaa' 2 0 0 0 0 0 0
+172579 'Helsinki' 2 0 0 0 0 0 0
+172649 'Hameenlinna' 0 0 0 0 0 0 0
+172665 'Vantaa' 2 0 0 1 0 0 0
+172685 'Hameenlinna' 0 0 0 1 0 0 0
+172702 'Espoo' 2 0 0 0 0 0 0
+172704 'Espoo' 2 0 0 0 0 0 0
+172716 'Espoo' 2 0 0 0 0 0 0
+172751 'Helsinki' 2 0 0 0 0 0 0
+172820 'Vantaa' 2 0 1 0 0 0 0
+172922 'Vantaa' 2 0 0 0 0 0 0
+173023 'Orimattila' 0 0 0 0 0 0 0
+173078 'Helsinki' 2 0 0 0 0 0 0
+173350 'Vantaa' 2 0 0 0 0 0 0
+173353 'Helsinki' 2 0 0 0 0 0 0
+173412 'Espoo' 2 0 0 0 0 0 0
+173442 'Helsinki' 2 0 0 0 0 0 0
+173486 'Vantaa' 2 0 0 0 0 0 0
+173537 'Hyvinkaa' 0 0 0 0 0 0 0
+173602 'Lohja' 0 0 0 1 0 0 0
+173613 'Muurame' 0 0 0 1 0 0 0
+173672 'Helsinki' 2 0 0 0 0 0 0
+173810 'Espoo' 2 0 1 1 1 0 0
+173819 'Loviisa' 0 0 0 0 0 0 0
+173893 'Vantaa' 2 0 0 0 0 0 0
+173979 'Helsinki' 2 0 0 0 0 0 0
+174104 'Vantaa' 2 0 0 0 0 0 0
+174113 'Helsinki' 2 0 0 0 0 0 0
+174335 'Espoo' 2 0 0 0 0 0 0
+174378 'Helsinki' 2 0 1 0 0 0 0
+174428 'Vantaa' 2 0 0 0 0 0 0
+174490 'Vantaa' 2 0 0 0 0 0 0
+174506 'Helsinki' 2 0 0 0 0 0 0
+174690 'Vantaa' 2 0 0 0 0 0 0
+174702 'Vantaa' 2 0 0 0 0 0 0
+174707 'Espoo' 2 0 0 0 0 0 0
+174796 'Helsinki' 2 0 0 0 0 0 0
+174823 'Tampere' 0 0 0 0 0 0 0
+174839 'Espoo' 2 0 0 0 1 0 0
+174983 'Helsinki' 2 0 0 0 0 0 0
+175004 'Forssa' 0 0 0 0 0 0 0
+175072 'Vantaa' 2 0 0 0 0 0 0
+175163 'Espoo' 2 0 0 0 0 0 0
+175408 'Vantaa' 2 0 1 0 0 0 0
+175445 'Helsinki' 2 0 0 0 1 0 0
+175446 'Helsinki' 2 0 1 0 0 0 0
+175472 'Espoo' 2 0 0 0 0 0 0
+175473 'Helsinki' 2 0 0 0 0 0 0
+175502 'Vantaa' 2 0 0 0 0 0 0
+175614 'Lohja' 0 0 0 0 0 0 0
+175655 'Vantaa' 2 0 0 0 0 0 0
+175674 'Vantaa' 2 0 0 0 0 0 0
+175675 'Vantaa' 2 0 0 0 0 0 0
+175729 'Espoo' 2 0 0 0 0 0 0
+175772 'Turku' 0 0 0 1 0 0 0
+175796 'Forssa' 0 0 0 0 0 0 0
+175844 'Loviisa' 0 0 0 0 0 0 0
+175947 'Helsinki' 2 0 1 0 0 0 0
+175948 'Helsinki' 2 0 0 0 0 0 0
+175994 'Helsinki' 2 0 0 0 0 0 0
+175997 'Helsinki' 2 0 0 1 0 0 0
+176006 'Espoo' 2 0 0 0 0 0 0
+176286 'Vantaa' 2 0 1 0 0 0 0
+176324 'Vantaa' 2 0 1 0 0 0 0
+176372 'Helsinki' 2 0 0 1 1 0 0
+176396 'Helsinki' 2 0 0 0 0 0 0
+176399 'Espoo' 2 0 0 0 0 0 0
+176419 'Vantaa' 2 0 0 0 0 0 0
+176426 'Helsinki' 2 0 0 1 0 0 0
+176446 'Helsinki' 2 0 0 0 0 0 0
+176518 'Kauniainen' 2 0 0 0 0 0 0
+176577 'Espoo' 2 0 0 0 0 0 0
+176582 'Espoo' 2 0 0 0 0 0 0
+176603 'Helsinki' 2 0 0 0 0 0 0
+176677 'Vantaa' 2 0 0 0 0 0 0
+176684 'Espoo' 2 0 1 0 0 0 0
+176769 'Helsinki' 2 0 0 0 0 0 0
+177003 'Espoo' 2 0 0 0 0 0 0
+177109 'Vantaa' 2 0 0 0 0 0 0
+177232 'Espoo' 2 0 0 0 1 0 0
+177234 'Espoo' 2 0 0 0 0 0 0
+177235 'Espoo' 2 0 0 0 0 0 0
+177236 'Helsinki' 2 0 0 0 0 0 0
+177282 'Helsinki' 2 0 0 0 0 0 0
+177345 'Vantaa' 2 0 0 0 0 0 0
+177541 'Jamsa' 0 0 0 1 0 0 0
+177641 'Hameenlinna' 0 0 0 0 0 0 0
+177652 'Espoo' 2 0 0 0 0 0 0
+177671 'Hanko' 0 0 0 0 0 0 0
+177776 'Espoo' 2 0 0 0 0 0 0
+177987 'Helsinki' 2 0 1 1 0 0 0
+178137 'Vantaa' 2 0 0 1 0 0 0
+178328 'Vantaa' 2 0 0 0 0 0 0
+178407 'Espoo' 2 0 0 0 0 0 0
+178409 'Helsinki' 2 0 0 0 0 0 0
+178514 'Vantaa' 2 0 0 0 0 0 0
+178526 'Helsinki' 2 0 0 1 1 0 0
+178534 'Vantaa' 2 0 1 1 0 0 0
+178574 'Espoo' 2 0 0 0 0 0 0
+178600 'Turku' 0 0 0 0 0 0 0
+178814 'Vantaa' 2 0 0 0 0 0 0
+179098 'Vantaa' 2 0 0 0 0 0 0
+179176 'Vantaa' 2 0 1 1 1 0 0
+179208 'Vantaa' 2 0 0 0 0 0 0
+179405 'Vantaa' 2 0 0 0 0 0 0
+179422 'Espoo' 2 0 0 0 0 0 0
+179449 'Espoo' 2 0 0 0 0 0 0
+179450 'Espoo' 2 0 1 0 0 0 0
+179746 'Espoo' 2 0 0 0 0 0 0
+179790 'Espoo' 2 0 0 0 1 0 0
+179840 'Espoo' 2 0 1 1 1 0 0
+179876 'Espoo' 2 0 0 0 0 0 0
+180082 'Vantaa' 2 0 0 0 0 0 0
+180126 'Espoo' 2 0 1 0 1 0 0
+180227 'Helsinki' 2 0 0 0 0 0 0
+180322 'Hanko' 0 0 0 0 0 0 0
+180323 'Orimattila' 0 0 0 0 0 0 0
+180386 'Espoo' 2 0 0 0 0 0 0
+180499 'Vantaa' 2 0 1 1 0 0 0
+180524 'Turku' 0 0 0 0 0 0 0
+180699 'Helsinki' 2 0 0 0 0 0 0
+180925 'Vantaa' 2 0 0 0 0 0 0
+180928 'Vantaa' 2 0 1 0 0 0 0
+180968 'Vantaa' 2 0 0 0 0 0 0
+180971 'Vantaa' 2 0 0 0 0 0 0
+180981 'Vantaa' 2 0 0 0 0 0 0
+181003 'Espoo' 2 0 0 0 0 0 0
+181063 'Helsinki' 2 0 1 1 0 0 0
+181085 'Helsinki' 2 0 0 0 0 0 0
+181113 'Espoo' 2 0 0 0 0 0 0
+181117 'Vantaa' 2 0 0 0 0 0 0
+181124 'Helsinki' 2 0 0 0 0 0 0
+181368 'Mantsala' 0 0 0 0 0 0 0
+181643 'Helsinki' 2 0 0 0 0 0 0
+181772 'Helsinki' 2 0 0 1 0 0 0
+182173 'Espoo' 2 0 0 0 0 0 0
+182197 'Orivesi' 0 0 0 0 0 0 0
+182342 'Helsinki' 2 0 0 0 0 0 0
+182736 'Helsinki' 2 0 1 0 1 0 0
+182743 'Vantaa' 2 0 0 0 0 0 0
+182773 'Vantaa' 2 0 0 0 0 0 0
+182959 'Espoo' 2 0 0 0 0 0 0
+183054 'Espoo' 2 0 0 0 0 0 0
+183115 'Espoo' 2 0 0 0 0 0 0
+183214 'Vantaa' 2 0 0 0 0 0 0
+183380 'Espoo' 2 0 1 0 0 0 0
+183565 'Helsinki' 2 0 0 0 0 0 0
+183636 'Espoo' 2 0 0 0 0 0 0
+183644 'Vantaa' 2 0 0 0 0 0 0
+183669 'Vantaa' 2 0 0 0 0 0 0
+183674 'Espoo' 2 0 0 0 0 0 0
+183793 'Loviisa' 0 0 0 0 0 0 0
+183808 'Tampere' 0 0 0 0 0 0 0
+183944 'Vantaa' 2 0 1 0 0 0 0
+183960 'Vantaa' 2 0 0 0 0 0 0
+183961 'Vantaa' 2 0 1 0 1 0 0
+184033 'Vantaa' 2 0 1 0 1 0 0
+184094 'Helsinki' 2 0 0 0 0 0 0
+184169 'Espoo' 2 0 0 0 0 0 0
+184228 'Vantaa' 2 0 0 0 0 0 0
+184302 'Espoo' 2 0 0 0 0 0 0
+184381 'Helsinki' 2 0 0 0 0 0 0
+184400 'Helsinki' 2 0 0 0 0 0 0
+184408 'Helsinki' 2 0 0 0 0 0 0
+184476 'Helsinki' 2 0 0 0 0 0 0
+184806 'Espoo' 2 0 0 0 0 0 0
+184919 'Vantaa' 2 0 0 0 0 0 0
+184967 'Espoo' 2 0 1 1 0 0 0
+184971 'Helsinki' 2 0 1 0 0 0 0
+185016 'Vantaa' 2 0 1 0 1 0 0
+185083 'Vantaa' 2 0 0 0 0 0 0
+185086 'Kauniainen' 2 0 1 0 1 0 0
+185129 'Helsinki' 2 0 0 0 0 0 0
+185189 'Espoo' 2 0 0 0 0 0 0
+185263 'Tampere' 0 0 0 0 0 0 0
+185283 'Vantaa' 2 0 0 0 0 0 0
+185311 'Helsinki' 2 0 0 0 0 0 0
+185348 'Helsinki' 2 0 0 0 0 0 0
+185375 'Helsinki' 2 0 0 0 0 0 0
+185408 'Helsinki' 2 0 0 0 0 0 0
+185413 'Vantaa' 2 0 0 0 0 0 0
+185426 'Helsinki' 2 0 0 0 0 0 0
+185497 'Helsinki' 2 0 0 0 0 0 0
+185604 'Helsinki' 2 0 1 0 0 0 0
+185617 'Humppila' 0 0 0 0 0 0 0
+185639 'Espoo' 2 0 0 0 0 0 0
+185646 'Espoo' 2 0 1 0 0 0 0
+185662 'Vantaa' 2 0 0 0 0 0 0
+185731 'Helsinki' 2 0 0 0 0 0 0
+185739 'Vantaa' 2 0 0 0 0 0 0
+185758 'Helsinki' 2 0 0 0 0 0 0
+185816 'Vihti' 0 0 0 1 0 0 0
+185875 'Helsinki' 2 0 0 0 0 0 0
+185911 'Espoo' 2 0 0 0 0 0 0
+185939 'Helsinki' 2 0 0 0 0 0 0
+185961 'Espoo' 2 0 0 0 0 0 0
+185969 'Espoo' 2 0 0 0 0 0 0
+185973 'Helsinki' 2 0 0 0 0 0 0
+185983 'Vantaa' 2 0 0 0 0 0 0
+186008 'Helsinki' 2 0 0 0 0 0 0
+186043 'Helsinki' 2 0 0 0 0 0 0
+186123 'Espoo' 2 0 0 0 0 0 0
+186213 'Tampere' 0 0 0 0 0 0 0
+186276 'Espoo' 2 0 0 0 0 0 0
+186318 'Helsinki' 2 0 0 0 0 0 0
+186338 'Espoo' 2 0 0 0 0 0 0
+186360 'Helsinki' 2 0 0 0 0 0 0
+186440 'Vantaa' 2 0 0 0 0 0 0
+186544 'Espoo' 2 0 0 0 0 0 0
+186611 'Espoo' 2 0 0 0 0 0 0
+186616 'Espoo' 2 0 0 0 0 0 0
+186648 'Helsinki' 2 0 0 0 0 0 0
+186845 'Vantaa' 2 0 0 0 0 0 0
+186885 'Espoo' 2 0 0 0 0 0 0
+186935 'Vantaa' 2 0 0 0 0 0 0
+187136 'Helsinki' 2 0 0 0 0 0 0
+187373 'Vantaa' 2 0 0 0 0 0 0
+187375 'Helsinki' 2 0 0 0 0 0 0
+187393 'Helsinki' 2 0 1 0 1 0 0
+187397 'Espoo' 2 0 0 0 0 0 0
+187398 'Helsinki' 2 0 1 0 0 0 0
+200733 'Vantaa' 2 0 0 0 0 0 0
+202505 'Vantaa' 2 0 1 0 0 0 0
+202842 'Espoo' 2 0 1 0 0 0 0
+202960 'Vantaa' 2 0 0 0 0 0 0
+202972 'Helsinki' 2 0 0 0 0 0 0
+203099 'Kauniainen' 2 0 0 0 0 0 0
+209739 'Jamsa' 0 0 0 0 0 0 0
+210001 'Vantaa' 2 0 0 0 0 0 0
+211215 'Vantaa' 2 0 1 1 1 0 0
+212993 'Helsinki' 2 0 1 0 0 0 0
+213614 'Janakkala' 0 0 0 0 0 0 0
+215126 'Espoo' 2 0 1 0 0 0 0
+215195 'Vantaa' 2 0 1 0 0 0 0
+215401 'Lohja' 0 0 0 1 0 0 0
+216232 'Helsinki' 2 0 0 0 0 0 0
+216923 'Espoo' 2 0 1 1 1 0 0
+218694 'Vantaa' 2 0 0 0 0 0 0
+219746 'Mantsala' 0 0 0 0 0 0 0
+219747 'Mantsala' 0 0 0 0 0 0 0
+219926 'Helsinki' 2 0 0 0 0 0 0
+222351 'Helsinki' 2 0 0 0 0 0 0
+222521 'Vantaa' 2 0 0 0 0 0 0
+222942 'Kauniainen' 2 0 1 0 0 0 0
+224447 'Helsinki' 2 0 1 0 0 0 0
+226206 'Helsinki' 2 0 0 0 0 0 0
+228474 'Espoo' 2 0 0 0 1 0 0
+231338 'Hanko' 0 0 0 0 0 0 0
+231367 'Espoo' 2 0 0 0 0 0 0
+231400 'Helsinki' 2 0 0 0 0 0 0
+232197 'Janakkala' 0 0 0 0 0 0 0
+233676 'Espoo' 2 0 1 0 0 0 0
+234862 'Raasepori' 0 0 0 0 0 0 0
+238237 'Helsinki' 2 0 1 1 1 0 0
+238817 'Helsinki' 2 0 0 0 0 0 0
+239770 'Janakkala' 0 0 0 0 0 0 0
+240049 'Espoo' 2 0 0 0 0 0 0
+243514 'Helsinki' 2 0 1 1 0 0 0
+245231 'Helsinki' 2 0 0 0 0 0 0
+245612 'Helsinki' 2 0 0 0 0 0 0
+245901 'Espoo' 2 0 1 1 0 0 0
+246472 'Helsinki' 2 0 0 0 0 0 0
+247362 'Hameenlinna' 0 0 0 0 0 0 0
+247363 'Helsinki' 2 0 0 0 0 0 0
+247368 'Helsinki' 2 0 0 0 0 0 0
+247369 'Helsinki' 2 16 0 0 0 0 0
+247378 'Vantaa' 2 0 0 0 0 0 0
+247382 'Helsinki' 2 0 0 0 0 0 0
+247383 'Helsinki' 2 0 0 0 0 0 0
+247385 'Kerava' 0 6 0 0 0 0 0
+247389 'Helsinki' 2 0 0 0 0 0 0
+247393 'Helsinki' 2 0 0 0 0 0 0
+247398 'Vantaa' 2 0 0 0 0 0 0
+247400 'Porvoo' 0 0 0 0 0 0 0
+247419 'Orivesi' 0 0 0 0 0 0 0
+247424 'Vantaa' 2 5 0 0 0 0 0
+247425 'Helsinki' 2 0 0 0 0 0 0
+247428 'Janakkala' 0 0 0 0 0 0 0
+247436 'Tampere' 0 6 0 0 0 0 0
+247437 'Tampere' 0 0 0 0 0 0 0
+247442 'Helsinki' 2 0 0 0 0 0 0
+247445 'Kerava' 0 0 0 0 0 0 0
+247454 'Janakkala' 0 24 0 0 0 0 0
+247457 'Porvoo' 0 17 0 0 0 0 0
+247470 'Jamsa' 0 0 0 0 0 0 0
+247479 'Vantaa' 2 0 0 0 0 0 0
+247480 'Helsinki' 2 0 0 0 0 0 0
+247486 'Vantaa' 2 0 0 0 0 0 0
+247487 'Lempaala' 0 5 0 0 0 0 0
+247491 'Vantaa' 2 0 0 0 0 0 0
+247492 'Kerava' 0 6 0 0 0 0 0
+247507 'Turku' 0 0 0 0 0 0 0
+247510 'Vantaa' 2 5 0 0 0 0 0
+247517 'Kauniainen' 2 0 0 0 0 0 0
+247518 'Nurmijarvi' 0 18 0 0 0 0 0
+247524 'Lohja' 0 6 0 0 0 0 0
+247529 'Espoo' 2 0 0 0 0 0 0
+247542 'Raasepori' 0 0 0 0 0 0 0
+247560 'Helsinki' 2 0 0 0 0 0 0
+247567 'Espoo' 2 0 0 0 0 0 0
+247570 'Inkoo' 0 0 0 0 0 0 0
+247571 'Hanko' 0 0 0 0 0 0 0
+247573 'Riihimaki' 0 0 0 0 0 0 0
+247580 'Hanko' 0 0 0 0 0 0 0
+247582 'Hanko' 0 0 0 0 0 0 0
+247593 'Porvoo' 0 0 0 0 0 0 0
+247614 'Vantaa' 2 0 0 0 0 0 0
+247619 'Hanko' 0 0 0 0 0 0 0
+247629 'Humppila' 0 0 0 0 0 0 0
+247634 'Raasepori' 0 0 0 0 0 0 0
+247644 'Vantaa' 2 0 0 0 0 0 0
+247647 'Salo' 0 0 0 0 0 0 0
+247650 'Porvoo' 0 0 0 0 0 0 0
+247668 'Jarvenpaa' 0 6 0 0 0 0 0
+247669 'Jarvenpaa' 0 0 0 0 0 0 0
+247674 'Akaa' 0 0 0 0 0 0 0
+247695 'Raasepori' 0 0 0 0 0 0 0
+247701 'Espoo' 2 0 0 0 0 0 0
+247703 'Raasepori' 0 0 0 0 0 0 0
+247708 'Vantaa' 2 0 0 0 0 0 0
+247709 'Helsinki' 2 1 0 0 0 0 0
+247720 'Hanko' 0 0 0 0 0 0 0
+247722 'Vihti' 0 0 0 0 0 0 0
+247731 'Lempaala' 0 0 0 0 0 0 0
+247741 'Vantaa' 2 0 0 0 0 0 0
+247742 'Helsinki' 2 0 0 0 0 0 0
+247743 'Helsinki' 2 0 0 0 0 0 0
+247747 'Sipoo' 0 5 0 0 0 0 0
+247749 'Janakkala' 0 0 0 0 0 0 0
+247750 'Vantaa' 2 0 0 0 0 0 0
+247751 'Vantaa' 2 0 0 0 0 0 0
+247755 'Kirkkonummi' 0 0 0 0 0 0 0
+247775 'Lohja' 0 0 0 0 0 0 0
+247777 'Helsinki' 2 15 0 0 0 0 0
+247783 'Kauniainen' 2 0 0 0 0 0 0
+247792 'Hausjarvi' 0 0 0 0 0 0 0
+247794 'Vantaa' 2 0 0 0 0 0 0
+247804 'Vantaa' 2 0 0 0 0 0 0
+247816 'Espoo' 2 0 0 0 0 0 0
+247832 'Turku' 0 5 0 0 0 0 0
+247837 'Tampere' 0 6 0 0 0 0 0
+247846 'Lempaala' 0 0 0 0 0 0 0
+247852 'Riihimaki' 0 16 0 0 0 0 0
+247853 'Jarvenpaa' 0 0 0 0 0 0 0
+247855 'Helsinki' 2 0 0 0 0 0 0
+247857 'Hausjarvi' 0 0 0 0 0 0 0
+247858 'Espoo' 2 0 0 0 0 0 0
+247867 'Kirkkonummi' 0 0 0 0 0 0 0
+247910 'Espoo' 2 0 0 0 0 0 0
+247926 'Lempaala' 0 0 0 0 0 0 0
+247951 'Kangasala' 0 0 0 0 0 0 0
+247959 'Tuusula' 0 0 0 0 0 0 0
+247986 'Vantaa' 2 18 0 0 0 0 0
+247987 'Vantaa' 2 0 0 0 0 0 0
+248000 'Hanko' 0 0 0 0 0 0 0
+248015 'Hyvinkaa' 0 0 0 0 0 0 0
+248016 'Hyvinkaa' 0 5 0 0 0 0 0
+248021 'Riihimaki' 0 0 0 0 0 0 0
+248022 'Riihimaki' 0 0 0 0 0 0 0
+248030 'Jarvenpaa' 0 0 0 0 0 0 0
+248032 'Porvoo' 0 0 0 0 0 0 0
+248034 'Raasepori' 0 0 0 0 0 0 0
+248040 'Helsinki' 2 0 0 0 0 0 0
+248041 'Kerava' 0 0 0 0 0 0 0
+248045 'Espoo' 2 0 0 0 0 0 0
+248046 'Vantaa' 2 0 0 0 0 0 0
+248049 'Jyvaskyla' 0 0 0 0 0 0 0
+248053 'Vantaa' 2 0 0 0 0 0 0
+248059 'Akaa' 0 6 0 0 0 0 0
+248067 'Helsinki' 2 16 0 0 0 0 0
+248070 'Kerava' 0 5 0 0 0 0 0
+248072 'Riihimaki' 0 0 0 0 0 0 0
+248164 'Hyvinkaa' 0 37 0 0 0 0 0
+248184 'Helsinki' 2 0 0 0 0 0 0
+248195 'Tampere' 0 0 0 0 0 0 0
+248249 'Tampere' 0 0 0 0 0 0 0
+248936 'Tampere' 0 0 0 0 0 0 0
+249035 'Riihimaki' 0 0 0 0 0 0 0
+249524 'Helsinki' 2 0 0 0 0 0 0
+249525 'Helsinki' 2 0 0 0 0 0 0
+249526 'Helsinki' 2 0 0 0 0 0 0
+249527 'Helsinki' 2 0 0 0 0 0 0
+249528 'Helsinki' 2 0 0 0 0 0 0
+249529 'Helsinki' 2 0 0 0 0 0 0
+249530 'Helsinki' 2 0 0 0 0 0 0
+249531 'Helsinki' 2 0 0 0 0 0 0
+249532 'Helsinki' 2 0 0 0 0 0 0
+249533 'Helsinki' 2 0 0 0 0 0 0
+249534 'Helsinki' 2 0 0 0 0 0 0
+249535 'Helsinki' 2 0 0 0 0 0 0
+249536 'Helsinki' 2 0 0 0 0 0 0
+249537 'Helsinki' 2 30 0 0 0 0 0
+249538 'Helsinki' 2 0 0 0 0 0 0
+249539 'Helsinki' 2 0 0 0 0 0 0
+249540 'Helsinki' 2 0 0 0 0 0 0
+249541 'Helsinki' 2 0 0 0 0 0 0
+249542 'Helsinki' 2 0 0 0 0 0 0
+249543 'Espoo' 2 24 0 0 0 0 0
+249544 'Espoo' 2 0 0 0 0 0 0
+249545 'Espoo' 2 0 0 0 0 0 0
+249546 'Espoo' 2 0 0 0 0 0 0
+249547 'Espoo' 2 0 0 0 0 0 0
+249548 'Espoo' 2 10 0 0 0 0 0
+249549 'Espoo' 2 0 0 0 0 0 0
+249550 'Espoo' 2 0 0 0 0 0 0
+249551 'Espoo' 2 23 0 0 0 0 0
+249552 'Espoo' 2 44 0 0 0 0 0
+249553 'Espoo' 2 14 0 0 0 0 0
+249592 'Helsinki' 2 0 0 0 0 0 0
+249597 'Helsinki' 2 0 0 0 0 0 0
+249600 'Helsinki' 2 0 0 0 0 0 0
+249605 'Helsinki' 2 0 0 0 0 0 0
+249606 'Helsinki' 2 0 0 0 0 0 0
+249610 'Helsinki' 2 0 0 0 0 0 0
+249619 'Helsinki' 2 0 0 0 0 0 0
+249627 'Helsinki' 2 0 0 0 0 0 0
+249639 'Helsinki' 2 0 0 0 0 0 0
+249643 'Helsinki' 2 0 0 0 0 0 0
+249646 'Helsinki' 2 0 0 0 0 0 0
+249648 'Helsinki' 2 0 0 0 0 0 0
+249649 'Helsinki' 2 0 0 0 0 0 0
+249657 'Helsinki' 2 0 0 0 0 0 0
+249665 'Helsinki' 2 0 0 0 0 0 1
+249671 'Helsinki' 2 0 0 0 0 0 1
+249672 'Helsinki' 2 0 0 0 0 0 1
+249675 'Helsinki' 2 0 0 0 0 0 1
+249680 'Helsinki' 2 0 0 0 0 0 0
+249683 'Helsinki' 2 0 0 0 0 0 0
+249686 'Helsinki' 2 0 0 0 0 0 0
+249689 'Helsinki' 2 0 0 0 0 0 0
+249718 'Helsinki' 2 0 0 0 0 0 0
+249720 'Helsinki' 2 0 0 0 0 0 1
+249723 'Helsinki' 2 0 0 0 0 0 0
+249741 'Helsinki' 2 0 0 0 0 0 0
+249742 'Helsinki' 2 0 0 0 0 0 0
+249747 'Helsinki' 2 0 0 0 0 0 0
+249751 'Helsinki' 2 0 0 0 0 0 1
+249756 'Helsinki' 2 0 0 0 0 0 1
+249769 'Helsinki' 2 0 0 0 0 0 0
+249782 'Helsinki' 2 0 0 0 0 0 0
+249786 'Helsinki' 2 0 0 0 0 0 1
+249791 'Helsinki' 2 0 0 0 0 0 0
+249792 'Helsinki' 2 0 0 0 0 0 0
+249808 'Helsinki' 2 0 0 0 0 0 1
+249818 'Helsinki' 2 0 0 0 0 0 0
+249828 'Helsinki' 2 0 0 0 0 1 0
+249829 'Helsinki' 2 0 0 0 0 1 0
+249831 'Helsinki' 2 0 0 0 0 1 0
+249832 'Helsinki' 2 0 0 0 0 1 0
+249833 'Helsinki' 2 0 0 0 0 1 0
+249834 'Helsinki' 2 0 0 0 0 1 0
+249835 'Helsinki' 2 0 0 0 0 1 0
+249836 'Helsinki' 2 0 0 0 0 1 0
+249837 'Helsinki' 2 0 0 0 0 1 0
+249839 'Helsinki' 2 0 0 0 0 1 0
+249840 'Helsinki' 2 0 0 0 0 1 0
+249841 'Helsinki' 2 0 0 0 0 1 0
+249842 'Helsinki' 2 0 0 0 0 1 0
+249843 'Helsinki' 2 0 0 0 0 1 0
+249844 'Helsinki' 2 0 0 0 0 1 0
+249845 'Helsinki' 2 0 0 0 0 1 0
+249846 'Helsinki' 2 0 0 0 0 1 0
+249847 'Helsinki' 2 0 0 0 0 1 0
+249848 'Helsinki' 2 0 0 0 0 1 0
+249849 'Helsinki' 2 0 0 0 0 1 0
+249850 'Helsinki' 2 0 0 0 0 1 0
+249851 'Helsinki' 2 0 0 0 0 1 0
+249852 'Helsinki' 2 0 0 0 0 1 0
+249854 'Helsinki' 2 0 0 0 0 1 0
+249855 'Helsinki' 2 0 0 0 0 1 0
+249856 'Helsinki' 2 0 0 0 0 1 0
+249857 'Helsinki' 2 0 0 0 0 1 0
+249860 'Helsinki' 2 0 0 0 0 1 0
+249864 'Helsinki' 2 0 0 0 0 1 0
+249865 'Helsinki' 2 0 0 0 0 1 0
+249867 'Helsinki' 2 0 0 0 0 1 0
+249869 'Helsinki' 2 0 0 0 0 1 0
+249870 'Vantaa' 2 0 0 0 0 0 0
+249881 'Jyvaskyla' 0 0 0 0 0 0 0
+250634 'Helsinki' 2 0 1 0 0 0 0
+253095 'Helsinki' 2 0 0 0 0 0 0
+253096 'Helsinki' 2 15 0 0 0 0 0
+256802 'Kerava' 0 0 0 0 0 0 0
+260022 'Helsinki' 2 0 0 0 0 0 0
+260247 'Kauniainen' 2 0 0 0 0 0 0
+270878 'Helsinki' 2 0 0 0 0 0 0
+277327 'Espoo' 2 0 1 0 0 0 0
+279932 'Helsinki' 2 0 1 0 0 0 0
+287408 'Helsinki' 2 0 0 0 0 0 0
+295309 'Espoo' 2 0 0 0 0 0 0
+295866 'Hameenlinna' 0 0 0 0 0 0 0
+299440 'Vantaa' 2 0 0 1 0 0 0
+300542 'Helsinki' 2 0 0 1 0 0 0
+304659 'Helsinki' 2 0 0 0 0 0 0
+309120 'Lahti' 0 0 0 0 0 0 0
+313017 'Helsinki' 2 0 1 0 0 0 0
+315034 'Vantaa' 2 0 0 1 0 0 0
+317233 'Helsinki' 2 0 0 0 0 0 0
+323000 'Helsinki' 2 0 0 0 0 0 0
+325606 'Espoo' 2 0 0 0 0 0 0
+329863 'Hyvinkaa' 0 0 0 0 0 0 0
+330155 'Helsinki' 2 0 1 0 0 0 0
+331615 'Vantaa' 2 0 0 0 0 0 0
+332608 'Vantaa' 2 0 0 0 0 0 0
+367822 'Helsinki' 2 0 0 0 0 0 0
+369326 'Vihti' 0 0 0 0 0 0 0
+372499 'Raasepori' 0 0 0 1 0 0 0
+378686 'Espoo' 2 0 0 0 0 0 0
+385213 'Jarvenpaa' 0 0 0 0 0 0 0
+386530 'Vantaa' 2 0 0 0 0 0 0
+388237 'Loviisa' 0 0 0 0 0 0 0
+388238 'Loviisa' 0 0 0 0 0 0 0
+389598 'Mantsala' 0 0 0 0 0 0 0
+389599 'Mantsala' 0 0 0 0 0 0 0
+392971 'Vantaa' 2 0 0 0 0 0 0
+393031 'Espoo' 2 0 0 0 0 0 0
+396690 'Kauniainen' 2 0 0 0 0 0 0
+399855 'Espoo' 2 0 1 0 0 0 0
+416308 'Helsinki' 2 0 1 0 0 0 0
+418567 'Hyvinkaa' 0 0 0 0 0 0 0
+420354 'Vantaa' 2 0 0 0 0 0 0
+428987 'Helsinki' 2 0 0 0 0 0 0
+430123 'Vantaa' 2 0 1 0 0 0 0
+432990 'Espoo' 2 0 0 0 0 0 0
+434255 'Vantaa' 2 0 0 0 0 0 0
+437274 'Vantaa' 2 0 0 0 0 0 0
+452786 'Espoo' 2 0 0 0 0 0 0
+453328 'Hanko' 0 0 0 0 0 0 0
+455533 'Hyvinkaa' 0 0 0 0 0 0 0
+459393 'Vantaa' 2 0 0 0 0 0 0
+461069 'Janakkala' 0 0 0 0 0 0 0
+474847 'Helsinki' 2 0 0 0 0 0 0
+475794 'Vantaa' 2 0 0 0 0 0 0
+477634 'Helsinki' 2 0 0 0 0 0 0
+480382 'Helsinki' 2 0 1 1 1 0 0
+480505 'Jarvenpaa' 0 0 0 0 0 0 0
+480506 'Jarvenpaa' 0 0 0 0 0 0 0
+483846 'Helsinki' 2 0 0 0 0 0 0
+490941 'Helsinki' 2 0 0 0 0 0 0
+492735 'Helsinki' 2 0 0 0 0 0 0
+495378 'Helsinki' 2 0 0 0 0 0 0
+495833 'Helsinki' 2 0 0 0 0 0 0
+496968 'Helsinki' 2 0 1 1 1 0 0
+504186 'Vantaa' 2 0 0 0 0 0 0
+510636 'Espoo' 2 0 0 0 0 0 0
+513874 'Helsinki' 2 0 1 0 1 0 0
+526501 'Porvoo' 0 0 0 0 0 0 0
+526689 'Vantaa' 2 0 0 0 0 0 0
+533014 'Helsinki' 2 0 0 0 1 0 0
+536776 'Kirkkonummi' 0 0 1 1 0 0 0
+538828 'Lohja' 0 0 0 1 0 0 0
+540317 'Tuusula' 0 0 1 0 0 0 0
+541744 'Kotka' 0 0 0 0 0 0 0
+541745 'Kotka' 0 0 0 0 0 0 0
+546892 'Porvoo' 0 0 0 0 0 0 0
+546893 'Porvoo' 0 0 0 0 0 0 0
+561132 'Espoo' 2 0 0 0 0 0 0
+570625 'Helsinki' 2 0 0 0 0 0 0
+573986 'Porvoo' 0 0 0 0 0 0 0
+573987 'Porvoo' 0 0 0 0 0 0 0
+577617 'Vantaa' 2 0 0 0 0 0 0
+578165 'Sipoo' 0 0 1 0 0 0 0
+581564 'Helsinki' 2 0 0 0 0 0 0
+583805 'Helsinki' 2 0 0 0 0 0 0
+591964 'Helsinki' 2 0 0 0 0 0 0
+593065 'Helsinki' 2 0 0 0 0 0 0
+603077 'Kauniainen' 2 0 0 0 0 0 0
+609871 'Vantaa' 2 0 0 0 0 0 0
+620255 'Lohja' 0 0 0 0 0 0 0
+623500 'Helsinki' 2 0 0 0 1 0 0
+630003 'Helsinki' 2 0 0 0 0 0 0
+630407 'Espoo' 2 0 0 0 0 0 0
+633078 'Vantaa' 2 0 0 0 0 0 0
+633079 'Vantaa' 2 0 0 0 0 0 0
+641262 'Humppila' 0 0 0 0 0 0 0
+642933 'Vantaa' 2 0 0 0 0 0 0
+644280 'Espoo' 2 0 0 0 0 0 0
+644565 'Espoo' 2 0 0 0 0 0 0
+645894 'Espoo' 2 0 0 0 0 0 0
+652560 'Helsinki' 2 0 0 0 0 0 0
+654387 'Helsinki' 2 0 0 0 0 0 0
+660837 'Helsinki' 2 0 0 0 0 0 0
+662095 'Helsinki' 2 0 1 0 0 0 0
+669425 'Helsinki' 2 0 1 0 0 0 0
+670438 'Espoo' 2 0 1 0 0 0 0
+673282 'Tampere' 0 0 0 1 0 0 0
+677329 'Vantaa' 2 0 0 0 0 0 0
+679451 'Mantsala' 0 0 0 0 0 0 0
+679452 'Mantsala' 0 0 0 0 0 0 0
+686567 'Vantaa' 2 0 0 0 0 0 0
+686836 'Helsinki' 2 0 0 0 0 0 0
+687446 'Espoo' 2 0 0 0 0 0 0
+688384 'Helsinki' 2 0 0 0 0 0 0
+715999 'Helsinki' 2 0 0 0 0 0 0
+717180 'Nurmijarvi' 0 0 0 0 0 0 0
+718349 'Helsinki' 2 0 0 0 0 0 0
+723640 'Espoo' 2 0 0 0 0 0 0
+724624 'Hameenlinna' 0 0 0 0 0 0 0
+726332 'Kerava' 0 0 0 0 0 0 0
+726333 'Kerava' 0 0 0 0 0 0 0
+729971 'Helsinki' 2 0 0 0 0 0 0
+739263 'Vantaa' 2 0 1 0 0 0 0
+740234 'Raasepori' 0 0 0 0 0 0 0
+744726 'Vantaa' 2 0 0 0 0 0 0
+748016 'Hameenlinna' 0 0 0 0 0 0 0
+748017 'Hameenlinna' 0 0 0 0 0 0 0
+753230 'Helsinki' 2 0 1 0 1 0 0
+763714 'Helsinki' 2 0 1 1 0 0 0
+764160 'Vantaa' 2 0 1 0 0 0 0
+772048 'Helsinki' 2 0 0 0 1 0 0
+778071 'Helsinki' 2 0 0 0 0 0 0
+779553 'Porvoo' 0 0 0 0 0 0 0
+786341 'Vantaa' 2 0 1 0 0 0 0
+788699 'Raasepori' 0 0 0 1 0 0 0
+789812 'Lohja' 0 0 0 0 0 0 0
+793080 'Kauniainen' 2 0 0 0 0 0 0
+794582 'Kerava' 0 0 0 0 0 0 0
+806237 'Espoo' 2 0 0 0 0 0 0
+812525 'Helsinki' 2 0 0 0 0 0 0
+816386 'Vantaa' 2 0 1 0 0 0 0
+816707 'Helsinki' 2 0 0 0 0 0 0
+820985 'Vantaa' 2 0 1 0 0 0 0
+823845 'Helsinki' 2 0 1 0 0 0 0
+828722 'Helsinki' 2 0 1 0 0 0 0
+830438 'Espoo' 2 0 0 0 0 0 0
+830451 'Espoo' 2 0 0 0 0 0 0
+830457 'Helsinki' 2 0 1 1 0 0 0
+830474 'Helsinki' 2 0 0 0 0 0 0
+830518 'Vantaa' 2 0 0 0 0 0 0
+830645 'Espoo' 2 0 0 0 0 0 0
+830646 'Espoo' 2 0 0 0 0 0 0
+830915 'Raasepori' 0 0 0 0 0 0 0
+831111 'Helsinki' 2 0 0 0 0 1 0
+831180 'Kotka' 0 0 0 0 0 0 0
+831291 'Kirkkonummi' 0 0 0 0 0 0 0
+831292 'Hanko' 0 0 0 0 0 0 0
+831297 'Raasepori' 0 0 0 0 0 0 0
+831298 'Inkoo' 0 0 0 0 0 0 0
+831557 'Porvoo' 0 0 0 0 0 0 0
+831615 'Kotka' 0 0 0 0 0 0 0
+831616 'Kotka' 0 0 0 0 0 0 0
+831647 'Hanko' 0 0 0 0 0 0 0
+831731 'Helsinki' 2 0 0 0 0 0 0
+831754 'Kotka' 0 0 0 0 0 0 0
+831778 'Hanko' 0 0 0 0 0 0 0
+831908 'Hanko' 0 0 0 0 0 0 0
+832245 'Kotka' 0 0 0 0 0 0 0
+832504 'Kotka' 0 0 0 0 0 0 0
+832576 'Hanko' 0 0 0 0 0 0 0
+832620 'Helsinki' 2 0 0 0 0 0 0
+833172 'Hanko' 0 0 0 0 0 0 0
+833334 'Porvoo' 0 0 0 0 0 0 0
+833887 'Hanko' 0 0 0 0 0 0 0
+834493 'Hanko' 0 0 0 0 0 0 0
+834495 'Kotka' 0 0 0 0 0 0 0
+834513 'Kotka' 0 0 0 0 0 0 0
+834515 'Helsinki' 2 0 0 0 0 0 0
+834516 'Hanko' 0 0 0 0 0 0 0
+834608 'Helsinki' 2 0 1 0 1 0 0
+900001 'Helsinki' 2 0 0 0 0 0 0
+900002 'Helsinki' 2 0 0 0 0 0 0
+900003 'Helsinki' 2 0 0 0 0 0 0
+900004 'Espoo' 2 15 1 0 0 0 0
+900005 'Vantaa' 2 0 0 0 0 0 0
+900006 'Helsinki' 2 0 0 0 0 0 0
+900007 'Vantaa' 2 0 0 0 1 0 0
+900008 'Espoo' 2 0 0 0 1 0 0
+900009 'Lohja' 0 0 0 0 0 0 0
+900010 'Espoo' 2 0 0 0 0 0 0
+900011 'Vantaa' 2 0 1 1 1 0 0
+900013 'Helsinki' 2 0 1 1 1 0 0
+900014 'Helsinki' 2 0 0 0 0 0 0
+900015 'Helsinki' 2 0 1 0 0 0 0
+900016 'Helsinki' 2 0 0 0 0 0 0
+900018 'Hyvinkaa' 0 0 0 0 0 0 0
+900019 'Vantaa' 2 0 0 0 0 0 0
+900021 'Helsinki' 2 0 0 0 0 0 0
+900024 'Espoo' 2 0 0 0 0 0 0
+900025 'Vantaa' 2 0 0 0 0 0 0
+900027 'Vantaa' 2 0 0 0 0 0 0
+900029 'Helsinki' 2 0 1 0 1 0 0
+900031 'Vantaa' 2 0 0 0 0 0 0
+900032 'Helsinki' 2 0 0 0 0 0 0
+900033 'Kauniainen' 2 0 0 0 0 0 0
+900036 'Vantaa' 2 0 1 0 0 0 0
+900037 'Vantaa' 2 0 1 0 0 0 0
+900040 'Espoo' 2 0 0 0 0 0 0
+900041 'Mantsala' 0 0 0 1 0 0 0
+900042 'Helsinki' 2 0 0 0 0 0 0
+900043 'Vantaa' 2 0 0 1 1 0 0
+900044 'Helsinki' 2 0 1 0 0 0 0
+900046 'Helsinki' 2 0 1 0 0 0 0
+900047 'Helsinki' 2 0 0 0 0 0 0
+900048 'Vantaa' 2 0 0 0 0 0 0
+900049 'Helsinki' 2 0 0 0 0 0 0
+900052 'Helsinki' 2 0 0 0 0 0 0
+900053 'Helsinki' 2 0 1 1 1 0 0
+900054 'Helsinki' 2 0 1 0 0 0 0
+900056 'Helsinki' 2 0 1 0 0 0 0
+900057 'Kotka' 0 0 0 0 0 0 0
+900058 'Helsinki' 2 0 0 0 0 0 0
+900060 'Vantaa' 2 0 0 0 0 0 0
+900064 'Vihti' 0 0 0 0 0 0 0
+900065 'Vantaa' 2 0 0 0 0 0 0
+900066 'Vantaa' 2 0 1 1 1 0 0
+900067 'Helsinki' 2 0 0 0 0 0 0
+900070 'Helsinki' 2 0 0 0 0 0 0
+900075 'Helsinki' 2 0 1 1 0 0 0
+900076 'Helsinki' 2 0 1 0 0 0 0
+900078 'Vantaa' 2 0 0 0 0 0 0
+900082 'Vantaa' 2 0 1 0 0 0 0
+900084 'Vantaa' 2 0 1 0 1 0 0
+900087 'Lohja' 0 0 0 0 0 0 0
+900090 'Espoo' 2 0 1 0 0 0 0
+900092 'Vantaa' 2 0 1 0 0 0 0
+900098 'Vantaa' 2 0 1 0 0 0 0
+900100 'Vihti' 0 0 0 0 0 0 0
+900101 'Hyvinkaa' 0 0 0 0 0 0 0
+900102 'Helsinki' 2 0 1 1 1 0 0
+900104 'Vantaa' 2 0 0 0 0 0 0
+900108 'Vantaa' 2 0 1 0 0 0 0
+900110 'Helsinki' 2 0 0 0 0 0 0
+900111 'Turku' 0 0 0 0 0 0 0
+900112 'Vantaa' 2 0 0 0 0 0 0
+900113 'Helsinki' 2 0 1 0 0 0 0
+900114 'Helsinki' 2 0 0 0 0 0 0
+900115 'Mantsala' 0 0 0 0 0 0 0
+900116 'Vantaa' 2 0 1 0 0 0 0
+900117 'Vantaa' 2 0 0 0 0 0 0
+900121 'Hanko' 0 0 0 0 0 0 0
+900123 'Vantaa' 2 0 1 1 1 0 0
+900124 'Vantaa' 2 0 1 1 0 0 0
+900125 'Porvoo' 0 0 0 0 0 0 0
+900126 'Espoo' 2 0 0 0 0 0 0
+900129 'Helsinki' 2 0 0 0 0 0 0
+900135 'Helsinki' 2 0 1 1 1 0 0
+900136 'Helsinki' 2 0 0 0 0 0 0
+900138 'Espoo' 2 0 1 0 1 0 0
+900140 'Vantaa' 2 0 1 0 0 0 0
+900149 'Espoo' 2 0 0 0 0 0 0
+900152 'Helsinki' 2 0 1 0 1 0 0
+900158 'Vihti' 0 0 0 0 0 0 0
+900162 'Helsinki' 2 0 0 0 0 0 0
+900163 'Helsinki' 2 0 1 1 1 0 0
+900168 'Mantsala' 0 0 0 0 0 0 0
+900170 'Helsinki' 2 0 0 0 0 0 0
+900172 'Helsinki' 2 0 0 0 0 0 0
+900174 'Helsinki' 2 0 0 0 0 0 0
+900179 'Espoo' 2 0 0 0 0 0 0
+900182 'Vihti' 0 0 1 0 0 0 0
+900185 'Helsinki' 2 0 0 0 0 0 0
+900187 'Helsinki' 2 0 1 0 1 0 0
+900191 'Espoo' 2 0 0 0 0 0 0
+900192 'Muurame' 0 0 0 0 0 0 0
+900194 'Vihti' 0 0 0 0 0 0 0
+900196 'Vihti' 0 0 0 0 0 0 0
+900200 'Vantaa' 2 0 0 0 0 0 0
+900202 'Lohja' 0 0 0 0 0 0 0
+900203 'Turku' 0 0 0 0 0 0 0
+900206 'Vantaa' 2 0 1 0 0 0 0
+900211 'Vantaa' 2 0 0 0 0 0 0
+900218 'Lohja' 0 0 0 0 0 0 0
+900220 'Helsinki' 2 0 1 0 1 0 0
+900223 'Helsinki' 2 0 1 0 0 0 1
+900235 'Helsinki' 2 0 1 0 0 0 0
+900300 'Helsinki' 2 0 0 0 0 0 0
+900301 'Espoo' 2 0 0 0 0 0 0
+900400 'Ulkomaa' 0 0 0 0 0 0 0
+900401 'Ulkomaa' 0 0 0 0 0 0 0
+900402 'Ulkomaa' 0 0 0 0 0 0 0
+900403 'Ulkomaa' 0 0 0 0 0 0 0
+900404 'Ulkomaa' 0 0 0 0 0 0 0
+900405 'Ulkomaa' 0 0 0 0 0 0 0

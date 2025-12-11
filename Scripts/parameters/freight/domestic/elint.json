@@ -1,0 +1,58 @@
+{
+    "name": "elint",
+    "orig": "null",
+    "dest": "null",
+    "generation_area": "domestic",
+    "attraction_area": "domestic",
+    "struct": "mode>dest",
+    "impedance_share": {},
+    "distance_boundaries": {
+        "truck": [
+            0,
+            9999
+        ],
+        "freight_train": [
+            0,
+            9999
+        ],
+        "ship": [
+            0,
+            9999
+        ]
+    },
+    "destination_choice": {
+        "truck": {
+            "attraction": {},
+            "impedance": {
+                "cost": -0.108
+            },
+            "log": {
+                "attraction_size": 1
+            },
+            "attraction_size": {
+                "att_elint": 1
+            }
+        }
+    },
+    "mode_choice": {
+        "truck": {
+            "constant": 0,
+            "generation": {},
+            "attraction": {},
+            "impedance": {},
+            "log": {
+                "logsum": 1
+            },
+            "individual_dummy": {}
+        }
+    },
+    "demand_share": {},
+    "logistics_module": {
+        "orig_lc_detour": -0.9985,
+        "lc_dest_detour": -0.9157,
+        "constant_detour": 9.4742,
+        "orig_dest_direct": -0.9986,
+        "constant_direct": -14.4740,
+        "size_factor": 2.9502
+    }
+}

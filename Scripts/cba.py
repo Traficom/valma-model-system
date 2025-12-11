@@ -269,7 +269,7 @@ def run_cost_benefit_analysis(scenario_0, scenario_1, year, workbook, submodel):
                     demand[scenario] = mtx[transport_class]
                     zone_numbers = mtx.zone_numbers
                 result_type = f"{transport_class}_demand_{scenario}"
-                results[result_type] += vol_fac * demand[scenario].sum(0)
+                results[result_type] += demand[scenario].sum(0) / vol_fac
             for mtx_type in ["dist", "time", "cost", "toll_cost"]:
                 cost = {}
                 for scenario in data:

@@ -54,7 +54,7 @@ class Tour:
 
     @property
     def orig(self):
-        return self.purpose.zone_data.zone_numbers[self.position[0]]
+        return self.purpose.generation_zone_data.zone_numbers[self.position[0]]
 
     @orig.setter
     def orig(self, origin):
@@ -68,7 +68,7 @@ class Tour:
     @property
     def dest(self) -> Optional[int]:
         if len(self.position) > 1:
-            return self.purpose.zone_data.zone_numbers[self.position[1]]
+            return self.purpose.attraction_zone_data.zone_numbers[self.position[1]]
         else:
             return None
 
@@ -83,7 +83,7 @@ class Tour:
     def sec_dest(self) -> Optional[int]:
         if len(self.position) > 2:
             self.position = cast(Tuple[int,int,int], self.position) #help for the type checker
-            return self.purpose.zone_data.zone_numbers[self.position[2]]
+            return self.purpose.attraction_zone_data.zone_numbers[self.position[2]]
         else:
             return None
 
@@ -165,9 +165,9 @@ class Tour:
         self.purpose.attracted_tours[self.mode][dest_idx] += 1
         self.purpose.histograms[self.mode].add(
             self.purpose.dist[orig_rel_idx, dest_idx])
-        for name in self.purpose.mappings:
-            i = self.purpose.mappings[name].iat[orig_idx]
-            j = self.purpose.mappings[name].iat[dest_idx]
+        for name in self.purpose.dest_mappings:
+            i = self.purpose.orig_mappings[name].iat[orig_idx]
+            j = self.purpose.dest_mappings[name].iat[dest_idx]
             self.purpose.aggregates[name][self.mode].at[i, j] += 1
         if orig_idx == dest_idx:
             self.purpose.own_zone_demand[self.mode].iat[orig_rel_idx] += 1

@@ -7,7 +7,7 @@ from datatypes.tour import Tour
 import utils.log as log
 from assignment.abstract_assignment import AssignmentModel, Period
 import parameters.departure_time as param
-from parameters.assignment import transport_classes
+from parameters.assignment import transport_classes, volume_factors
 
 
 class DepartureTimeModel:
@@ -90,7 +90,6 @@ class DepartureTimeModel:
         demand : Demand or Tour
             Travel demand matrix or number of travellers
         """
-        demand.purpose.name = cast(str, demand.purpose.name) #type checker hint
         position: Sequence[int] = demand.position
         if len(position) == 2:
             share: Dict[str, Any] = demand.purpose.demand_share[demand.mode]
@@ -99,6 +98,14 @@ class DepartureTimeModel:
                     self._add_2d_demand(
                         share[ap.name], demand.mode, ap.name,
                         demand.matrix, position)
+            if "acc" in demand.mode:
+                mode = demand.mode.replace("acc", "egr")
+                share: Dict[str, Any] = demand.purpose.demand_share[mode]
+                for ap in self.assignment_periods:
+                    if demand.mode in ap.assignment_modes:
+                        self._add_2d_demand(
+                            share[ap.name], mode, ap.name,
+                            demand.matrix, position)
         elif len(position) == 3:
             for ap in self.assignment_periods:
                 if demand.mode in ap.assignment_modes:
@@ -118,13 +125,14 @@ class DepartureTimeModel:
         r_n = r_0 + mtx.shape[0]
         c_n = c_0 + mtx.shape[1]
         large_mtx = self.demand[time_period][ass_class]
+        vol_fac = volume_factors[ass_class][time_period]
         try:
-            large_mtx[r_0:r_n, c_0:c_n] += demand_share[0] * mtx
-            large_mtx[c_0:c_n, r_0:r_n] += demand_share[1] * mtx.T
+            large_mtx[r_0:r_n, c_0:c_n] += vol_fac * demand_share[0] * mtx
+            large_mtx[c_0:c_n, r_0:r_n] += vol_fac * demand_share[1] * mtx.T
         except ValueError:
             share = param.backup_demand_share[time_period]
-            large_mtx[r_0:r_n, c_0:c_n] += share[0] * mtx
-            large_mtx[c_0:c_n, r_0:r_n] += share[1] * mtx.T
+            large_mtx[r_0:r_n, c_0:c_n] += vol_fac * share[0] * mtx
+            large_mtx[c_0:c_n, r_0:r_n] += vol_fac * share[1] * mtx.T
             log.warn("{} {} matrix not matching {} demand shares. Resorted to backup demand shares.".format(
                 mtx.shape, ass_class, len(demand_share[0])))
         self.demand[time_period][ass_class] = large_mtx

@@ -1,14 +1,16 @@
-# lem-model-system
+# valma-model-system
 
-This repository contains python files for LEM model system. Source codes can be found in the [Scripts-folder](Scripts).
+This repository contains python files for VALMA model system.
+Source codes can be found in the [Scripts-folder](Scripts).
 
 ## Usage
 
-You can run LEM from the command line or by using [LEM UI](https://github.com/Traficom/lem-ui).
+You can run LEM from the command line or by using [VALMA UI](https://github.com/Traficom/lem-ui).
 In this chapter, we will guide you how to install LEM to work with Bentley OpenPaths EMME software from the command line.
 The user is not expected to install any new software apart from model-system and OpenPaths EMME.
 
-If you do not have an Bentley OpenPaths license or you wish to develop LEM further, please scroll down to [Development](#development) chapter.
+If you do not have an Bentley OpenPaths license or you wish to develop VALMA further,
+please scroll down to [Development](#development) chapter.
 
 ### Setup
 
@@ -49,15 +51,16 @@ Instructions on the configuration settings are found [here](Scripts#running-the-
 Then, open command line to your local Scripts folder:
 
 ```
-python lem.py
+python valma_travel.py
 ```
 
 Run parameters can be added to the command line call.
-Run `python lem.py --help` to see parameter syntax.
+Run `python valma_travel.py --help` to see parameter syntax.
 
 ## Development
 
-If you do not have Bentley OpenPaths license or you wish to develop LEM source code, you need to set up a development environment. 
+If you do not have Bentley OpenPaths license or you wish to develop VALMA source code,
+you need to set up a development environment.
 Although not covered here, installing [Git](https://git-scm.com/downloads) is highly recommended!
 
 ### Environment and dependencies
@@ -105,7 +108,7 @@ Use `pipenv` when executing scripts. For example:
 
 ```
 cd Scripts
-pipenv run python lem.py
+pipenv run python valma_travel.py
 ```
 
 
@@ -149,8 +152,8 @@ Alternatively, you can run the mock assignment with the help of command line
     - `"RESULTS_PATH": "YOUR_PATH\\model-system\\Scripts\\tests\\test_data\\Results"`,
     - `"BASELINE_DATA_PATH": "YOUR_PATH\\model-system\\Scripts\\tests\\test_data\\Base_input_data"`,
     - `"FORECAST_DATA_PATH": "YOUR_PATH\\model-system\\Scripts\\tests\\test_data\\Scenario_input_data\\2030_test"`,
-3. Type the following to the command line: `pipenv run python helmet.py --do-not-use-emme`.
-   You can also use the shorter `pipenv run python helmet.py -m`.
+3. Type the following to the command line: `pipenv run python valma_travel.py --do-not-use-emme`.
+   You can also use the shorter `pipenv run python valma_travel.py -m`.
 
 
 ### Visual Studio Code

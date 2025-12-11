@@ -1,0 +1,24 @@
+{
+    "strat_files": [
+        {
+            "name": "transit_work",
+            "path": "STRAT_0"
+        },
+        {
+            "name": "transit_leisure",
+            "path": "STRAT_1"
+        },
+		{
+            "name": "train",
+            "path": "STRAT_2"
+        },
+        {
+            "name": "long_d_bus",
+            "path": "STRAT_3"
+        },
+        {
+            "name": "airplane",
+            "path": "STRAT_4"
+        }
+    ]
+}

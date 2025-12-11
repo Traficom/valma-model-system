@@ -1,0 +1,77 @@
+{
+    "name": "pappai",
+    "orig": "null",
+    "dest": "null",
+    "generation_area": "domestic",
+    "attraction_area": "domestic",
+    "struct": "dest>mode",
+    "impedance_share": {},
+    "distance_boundaries": {
+        "truck": [
+            0,
+            9999
+        ],
+        "freight_train": [
+            0,
+            9999
+        ],
+        "ship": [
+            0,
+            9999
+        ]
+    },
+    "destination_choice": {
+        "logsum": {
+            "attraction": {},
+            "impedance": {},
+            "log": {
+                "attraction_size": 1.0,
+                "logsum": 0.04253
+            },
+            "attraction_size": {
+                "att_pappai": 1
+            }
+        }
+    },
+    "mode_choice": {
+        "truck": {
+            "constant": 0,
+            "generation": {},
+            "attraction": {},
+            "impedance": {
+                "cost": -3.574
+            },
+            "log": {},
+            "individual_dummy": {}
+        },
+        "freight_train": {
+            "generation": {},
+            "attraction": {},
+            "impedance": {
+                "cost": -11.82
+            },
+            "log": {},
+            "individual_dummy": {},
+            "constant": 121.8
+        },
+        "ship": {
+            "generation": {},
+            "attraction": {},
+            "impedance": {
+                "cost": -21.37
+            },
+            "log": {},
+            "individual_dummy": {},
+            "constant": 440.0
+        }
+    },
+    "demand_share": {},
+    "logistics_module": {
+        "orig_lc_detour": -0.9996,
+        "lc_dest_detour": -0.9994,
+        "constant_detour": 1.8520,
+        "orig_dest_direct": -0.9984,
+        "constant_direct": -6.8520,
+        "size_factor": 2.2382
+    }
+}

@@ -57,6 +57,7 @@ Scripts/.pytest_cache
 Scripts/tests/.pytest_cache
 Scripts/.env
 Scripts/tests/test_data/Results/*
+!Scripts/tests/test_data/Results/STRATS_s19/config
 !Scripts/tests/test_data/Results/test/Matrices/uusimaa/cost*
 !Scripts/tests/test_data/Results/test/Matrices/uusimaa/dist*
 !Scripts/tests/test_data/Results/test/Matrices/uusimaa/time*
@@ -66,6 +67,9 @@ Scripts/tests/test_data/Results/*
 !Scripts/tests/test_data/Results/test/Matrices/koko_suomi/dist*
 !Scripts/tests/test_data/Results/test/Matrices/koko_suomi/time*
 !Scripts/tests/test_data/Results/test/Matrices/koko_suomi/inv_time*
+!Scripts/tests/test_data/Results/test/Matrices/koko_suomi/car_time*
+!Scripts/tests/test_data/Results/test/Matrices/koko_suomi/transfer_time*
+!Scripts/tests/test_data/Results/test/Matrices/koko_suomi/park_cost*
 !Scripts/tests/test_data/Results/test/Matrices/koko_suomi/beeline*
 project.mtbx-shm
 project.mtbx-wal

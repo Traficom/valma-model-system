@@ -79,6 +79,7 @@ def create_config(config: dict):
         "FIRST_SCENARIO_ID": None,
         "FIRST_MATRIX_ID": None,
         "END_ASSIGNMENT_ONLY": False,
+        "CAR_END_ASSIGNMENT_ONLY": False,
         "LONG_DIST_DEMAND_FORECAST": None,
         "FREIGHT_MATRIX_PATH": None,
         "STORED_SPEED_ASSIGNMENT": None,
