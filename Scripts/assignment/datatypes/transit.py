@@ -153,7 +153,7 @@ class TransitMode(AssignmentMode):
                 "avg_boardings": self.num_board.id,
             },
         }]
-        # For daily tours, use main_inv_time for analyzing train usage
+        # For daily tours, use main_mode_dist for analyzing train usage
         self.transit_result_specs.append({
             "type": "EXTENDED_TRANSIT_MATRIX_RESULTS",
             subset: {
