@@ -240,8 +240,7 @@ freight_terminal_cost = {
 boarding_penalty = {
     'b': 3, # Bus
     'g': 3, # Trunk bus
-    'd': 5, # Long-distance bus
-    'e': 5, # Express bus
+    'e': 5, # Coach bus
     't': 0, # Tram
     'p': 0, # Light rail
     'm': 0, # Metro
@@ -253,8 +252,7 @@ boarding_penalty = {
 long_boarding_penalty = {
     'b': 0, # Bus
     'g': 0, # Trunk bus
-    'd': 5, # Long-distance bus
-    'e': 0, # Express bus
+    'e': 0, # Coach bus
     't': 0, # Tram
     'p': 0, # Light rail
     'm': 0, # Metro
@@ -265,11 +263,6 @@ long_boarding_penalty = {
 # Headway standard deviation function parameters for different transit modes
 headway_sd_func = {
     'b': {
-        "asc": 2.164,
-        "ctime": 0.078,
-        "cspeed": -0.028,
-    },
-    'd':  {
         "asc": 2.164,
         "ctime": 0.078,
         "cspeed": -0.028,
@@ -600,6 +593,7 @@ assignment_classes = {
     "hb_grocery": "leisure",
     "hb_other_shop": "leisure",
     "hb_leisure": "leisure",
+    "hb_escort": "leisure",
     "hb_sport": "leisure",
     "hb_visit": "leisure",
     "hb_leisure_overnight": "leisure",

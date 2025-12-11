@@ -29,18 +29,17 @@ The default is `TEXT`, but this can be changed to `JSON`.
 
 ### `SCENARIO_NAME`
 
-Then, you need to set the name of your scenario.
-If you are trying the test model, write `"test"`.
+You need to set the name of your scenario.
+Influences result folder name and log file name.
 
 ### `RESULTS_PATH`
 
 You need to set the path to your results folder where you wish your
-result tables and matrices are written to.
+result tables and matrices to be written to.
 This data will be written over during the model run.
 
-If you are trying the test model, try
+If you are trying the test network and data, try
 `"C:\\FILL_YOUR_PATH\\model-system\\Scripts\\tests\\test_data\\Results"`.
-If you are trying another model, fill in whatever the path is.
 
 When running the `SCENARIO_NAME` scenario, its results are written in `RESULT_PATH\\SCENARIO_NAME`.
 If you are using mock assignment instead or proper Emme assignment,
@@ -66,46 +65,33 @@ Used only if `SAVE_MATRICES_IN_EMME` is set to `true`.
 
 ### `BASELINE_DATA_PATH`
 
-You need data and matrices for the initialization phase.
-This data will not be written over at any point - it is read-only.
-The location of this data is defined in `BASELINE_DATA_PATH` key.
+This a directory path.
+You need base matrices for the initialization phase.
+This data will not be written over at any point.
 
-If you are trying the test model, try
-`"C:\\FILL_YOUR_PATH\\model-system\\Scripts\\tests\\test_data\\Base_input_data"`.
-If you are trying another model, fill in whatever the path is.
+If you are trying the test network and data, try
+`"C:\\FILL_YOUR_PATH\\model-system\\Scripts\\tests\\test_data\\Scenario_input_data"`.
 
-There should be two directiories under the path: `2018_zonedata` and `Matrices`.
-The names of these directories are hardcoded.
+There should be one directory under the path: `Matrices`.
+The name of this directory is hardcoded.
 
-There are 13 different input vector files in `2018_zonedata` from `.car` to `.wrk`.
-In the `2018_zonedata` directory, there must also exist a .zmp file that matches
-the name of the chosen [`SUBMODEL`](#submodel),
-which maps the data to the zone system of the network.
-
-`Matrices` contains `.omx` files for demand, external traffic and freight traffic.
+`Matrices` contains `.omx` files for base demand.
 The matrices may have missing zones (compared to the network), but cannot have extra zones.
 
 ### `FORECAST_DATA_PATH`
 
-Then, you need data for the forecast scenario.
-This data will also not be written over at any point - it is read-only.
-The location of this data is defined in `FORECAST_DATA_PATH` key.
+This is a .gpkg file, containing zone data.
+This data will not be written over at any point.
 
-If you are trying the test model, try
-`"C:\\FILL_YOUR_PATH\\model-system\\Scripts\\tests\\test_data\\Scenario_input_data\\2030_test"`.
-If you are trying another model, fill in whatever the path is.
+If you are trying the test test network and data, try
+`"C:\\FILL_YOUR_PATH\\model-system\\Scripts\\tests\\test_data\\Scenario_input_data\\zonedata_test.gpkg"`.
 
-There should be 12 or 13 different input vector files in your forecast data path.
-File extensions are similar to your `BASELINE_DATA_PATH\\2018_zonedata` files.
-The file `.car` is optional.
+### `COST_DATA_PATH`
 
-In all files, excluding files .cco, .tco and .trk, there must be a value
-line for every internal zone in use.
-It means that if there are no inhabitants, workplaces, parking costs etc. in
-some zone a zero value line instead of a missing line must be used.
+This is a .json file, containing transport cost data.
 
-There must also exist a .zmp file that matches the name of the chosen [`SUBMODEL`](#submodel)
-and zone system of the network.
+If you are trying the test test network and data, try
+`"C:\\FILL_YOUR_PATH\\model-system\\Scripts\\tests\\test_data\\Scenario_input_data\\costdata.json"`.
 
 ### `LONG_DIST_DEMAND_FORECAST`
 
@@ -143,6 +129,10 @@ flags are separated by commas (e.g., `"OPTIONAL_FLAGS": ["RUN_AGENT_SIMULATION",
 #### `END_ASSIGNMENT_ONLY`
 
 Using this flag runs only end assignment of base demand matrices.
+
+### `CAR_END_ASSIGNMENT_ONLY`
+
+Using this flag runs only end assignment of *car* base demand matrices.
 
 #### `STORED_SPEED_ASSIGNMENT`
 

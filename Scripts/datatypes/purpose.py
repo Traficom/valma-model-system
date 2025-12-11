@@ -20,6 +20,7 @@ import models.generation as generation
 from datatypes.demand import Demand
 from datatypes.histogram import TourLengthHistogram
 from utils.freight_costs import calc_cost
+from models.logistics import DDMParameters
 from utils.calibrate import attempt_calibration
 
 
@@ -369,6 +370,14 @@ class TourPurpose(Purpose):
             Time period (aht/pt/iht/it) : dict
                 Type (time/cost/dist) : dict
                     Mode (car/transit/bike/...) : numpy.ndarray
+        is_last_iteration : bool
+            Whether to calclulate and store accessibility indicators
+
+        Returns
+        -------
+        dict
+            Mode (car/transit/bike/walk) : numpy 2-d matrix
+                Choice probabilities
         """
         purpose_impedance = self.transform_impedance(impedance)
 
@@ -390,16 +399,17 @@ class TourPurpose(Purpose):
 
         # Calculate main mode probability after access mode probability
         # to have access mode logsum as variable
-        self.prob = self.model.calc_prob(purpose_impedance, is_last_iteration)
+        prob = self.model.calc_prob(purpose_impedance, is_last_iteration)
         log.info(f"Mode and dest probabilities calculated for {self.name}")
 
         # If the trip is long-distance, calculate joint main mode/access
         # mode probability for each intermodal class in EMME assignment
         if "vrk" in impedance:
             for main_mode, split in acc_splits.items():
-                prob = self.prob[main_mode]
+                main_prob = prob[main_mode]
                 for acc_mode in split:
-                    self.prob[acc_mode] = split[acc_mode] * prob
+                    prob[acc_mode] = split[acc_mode] * main_prob
+        return prob
 
     def split_connection_mode(self, impedance, pt_mode, car_acc_modes):
         access_modes = car_acc_modes + [pt_mode]
@@ -445,30 +455,34 @@ class TourPurpose(Purpose):
         log.info(f"Mode and dest probabilities calculated for {self.name}")
         return []
 
-    def calc_demand(self, impedance) -> Iterator[Demand]:
+    def calc_demand(
+            self, impedance, is_last_iteration: bool) -> Iterator[Demand]:
         """Calculate purpose specific demand matrices.
 
         Parameters
         ----------
         impedance : dict
             Time period (aht/pt/iht/it) : dict
-                Type (time/dist) : dict
-                    Mode (bike/walk) : numpy.ndarray
+                Type (time/cost/dist) : dict
+                    Mode (car/transit/bike/...) : numpy.ndarray
+        is_last_iteration : bool
+            Whether to calculate and store accessibility indicators
 
         Yields
         -------
         Demand
                 Mode-specific demand matrix for whole day
         """
+        prob = self.calc_prob(impedance, is_last_iteration)
+        self.gen_model.init_tours()
+        self.gen_model.add_tours()
         tours = self.gen_model.get_tours()
-        if self.prob is None:
-            self.prob = self.model.calc_prob_again()
-        purpose_impedance = self.transform_impedance(impedance)
-        self.prob.update(self.model.calc_soft_mode_prob(purpose_impedance))
+        if prob is None:
+            prob = self.model.calc_prob_again()
         orig_agg = self.generation_zone_data.aggregations
         dest_agg = self.attraction_zone_data.aggregations
         for mode in self.modes:
-            mtx = (self.prob.pop(mode) * tours).T
+            mtx = (prob.pop(mode) * tours).T
             try:
                 self.sec_dest_purpose.gen_model.add_secondary_tours(
                     mtx, mode, self)
@@ -504,10 +518,7 @@ class SimpleTourPurpose(TourPurpose):
         Demand
                 Mode-specific demand matrix for whole day
         """
-        self.calc_prob(impedance, is_last_iteration)
-        self.gen_model.init_tours()
-        self.gen_model.add_tours()
-        return self.calc_demand()
+        return self.calc_demand(impedance, is_last_iteration)
 
 
 class SecDestPurpose(Purpose):
@@ -552,6 +563,7 @@ class SecDestPurpose(Purpose):
 
     def generate_tours(self):
         """Generate the source tours without secondary destinations."""
+        self.gen_model.init_tours()
         self.tours = {}
         self._init_sums()
         for mode in self.model.dest_choice_param:
@@ -639,29 +651,36 @@ class FreightPurpose(Purpose):
     ----------
     specification : dict
         Model parameter specifications
-    zone_data : ZoneData
-        Data used for all demand calculations
+    zone_data : Dict[str, FreightZoneData]
+        Model area (domestic/foreign) : Data used for all demand calculations
     resultdata : ResultData
         Writer object to result directory
     costdata : Dict[str, dict]
         Freight mode (truck/freight_train/ship) : mode
             Mode (truck/trailer_truck...) : unit cost name
                 unit cost name : unit cost value
-    category : str
-        purpose modelling category, within Finland as 'domestic, 
-        outside Finland as 'foreign'
     """
-    def __init__(self, specification, zone_data, resultdata, costdata, category):
-        args = (self, specification, zone_data, resultdata)
-        Purpose.__init__(*args)
+    def __init__(self, specification, zone_data, resultdata, costdata):
+        Purpose.__init__(self, specification, zone_data, resultdata)
         self.costdata = costdata
-        self.model_category = category
+        self.model_category = list(zone_data)[0]
 
         if specification["struct"] == "dest>mode":
-            self.model = logit.DestModeModel(*args)
+            self.model = logit.DestModeModel(self, specification, zone_data[self.model_category], 
+                                             resultdata)
         else:
-            self.model = logit.ModeDestModel(*args)
+            self.model = logit.ModeDestModel(self, specification, zone_data[self.model_category], 
+                                             resultdata)
         self.modes = list(self.model.mode_choice_param)
+
+        if specification.get("logistics_module"):
+            self.logistics_module = specification["logistics_module"]
+            self.logistics_params = DDMParameters(orig_lc_detour=self.logistics_module["orig_lc_detour"],
+                                                  lc_dest_detour=self.logistics_module["lc_dest_detour"],
+                                                  constant_detour=self.logistics_module["constant_detour"],
+                                                  orig_dest_direct=self.logistics_module["orig_dest_direct"],
+                                                  constant_direct=self.logistics_module["constant_direct"],
+                                                  size_factor=self.logistics_module["size_factor"])
 
     def calc_traffic(self, impedance: dict):
         """Calculate freight traffic matrix.

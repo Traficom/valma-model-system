@@ -219,10 +219,16 @@ class AssignmentPeriod(Period):
         del mtxs["toll_cost"]
         return mtxs
 
-    def end_assign(self) -> Dict[str, Dict[str, numpy.ndarray]]:
+    def end_assign(self,
+                   assign_transit=True) -> Dict[str, Dict[str, numpy.ndarray]]:
         """Assign bikes, cars, trucks and transit for one time period.
 
         Get travel impedance matrices for one time period from assignment.
+
+        Parameters
+        ----------
+        assign_transit : bool (optional)
+            Whether to assign transit (default: true)
 
         Returns
         -------
@@ -238,10 +244,13 @@ class AssignmentPeriod(Period):
         self._assign_cars(self.stopping_criteria["fine"])
         self._set_car_vdfs(use_free_flow_speeds=True)
         self._assign_trucks()
-        self._assign_transit(
-            param.simple_transit_classes, calc_network_results=True,
-            delete_strat_files=self._delete_strat_files)
-        self._calc_transit_link_results()
+        if assign_transit:
+            self._assign_transit(
+                param.simple_transit_classes, calc_network_results=True,
+                delete_strat_files=self._delete_strat_files)
+            self._calc_transit_link_results()
+        else:
+            self._end_assignment_classes -= set(param.transit_classes)
         mtxs = self._get_impedances(self._end_assignment_classes)
         self._check_congestion()
         for tc in self.assignment_modes:
@@ -644,15 +653,6 @@ class AssignmentPeriod(Period):
             specification=self.bike_mode.spec, scenario=scen)
         log.info("Bike assignment performed for scenario " + str(scen.id))
 
-    def _assign_pedestrians(self):
-        """Perform pedestrian assignment for one scenario."""
-        self.walk_mode.init_matrices()
-        self._set_walk_time()
-        log.info("Pedestrian assignment started...")
-        self.emme_project.pedestrian_assignment(
-            specification=self.walk_mode.spec, scenario=self.emme_scenario)
-        log.info("Pedestrian assignment performed for scenario " + str(self.emme_scenario.id))
-
     def _calc_extra_wait_time(self):
         """Calculate extra waiting time for one scenario."""
         network = self.emme_scenario.get_network()
@@ -720,7 +720,6 @@ class AssignmentPeriod(Period):
                         calc_network_results=False, delete_strat_files=False):
         """Perform transit assignment for one scenario."""
         self._calc_extra_wait_time()
-        self._set_walk_time()
         log.info("Transit assignment started...")
         for i, transit_class in enumerate(transit_classes):
             tc: TransitMode = self.assignment_modes[transit_class]

@@ -56,7 +56,7 @@ class LogitModel:
         self.mode_utils.clear()
         prob = {mode: divide(mode_exps.pop(mode), expsum).T
             for mode in self.mode_choice_param}
-        return prob, -log(expsum) + 90
+        return prob, log(expsum)
 
     def _calc_alt_util(self, mode: str, utility: numpy.ndarray,
                        impedance: Dict[str, numpy.ndarray],
@@ -346,8 +346,11 @@ class ModeDestModel(LogitModel):
         mode_exps, mode_expsum, dest_exps, dest_expsums = self._stashed_exps
         del self._stashed_exps
         mode_probs = self._calc_mode_prob(mode_exps, mode_expsum)
-        self.soft_mode_probs = {
-            mode: mode_probs[mode] for mode in self.soft_mode_exps}
+        try:
+            self.soft_mode_probs = {
+                mode: mode_probs[mode] for mode in self.soft_mode_exps}
+        except AttributeError:
+            pass
         return self._calc_prob(mode_probs, dest_exps, dest_expsums)
 
     def calc_basic_prob(self, impedance: dict, calc_accessibility=False):
