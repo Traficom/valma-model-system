@@ -362,12 +362,12 @@ def read_zonedata(path: Path,
         for col in cols:
             try:
                 total = col["total"]
-                shares[total] = defaultdict(list)
             except TypeError:
                 aggs[col] = func
             else:
                 aggs[total] = func
                 wa = WeightedAverage(data[total])
+                shares[total] = defaultdict(list)
                 for share in col["shares"]:
                     aggs[share] = wa.avg
                     shares[total][share.split('_')[1]].append(share)
