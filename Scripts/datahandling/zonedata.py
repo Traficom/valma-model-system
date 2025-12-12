@@ -10,7 +10,7 @@ import json
 
 import parameters.zone as param
 import utils.log as log
-from datatypes.zone import Zone, ZoneAggregations, avg
+from datatypes.zone import Zone, ZoneAggregations, WeightedAverage
 from models.logit import divide
 
 
@@ -367,8 +367,9 @@ def read_zonedata(path: Path,
                 aggs[col] = func
             else:
                 aggs[total] = func
+                wa = WeightedAverage(data[total])
                 for share in col["shares"]:
-                    aggs[share] = lambda x: avg(x, weights=data[total])
+                    aggs[share] = wa.avg
                     shares[total][share.split('_')[1]].append(share)
     data = data.groupby(zone_mapping_name).agg(aggs)
     data.index = data.index.astype(int)
