@@ -260,6 +260,10 @@ class ModelSystem:
                         self.dtm.demand[tp][ass_class] = mtx[ass_class]
             if not is_car_end_assignment:
                 ap.init_assign()
+        if self.long_dist_matrices is not None:
+            self.dtm.init_demand(param.long_dist_simple_classes)
+            self._add_external_demand(
+                self.long_dist_matrices, param.long_dist_simple_classes)
         if self.freight_matrices is not None:
             self.dtm.init_demand(param.truck_classes)
             self._add_external_demand(
@@ -333,7 +337,7 @@ class ModelSystem:
             matrices = (self.basematrices if self.long_dist_matrices is None
                 else self.long_dist_matrices)
             self._add_external_demand(
-                matrices, param.car_classes + param.simple_transit_classes)
+                matrices, param.car_classes + param.local_transit_classes)
 
         # Add vans and save demand matrices
         zd = self._zone_datas["domestic"]
