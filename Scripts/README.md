@@ -93,6 +93,15 @@ This is a .json file, containing transport cost data.
 If you are trying the test test network and data, try
 `"C:\\FILL_YOUR_PATH\\model-system\\Scripts\\tests\\test_data\\Scenario_input_data\\costdata.json"`.
 
+### `MODE_DEST_CALIBRATION_PATH`
+
+File path (.json) where mode and destination choice calibration coefficients
+are found.
+
+### `MUNICIPALITY_CALIBRATION_PATH`
+
+File path (.txt) where municipality calibration coefficients are found
+
 ### `LONG_DIST_DEMAND_FORECAST`
 
 If 'calc', runs assigment with free-flow speed and calculates demand for long-distance trips.

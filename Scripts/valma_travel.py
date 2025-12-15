@@ -29,7 +29,6 @@ def main(args):
     else:
         raise ArgumentTypeError(
             "Iteration number {} not valid".format(args.iterations))
-    base_zonedata_path = Path(args.baseline_data_path, BASE_ZONEDATA_FILE)
     base_matrices_path = Path(args.baseline_data_path, "Matrices")
     freight_matrices_path = (Path(args.freight_matrix_path)
         if args.freight_matrix_path is not None else None)
@@ -99,8 +98,10 @@ def main(args):
     # and providing demand calculations as Python modules)
     # Read input matrices (.omx) and zonedata (.csv)
     log.info("Initializing matrices and models...", extra=log_extra)
-    model_args = (forecast_zonedata_path, cost_data_path, base_zonedata_path,
+    model_args = (forecast_zonedata_path, cost_data_path,
                   base_matrices_path, results_path, ass_model, args.submodel,
+                  args.mode_dest_calibration_path,
+                  args.municipality_calibration_path,
                   long_dist_matrices_path, freight_matrices_path)
     model = (AgentModelSystem(*model_args) if args.is_agent_model
              else ModelSystem(*model_args))
@@ -261,7 +262,6 @@ if __name__ == "__main__":
         "--results-path",
         type=str,
         help="Path to folder where result data is saved to."),
-    # HELMET scenario input data
     parser.add_argument(
         "--submodel",
         type=str,
@@ -290,6 +290,14 @@ if __name__ == "__main__":
         "--cost-data-path",
         type=str,
         help="Path to file containing transport cost data"),
+    parser.add_argument(
+        "--mode-dest-calibration-path",
+        type=str,
+        help="Path to file containing mode and destination choice calibration data"),
+    parser.add_argument(
+        "--municipality-calibration-path",
+        type=str,
+        help="Path to file containing municipality calibration data"),
     parser.add_argument(
         "--iterations",
         type=int,

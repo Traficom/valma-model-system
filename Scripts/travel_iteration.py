@@ -48,6 +48,11 @@ class ModelSystem:
         can be EmmeAssignmentModel or MockAssignmentModel
     submodel: str
         Name of submodel, used for choosing appropriate zone mapping
+    mode_dest_calibration_path : Path (optional)
+        File path (.json) where mode and destination choice calibration
+        coefficients are found
+    municipality_calibration_path : Path (optional)
+        File path (.txt) where municipality calibration coefficients are found
     long_dist_matrices_path: Path (optional)
         Directory path where long-distance demand is found.
         If None, long-distance demand is taken from base matrices.
@@ -59,11 +64,12 @@ class ModelSystem:
     def __init__(self,
                  zone_data_path: Path,
                  cost_data_path: Path,
-                 base_zone_data_path: Path,
                  base_matrices_path: Path,
                  results_path: Path,
                  assignment_model: AssignmentModel,
                  submodel: str,
+                 mode_dest_calibration_path: Optional[Path] = None,
+                 municipality_calibration_path: Optional[Path] = None,
                  long_dist_matrices_path: Optional[Path] = None,
                  freight_matrices_path: Optional[Path] = None):
         self.ass_model = cast(Union[MockAssignmentModel,EmmeAssignmentModel], assignment_model) #type checker hint
@@ -79,11 +85,26 @@ class ModelSystem:
         self.car_dist_cost = cost_data["car_cost"]
         self.transit_cost = {data.pop("id"): data for data
             in cost_data["transit_cost"].values()}
-        extra_dummies = cost_data.get("area_calibration", {})
+        if mode_dest_calibration_path is None:
+            mode_dummies = {}
+            dest_dummies = {}
+        else:
+            calibration_data: dict = json.loads(
+                mode_dest_calibration_path.read_text("utf-8"))
+            mode_dummies = calibration_data["mode_choice_calibration"]
+            dest_dummies = calibration_data["destination_choice_calibration"]
+        extra_dummies = {**mode_dummies, **dest_dummies}
+        if municipality_calibration_path is None:
+            municip_calib = {}
+        else:
+            municip_calib = pandas.read_csv(
+                municipality_calibration_path, sep="\t",
+                index_col=["generation", "attraction"]).to_dict("series")
         self._zone_datas = {
             model_area: ZoneData(
                 zone_data_path, self.zone_numbers, submodel,
-                model_area=model_area, extra_dummies=extra_dummies,
+                model_area=model_area, municipality_calibration=municip_calib,
+                extra_dummies=extra_dummies,
                 car_dist_cost=self.car_dist_cost["car_work"]
             ) for model_area in ["domestic"]}
 
@@ -96,20 +117,28 @@ class ModelSystem:
         sec_dest_purposes = []
         other_work_purposes = []
         other_leisure_purposes = []
-        for file in parameters_path.rglob("*.json"):
+        purpose_names = []
+        for file in parameters_path.glob("*.json"):
             specification = json.loads(file.read_text("utf-8"))
-            for dummies in extra_dummies.values():
+            for dummies in mode_dummies.values():
                 for subarea in dummies:
                     for mode, coeff in dummies[subarea].items():
                         if mode in specification["mode_choice"]:
                             (specification["mode_choice"][mode]
                                           ["generation"][subarea]) = coeff
+            for dummies in dest_dummies.values():
+                for subarea in dummies:
+                    for mode, coeff in dummies[subarea].items():
+                        if mode in specification["destination_choice"]:
+                            (specification["destination_choice"][mode]
+                                          ["attraction"][subarea]) = coeff
             purpose = new_tour_purpose(
                 specification, self._zone_datas, self.resultdata,
                 cost_data["cost_changes"])
             required_time_periods = sorted(
                 {tp for m in purpose.impedance_share.values() for tp in m})
             if required_time_periods == sorted(assignment_model.time_periods):
+                purpose_names.append(purpose.name)
                 if isinstance(purpose, SecDestPurpose):
                     sec_dest_purposes.append(purpose)
                 elif purpose.orig == "home":
@@ -122,6 +151,10 @@ class ModelSystem:
                         other_work_purposes.append(purpose)
                     else:
                         other_leisure_purposes.append(purpose)
+        if len(purpose_names) != len(set(purpose_names)):
+            msg = f"Duplicate tour purposes in demand parameters."
+            log.error(msg)
+            raise ValueError(msg)
         self.dm = self._init_demand_model(
             home_based_work_purposes + other_work_purposes
             + home_based_leisure_purposes + other_leisure_purposes
@@ -475,9 +508,10 @@ class ModelSystem:
     def _get_mode_tours(self, generation = True):
         tours: Dict[str, pandas.Series] = {}
         dists: Dict[str, pandas.Series] = {}
+        idx = pandas.Index(self.zone_numbers, name="analysis_zone_id")
         for mode in self.travel_modes:
-            demand = pandas.Series(0.0, self.zone_numbers, name=mode)
-            dist = pandas.Series(0.0, self.zone_numbers, name=mode)
+            demand = pandas.Series(0.0, idx, name=mode)
+            dist = pandas.Series(0.0, idx, name=mode)
             for purpose in self.dm.tour_purposes:
                 if mode in purpose.modes and purpose.dest != "source":
                     if generation:
