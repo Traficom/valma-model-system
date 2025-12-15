@@ -2,6 +2,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Dict, Iterable
 import numpy
 
+import utils.log as log
 from assignment.assignment_period import AssignmentPeriod
 import parameters.assignment as param
 from assignment.datatypes.transit import TransitMode
@@ -42,6 +43,7 @@ class WholeDayPeriod(AssignmentPeriod):
         """
         self._prepare_cars(
             dist_unit_cost, save_matrices, param.car_classes, truck_classes=[])
+        self._prepare_walk_and_bike(save_matrices=True)
         self._prepare_transit(
             day_scenario, save_standard_matrices=True,
             save_extra_matrices=save_matrices,
@@ -51,11 +53,16 @@ class WholeDayPeriod(AssignmentPeriod):
             dist_unit_cost=dist_unit_cost["car_work"])
 
     def init_assign(self):
-         self._set_car_vdfs(use_free_flow_speeds=True)
-         return []
+        log.info("Pedestrian assignment started...")
+        self.walk_mode.assign()
+        log.info(f"Pedestrians assigned for scenario {self.emme_scenario.id}")
+        self._set_bike_vdfs()
+        self._assign_bikes()
+        self._set_car_vdfs(use_free_flow_speeds=True)
+        return []
 
     def get_soft_mode_impedances(self):
-        return []
+        return self._get_impedances([self.bike_mode.name, self.walk_mode.name])
 
     def assign_trucks_init(self):
          pass

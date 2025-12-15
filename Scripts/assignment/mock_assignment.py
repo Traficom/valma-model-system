@@ -233,7 +233,8 @@ class WholeDayPeriod(MockPeriod):
     def __init__(self, *args, **kwargs):
         MockPeriod.__init__(self, *args, **kwargs)
         self.assignment_modes = (param.car_classes
-                                 + param.long_distance_transit_classes)
+                                 + param.long_distance_transit_classes
+                                 + ("bike", "walk"))
 
     def end_assign(self) -> Dict[str, Dict[str, numpy.ndarray]]:
         """ Get travel impedance matrices for whole day from files.
