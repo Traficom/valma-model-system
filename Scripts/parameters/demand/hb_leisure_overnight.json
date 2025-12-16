@@ -136,18 +136,19 @@
                 "within_zone_inf": -1
             },
             "impedance": {
-                "logsum": 0.3421
+                "logsum": 0.343
             },
             "log": {
                 "attraction_size": 1
             },
             "attraction_size": {
                 "area_leisure_buildings": 1,
-                "wrk_hospitality*beeline_0_10_km": 6.27768,
-                "wrk_hospitality*beeline_10_100_km": 37.04006,
-                "wrk_hospitality*beeline_100_200_km": 93.6908,
-                "wrk_hospitality*beeline_200_9999_km": 290.61518,
-                "population": 1.99771
+                "wrk_hospitality*beeline_0_10_km": 6.44304,
+                "wrk_hospitality*beeline_10_100_km": 36.96605,
+                "wrk_hospitality*beeline_100_200_km": 94.25463,
+                "wrk_hospitality*beeline_200_400_km": 265.86801,
+                "wrk_hospitality*beeline_400_9999_km": 478.66453,
+                "population": 2.00652
             }
         },
         "transit_leisure": {
@@ -155,18 +156,19 @@
                 "within_zone_inf": -1
             },
             "impedance": {
-                "logsum": 0.3421
+                "logsum": 0.343
             },
             "log": {
                 "attraction_size": 1
             },
             "attraction_size": {
                 "area_leisure_buildings": 1,
-                "wrk_hospitality*beeline_0_10_km": 6.27768,
-                "wrk_hospitality*beeline_10_100_km": 37.04006,
-                "wrk_hospitality*beeline_100_200_km": 93.6908,
-                "wrk_hospitality*beeline_200_9999_km": 290.61518,
-                "population": 1.99771
+                "wrk_hospitality*beeline_0_10_km": 6.44304,
+                "wrk_hospitality*beeline_10_100_km": 36.96605,
+                "wrk_hospitality*beeline_100_200_km": 94.25463,
+                "wrk_hospitality*beeline_200_400_km": 265.86801,
+                "wrk_hospitality*beeline_400_9999_km": 478.66453,
+                "population": 2.00652
             }
         },
         "car_leisure": {
@@ -174,19 +176,20 @@
                 "within_zone_inf": -1
             },
             "impedance": {
-                "cost": -0.01554
+                "cost": -0.01785
             },
             "log": {
                 "attraction_size": 1,
-                "time": -1.506
+                "time": -1.476
             },
             "attraction_size": {
                 "area_leisure_buildings": 1,
-                "wrk_hospitality*beeline_0_10_km": 6.27768,
-                "wrk_hospitality*beeline_10_100_km": 37.04006,
-                "wrk_hospitality*beeline_100_200_km": 93.6908,
-                "wrk_hospitality*beeline_200_9999_km": 290.61518,
-                "population": 1.99771
+                "wrk_hospitality*beeline_0_10_km": 6.44304,
+                "wrk_hospitality*beeline_10_100_km": 36.96605,
+                "wrk_hospitality*beeline_100_200_km": 94.25463,
+                "wrk_hospitality*beeline_200_400_km": 265.86801,
+                "wrk_hospitality*beeline_400_9999_km": 478.66453,
+                "population": 2.00652
             }
         },
         "car_pax": {
@@ -194,19 +197,20 @@
                 "within_zone_inf": -1
             },
             "impedance": {
-                "cost": -0.01554
+                "cost": -0.01785
             },
             "log": {
                 "attraction_size": 1,
-                "time": -1.604
+                "time": -1.589
             },
             "attraction_size": {
                 "area_leisure_buildings": 1,
-                "wrk_hospitality*beeline_0_10_km": 6.27768,
-                "wrk_hospitality*beeline_10_100_km": 37.04006,
-                "wrk_hospitality*beeline_100_200_km": 93.6908,
-                "wrk_hospitality*beeline_200_9999_km": 290.61518,
-                "population": 1.99771
+                "wrk_hospitality*beeline_0_10_km": 6.44304,
+                "wrk_hospitality*beeline_10_100_km": 36.96605,
+                "wrk_hospitality*beeline_100_200_km": 94.25463,
+                "wrk_hospitality*beeline_200_400_km": 265.86801,
+                "wrk_hospitality*beeline_400_9999_km": 478.66453,
+                "population": 2.00652
             }
         },
         "walk": {
@@ -221,11 +225,12 @@
             },
             "attraction_size": {
                 "area_leisure_buildings": 1,
-                "wrk_hospitality*beeline_0_10_km": 6.27768,
-                "wrk_hospitality*beeline_10_100_km": 37.04006,
-                "wrk_hospitality*beeline_100_200_km": 93.6908,
-                "wrk_hospitality*beeline_200_9999_km": 290.61518,
-                "population": 1.99771
+                "wrk_hospitality*beeline_0_10_km": 6.44304,
+                "wrk_hospitality*beeline_10_100_km": 36.96605,
+                "wrk_hospitality*beeline_100_200_km": 94.25463,
+                "wrk_hospitality*beeline_200_400_km": 265.86801,
+                "wrk_hospitality*beeline_400_9999_km": 478.66453,
+                "population": 2.00652
             }
         }
     },
@@ -236,81 +241,81 @@
             "attraction": {},
             "impedance": {},
             "log": {
-                "logsum": 0.02739
+                "logsum": 0.0336
             },
             "individual_dummy": {}
         },
         "transit_leisure": {
-            "constant": 91,
+            "constant": 72.8,
             "generation": {},
             "attraction": {},
             "impedance": {},
             "log": {
-                "logsum": 0.02739
+                "logsum": 0.0336
             },
             "individual_dummy": {}
         },
         "car_leisure": {
-            "constant": 37.98,
+            "constant": 30.37,
             "generation": {},
             "attraction": {},
             "impedance": {},
             "log": {
-                "logsum": 0.02739
+                "logsum": 0.0336
             },
             "individual_dummy": {
-                "sh_cars1_hh1": 135.8,
-                "sh_cars2_hh2": 135.8,
-                "sh_cars1_hh2": 126.7
+                "sh_cars1_hh1": 110.7,
+                "sh_cars2_hh2": 110.7,
+                "sh_cars1_hh2": 103.2
             }
         },
         "car_pax": {
-            "constant": 106,
+            "constant": 85.92,
             "generation": {},
             "attraction": {},
             "impedance": {},
             "log": {
-                "logsum": 0.02739
+                "logsum": 0.0336
             },
             "individual_dummy": {
-                "sh_cars1_hh2": 56.7,
-                "sh_cars2_hh2": 56.7
+                "sh_cars1_hh2": 46.18,
+                "sh_cars2_hh2": 46.18
             }
         },
         "walk": {
-            "constant": 87.41,
+            "constant": 70.71,
             "generation": {},
             "attraction": {},
             "impedance": {},
             "log": {
-                "logsum": 0.02739
+                "logsum": 0.0336
             },
             "individual_dummy": {}
         },
         "scaling": {
             "car_leisure": {
-                "constant": 0.02739,
+                "constant": 0.0336,
                 "individual_dummy": {
-                    "sh_cars1_hh1": 0.02739,
-                    "sh_cars2_hh2": 0.02739,
-                    "sh_cars1_hh2": 0.02739
+                    "sh_cars1_hh1": 0.0336,
+                    "sh_cars2_hh2": 0.0336,
+                    "sh_cars1_hh2": 0.0336
                 }
             },
             "car_pax": {
-                "constant": 0.02739,
+                "constant": 0.0336,
                 "individual_dummy": {
-                    "sh_cars1_hh2": 0.02739,
-                    "sh_cars2_hh2": 0.02739
+                    "sh_cars1_hh2": 0.0336,
+                    "sh_cars2_hh2": 0.0336
                 }
             },
             "transit_leisure": {
-                "constant": 0.02739
+                "constant": 0.0336
             },
             "airplane": {
-                "constant": 0.02739
+                "constant": 0.0336
             },
             "walk": {
-                "constant": 0.02739
+                "constant": 0.0336
             }
         }
     },
