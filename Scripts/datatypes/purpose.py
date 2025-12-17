@@ -190,6 +190,12 @@ class Purpose:
                     day_imp[mode][mtx_type] -= day_imp[mode]["car_time"] * 1.5
                 if mtx_type == "time" and mode in transit_access_modes:
                     day_imp[mode][mtx_type] -= day_imp[mode]["car_time"] * 6.5
+            try:
+                vot = cost.vot[self.name][mode]
+                day_imp[mode]["gen_cost"] = day_imp[mode]["cost"] + (day_imp[mode]["time"]/60) * vot
+                log.info(f"Generalized cost calculated for {self.name} {mode}.")
+            except KeyError:
+                pass
         return day_imp
 
 def new_tour_purpose(*args):

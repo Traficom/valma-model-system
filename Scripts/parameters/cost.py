@@ -70,3 +70,32 @@ car_pax_occupancy = {
     "hb_business": 2.483,
     "hb_escort": 2.89
 }
+
+vot = {
+    "hb_leisure_overnight": {
+        "airplane": 11.4,
+        "airpl_car_acc": 11.4,
+        "airpl_taxi_acc": 11.4,
+        "airpl_car_egr": 11.4,
+        "transit_leisure": 7.7,
+        "pt_car_acc": 7.7,
+        "pt_taxi_acc": 7.7,
+        "pt_car_egr": 7.7,
+        "pt_taxi_egr": 7.7,
+        "car_leisure": 11.4,
+        "car_pax": 11.4,
+    },
+    "hb_business": {
+        "airplane": 11.4,
+        "airpl_car_acc": 11.4,
+        "airpl_taxi_acc": 11.4,
+        "airpl_car_egr": 11.4,
+        "transit_leisure": 7.7,
+        "pt_car_acc": 7.7,
+        "pt_taxi_acc": 7.7,
+        "pt_car_egr": 7.7,
+        "pt_taxi_egr": 7.7,
+        "car_leisure": 11.4,
+        "car_pax": 11.4,
+    }
+}

@@ -136,7 +136,7 @@
                 "within_zone_inf": -1
             },
             "impedance": {
-                "logsum": 0.5101
+                "logsum": 0.5487
             },
             "log": {
                 "attraction_size": 1
@@ -150,7 +150,7 @@
                 "within_zone_inf": -1
             },
             "impedance": {
-                "logsum": 0.5101
+                "logsum": 0.5487
             },
             "log": {
                 "attraction_size": 1
@@ -164,11 +164,11 @@
                 "within_zone_inf": -1
             },
             "impedance": {
-                "cost": -0.02235
+                "gen_cost": -0.01431
             },
             "log": {
                 "attraction_size": 1,
-                "time": -1.993
+                "gen_cost": -1.618
             },
             "attraction_size": {
                 "workplaces": 1
@@ -179,11 +179,11 @@
                 "within_zone_inf": -1
             },
             "impedance": {
-                "cost": -0.02235
+                "gen_cost": -0.01401
             },
             "log": {
                 "attraction_size": 1,
-                "time": -2.145
+                "gen_cost": -1.902
                 
             },
             "attraction_size": {
@@ -195,7 +195,7 @@
                 "within_zone_inf": -1
             },
             "impedance": {
-                "dist": -0.3952
+                "dist": -0.3625
             },
             "log": {
                 "attraction_size": 1
@@ -213,162 +213,161 @@
             "attraction": {},
             "impedance": {},
             "log": {
-                "logsum": 0.1967
+                "logsum": 0.4808
             },
             "individual_dummy": {}
         },
         "transit_leisure": {
-            "constant": 5.2411,
+            "constant": -0.63481,
             "generation": {},
             "attraction": {},
             "impedance": {},
             "log": {
-                "logsum": 0.1967
+                "logsum": 0.4808
             },
             "individual_dummy": {}
         },
         "car_leisure": {
-            "constant": 7.467,
+            "constant": -1.881,
             "generation": {},
             "attraction": {},
             "impedance": {},
             "log": {
-                "logsum": 0.1967
+                "logsum": 0.4808
             },
             "individual_dummy": {
-                "sh_cars1_hh1": 17.36,
-                "sh_cars2_hh2": 17.36,
-                "sh_cars1_hh2": 12.96
+                "sh_cars1_hh1": 6.76,
+                "sh_cars2_hh2": 6.76,
+                "sh_cars1_hh2": 5.081
             }
         },
         "car_pax": {
-            "constant": 6.139,
+            "constant": -2.969,
             "generation": {},
             "attraction": {},
             "impedance": {},
             "log": {
-                "logsum": 0.1967
+                "logsum": 0.4808
             },
             "individual_dummy": {
-                "sh_cars1_hh2": 5.494,
-                "sh_cars2_hh2": 5.494
+                "sh_cars1_hh2": 2.022,
+                "sh_cars2_hh2": 2.022
             }
         },
         "walk": {
-            "constant": 6.028,
+            "constant": -1.12,
             "generation": {},
             "attraction": {},
             "impedance": {},
             "log": {
-                "logsum": 0.1967
+                "logsum": 0.4808
             },
             "individual_dummy": {}
         },
         "scaling": {
             "car_leisure": {
-                "constant": 0.1967,
+                "constant": 0.4808,
                 "individual_dummy": {
-                    "sh_cars1_hh1": 0.1967,
-                    "sh_cars2_hh2": 0.1967,
-                    "sh_cars1_hh2": 0.1967
+                    "sh_cars1_hh1": 0.4808,
+                    "sh_cars2_hh2": 0.4808,
+                    "sh_cars1_hh2": 0.4808
                 }
             },
             "car_pax": {
-                "constant": 0.1967,
+                "constant": 0.4808,
                 "individual_dummy": {
-                    "sh_cars1_hh2": 0.1967,
-                    "sh_cars2_hh2": 0.1967
+                    "sh_cars1_hh2": 0.4808,
+                    "sh_cars2_hh2": 0.4808
                 }
             },
             "transit_leisure": {
-                "constant": 0.1967
+                "constant": 0.4808
             },
             "airplane": {
-                "constant": 0.1967
+                "constant": 0.4808
             },
             "walk": {
-                "constant": 0.1967
+                "constant": 0.4808
             }
         }
     },
     "access_mode_choice": {
         "airplane": {
             "airplane": {
-                "constant": -5.5,
+                "constant": -2,
                 "generation": {},
                 "attraction": {},
                 "impedance": {
-                    "cost": -0.145
+                    "gen_cost": -0.04309
                 },
                 "log": {
-                    "transform": -0.6383
+                    "transform": -1.982
                 },
                 "transform": {
                     "attraction": {},
                     "impedance": {
-                        "time": 1
+                        "gen_cost": 1
                     }
                 },
                 "individual_dummy": {}
             },
             "airpl_car_acc": {
-                "constant": -5.526,
+                "constant": -5.688,
                 "generation": {},
                 "attraction": {},
                 "impedance": {
-                    "cost": -0.145,
-                    "park_cost": -0.145
+                    "gen_cost": -0.04309
                 },
                 "log": {
-                    "transform": -0.6383
+                    "transform": -1.982
                 },
                 "transform": {
                     "attraction": {},
                     "impedance": {
-                        "time": 1
+                        "gen_cost": 1
                     }
                 },
                 "individual_dummy": {
-                    "sh_cars1_hh1": 4.368,
-                    "sh_cars2_hh2": 4.368,
-                    "sh_cars1_hh2": 3.26
+                    "sh_cars1_hh1": 4.218,
+                    "sh_cars2_hh2": 4.218,
+                    "sh_cars1_hh2": 3.2
                 }
             },
             "airpl_taxi_acc": {
-                "constant": -3.116,
+                "constant": -3.313,
                 "generation": {},
                 "attraction": {},
                 "impedance": {
-                    "cost": -0.145
+                    "gen_cost": -0.04309
                 },
                 "log": {
-                    "transform": -0.6383
+                    "transform": -1.982
                 },
                 "transform": {
                     "attraction": {},
                     "impedance": {
-                        "time": 1
+                        "gen_cost": 1
                     }
                 },
                 "individual_dummy": {
-                    "sh_cars1_hh2": 1.683,
-                    "sh_cars2_hh2": 1.683
+                    "sh_cars1_hh2": 1.578,
+                    "sh_cars2_hh2": 1.578
                 }
             },
             "airpl_car_egr": {
-                "constant": -5.5,
+                "constant": -3.036,
                 "generation": {},
                 "attraction": {},
                 "impedance": {
-                    "cost": -0.145
+                    "gen_cost": -0.04309
                 },
                 "log": {
-                    "transform": -0.6383
+                    "transform": -1.982
                 },
                 "transform": {
                     "attraction": {},
                     "impedance": {
-                        "time": 1
+                        "gen_cost": 1
                     }
                 },
                 "individual_dummy": {}
@@ -380,77 +379,76 @@
                 "generation": {},
                 "attraction": {},
                 "impedance": {
-                    "cost": -0.145
+                    "gen_cost": -0.04309
                 },
                 "log": {
-                    "transform": -0.6383
+                    "transform": -1.982
                 },
                 "transform": {
                     "attraction": {},
                     "impedance": {
-                        "time": 1
+                        "gen_cost": 1
                     }
                 },
                 "individual_dummy": {}
             },
             "pt_car_acc": {
-                "constant": -5.526,
+                "constant": -5.688,
                 "generation": {},
                 "attraction": {},
                 "impedance": {
-                    "cost": -0.145,
-                    "park_cost": -0.145
+                    "gen_cost": -0.04309
                 },
                 "log": {
-                    "transform": -0.6383
+                    "transform": -1.982
                 },
                 "transform": {
                     "attraction": {},
                     "impedance": {
-                        "time": 1
+                        "gen_cost": 1
                     }
                 },
                 "individual_dummy": {
-                    "sh_cars1_hh1": 4.368,
-                    "sh_cars2_hh2": 4.368,
-                    "sh_cars1_hh2": 3.26
+                    "sh_cars1_hh1": 4.218,
+                    "sh_cars2_hh2": 4.218,
+                    "sh_cars1_hh2": 3.2
                 }
             },
             "pt_taxi_acc": {
-                "constant": -3.116,
+                "constant": -3.313,
                 "generation": {},
                 "attraction": {},
                 "impedance": {
-                    "cost": -0.145
+                    "gen_cost": -0.04309
                 },
                 "log": {
-                    "transform": -0.6383
+                    "transform": -1.982
                 },
                 "transform": {
                     "attraction": {},
                     "impedance": {
-                        "time": 1
+                        "gen_cost": 1
                     }
                 },
                 "individual_dummy": {
-                    "sh_cars1_hh2": 1.683,
-                    "sh_cars2_hh2": 1.683
+                    "sh_cars1_hh2": 1.578,
+                    "sh_cars2_hh2": 1.578
                 }
             },
             "pt_taxi_egr": {
-                "constant": -2.748,
+                "constant": -3.036,
                 "generation": {},
                 "attraction": {},
                 "impedance": {
-                    "cost": -0.145
+                    "gen_cost": -0.04309
                 },
                 "log": {
-                    "transform": -0.6383
+                    "transform": -1.982
                 },
                 "transform": {
                     "attraction": {},
                     "impedance": {
-                        "time": 1
+                        "gen_cost": 1
                     }
                 },
                 "individual_dummy": {}
