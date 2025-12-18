@@ -202,13 +202,12 @@ class FreightAssignmentPeriod(AssignmentPeriod):
         return port_ids
 
     def _get_marine_transit_lines(self, is_export: bool) -> dict:
-        """Get list of marine transit lines depending whether data fetching
-        is done for exporting or importing.
+        """Fetch list of marine transit lines.
 
         Parameters
         ----------
         is_export : bool
-            Whether data should be fetched for export (True) or import (False)
+            Fetch export specific transit lines. Else import specific
         
         Returns
         -------
@@ -241,7 +240,7 @@ class FreightAssignmentPeriod(AssignmentPeriod):
         """Create inf matrix and insert attribute values into origin and
         destination indices of the matrix. OD pairs without trade route will 
         retain their inf attribute value.
-.
+
         Parameters
         ----------
         transit_lines : list[Transit line]
