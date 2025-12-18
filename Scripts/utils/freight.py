@@ -1,6 +1,6 @@
 import numpy # type: ignore
 
-import parameters.tour_generation as param
+import parameters.tour_combinations as param
 
 
 def fratar(target_vect, trips, max_iter=10):

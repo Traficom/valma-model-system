@@ -1,0 +1,58 @@
+{
+    "name": "tekst",
+    "orig": "null",
+    "dest": "null",
+    "generation_area": "domestic",
+    "attraction_area": "domestic",
+    "struct": "mode>dest",
+    "impedance_share": {},
+    "distance_boundaries": {
+        "truck": [
+            0,
+            9999
+        ],
+        "freight_train": [
+            0,
+            9999
+        ],
+        "ship": [
+            0,
+            9999
+        ]
+    },
+    "destination_choice": {
+        "truck": {
+            "attraction": {},
+            "impedance": {
+                "cost": -0.05819
+            },
+            "log": {
+                "attraction_size": 1
+            },
+            "attraction_size": {
+                "att_tekst": 1
+            }
+        }
+    },
+    "mode_choice": {
+        "truck": {
+            "constant": 0,
+            "generation": {},
+            "attraction": {},
+            "impedance": {},
+            "log": {
+                "logsum": 1
+            },
+            "individual_dummy": {}
+        }
+    },
+    "demand_share": {},
+    "logistics_module": {
+        "orig_lc_detour": -0.3340,
+        "lc_dest_detour": -0.3405,
+        "constant_detour": -25.0821,
+        "orig_dest_direct": -0.9939,
+        "constant_direct": 20.0824,
+        "size_factor": 2.5867
+    }
+}

@@ -43,6 +43,6 @@ class Demand:
         """
         start = self.purpose.bounds.start
         if self.orig is None:
-            return (start, 0)
+            return (start, self.purpose.dest_interval.start)
         else:
             return (self.orig, start, start)

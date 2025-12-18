@@ -45,7 +45,8 @@ class EmmeAssignmentTest(unittest.TestCase):
         validate(
             self.context.modeller.emmebank.scenario(
                 self.scenario_id).get_network())
-        ass_model = EmmeAssignmentModel(self.context, self.scenario_id)
+        ass_model = EmmeAssignmentModel(
+            self.context, self.scenario_id, "uusimaa")
         ass_model.prepare_network(self.dist_cost, car_time_files=[])
         ass_model.calc_transit_cost(self.fares)
         nr_zones = ass_model.nr_zones
@@ -56,8 +57,6 @@ class EmmeAssignmentTest(unittest.TestCase):
             "car_electric",
             "transit_work",
             "transit_leisure",
-            # "car_first_mile",
-            # "car_last_mile",
             "bike",
             "trailer_truck",
             "semi_trailer",
@@ -83,8 +82,8 @@ class EmmeAssignmentTest(unittest.TestCase):
 
     def test_long_dist_assignment(self):
         ass_model = EmmeAssignmentModel(
-            self.context, self.scenario_id, use_free_flow_speeds=True,
-            time_periods={"vrk": "WholeDayPeriod"})
+            self.context, self.scenario_id, "koko_suomi",
+            use_free_flow_speeds=True, time_periods={"vrk": "WholeDayPeriod"})
         ass_model.prepare_network(self.dist_cost)
         ass_model.calc_transit_cost(self.fares)
         nr_zones = ass_model.nr_zones
@@ -94,7 +93,7 @@ class EmmeAssignmentTest(unittest.TestCase):
             "car_leisure",
             "car_electric",
             "train",
-            "long_d_bus",
+            "coach",
             "airplane",
         ]
         for ap in ass_model.assignment_periods:
@@ -107,7 +106,8 @@ class EmmeAssignmentTest(unittest.TestCase):
         ass_model.aggregate_results(self.resultdata, self.mapping)
 
     def test_freight_assignment(self):
-        ass_model = EmmeAssignmentModel(self.context, self.scenario_id)
+        ass_model = EmmeAssignmentModel(
+            self.context, self.scenario_id, "koko_suomi")
         ass_model.prepare_freight_network(self.dist_cost, ["c1", "c2"])
         ass_model.freight_network.assign()
         demand = numpy.full((ass_model.nr_zones, ass_model.nr_zones), 1.0)
@@ -116,4 +116,5 @@ class EmmeAssignmentTest(unittest.TestCase):
         ass_model.freight_network.save_network_volumes("c1")
         ass_model.freight_network.output_traversal_matrix({"freight_train", "ship"},
                                                           self.resultdata.path)
+        ass_model.freight_network.read_ship_impedances(is_export=True)
         self.resultdata.flush()

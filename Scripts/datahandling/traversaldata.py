@@ -1,11 +1,11 @@
 from pathlib import Path
 import parameters.assignment as param
 import numpy
+from typing import Dict
 
-def transform_traversal_data(result_path: Path, zones: list):
-    """Processes freight model specific traversal files containing
-    information on amount of transported tons between gate pair.
-    Processed traversal file contents are aggregated as auxiliary matrix.
+def transform_traversal_data(result_path: Path, zones: list) -> Dict[str, numpy.ndarray]:
+    """Processes freight model specific traversal files containing information 
+    on amount of transported tons between gate pair as auxiliary demand.
 
     Parameters
     ----------
@@ -16,14 +16,14 @@ def transform_traversal_data(result_path: Path, zones: list):
 
     Returns
     ----------
-    numpy matrix
-        Aggregated auxiliary demand of freight modes
+    dict
+        freight transit mode : numpy.ndarray
     """
-    aux_tons = numpy.zeros([len(zones), len(zones)], dtype=numpy.float32)
+    aux_tons = {}
     for ass_class in param.freight_modes:
         file = result_path / f"{ass_class}.txt"
         if file.exists():
-            aux_tons += read_traversal_file(file, numpy.array(zones))
+            aux_tons[ass_class] = read_traversal_file(file, numpy.array(zones))
             file.unlink()
     return aux_tons
 

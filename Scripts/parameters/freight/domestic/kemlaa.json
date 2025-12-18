@@ -1,0 +1,77 @@
+{
+    "name": "kemlaa",
+    "orig": "null",
+    "dest": "null",
+    "generation_area": "domestic",
+    "attraction_area": "domestic",
+    "struct": "dest>mode",
+    "impedance_share": {},
+    "distance_boundaries": {
+        "truck": [
+            0,
+            9999
+        ],
+        "freight_train": [
+            0,
+            9999
+        ],
+        "ship": [
+            0,
+            9999
+        ]
+    },
+    "destination_choice": {
+        "logsum": {
+            "attraction": {},
+            "impedance": {},
+            "log": {
+                "attraction_size": 1.0,
+                "logsum": 0.4074
+            },
+            "attraction_size": {
+                "att_kemlaa": 1
+            }
+        }
+    },
+    "mode_choice": {
+        "truck": {
+            "constant": 0,
+            "generation": {},
+            "attraction": {},
+            "impedance": {
+                "cost": -0.175
+            },
+            "log": {},
+            "individual_dummy": {}
+        },
+        "freight_train": {
+            "generation": {},
+            "attraction": {},
+            "impedance": {
+                "cost": -0.367
+            },
+            "log": {},
+            "individual_dummy": {},
+            "constant": 3.943
+        },
+        "ship": {
+            "generation": {},
+            "attraction": {},
+            "impedance": {
+                "cost": -0.7516
+            },
+            "log": {},
+            "individual_dummy": {},
+            "constant": 15.88
+        }
+    },
+    "demand_share": {},
+    "logistics_module": {
+        "orig_lc_detour": -0.9997,
+        "lc_dest_detour": -0.8271,
+        "constant_detour": -8.8502,
+        "orig_dest_direct": -0.9934,
+        "constant_direct": 3.8505,
+        "size_factor": 0.3370
+    }
+}

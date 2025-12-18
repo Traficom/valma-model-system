@@ -1,6 +1,7 @@
+from typing import Union, Dict, Tuple
 import numpy # type: ignore
 
-import parameters.tour_generation as param
+import parameters.tour_combinations as param
 
 
 class TourCombinationModel:
@@ -25,7 +26,9 @@ class TourCombinationModel:
         self.tour_combinations = [combination for nr_tours in self.param
             for combination in self.param[nr_tours]]
 
-    def calc_prob(self, age_group, is_car_user, zones):
+    def calc_prob(self,
+                  age_group: str,
+                  zones: Union[int, slice]) -> Dict[Tuple[str], numpy.ndarray]:
         """Calculate choice probabilities for each tour combination.
 
         Calculation is done for one specific population group
@@ -36,8 +39,6 @@ class TourCombinationModel:
         ----------
         age_group : str
             Age group (age_7-17/age_18-29/...)
-        is_car_user : bool
-            True if is car user
         zones : int or slice
             Zone number (for agent model) or zone data slice
 
@@ -46,7 +47,7 @@ class TourCombinationModel:
         dict
             key : tuple of str
                 Tour combination (-/hw/hw-ho/...)
-            value : pandas.Series
+            value : numpy.ndarray
                 Choice probabilities per zone
         """
         prob = {}
@@ -74,8 +75,6 @@ class TourCombinationModel:
                         util += b["zone"][i] * self.zone_data[i][zones]
                     dummies = b["individual_dummy"]
                     util += dummies[age_group]
-                    if is_car_user and "car_users" in dummies:
-                        util += dummies["car_users"]
                     combination_exps[tour_combination] = numpy.exp(util)
                 else:
                     combination_exps[tour_combination] = 0.0

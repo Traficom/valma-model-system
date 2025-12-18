@@ -1,14 +1,14 @@
 t network_fields
-#hinta_aht LINK REAL ''
-#hinta_pt LINK REAL ''
-#hinta_iht LINK REAL ''
-#hinta_vrk LINK REAL ''
-#extra_cost LINK INTEGER32 extra_cost
+#buslane LINK BOOLEAN ''
 #car_time_aht LINK REAL ''
-#car_time_pt LINK REAL ''
 #car_time_iht LINK REAL ''
 #car_time_it LINK REAL ''
+#car_time_pt LINK REAL ''
 #car_time_vrk LINK REAL ''
-#buslane LINK BOOLEAN ''
+#extra_cost LINK INTEGER32 'extra_cost'
+#hinta_aht LINK REAL ''
+#hinta_iht LINK REAL ''
+#hinta_pt LINK REAL ''
+#hinta_vrk LINK REAL ''
 end network_fields
-   inode    jnode  #buslane #car_time_aht #car_time_iht #car_time_pt #car_time_vrk
+   inode    jnode  #buslane #car_time_aht #car_time_iht #car_time_it #car_time_pt #car_time_vrk #extra_cost #hinta_aht #hinta_iht #hinta_pt #hinta_vrk

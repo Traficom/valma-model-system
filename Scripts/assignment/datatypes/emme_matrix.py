@@ -67,8 +67,11 @@ class EmmeMatrix:
 
     @property
     def data(self) -> numpy.ndarray:
-        return (self._emme_project.modeller.emmebank.matrix(self.id)
-               .get_numpy_data(scenario_id=self._scenario_id))
+        try:
+            return (self._emme_project.modeller.emmebank.matrix(self.id)
+                    .get_numpy_data(scenario_id=self._scenario_id))
+        except AttributeError:
+            raise AttributeError(f"Matrix {self.description} not found")
 
     @property
     def item(self):

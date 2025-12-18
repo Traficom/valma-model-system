@@ -1,6 +1,6 @@
 c Modeller - Mode Transaction
-c Date: 2024-11-21 10:00:32
-c Project:        mock_project                                                
+c Date: 2025-05-15 14:57:13
+c Project:        mock_project
 c Scenario 5:     test network
 t modes
 c id description mode_type colour cost_time_coeff cost_distance_coeff energy_time_coeff energy_distance_coeff speed_factor
@@ -9,14 +9,11 @@ a c 'Car'      4   1
 a k 'Truck'    4   1
 a y 'Trailer_tr' 4   1
 a v 'Van'      4   1
-a d 'Rail_dies' 2   1
 a J 'Rail_elec' 2   1
 a t 'Tram'     2   1
 a a 'Walking'  3   1   0.00   0.00   0.00   0.00          5.0
 a w 'Ferry'    2   1
 a W 'Ship_4m'  2   1
-a s 'Ship_7m'  2   1
-a S 'Ship_9m'  2   1
 a b 'Bus'      2   1
 a f 'Bike'     3   1   0.00   0.00   0.00   0.00         15.0
 a g 'BRT'      2   1
@@ -27,3 +24,10 @@ a j 'Long_d_tra' 2   1
 a p 'Light_rail' 2   1
 a e 'Long_d_bus' 2   1
 a u 'Park_ride' 3   1   0.00   0.00   0.00   0.00    timau*1.0
+a C 'Container' 2   1
+a G 'Gen_cargo' 2   1
+a L 'LNG_carrie' 2   1
+a O 'Oil_tanker' 2   1
+a P 'Prod_tanke' 2   1
+a R 'Roro'     2   1
+a D 'Rail_dies' 2   1

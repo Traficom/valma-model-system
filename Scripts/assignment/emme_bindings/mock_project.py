@@ -4,6 +4,7 @@ import numpy # type: ignore
 from collections import namedtuple
 import copy
 import os
+from pathlib import Path
 
 
 MODE_TYPES = {
@@ -104,9 +105,9 @@ class MockProject:
                 
     def create_network_field(self, 
                              network_field_type: str,
+                             network_field_atype: str,
                              network_field_name: str,
                              network_field_description: str,
-                             network_field_atype: str,
                              overwrite: bool = False,
                              scenario: Optional[Scenario] = None):
         if overwrite:
@@ -352,8 +353,7 @@ class MockProject:
                     break
                 attr_type = rec[1]
                 self.create_network_field(
-                    attr_type, rec[0], "",
-                    network_field_atype=rec[2],
+                    attr_type, rec[2], rec[0], "",
                     overwrite=True, scenario=scenario)
             header = f.readline().split()
             network = scenario.get_network()
@@ -395,9 +395,6 @@ class MockProject:
             "iterations": [{"number": 1}],
         }
         return report
-
-    def pedestrian_assignment(self, *args, **kwargs):
-        pass
 
     _transit_classes = set()
 
@@ -460,7 +457,8 @@ class MockProject:
         for category in ["on_links","on_segments","at_nodes"]:
             if category in specification:
                 for attr in specification[category].values():
-                    if scenario.extra_attribute(attr) is None:
+                    if (not isinstance(attr, list)
+                        and scenario.extra_attribute(attr) is None):
                         raise AttributeError(f"Attribute {attr} does not exist")
 
     def traversal_analysis(self, specification: Dict, output_file: str,
@@ -478,6 +476,8 @@ Modeller = namedtuple("Modeller", "emmebank")
 
 class EmmeBank:
     def __init__(self):
+        self.path = (Path(__file__).parent.parent.parent
+                     / "tests" / "test_data" / "Results" / "test")
         self._scenarios = {}
         self._matrices = {}
         self._functions = {}
@@ -897,6 +897,12 @@ class Node(NetworkObject):
     @property
     def id(self):
         return str(self.number)
+
+    def incoming_links(self):
+        return (l for l in self.network.links() if l.j_node is self)
+
+    def outgoing_links(self):
+        return (l for l in self.network.links() if l.i_node is self)
 
     def outgoing_segments(self, include_hidden=False):
         return (s for s in self.network.transit_segments(include_hidden)

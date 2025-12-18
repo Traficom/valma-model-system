@@ -5,11 +5,12 @@ from typing import TYPE_CHECKING, Union
 import parameters.assignment as param
 from assignment.datatypes.assignment_mode import AssignmentMode, LENGTH_ATTR
 from assignment.datatypes.path_analysis import PathAnalysis
+from models.logit import divide
 if TYPE_CHECKING:
     from assignment.assignment_period import AssignmentPeriod
 
 
-class CarMode(AssignmentMode):
+class VehicleMode(AssignmentMode):
     def __init__(self, name: str, assignment_period: AssignmentPeriod,
                  dist_unit_cost: float, include_toll_cost: bool,
                  save_matrices: bool = False):
@@ -92,9 +93,25 @@ class CarMode(AssignmentMode):
     def _get_time(self, cost):
         return self.gen_cost.data - self.vot_inv*cost
 
-class TruckMode(CarMode):
+
+class CarMode(VehicleMode):
     def __init__(self, *args, **kwargs):
-        CarMode.__init__(self, *args, **kwargs)
+        VehicleMode.__init__(self, *args, **kwargs)
+        self.free_flow_time = self._create_matrix("free_flow_time")
+        self.add_analysis(param.free_flow_time_attr, self.free_flow_time.id)
+        self.max_congestion = 0.0
+
+    def _get_time(self, cost):
+        time = self.gen_cost.data - self.vot_inv*cost
+        free_flow_time = self.free_flow_time.data
+        congested_time = time - free_flow_time
+        self.max_congestion: float = divide(congested_time, free_flow_time).max()
+        return free_flow_time + param.congested_time_weight*congested_time
+
+
+class TruckMode(VehicleMode):
+    def __init__(self, *args, **kwargs):
+        VehicleMode.__init__(self, *args, **kwargs)
         self.time = self._create_matrix("time")
         self.add_analysis(f"@truck_time_{self.time_period}", self.time.id)
 

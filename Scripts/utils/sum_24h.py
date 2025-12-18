@@ -42,7 +42,7 @@ def sum_24h(obj, networks, extras: Dict[str, Dict[str, str]],
         else:
             for attr in extra:
                 day_attr[attr] += (tp_obj[extras[tp][attr]]
-                                   * volume_factors[attr][tp])
+                                   / volume_factors[attr][tp])
     for attr in extra:
         obj[extra[attr]] = day_attr[attr]
 

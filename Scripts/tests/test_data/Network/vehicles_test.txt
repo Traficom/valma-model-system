@@ -1,6 +1,6 @@
 c Modeller - Vehicle Transaction
-c Date: 2024-11-21 10:00:32
-c Project:        mock_project                                                
+c Date: 2025-05-15 14:57:13
+c Project:        mock_project
 c Scenario 5:     test network
 t vehicles
 c  id description mode fleet_size seated_capacity total_capacity cost_time_coeff cost_distance_coeff energy_time_coeff energy_distance_coeff auto_equivalent
@@ -15,8 +15,12 @@ a   8 'Long_d_bus' e      1   100   150   0.00   0.00   0.00   0.00   1.00
 a   9 'Local_trai' r      1   100   150   0.00   0.00   0.00   0.00   1.00
 a  10 'BRT'      g      1   100   150   0.00   0.00   0.00   0.00   1.00
 a  11 'Ferry'    w      1   100   150   0.00   0.00   0.00   0.00   1.00
-a  20 'f_ship4m' W      1   100   150   0.00   0.00   0.00   0.00   1.00
-a  21 'f_ship7m' s      1   100   150   0.00   0.00   0.00   0.00   1.00
-a  22 'f_ship9m' S      1   100   150   0.00   0.00   0.00   0.00   1.00
-a  30 'f_train_d' d      1   100   150   0.00   0.00   0.00   0.00   1.00
+a  20 'Dom_vessel' W      1   100   150   0.00   0.00   0.00   0.00   1.00
+a  21 'Container' C      1   100   150   0.00   0.00   0.00   0.00   1.00
+a  22 'Gen_cargo' G      1   100   150   0.00   0.00   0.00   0.00   1.00
+a  23 'LNG_carrie' L      1   100   150   0.00   0.00   0.00   0.00   1.00
+a  24 'Oil_tanker' O      1   100   150   0.00   0.00   0.00   0.00   1.00
+a  25 'Prod_tanke' P      1   100   150   0.00   0.00   0.00   0.00   1.00
+a  26 'Roro'     R      1   100   150   0.00   0.00   0.00   0.00   1.00
+a  30 'f_train_d' D      1   100   150   0.00   0.00   0.00   0.00   1.00
 a  31 'f_train_e' J      1   100   150   0.00   0.00   0.00   0.00   1.00
