@@ -336,6 +336,10 @@ class ModeDestModel(LogitModel):
                 ec_impedance[mode] = impedance.pop(electric_mode)
         mode_exps, mode_expsum, dest_exps, dest_expsums = self._calc_utils(
             impedance)
+        logsum = pandas.Series(
+            log(mode_expsum), self.purpose.orig_zone_numbers,
+            name=self.purpose.name)
+        self.zone_data._values[self.purpose.name] = logsum
         if calc_accessibility:
             self._calc_accessibility(mode_exps, mode_expsum)
         mode_probs = self._calc_mode_prob(mode_exps, mode_expsum)
@@ -401,6 +405,10 @@ class ModeDestModel(LogitModel):
             Whether to calclulate and store accessibility indicators
         """
         mode_exps, mode_expsum, dest_exps, _ = self._calc_utils(impedance)
+        logsum = pandas.Series(
+            log(mode_expsum), self.purpose.orig_zone_numbers,
+            name=self.purpose.name)
+        self.zone_data._values[self.purpose.name] = logsum
         if calc_accessibility:
             self._calc_accessibility(mode_exps, mode_expsum)
         self.cumul_dest_prob = {}
@@ -494,10 +502,6 @@ class ModeDestModel(LogitModel):
         except AttributeError:
             pass
         mode_expsum: numpy.ndarray = sum(mode_exps.values())
-        logsum = pandas.Series(
-            log(mode_expsum), self.purpose.orig_zone_numbers,
-            name=self.purpose.name)
-        self.zone_data._values[self.purpose.name] = logsum
         return mode_exps, mode_expsum, dest_exps, dest_expsums
 
     def _calc_exps(self,

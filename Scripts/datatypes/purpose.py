@@ -301,7 +301,6 @@ class TourPurpose(Purpose):
         self.connection_models: Dict[str, logit.LogitModel] = {}
         for mode in intermodals:
             if mode in self.modes:
-                self.modes += intermodals[mode]
                 new_spec = copy(specification)
                 new_spec["mode_choice"] = new_spec["access_mode_choice"][mode]
                 self.connection_models[mode] = logit.LogitModel(
