@@ -23,6 +23,7 @@ from parameters.commodity import commodity_conversion
 
 
 def main(args):
+    # Connect to emme project, set zonedata and other path variables
     zonedata_path = Path(args.forecast_data_path)
     cost_data_path = Path(args.cost_data_path)
     results_path = Path(args.results_path, args.scenario_name)
@@ -41,28 +42,38 @@ def main(args):
     resultdata = ResultsData(results_path)
     resultmatrices = MatrixData(results_path / "Matrices" / "koko_suomi")
     costdata = json.loads(cost_data_path.read_text("utf-8"))
-    purposes = create_purposes(parameters_path / "domestic", zonedata, 
-                               resultdata, costdata["freight"])
+    
+    # Set purposes and fetch impedances
+    purposes = {
+        "domestic": create_purposes(parameters_path / "domestic", zonedata, 
+                                    resultdata, costdata["freight"]),
+        "foreign": create_purposes(parameters_path / "foreign", zonedata, 
+                                   resultdata, costdata["freight"])
+    }
     purps_to_assign = list(filter(lambda purposes: purposes[0] in
-                                  list(purposes), args.specify_commodity_names))
+                                  list(purposes["domestic"]), args.specify_commodity_names))
     ass_model.prepare_freight_network(costdata["car_cost"], purps_to_assign)
     store_demand = StoreDemand(ass_model.freight_network, resultmatrices, 
                                zonedata.all_zone_numbers, zonedata.zone_numbers)
-
     impedance = ass_model.freight_network.assign()
-    for mtx_type in impedance.keys():
-        for ass_class, mtx in impedance[mtx_type].items():
-            impedance[mtx_type][ass_class] = mtx[:zonedata.nr_zones, :zonedata.nr_zones]
-    truck_distances = {key: impedance["dist"][key] for key in param.truck_classes}
-    del impedance["cost"]
-    impedance = {mode: {mtx_type: impedance[mtx_type][mode] for mtx_type in impedance
-                        if mode in impedance[mtx_type]}
-                        for mode in ("truck", "freight_train", "ship")}
     
-    total_demand = {mode: numpy.zeros([zonedata.nr_zones, zonedata.nr_zones], 
-                                      dtype="float32")
+    # Run foreign trade route choice
+    for purpose in purposes["foreign"].values():
+        log.info(f"Calculating route for foreign purpose: {purpose.name}")
+        ship_imps, origs, dests = ass_model.freight_network.read_ship_impedances(
+            is_export=True)
+        purpose.calc_route(impedance, ship_imps, origs, dests)
+    
+    # prepare domestic model by splicing impedances and initializing final demand matrix 
+    for ass_class in list(impedance):
+        for mtx_type, mtx in impedance[ass_class].items():
+            impedance[ass_class][mtx_type] = mtx[:zonedata.nr_zones, :zonedata.nr_zones]
+    truck_distances = {key: impedance[key]["dist"] for key in param.truck_classes}
+    total_demand = {mode: numpy.zeros([zonedata.nr_zones, zonedata.nr_zones], dtype="float32")
                     for mode in param.truck_classes}
-    for purpose in purposes.values():
+    
+    # Run domestic demand calculation
+    for purpose in purposes["domestic"].values():
         log.info(f"Calculating demand for domestic purpose: {purpose.name}")
         demand = purpose.calc_traffic(impedance)
         if hasattr(purpose, "logistics_module"):
@@ -98,15 +109,6 @@ def main(args):
     write_vehicle_summary(total_demand, truck_distances, resultdata)
     resultdata.flush()
     
-    purposes = create_purposes(parameters_path / "foreign", zonedata, 
-                               resultdata, costdata["freight"])
-    for purpose in purposes.values():
-        log.info(f"Calculating route for foreign purpose: {purpose.name}")
-        imp, origs, dests = ass_model.freight_network.read_ship_impedances(
-            is_export=True)
-        impedance["ship"] = imp
-        purpose.calc_route(impedance, origs, dests)
-
     log.info("Starting end assigment")
     for ass_class in total_demand:
         store_demand.store(ass_class, total_demand[ass_class], "freight_demand")
