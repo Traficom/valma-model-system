@@ -44,21 +44,17 @@ def main(args):
     costdata = json.loads(cost_data_path.read_text("utf-8"))
     
     # Set purposes and fetch impedances
-    purposes = {
-        "domestic": create_purposes(parameters_path / "domestic", zonedata, 
-                                    resultdata, costdata["freight"]),
-        "foreign": create_purposes(parameters_path / "foreign", zonedata, 
-                                   resultdata, costdata["freight"])
-    }
-    purps_to_assign = list(filter(lambda purposes: purposes[0] in
-                                  list(purposes["domestic"]), args.specify_commodity_names))
-    ass_model.prepare_freight_network(costdata["car_cost"], purps_to_assign)
+    purposes = create_purposes(parameters_path / "foreign", zonedata, 
+                               resultdata, costdata["freight"])
+    purposes_to_assign = [purpose for purpose in list(commodity_conversion)
+                          if purpose in args.specify_commodity_names]
+    ass_model.prepare_freight_network(costdata["car_cost"], purposes_to_assign)
     store_demand = StoreDemand(ass_model.freight_network, resultmatrices, 
                                zonedata.all_zone_numbers, zonedata.zone_numbers)
     impedance = ass_model.freight_network.assign()
     
     # Run foreign trade route choice
-    for purpose in purposes["foreign"].values():
+    for purpose in purposes.values():
         log.info(f"Calculating route for foreign purpose: {purpose.name}")
         ship_imps, origs, dests = ass_model.freight_network.read_ship_impedances(
             is_export=True)
@@ -71,8 +67,10 @@ def main(args):
     total_demand = {mode: numpy.zeros([zonedata.nr_zones, zonedata.nr_zones], dtype="float32")
                     for mode in param.truck_classes}
     
+    purposes = create_purposes(parameters_path / "domestic", zonedata, 
+                               resultdata, costdata["freight"])
     # Run domestic demand calculation
-    for purpose in purposes["domestic"].values():
+    for purpose in purposes.values():
         log.info(f"Calculating demand for domestic purpose: {purpose.name}")
         demand = purpose.calc_traffic(impedance)
         if hasattr(purpose, "logistics_module"):
