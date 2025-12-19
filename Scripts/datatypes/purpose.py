@@ -724,7 +724,7 @@ class FreightPurpose(Purpose):
                 Centroid id : int
         
         """
-        imps = {key: impedance[key] for key in impedance if key in self.modes}
+        imps = impedance.copy()
         imps["ship"] = marine_impendance
         costs = self.get_costs(imps, origs, dests)
 

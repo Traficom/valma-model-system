@@ -68,7 +68,6 @@ def main(args):
     for ass_class in list(impedance):
         for mtx_type, mtx in impedance[ass_class].items():
             impedance[ass_class][mtx_type] = mtx[:zonedata.nr_zones, :zonedata.nr_zones]
-    truck_distances = {key: impedance[key]["dist"] for key in param.truck_classes}
     total_demand = {mode: numpy.zeros([zonedata.nr_zones, zonedata.nr_zones], dtype="float32")
                     for mode in param.truck_classes}
     
@@ -106,7 +105,7 @@ def main(args):
             total_demand[mode] += purpose.calc_vehicles(ton_demand, mode)
         write_purpose_summary(purpose, demand, aux_demand, impedance, resultdata)
         write_zone_summary(purpose.name, zonedata.zone_numbers, demand, resultdata)
-    write_vehicle_summary(total_demand, truck_distances, resultdata)
+    write_vehicle_summary(total_demand, impedance, resultdata)
     resultdata.flush()
     
     log.info("Starting end assigment")
@@ -158,11 +157,11 @@ def write_zone_summary(purpose_name: str, zone_numbers: list,
     filename = "freight_zone_summary.txt"
     resultdata.print_data(df, filename)
 
-def write_vehicle_summary(demand: dict, dist: dict, resultdata: ResultsData):
+def write_vehicle_summary(demand: dict, impedance: dict, resultdata: ResultsData):
     """Write summary for truck classes and their mileage."""
     modes = list(demand)
     vehicles_sum = [numpy.sum(demand[mode]) for mode in modes]
-    mileage_sum = [numpy.sum(dist.pop(mode)*demand[mode]) for mode in modes]
+    mileage_sum = [numpy.sum(impedance[mode]["dist"]*demand[mode]) for mode in modes]
     df = DataFrame(data={
         "Mode": modes,
         "Vehicle trips (day)": [int(i) for i in vehicles_sum],
