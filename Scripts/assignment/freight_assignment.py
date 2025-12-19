@@ -221,17 +221,12 @@ class FreightAssignmentPeriod(AssignmentPeriod):
         ship_modes = {mode for nesting in param.freight_marine_modes.values() 
                       for mode in nesting}
         for line in self.emme_scenario.get_network().transit_lines():
-            if line.mode.id not in ship_modes:
+            # Marine transit line id in format port-port_shiptype
+            if line.mode.id not in ship_modes or not line.id[0:2].isalpha():
                 continue
-            
-            id_split = line.id.split("_")[0]
-            try:
-                int(id_split)
-                continue
-            except ValueError:
-                starts_in_fi = line.id[0:2] == "FI"
-                if ((starts_in_fi and is_export) or (not starts_in_fi and not is_export)):
-                    mode_transit_lines[line.mode.id].append(line)
+            starts_in_fi = line.id[0:2] == "FI"
+            if ((starts_in_fi and is_export) or (not starts_in_fi and not is_export)):
+                mode_transit_lines[line.mode.id].append(line)
         return mode_transit_lines
 
     def _line_data_to_matrix(self, transit_lines: list, attribute: str,
