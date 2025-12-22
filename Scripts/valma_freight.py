@@ -58,8 +58,10 @@ def main(args):
     ship_imps, origs, dests = ass_model.freight_network.read_ship_impedances(is_export=True)
     for purpose in purposes.values():
         log.info(f"Calculating route for foreign purpose: {purpose.name}")
-        purpose.calc_route(impedance, ship_imps, origs, dests)
-    
+        impedance[param.marine_ships_name] = ship_imps
+        purpose.calc_route(impedance, origs, dests)
+    del impedance[param.marine_ships_name]
+
     # prepare domestic model by splicing impedances and initializing final demand matrix 
     for ass_class in list(impedance):
         for mtx_type, mtx in impedance[ass_class].items():

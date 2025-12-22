@@ -40,11 +40,10 @@ def calc_cost(mode: str, unit_costs: Dict[str, Dict],
         case "freight_train":
             return calc_rail_cost(unit_costs, impedance, model_category)
         case "ship":
-            if model_category == "domestic":
-                return get_domestic_ship_cost(unit_costs, impedance, model_category)
-            else:
-                return get_foreign_ship_cost(unit_costs, impedance, 
-                                             model_category, origs, dests)
+            return get_domestic_ship_cost(unit_costs, impedance, model_category)
+        case "marine_ships":
+            return get_foreign_ship_cost(unit_costs, impedance, 
+                                         model_category, origs, dests)
         case _:
             msg = f"Unknown mode {mode}"
             log.error(msg)

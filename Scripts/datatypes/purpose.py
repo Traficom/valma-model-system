@@ -704,8 +704,7 @@ class FreightPurpose(Purpose):
         demand = {mode: (probs.pop(mode) * generation).T for mode in self.modes}
         return demand
 
-    def calc_route(self, impedance: dict, marine_impendance: dict, 
-                   origs: dict, dests: dict):
+    def calc_route(self, impedance: dict, origs: dict, dests: dict):
         """Calculates route choice for foreign freight trade. 
         
         Parameters
@@ -713,9 +712,6 @@ class FreightPurpose(Purpose):
         impedance : dict
             Freight assignment mode (truck/train/...) : dict
                 Type (time/dist/toll_cost/canal_cost) : numpy 2d matrix
-        marine_impedance : dict
-            Freight marine mode (container_ship/general_cargo...) : attribute
-                Type (dist/frequency) : numpy.ndarray
         origs : dict
             Origin border id (FIHEL/SESTO...) : str
                 Centroid id : int
@@ -724,9 +720,7 @@ class FreightPurpose(Purpose):
                 Centroid id : int
         
         """
-        imps = impedance.copy()
-        imps["ship"] = marine_impendance
-        costs = self.get_costs(imps, origs, dests)
+        costs = self.get_costs(impedance, origs, dests)
 
     def get_costs(self, impedance: dict, origs: dict = None, dests: dict = None):
         """Fetches calculated costs for each mode in model's mode choice.
