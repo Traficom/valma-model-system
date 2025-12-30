@@ -4,7 +4,7 @@
     "dest": "work",
     "generation_area": "domestic",
     "attraction_area": "domestic",
-    "struct": "mode>dest",
+    "struct": "dest>mode",
     "gen_model": "rate",
     "generation": {
         "no_car": {
@@ -131,75 +131,12 @@
         ]
     },
     "destination_choice": {
-        "airplane": {
-            "attraction": {
-                "within_zone_inf": -1
-            },
-            "impedance": {
-                "logsum": 0.5487
-            },
-            "log": {
-                "attraction_size": 1
-            },
-            "attraction_size": {
-                "workplaces": 1
-            }
-        },
-        "transit_leisure": {
-            "attraction": {
-                "within_zone_inf": -1
-            },
-            "impedance": {
-                "logsum": 0.5487
-            },
-            "log": {
-                "attraction_size": 1
-            },
-            "attraction_size": {
-                "workplaces": 1
-            }
-        },
-        "car_leisure": {
-            "attraction": {
-                "within_zone_inf": -1
-            },
-            "impedance": {
-                "gen_cost": -0.01431
-            },
+        "logsum": {
+            "attraction": {},
+            "impedance": {},
             "log": {
                 "attraction_size": 1,
-                "gen_cost": -1.618
-            },
-            "attraction_size": {
-                "workplaces": 1
-            }
-        },
-        "car_pax": {
-            "attraction": {
-                "within_zone_inf": -1
-            },
-            "impedance": {
-                "gen_cost": -0.01401
-            },
-            "log": {
-                "attraction_size": 1,
-                "gen_cost": -1.902
-                
-            },
-            "attraction_size": {
-                "workplaces": 1
-            }
-        },
-        "walk": {
-            "attraction": {
-                "within_zone_inf": -1
-            },
-            "impedance": {
-                "dist": -0.3625
-            },
-            "log": {
-                "attraction_size": 1
-                
+                "logsum": 0.7176
             },
             "attraction_size": {
                 "workplaces": 1
@@ -207,88 +144,88 @@
         }
     },
     "mode_choice": {
-        "airplane": {
-            "constant": 0,
-            "generation": {},
-            "attraction": {},
-            "impedance": {},
-            "log": {
-                "logsum": 0.4808
-            },
-            "individual_dummy": {}
-        },
-        "transit_leisure": {
-            "constant": -0.63481,
-            "generation": {},
-            "attraction": {},
-            "impedance": {},
-            "log": {
-                "logsum": 0.4808
-            },
-            "individual_dummy": {}
-        },
         "car_leisure": {
-            "constant": -1.881,
+            "constant": -8.378,
             "generation": {},
-            "attraction": {},
-            "impedance": {},
+            "transform": {
+                "attraction": {},
+                "impedance": {
+                    "gen_cost": 1
+                }
+            },
+            "attraction": {
+                "within_zone_inf": -1
+            },
+            "impedance": {
+                "gen_cost": -0.01941
+            },
             "log": {
-                "logsum": 0.4808
+                "transform": -2.215
             },
             "individual_dummy": {
-                "sh_cars1_hh1": 6.76,
-                "sh_cars2_hh2": 6.76,
-                "sh_cars1_hh2": 5.081
+                "sh_cars1_hh1": 3.263,
+                "sh_cars2_hh2": 3.263,
+                "sh_cars1_hh2": 2.534
             }
         },
         "car_pax": {
-            "constant": -2.969,
+            "constant": -8.866,
             "generation": {},
-            "attraction": {},
-            "impedance": {},
+            "transform": {
+                "attraction": {},
+                "impedance": {
+                    "gen_cost": 1
+                }
+            },
+            "attraction": {
+                "within_zone_inf": -1
+            },
+            "impedance": {
+                "gen_cost": -0.01792
+            },
             "log": {
-                "logsum": 0.4808
+                "transform": -2.758
             },
             "individual_dummy": {
-                "sh_cars1_hh2": 2.022,
-                "sh_cars2_hh2": 2.022
+                "sh_cars1_hh2": 0.9903,
+                "sh_cars2_hh2": 0.9903
             }
         },
-        "walk": {
-            "constant": -1.12,
+        "transit_leisure": {
+            "constant": -6.853,
             "generation": {},
-            "attraction": {},
-            "impedance": {},
-            "log": {
-                "logsum": 0.4808
+            "attraction": {
+                "within_zone_inf": -1
             },
+            "impedance": {
+                "logsum": 0.8522
+            },
+            "log": {},
             "individual_dummy": {}
         },
-        "scaling": {
-            "car_leisure": {
-                "constant": 0.4808,
-                "individual_dummy": {
-                    "sh_cars1_hh1": 0.4808,
-                    "sh_cars2_hh2": 0.4808,
-                    "sh_cars1_hh2": 0.4808
-                }
+        "airplane": {
+            "constant": 0,
+            "generation": {},
+            "attraction": {
+                "within_zone_inf": -1
             },
-            "car_pax": {
-                "constant": 0.4808,
-                "individual_dummy": {
-                    "sh_cars1_hh2": 0.4808,
-                    "sh_cars2_hh2": 0.4808
-                }
+            "impedance": {
+                "logsum": 0.8522
             },
-            "transit_leisure": {
-                "constant": 0.4808
+            "log": {},
+            "individual_dummy": {}
+        },
+        "walk": {
+            "constant": -8.653,
+            "generation": {},
+            "attraction": {
+                "within_zone_inf": -1
             },
-            "airplane": {
-                "constant": 0.4808
+            "impedance": {
+                "dist": -0.4056
             },
-            "walk": {
-                "constant": 0.4808
-            }
+            "log": {},
+            "individual_dummy": {}
         }
     },
     "access_mode_choice": {
