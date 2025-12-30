@@ -136,19 +136,23 @@
                 "within_zone_inf": -1
             },
             "impedance": {
-                "logsum": 0.3757
+                "logsum": 0.4208
             },
             "log": {
                 "attraction_size": 1
             },
             "attraction_size": {
                 "area_leisure_buildings": 1,
-                "wrk_hospitality*beeline_0_10_km": 7.84597,
-                "wrk_hospitality*beeline_10_100_km": 41.84616,
-                "wrk_hospitality*beeline_100_200_km": 94.91673,
-                "wrk_hospitality*beeline_200_400_km": 250.63558,
-                "wrk_hospitality*beeline_400_9999_km": 403.02557,
-                "population": 1.87667
+                "wrk_hospitality*beeline_0_100_km": 20.84262,
+                "wrk_hospitality*beeline_100_200_km": 97.70962,
+                "wrk_hospitality*beeline_200_400_km": 325.05682,
+                "wrk_hospitality*beeline_400_600_km": 765.09499,
+                "wrk_hospitality*beeline_600_9999_km": 9311.44903,
+                "population*beeline_0_100_km": 1.6446,
+                "population*beeline_100_200_km": 2.17907,
+                "population*beeline_200_400_km": 4.88906,
+                "population*beeline_400_600_km": 11.02318,
+                "population*beeline_600_9999_km": 138.65655
             }
         },
         "transit_leisure": {
@@ -156,19 +160,23 @@
                 "within_zone_inf": -1
             },
             "impedance": {
-                "logsum": 0.3757
+                "logsum": 0.4208
             },
             "log": {
                 "attraction_size": 1
             },
             "attraction_size": {
                 "area_leisure_buildings": 1,
-                "wrk_hospitality*beeline_0_10_km": 7.84597,
-                "wrk_hospitality*beeline_10_100_km": 41.84616,
-                "wrk_hospitality*beeline_100_200_km": 94.91673,
-                "wrk_hospitality*beeline_200_400_km": 250.63558,
-                "wrk_hospitality*beeline_400_9999_km": 403.02557,
-                "population": 1.87667
+                "wrk_hospitality*beeline_0_100_km": 20.84262,
+                "wrk_hospitality*beeline_100_200_km": 97.70962,
+                "wrk_hospitality*beeline_200_400_km": 325.05682,
+                "wrk_hospitality*beeline_400_600_km": 765.09499,
+                "wrk_hospitality*beeline_600_9999_km": 9311.44903,
+                "population*beeline_0_100_km": 1.6446,
+                "population*beeline_100_200_km": 2.17907,
+                "population*beeline_200_400_km": 4.88906,
+                "population*beeline_400_600_km": 11.02318,
+                "population*beeline_600_9999_km": 138.65655
             }
         },
         "car_leisure": {
@@ -176,20 +184,24 @@
                 "within_zone_inf": -1
             },
             "impedance": {
-                "gen_cost": -0.00522
+                "gen_cost": -0.01238
             },
             "log": {
                 "attraction_size": 1,
-                "gen_cost": -1.437
+                "gen_cost": -1.278
             },
             "attraction_size": {
                 "area_leisure_buildings": 1,
-                "wrk_hospitality*beeline_0_10_km": 7.84597,
-                "wrk_hospitality*beeline_10_100_km": 41.84616,
-                "wrk_hospitality*beeline_100_200_km": 94.91673,
-                "wrk_hospitality*beeline_200_400_km": 250.63558,
-                "wrk_hospitality*beeline_400_9999_km": 403.02557,
-                "population": 1.87667
+                "wrk_hospitality*beeline_0_100_km": 20.84262,
+                "wrk_hospitality*beeline_100_200_km": 97.70962,
+                "wrk_hospitality*beeline_200_400_km": 325.05682,
+                "wrk_hospitality*beeline_400_600_km": 765.09499,
+                "wrk_hospitality*beeline_600_9999_km": 9311.44903,
+                "population*beeline_0_100_km": 1.6446,
+                "population*beeline_100_200_km": 2.17907,
+                "population*beeline_200_400_km": 4.88906,
+                "population*beeline_400_600_km": 11.02318,
+                "population*beeline_600_9999_km": 138.65655
             }
         },
         "car_pax": {
@@ -197,20 +209,24 @@
                 "within_zone_inf": -1
             },
             "impedance": {
-                "gen_cost": -0.0062
+                "gen_cost": -0.01383
             },
             "log": {
                 "attraction_size": 1,
-                "gen_cost": -1.479
+                "gen_cost": -1.335
             },
             "attraction_size": {
                 "area_leisure_buildings": 1,
-                "wrk_hospitality*beeline_0_10_km": 7.84597,
-                "wrk_hospitality*beeline_10_100_km": 41.84616,
-                "wrk_hospitality*beeline_100_200_km": 94.91673,
-                "wrk_hospitality*beeline_200_400_km": 250.63558,
-                "wrk_hospitality*beeline_400_9999_km": 403.02557,
-                "population": 1.87667
+                "wrk_hospitality*beeline_0_100_km": 20.84262,
+                "wrk_hospitality*beeline_100_200_km": 97.70962,
+                "wrk_hospitality*beeline_200_400_km": 325.05682,
+                "wrk_hospitality*beeline_400_600_km": 765.09499,
+                "wrk_hospitality*beeline_600_9999_km": 9311.44903,
+                "population*beeline_0_100_km": 1.6446,
+                "population*beeline_100_200_km": 2.17907,
+                "population*beeline_200_400_km": 4.88906,
+                "population*beeline_400_600_km": 11.02318,
+                "population*beeline_600_9999_km": 138.65655
             }
         },
         "walk": {
@@ -218,19 +234,23 @@
                 "within_zone_inf": -1
             },
             "impedance": {
-                "dist": -0.3447
+                "dist": -0.3449
             },
             "log": {
                 "attraction_size": 1    
             },
             "attraction_size": {
                 "area_leisure_buildings": 1,
-                "wrk_hospitality*beeline_0_10_km": 7.84597,
-                "wrk_hospitality*beeline_10_100_km": 41.84616,
-                "wrk_hospitality*beeline_100_200_km": 94.91673,
-                "wrk_hospitality*beeline_200_400_km": 250.63558,
-                "wrk_hospitality*beeline_400_9999_km": 403.02557,
-                "population": 1.87667
+                "wrk_hospitality*beeline_0_100_km": 20.84262,
+                "wrk_hospitality*beeline_100_200_km": 97.70962,
+                "wrk_hospitality*beeline_200_400_km": 325.05682,
+                "wrk_hospitality*beeline_400_600_km": 765.09499,
+                "wrk_hospitality*beeline_600_9999_km": 9311.44903,
+                "population*beeline_0_100_km": 1.6446,
+                "population*beeline_100_200_km": 2.17907,
+                "population*beeline_200_400_km": 4.88906,
+                "population*beeline_400_600_km": 11.02318,
+                "population*beeline_600_9999_km": 138.65655
             }
         }
     },
@@ -241,81 +261,81 @@
             "attraction": {},
             "impedance": {},
             "log": {
-                "logsum": 0.07709
+                "logsum": 0.1182
             },
             "individual_dummy": {}
         },
         "transit_leisure": {
-            "constant": 30.38,
+            "constant": 18.15,
             "generation": {},
             "attraction": {},
             "impedance": {},
             "log": {
-                "logsum": 0.07709
+                "logsum": 0.1182
             },
             "individual_dummy": {}
         },
         "car_leisure": {
-            "constant": 10.58,
+            "constant": 4.814,
             "generation": {},
             "attraction": {},
             "impedance": {},
             "log": {
-                "logsum": 0.07709
+                "logsum": 0.1182
             },
             "individual_dummy": {
-                "sh_cars1_hh1": 47.97,
-                "sh_cars2_hh2": 47.97,
-                "sh_cars1_hh2": 44.75
+                "sh_cars1_hh1": 31.1,
+                "sh_cars2_hh2": 31.1,
+                "sh_cars1_hh2": 29.02
             }
         },
         "car_pax": {
-            "constant": 34.54,
+            "constant": 20.43,
             "generation": {},
             "attraction": {},
             "impedance": {},
             "log": {
-                "logsum": 0.07709
+                "logsum": 0.1182
             },
             "individual_dummy": {
-                "sh_cars1_hh2": 19.93,
-                "sh_cars2_hh2": 19.93
+                "sh_cars1_hh2": 12.86,
+                "sh_cars2_hh2": 12.86
             }
         },
         "walk": {
-            "constant": 30.1,
+            "constant": 18.34,
             "generation": {},
             "attraction": {},
             "impedance": {},
             "log": {
-                "logsum": 0.07709
+                "logsum": 0.1182
             },
             "individual_dummy": {}
         },
         "scaling": {
             "car_leisure": {
-                "constant": 0.07709,
+                "constant": 0.1182,
                 "individual_dummy": {
-                    "sh_cars1_hh1": 0.07709,
-                    "sh_cars2_hh2": 0.07709,
-                    "sh_cars1_hh2": 0.07709
+                    "sh_cars1_hh1": 0.1182,
+                    "sh_cars2_hh2": 0.1182,
+                    "sh_cars1_hh2": 0.1182
                 }
             },
             "car_pax": {
-                "constant": 0.07709,
+                "constant": 0.1182,
                 "individual_dummy": {
-                    "sh_cars1_hh2": 0.07709,
-                    "sh_cars2_hh2": 0.07709
+                    "sh_cars1_hh2": 0.1182,
+                    "sh_cars2_hh2": 0.1182
                 }
             },
             "transit_leisure": {
-                "constant": 0.07709
+                "constant": 0.1182
             },
             "airplane": {
-                "constant": 0.07709
+                "constant": 0.1182
             },
             "walk": {
-                "constant": 0.07709
+                "constant": 0.1182
             }
         }
     },
