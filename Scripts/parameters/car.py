@@ -42,7 +42,7 @@ car_ownership = {
             }
         },
         "1": {
-            "constant": 3.123273486,
+            "constant": 3.661863,
             "generation": {
                 "hb_leisure_sustainable": -0.653260,
             },
@@ -88,7 +88,7 @@ car_ownership = {
             }
         },
         "1": {
-            "constant": 4.901588103,
+            "constant": 5.321504,
             "generation": {
                 "hb_leisure_sustainable": -0.869877,
             },
@@ -134,7 +134,7 @@ car_ownership = {
             }
         },
         "1": {
-            "constant": 4.871200205,
+            "constant": 4.778818,
             "generation": {
                 "hb_leisure_sustainable": -0.694607,
             },
@@ -157,7 +157,7 @@ car_ownership = {
             }
         },
         "2": {
-            "constant": 5.677996535,
+            "constant": 5.677953,
             "generation": {
                 "hb_leisure_sustainable": -1.074284,
             },
