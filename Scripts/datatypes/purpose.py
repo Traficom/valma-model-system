@@ -710,7 +710,7 @@ class FreightPurpose(Purpose):
         Parameters
         ----------
         impedance : dict
-            Mode (truck/train/...) : dict
+            Freight assignment mode (truck/train/...) : dict
                 Type (time/dist/toll_cost/canal_cost) : numpy 2d matrix
         origs : dict
             Origin border id (FIHEL/SESTO...) : str

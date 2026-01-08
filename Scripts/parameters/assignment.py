@@ -674,6 +674,7 @@ freight_modes = {
         'W': "@ship",
     },
 }
+marine_ships_name = "marine_ships"
 freight_marine_modes = {
     "container_ship": {
         "C": "@container_ship"
