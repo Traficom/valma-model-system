@@ -136,6 +136,7 @@ class TransitMode(AssignmentMode):
         self.gen_cost = self._create_matrix("gen_cost")
         self.inv_cost = self._create_matrix("inv_cost")
         self.board_cost = self._create_matrix("board_cost")
+        self.main_mode_dist = self._create_matrix("main_mode_dist")
 
     def _add_park_and_ride(self):
         return False
@@ -152,6 +153,14 @@ class TransitMode(AssignmentMode):
                 "avg_boardings": self.num_board.id,
             },
         }]
+        # For daily tours, use main_mode_dist for analyzing train usage
+        self.transit_result_specs.append({
+            "type": "EXTENDED_TRANSIT_MATRIX_RESULTS",
+            subset: {
+                "modes": ['j', 'r'],
+                "distance": self.main_mode_dist.id,
+            },
+        })
         return [
             self.transit_result_specs[0],
             self.transit_result_specs[0][subset],
@@ -187,6 +196,9 @@ class TransitMode(AssignmentMode):
         time = self.gen_cost.data - self.vot_inv*cost - transfer_penalty
         time[cost > 999999] = 999999
         mtxs = {"time": time, "cost": cost}
+        if not self.name in param.long_distance_transit_classes:
+            mtxs["train_users"] = self.demand.data
+            mtxs["train_users"][self.main_mode_dist.data == 0] = 0
         for mtx_name in param.impedance_output:
             if mtx_name in self._matrices:
                 mtxs[mtx_name] = self._matrices[mtx_name].data

@@ -102,6 +102,7 @@ class OffPeakPeriod(AssignmentPeriod):
         for ass_cl in param.car_classes:
             del mtxs["dist"][ass_cl]
         del mtxs["toll_cost"]
+        del mtxs["train_users"]
         return mtxs
 
 
@@ -167,6 +168,7 @@ class TransitAssignmentPeriod(OffPeakPeriod):
         """
         mtxs = self._get_impedances(param.local_transit_classes)
         del mtxs["dist"]
+        del mtxs["train_users"]
         return mtxs
 
     def end_assign(self,
