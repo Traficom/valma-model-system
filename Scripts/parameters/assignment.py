@@ -162,8 +162,6 @@ bus_dwell_time = {
     'g': 0.4,
     'e': 0.4,
 }
-# Node labels for HSL members (new and old fare zones)
-hsl_area = "ABCDE HEXL"
 # Performance settings
 performance_settings = {
     "number_of_processors": "max",
