@@ -61,7 +61,7 @@ car_ownership = {
                 "sh_income_100_*sh_hh_1_adult_children": 0.528040,
             },
             "calibration": {
-                "constant": 0
+                "constant": -0.538589514
             },
         }
     },
@@ -107,7 +107,7 @@ car_ownership = {
                 "sh_income_100_*sh_hh_2_adults_children": 0.179828,
             },
             "calibration": {
-                "constant": 0
+                "constant": -0.419915897
             }
         },
     },
@@ -153,7 +153,7 @@ car_ownership = {
                 "sh_income_100_*sh_hh_2_adults_children": 0.397982,
             },
             "calibration": {
-                "constant": 0
+                "constant": 0.092382205
             }
         },
         "2": {
@@ -176,7 +176,7 @@ car_ownership = {
                 "sh_income_100_*sh_hh_2_adults_children": 0.959502+0.650635,
             },
             "calibration": {
-                "constant": 0
+                "constant": 0.000043535
             }
         }
     }
