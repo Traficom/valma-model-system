@@ -688,7 +688,3 @@ roadtypes = {
     11: "ferry",
     99: "connector",
 }
-station_ids = {
-    "metro": 13,
-    "train": 14,
-}
