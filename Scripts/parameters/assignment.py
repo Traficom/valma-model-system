@@ -100,15 +100,6 @@ transit_delay_funcs = {
         "vrk": 6,
     },
 }
-# Node numbers used in HSL official networks and their allowed modes
-official_node_numbers = {
-    "hcvkyasf": (1, 35000),
-    "hcvkybgdewasf": (40000, 600000),
-    "hmaf": (800000, 800500),
-    "hrjasf": (801000, 801500),
-    "htpaf": (802000, 806000),
-    "hpaf": (810000, 816000),
-}
 vdf_temp = ("(put(60/ul2)*(1+{}*put((volau+volad)/{})/"
             + "(ul1-get(2))))*(get(2).le.put(ul1*{}))*length+(get(2).gt."
             + "get(3))*({}*get(1)*length+{}*(get(2)-get(3))*length)")
