@@ -13,7 +13,6 @@ import models.logit as logit
 from parameters.assignment import (
     assignment_classes,
     intermodals,
-    tour_duration,
     mixed_mode_classes)
 import parameters.cost as cost
 import models.generation as generation
@@ -418,7 +417,7 @@ class TourPurpose(Purpose):
             impedance["airpl_taxi_acc"] = impedance["airpl_car_acc"]
         for mode in access_modes:
             if mode in mixed_mode_classes:
-                self.reweight_parking_cost(impedance[mode], tour_duration[mode])
+                self.reweight_parking_cost(impedance[mode], cost.tour_duration[mode])
         model = self.connection_models[pt_mode]
         prob, logsum = model.calc_mode_prob(impedance)
         if "airpl_taxi_acc" in prob:
