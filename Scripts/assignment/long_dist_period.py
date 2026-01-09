@@ -89,7 +89,8 @@ class WholeDayPeriod(AssignmentPeriod):
         self._long_distance_trips_assigned = True
         mtxs = self._get_impedances(modes)
         for ass_cl in param.car_classes:
-            del mtxs["dist"][ass_cl]
+            if ass_cl in mtxs["dist"]:
+                del mtxs["dist"][ass_cl]
         del mtxs["toll_cost"]
         return mtxs
 
