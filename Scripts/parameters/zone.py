@@ -33,16 +33,6 @@ purpose_areas: Dict[str, Tuple[int,int]] = {
 }
 tour_length_intervals = (0, 3, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100,
                          200, 300, 400, 500, 600, 700, 800, float("inf"))
-# Population in noise zones as share of total area population as
-# function only of zone area, calculated by Ramboll Feb 2021
-pop_share_per_noise_area = {
-    "helsinki_cbd": 0.028816313,
-    "helsinki_other": 0.005536503,
-    "espoo_vant_kau": 0.002148004,
-    "surround_train": 0.0019966,
-    "surround_other": 0.001407824,
-    "peripheral": 0,  # Not calculated
-}
 
 # Finnish ports and road border control points
 finland_border_points = {

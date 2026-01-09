@@ -129,7 +129,6 @@ class EmmeAssignmentTest:
             "Lahti": "Paijat-Hame"
         })
         self.ass_model.aggregate_results(self.resultdata, mapping)
-        self.ass_model.calc_noise(mapping)
         self.resultdata.flush()
         costs_files = MatrixData(
             TEST_DATA_PATH / "Results" / "assignment" / "Matrices")

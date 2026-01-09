@@ -60,9 +60,6 @@ class MockAssignmentModel(AssignmentModel):
     def aggregate_results(self, resultdata, mapping):
         pass
 
-    def calc_noise(self, mapping):
-        return pandas.Series(0.0, mapping.drop_duplicates())
-
     def prepare_network(self, car_dist_unit_cost: Dict[str, float], *args):
         for ap in self.assignment_periods:
             ap.dist_unit_cost = car_dist_unit_cost

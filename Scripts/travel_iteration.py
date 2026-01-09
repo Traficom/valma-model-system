@@ -324,7 +324,6 @@ class ModelSystem:
         if is_end_assignment:
             self.ass_model.aggregate_results(
                 self.resultdata, zd.aggregations.municipality_mapping)
-            self._calculate_noise_areas()
             self.resultdata.flush()
         return impedance
 
@@ -418,7 +417,6 @@ class ModelSystem:
         if iteration=="last":
             self.ass_model.aggregate_results(
                 self.resultdata, zd.aggregations.municipality_mapping)
-            self._calculate_noise_areas()
             self.resultdata.flush()
         return impedance
 
@@ -447,17 +445,6 @@ class ModelSystem:
             with self.resultmatrices.open(mtx_type, tp, zone_numbers, m='w') as mtx:
                 for ass_class in impedance[mtx_type]:
                     mtx[ass_class] = impedance[mtx_type][ass_class]
-
-    def _calculate_noise_areas(self):
-        if not self.ass_model.use_free_flow_speeds:
-            data = {}
-            zd = self._zone_datas["domestic"]
-            data["area"] = self.ass_model.calc_noise(
-                zd.aggregations.municipality_mapping)
-            pop = zd.aggregations.aggregate_array(zd["population"], "county")
-            conversion = pandas.Series(zone_param.pop_share_per_noise_area)
-            data["population"] = conversion * data["area"] * pop
-            self.resultdata.print_data(data, "noise_areas.txt")
 
     def _export_accessibility(self):
         for purpose in self.dm.tour_purposes:
