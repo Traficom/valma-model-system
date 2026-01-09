@@ -387,16 +387,6 @@ class EmmeAssignmentModel(AssignmentModel):
         resultdata.print_data(
             pandas.DataFrame.from_dict(boardings), "municipality_boardings.txt")
 
-        # Aggregate and print numbers of stations
-        stations = pandas.Series(0, param.station_ids, name="number")
-        for node in network.regular_nodes():
-            for mode in param.station_ids:
-                if (node.data2 == param.station_ids[mode]
-                        and node[self._extra("transit_won_boa")] > 0):
-                    stations[mode] += 1
-                    break
-        resultdata.print_data(stations, "transit_stations.txt")
-
         # Export link, node and segnment extra attributes to GeoPackage file
         fname = "assignment_results.gpkg"
         for geom_type, objects in (
