@@ -63,29 +63,6 @@ custom_roadtypes = {
     94: "arterial",
     95: "local",
 }
-# Bike delay function ids
-bikepath_vdfs = (
-    {  # 0 - Mixed traffic
-        None: 78,
-        "collector": 77,
-        "arterial": 77,
-        "highway": 76,
-    },
-    {  # 1 - Bike lane
-        None: 75,
-    },
-    {  # 2 - Road-side bike path
-        None: 74,
-        "arterial": 73,
-        "highway": 72,
-    },
-    {  # 3 - Separate bike path
-        None: 71
-    },
-    {  # 4 - BAANA
-        None: 70,
-    }
-)
 # Transit delay function ids
 transit_delay_funcs = {
     ("bus", "bge"): {
@@ -291,12 +268,6 @@ aux_time_perception_factor = 1.75
 aux_time_perception_factor_long = 2.5
 aux_time_perception_factor_car = 7.5
 aux_time_perception_factor_truck = 30
-# Stochastic bike assignment distribution
-bike_dist = {
-    "type": "UNIFORM", 
-    "A": 0.5, 
-    "B": 1.5,
-}
 # Factors for 24-h expansion of volumes
 # TODO: Trucks and vans
 volume_factors = {
