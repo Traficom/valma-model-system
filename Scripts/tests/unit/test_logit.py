@@ -27,10 +27,7 @@ class LogitModelTest(unittest.TestCase):
             pass
         pur = Purpose()
         zi = numpy.array(INTERNAL_ZONES + EXTERNAL_ZONES)
-        zd = ZoneData(ZONEDATA_PATH, zi, "uusimaa")
-        zd["car_users"] = pandas.Series(0.5, zd.zone_numbers)
-        zd["cost"] = pandas.Series(0.0, index=zd.zone_numbers)
-        zd["within_zone"] = pandas.Series(1, index=zd.zone_numbers)
+        zd = ZoneData(ZONEDATA_PATH, zi, "uusimaa", car_dist_cost=0.12)
         mtx = numpy.arange(720, dtype=numpy.float32)
         mtx.shape = (24, 30)
         mtx[numpy.diag_indices(24)] = 0
@@ -68,8 +65,7 @@ class LogitModelTest(unittest.TestCase):
             },
         }
         pur.bounds = slice(0, 24)
-        pur.sub_bounds = [slice(0, 20), slice(20, 24)]
-        pur.zone_numbers = INTERNAL_ZONES
+        pur.orig_zone_numbers = INTERNAL_ZONES
         pur.dist = mtx
         parameters_path = Path(__file__).parents[2] / "parameters" / "demand"
         for file in parameters_path.rglob("*.json"):

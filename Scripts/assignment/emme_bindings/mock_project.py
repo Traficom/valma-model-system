@@ -105,9 +105,9 @@ class MockProject:
                 
     def create_network_field(self, 
                              network_field_type: str,
+                             network_field_atype: str,
                              network_field_name: str,
                              network_field_description: str,
-                             network_field_atype: str,
                              overwrite: bool = False,
                              scenario: Optional[Scenario] = None):
         if overwrite:
@@ -353,8 +353,7 @@ class MockProject:
                     break
                 attr_type = rec[1]
                 self.create_network_field(
-                    attr_type, rec[0], "",
-                    network_field_atype=rec[2],
+                    attr_type, rec[2], rec[0], "",
                     overwrite=True, scenario=scenario)
             header = f.readline().split()
             network = scenario.get_network()
@@ -396,9 +395,6 @@ class MockProject:
             "iterations": [{"number": 1}],
         }
         return report
-
-    def pedestrian_assignment(self, *args, **kwargs):
-        pass
 
     _transit_classes = set()
 

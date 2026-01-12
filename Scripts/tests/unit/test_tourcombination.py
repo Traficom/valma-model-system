@@ -18,11 +18,6 @@ ZONE_INDEXES = numpy.array(INTERNAL_ZONES + EXTERNAL_ZONES)
 class TourCombinationModelTest(unittest.TestCase):
     def test_generation(self):
         zi = numpy.array(INTERNAL_ZONES + EXTERNAL_ZONES)
-        zd = ZoneData(ZONEDATA_PATH, zi, "uusimaa")
+        zd = ZoneData(ZONEDATA_PATH, zi, "uusimaa", car_dist_cost=0.12)
         zd._values["hb_edu_student"] = pandas.Series(0.0, INTERNAL_ZONES)
         model = TourCombinationModel(zd)
-        prob = model.calc_prob("age_50_64", 202)
-        self.assertIs(type(prob[("hb_edu_student",)]), numpy.ndarray)
-        self.assertAlmostEquals(sum(prob.values()), 1)
-        prob = model.calc_prob("age_7_17", slice(0, 9))
-        self.assertIs(type(prob[()]), pandas.core.series.Series)

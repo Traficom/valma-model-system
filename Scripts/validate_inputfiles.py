@@ -152,14 +152,13 @@ def main(args):
             # TODO Count existing extra attributes which are NOT included
             # in the set of attributes created during model run
             nr_transit_classes = len(param.transit_classes)
-            nr_segment_results = len(param.segment_results)
             nr_veh_classes = len(param.transport_classes)
             nr_assignment_modes = len(param.assignment_modes)
             nr_new_attr = {
-                "nodes": nr_transit_classes * (nr_segment_results-1),
-                "links": nr_veh_classes + 4,
-                "transit_lines": nr_transit_classes + 2,
-                "transit_segments": nr_transit_classes*nr_segment_results + 2,
+                "nodes": 1,
+                "links": nr_veh_classes + 3,
+                "transit_lines": nr_transit_classes,
+                "transit_segments": 2,
             }
             link_costs_defined = False
             for tp in time_periods:
@@ -178,6 +177,9 @@ def main(args):
                 # EMME scenario
                 for key in nr_new_attr:
                     nr_new_attr[key] *= len(time_periods) + 1
+            nr_new_attr["links"] += 3
+            nr_new_attr["transit_lines"] += 2
+            nr_new_attr["transit_segments"] += 5
             dim = emmebank.dimensions
             dim["nodes"] = dim["centroids"] + dim["regular_nodes"]
             attr_space = 0
@@ -231,7 +233,8 @@ def main(args):
             raise ValueError(msg)
         zonedata_args = Path(data_path), zone_numbers[submodel], submodel
         forecast_zonedata = (FreightZoneData(*zonedata_args)
-            if model_type == "goods_transport" else ZoneData(*zonedata_args))
+                             if model_type == "goods_transport"
+                             else ZoneData(*zonedata_args, car_dist_cost=0.12))
 
         # Check long-distance base matrices
         if long_dist_forecast not in ("calc", "base"):

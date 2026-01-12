@@ -90,7 +90,6 @@ class DepartureTimeModel:
         demand : Demand or Tour
             Travel demand matrix or number of travellers
         """
-        demand.purpose.name = cast(str, demand.purpose.name) #type checker hint
         position: Sequence[int] = demand.position
         if len(position) == 2:
             share: Dict[str, Any] = demand.purpose.demand_share[demand.mode]

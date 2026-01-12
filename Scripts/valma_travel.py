@@ -20,7 +20,7 @@ def main(args):
     long_dist_matrices_path = (None
         if args.long_dist_demand_forecast in ("calc", "base")
         else Path(args.long_dist_demand_forecast))
-    if args.end_assignment_only:
+    if args.end_assignment_only or args.car_end_assignment_only:
         iterations = 0
     elif calculate_long_dist_demand or args.stored_speed_assignment is not None:
         iterations = 1
@@ -101,6 +101,8 @@ def main(args):
     log.info("Initializing matrices and models...", extra=log_extra)
     model_args = (zone_data_file, cost_data_file, base_zonedata_path,
                   base_matrices_path, result_data_folder, ass_model, args.submodel,
+                  args.mode_dest_calibration_path,
+                  args.municipality_calibration_path,
                   long_dist_matrices_path, freight_matrices_path)
     model = (AgentModelSystem(*model_args) if args.is_agent_model
              else ModelSystem(*model_args))
@@ -120,7 +122,7 @@ def main(args):
     except TypeError:
         pass
     impedance = model.assign_base_demand(
-        iterations==0, stored_speed_assignment)
+        iterations==0, args.car_end_assignment_only, stored_speed_assignment)
     log_extra["status"]["state"] = "running"
     i = 1
     while i <= iterations:
@@ -138,7 +140,7 @@ def main(args):
                 "Fatal error occured, simulation aborted.", extra=log_extra)
             break
         gap = model.convergence[-1] # Last iteration convergence
-        convergence_criteria_fulfilled = gap["max_gap"] < args.max_gap or gap["rel_gap"] < args.rel_gap
+        convergence_criteria_fulfilled = gap["max_gap"] < args.max_gap and gap["rel_gap"] < args.rel_gap
         if i == iterations:
             log_extra["status"]['state'] = 'finished'
         elif convergence_criteria_fulfilled:
@@ -193,11 +195,16 @@ if __name__ == "__main__":
         "--log-format",
         choices={"TEXT", "JSON"},
     )
-    # HELMET scenario metadata
     parser.add_argument(
         "-o", "--end-assignment-only",
         action="store_true",
         help="Using this flag runs only end assignment of base demand matrices.",
+    )
+    parser.add_argument(
+        "-c", "--car-end-assignment-only",
+        action="store_true",
+        help=("Using this flag runs only end assignment of base demand "
+              + "matrices for car trips."),
     )
     parser.add_argument(
         "-l", "--long-dist-demand-forecast",
@@ -256,7 +263,6 @@ if __name__ == "__main__":
         "--result-data-folder",
         type=str,
         help="Path to folder where result data is saved to."),
-    # HELMET scenario input data
     parser.add_argument(
         "--submodel",
         type=str,
@@ -285,6 +291,14 @@ if __name__ == "__main__":
         "--cost-data-file",
         type=str,
         help="Path to file containing transport cost data"),
+    parser.add_argument(
+        "--mode-dest-calibration-path",
+        type=str,
+        help="Path to file containing mode and destination choice calibration data"),
+    parser.add_argument(
+        "--municipality-calibration-path",
+        type=str,
+        help="Path to file containing municipality calibration data"),
     parser.add_argument(
         "--iterations",
         type=int,

@@ -1,0 +1,3 @@
+generation	attraction	car_work	bike
+Espoo	Helsinki	0.0	0.0
+Kauniainen	Helsinki	0.0	0.0

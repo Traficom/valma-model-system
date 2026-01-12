@@ -5,6 +5,7 @@
     "generation_area": "domestic",
     "attraction_area": "domestic",
     "struct": "mode>dest",
+    "gen_model": "rate",
     "generation": {
         "no_car": {
             "age_7_17": 0.0545,
@@ -126,7 +127,7 @@
                 "within_zone_inf": -1
             },
             "impedance": {
-                "logsum": -0.08874
+                "logsum": 0.08874
             },
             "log": {
                 "attraction_size": 1
@@ -145,7 +146,7 @@
                 "within_zone_inf": -1
             },
             "impedance": {
-                "logsum": -0.08874
+                "logsum": 0.08874
             },
             "log": {
                 "attraction_size": 1
@@ -164,7 +165,7 @@
                 "within_zone_inf": -1
             },
             "impedance": {
-                "logsum": -0.08874
+                "logsum": 0.08874
             },
             "log": {
                 "attraction_size": 1
@@ -251,7 +252,7 @@
             "individual_dummy": {}
         },
         "car_leisure": {
-            "constant": 7.033,
+            "constant": 15.0196,
             "generation": {},
             "attraction": {},
             "impedance": {},
@@ -265,7 +266,7 @@
             }
         },
         "car_pax": {
-            "constant": 12.743,
+            "constant": 20.7296,
             "generation": {},
             "attraction": {},
             "impedance": {},

@@ -63,29 +63,6 @@ custom_roadtypes = {
     94: "arterial",
     95: "local",
 }
-# Bike delay function ids
-bikepath_vdfs = (
-    {  # 0 - Mixed traffic
-        None: 78,
-        "collector": 77,
-        "arterial": 77,
-        "highway": 76,
-    },
-    {  # 1 - Bike lane
-        None: 75,
-    },
-    {  # 2 - Road-side bike path
-        None: 74,
-        "arterial": 73,
-        "highway": 72,
-    },
-    {  # 3 - Separate bike path
-        None: 71
-    },
-    {  # 4 - BAANA
-        None: 70,
-    }
-)
 # Transit delay function ids
 transit_delay_funcs = {
     ("bus", "bge"): {
@@ -99,15 +76,6 @@ transit_delay_funcs = {
         "it": 6,
         "vrk": 6,
     },
-}
-# Node numbers used in HSL official networks and their allowed modes
-official_node_numbers = {
-    "hcvkyasf": (1, 35000),
-    "hcvkybgdewasf": (40000, 600000),
-    "hmaf": (800000, 800500),
-    "hrjasf": (801000, 801500),
-    "htpaf": (802000, 806000),
-    "hpaf": (810000, 816000),
 }
 vdf_temp = ("(put(60/ul2)*(1+{}*put((volau+volad)/{})/"
             + "(ul1-get(2))))*(get(2).le.put(ul1*{}))*length+(get(2).gt."
@@ -171,8 +139,6 @@ bus_dwell_time = {
     'g': 0.4,
     'e': 0.4,
 }
-# Node labels for HSL members (new and old fare zones)
-hsl_area = "ABCDE HEXL"
 # Performance settings
 performance_settings = {
     "number_of_processors": "max",
@@ -189,48 +155,6 @@ vot_inv = {
     "trailer_truck": 1.667, # 1 / ((36 eur/h) / (60 min/h)) = 1.667 min/eur
 }
 congested_time_weight = 1.5
-tour_duration = {
-    "train_car_acc": {
-        "avg": 2.18,
-        "hb_business": 1.12,
-        "hb_leisure_overnight": 9,
-    },
-    "train_taxi_acc": {
-        "avg": 2.18,
-        "hb_business": 1.12,
-        "hb_leisure_overnight": 9,
-    },
-    "coach_car_acc": {
-        "avg": 2.62,
-        "hb_business": 2.43,
-        "hb_leisure_overnight": 14,
-    },
-    "airpl_car_acc": {
-        "avg": 2.39,
-        "hb_business": 2.01,
-        "hb_leisure_overnight": 9,
-    },
-    "train_car_egr": {
-        "avg": 2.18,
-        "hb_business": 1.12,
-        "hb_leisure_overnight": 9,
-    },
-    "train_taxi_egr": {
-        "avg": 2.18,
-        "hb_business": 1.12,
-        "hb_leisure_overnight": 9,
-    },
-    "coach_car_egr": {
-        "avg": 2.62,
-        "hb_business": 2.43,
-        "hb_leisure_overnight": 14,
-    },
-    "airpl_car_egr": {
-        "avg": 2.39,
-        "hb_business": 2.01,
-        "hb_leisure_overnight": 9,
-    },
-}
 freight_terminal_cost = {
     'D': 0,
     'J': 0,
@@ -240,8 +164,7 @@ freight_terminal_cost = {
 boarding_penalty = {
     'b': 3, # Bus
     'g': 3, # Trunk bus
-    'd': 5, # Long-distance bus
-    'e': 5, # Express bus
+    'e': 5, # Coach bus
     't': 0, # Tram
     'p': 0, # Light rail
     'm': 0, # Metro
@@ -253,8 +176,7 @@ boarding_penalty = {
 long_boarding_penalty = {
     'b': 0, # Bus
     'g': 0, # Trunk bus
-    'd': 5, # Long-distance bus
-    'e': 0, # Express bus
+    'e': 0, # Coach bus
     't': 0, # Tram
     'p': 0, # Light rail
     'm': 0, # Metro
@@ -265,11 +187,6 @@ long_boarding_penalty = {
 # Headway standard deviation function parameters for different transit modes
 headway_sd_func = {
     'b': {
-        "asc": 2.164,
-        "ctime": 0.078,
-        "cspeed": -0.028,
-    },
-    'd':  {
         "asc": 2.164,
         "ctime": 0.078,
         "cspeed": -0.028,
@@ -351,103 +268,97 @@ aux_time_perception_factor = 1.75
 aux_time_perception_factor_long = 2.5
 aux_time_perception_factor_car = 7.5
 aux_time_perception_factor_truck = 30
-# Stochastic bike assignment distribution
-bike_dist = {
-    "type": "UNIFORM", 
-    "A": 0.5, 
-    "B": 1.5,
-}
 # Factors for 24-h expansion of volumes
 # TODO: Trucks and vans
 volume_factors = {
     "car": {
-        "aht": 0.4878,
-        "pt": 0.0984,
-        "iht": 0.4310,
+        "aht": 0.439,
+        "pt": 0.098,
+        "iht": 0.378,
         "it": 0.3,
         "vrk": 1.0,
     },
     "car_work": {
-        "aht": 0.454,
+        "aht": 0.436,
         "pt": 0.100,
-        "iht": 0.482,
+        "iht": 0.481,
         "it": 0.3,
         "vrk": 1.0,
     },
     "car_leisure": {
-        "aht": 0.617,
-        "pt": 0.0978,
-        "iht": 0.397,
+        "aht": 0.449,
+        "pt": 0.098,
+        "iht": 0.310,
         "it": 0.3,
         "vrk": 1.0,
     },
     "transit": {
-        "aht": 0.546,
+        "aht": 0.517,
         "pt": 0.167,
-        "iht": 0.404,
+        "iht": 0.414,
         "it": 0.238,
         "vrk": 1.0,
     },
     "transit_work": {
-        "aht": 0.532,
+        "aht": 0.521,
         "pt": 0.167,
-        "iht": 0.432,
+        "iht": 0.444,
         "it": 0.222,
         "vrk": 1.0,
     },
     "transit_leisure": {
-        "aht": 0.845,
+        "aht": 0.417,
         "pt": 0.167,
-        "iht": 0.340,
+        "iht": 0.345,
         "it": 0.248,
         "vrk": 1.0,
     },
     "train": {
-        "aht": 0.429,
+        "aht": 0.524,
         "pt": 0.167,
-        "iht": 0.407,
+        "iht": 0.400,
         "it": 0.255,
         "vrk": 1.0,
     },
     "coach": {
-        "aht": 0.429,
+        "aht": 0.524,
         "pt": 0.167,
-        "iht": 0.407,
+        "iht": 0.400,
         "it": 0.255,
         "vrk": 1.0,
     },
     "airplane": {
-        "aht": 0.429,
+        "aht": 0.524,
         "pt": 0.167,
-        "iht": 0.407,
+        "iht": 0.400,
         "it": 0.255,
         "vrk": 1.0,
     },
     "bike": {
-        "aht": 0.538,
+        "aht": 0.547,
         "pt": 0.110,
-        "iht": 0.404,
+        "iht": 0.364,
         "it": 0.3,
         "vrk": 1.0,
     },
     "bike_work": {
-        "aht": 0.538,
+        "aht": 0.556,
         "pt": 0.134,
-        "iht": 0.424,
+        "iht": 0.414,
         "it": 0.3,
         "vrk": 1.0,
     },
     "bike_leisure": {
-        "aht": 0.528,
-        "pt": 0.0957,
-        "iht": 0.386,
+        "aht": 0.423,
+        "pt": 0.096,
+        "iht": 0.322,
         "it": 0.3,
         "vrk": 1.0,
     },
     "walk": {
-        "aht": 0.538,
-        "pt": 0.110,
-        "iht": 0.404,
+        "aht": 0.540,
+        "pt": 0.118,
+        "iht": 0.323,
         "it": 0.3,
         "vrk": 1.0,
     },
@@ -600,6 +511,7 @@ assignment_classes = {
     "hb_grocery": "leisure",
     "hb_other_shop": "leisure",
     "hb_leisure": "leisure",
+    "hb_escort": "leisure",
     "hb_sport": "leisure",
     "hb_visit": "leisure",
     "hb_leisure_overnight": "leisure",
@@ -680,6 +592,7 @@ freight_modes = {
         'W': "@ship",
     },
 }
+marine_ships_name = "marine_ships"
 freight_marine_modes = {
     "container_ship": {
         "C": "@container_ship"
@@ -707,12 +620,13 @@ external_modes = [
     "trailer_truck",
 ]
 segment_results = {
-    "transit_volumes": "vol",
-    "total_boardings": "boa",
-    "transfer_boardings": "trb",
+    "transit_volumes": "@voltr",
+    "total_boardings": "@total_board",
+    "transfer_boardings": "@transfer_board",
 }
 uncongested_transit_time = "base_timtr"
-basic_impedance_output = ["time", "cost", "dist", "toll_cost", "inv_time"]
+basic_impedance_output = ["time", "cost", "dist", "toll_cost", "inv_time",
+                          "train_users"]
 mixed_mode_output = ["car_time", "transfer_time", "park_cost"]
 impedance_output = basic_impedance_output + mixed_mode_output
 transit_impedance_matrices = {
@@ -756,6 +670,7 @@ freight_gate_attr = "@freight_gate"
 ferry_wait_attr = "@ferry_wait_time"
 free_flow_time_attr = "@free_flow_time"
 extra_freight_cost_attr = "#extra_cost"
+park_ride_vol_attr = "@park_and_ride_vol"
 railtypes = {
     2: "tram",
     3: "metro",
@@ -772,8 +687,4 @@ roadtypes = {
     5: "single-lane",
     11: "ferry",
     99: "connector",
-}
-station_ids = {
-    "metro": 13,
-    "train": 14,
 }

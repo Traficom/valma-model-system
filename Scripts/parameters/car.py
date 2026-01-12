@@ -20,7 +20,7 @@ car_density = {
 }
 car_ownership = {
     "hh1": {
-        0: {
+        "0": {
             "constant": 0.0,
             "generation": {},
             "individual_dummy": {
@@ -35,7 +35,7 @@ car_ownership = {
                 "constant": 0.382845731
             }
         },
-        1: {
+        "1": {
             "constant": 3.221865,
             "generation": {
                 "hb_leisure_sustainable": -0.099956,
@@ -56,7 +56,7 @@ car_ownership = {
         }
     },
     "hh2": {
-        0: {
+        "0": {
             "constant": 0.0,
             "generation": {},
             "individual_dummy": {
@@ -71,7 +71,7 @@ car_ownership = {
                 "constant": 0.081983161
             }
         },
-        1: {
+        "1": {
             "constant": 3.477066,
             "generation": {
                 "hb_leisure_sustainable": -0.224521,
@@ -90,7 +90,7 @@ car_ownership = {
                 "constant": -0.014866763
             }
         },
-        2: {
+        "2": {
             "constant": 5.380643,
             "generation": {
                 "hb_leisure_sustainable": -0.396650,
@@ -111,7 +111,7 @@ car_ownership = {
         }
     },
     "hh3": {
-        0: {
+        "0": {
             "constant": 0.0,
             "generation": {},
             "individual_dummy": {
@@ -126,7 +126,7 @@ car_ownership = {
                 "constant": -0.071076673
             }
         },
-        1: {
+        "1": {
             "constant": 3.646567,
             "generation": {
                 "hb_leisure_sustainable": -0.224521,
@@ -145,7 +145,7 @@ car_ownership = {
                 "constant": -0.100249666
             }
         },
-        2: {
+        "2": {
             "constant": 6.328425,
             "generation": {
                 "hb_leisure_sustainable": -0.396650,

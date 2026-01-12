@@ -97,8 +97,6 @@ class EmmeProject:
             "inro.emme.network_calculation.network_calculator")
         self.car_assignment = self.modeller.tool(
             "inro.emme.traffic_assignment.sola_traffic_assignment")
-        self.pedestrian_assignment = self.modeller.tool(
-            "inro.emme.transit_assignment.standard_transit_assignment")
         self.transit_assignment = self.modeller.tool(
             "inro.emme.transit_assignment.extended_transit_assignment")
         self.congested_assignment = self.modeller.tool(
@@ -111,6 +109,8 @@ class EmmeProject:
             "inro.emme.transit_assignment.extended.traversal_analysis")
         self.create_extra_attribute = self.modeller.tool(
             "inro.emme.data.extra_attribute.create_extra_attribute")
+        self.create_network_field = self.modeller.tool(
+            "inro.emme.data.network_field.create_network_field")
         self.set_extra_function_parameters = self.modeller.tool(
             "inro.emme.traffic_assignment.set_extra_function_parameters")
     

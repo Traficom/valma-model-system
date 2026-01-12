@@ -41,14 +41,14 @@ def create_purposes(parameters_path: Path, zonedata: FreightZoneData,
     for file in parameters_path.rglob("*.json"):
         commodity_params = json.loads(file.read_text("utf-8"))
         commodity = commodity_params["name"]
-        try:
-            purpose_cost = costdata[commodity_conversion[commodity]]
-            purposes[commodity] = FreightPurpose(commodity_params, zonedata, 
-                                                 resultdata, purpose_cost,
-                                                 parameters_path.stem)
-        except KeyError:
+        purpose_cost = costdata.get(commodity_conversion[commodity])
+        if not purpose_cost:
             log.warn(f"Aggregated commodity class '{commodity_conversion[commodity]}' "
-                      f"for commodity '{commodity}' not found in costs json")
+                     f"for commodity '{commodity}' not found in costs json")
+            continue
+        purposes[commodity] = FreightPurpose(commodity_params, 
+                                             {parameters_path.stem: zonedata},
+                                             resultdata, purpose_cost)
     return purposes
 
 class StoreDemand():

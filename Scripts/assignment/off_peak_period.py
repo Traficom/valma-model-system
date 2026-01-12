@@ -2,6 +2,7 @@ from typing import Dict, Iterable
 from numpy import ndarray
 import copy
 
+import utils.log as log
 from assignment.assignment_period import AssignmentPeriod
 from assignment.long_dist_period import WholeDayPeriod
 from assignment.datatypes.transit import TransitMode
@@ -55,7 +56,9 @@ class OffPeakPeriod(AssignmentPeriod):
 
     def init_assign(self):
         self._init_assign_transit()
-        self._assign_pedestrians()
+        log.info("Pedestrian assignment started...")
+        self.walk_mode.assign()
+        log.info(f"Pedestrians assigned for scenario {self.emme_scenario.id}")
         self._set_bike_vdfs()
         self._assign_bikes()
         return self.get_soft_mode_impedances()
@@ -99,6 +102,7 @@ class OffPeakPeriod(AssignmentPeriod):
         for ass_cl in param.car_classes:
             del mtxs["dist"][ass_cl]
         del mtxs["toll_cost"]
+        del mtxs["train_users"]
         return mtxs
 
 
@@ -164,13 +168,20 @@ class TransitAssignmentPeriod(OffPeakPeriod):
         """
         mtxs = self._get_impedances(param.local_transit_classes)
         del mtxs["dist"]
+        del mtxs["train_users"]
         return mtxs
 
-    def end_assign(self) -> Dict[str, Dict[str, ndarray]]:
+    def end_assign(self,
+                   assign_transit=True) -> Dict[str, Dict[str, ndarray]]:
         """Get transit impedance matrices for one time period.
 
         Long-distance mode impedances are included if assignment period
         was created with delete_extra_matrices option disabled.
+
+        Parameters
+        ----------
+        assign_transit : bool (optional)
+            Whether to assign transit for this time period
 
         Returns
         -------
@@ -178,6 +189,8 @@ class TransitAssignmentPeriod(OffPeakPeriod):
             Type (time/cost/dist) : dict
                 Assignment class (transit_work/...) : numpy 2-d matrix
         """
+        if not assign_transit:
+            return {}
         self._assign_transit(
             param.simple_transit_classes, calc_network_results=True,
             delete_strat_files=self._delete_strat_files)

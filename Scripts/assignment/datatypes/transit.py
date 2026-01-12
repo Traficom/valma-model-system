@@ -2,6 +2,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Dict
 
 import parameters.assignment as param
+from parameters.cost import tour_duration
 from assignment.datatypes.assignment_mode import AssignmentMode
 from assignment.datatypes.journey_level import JourneyLevel
 if TYPE_CHECKING:
@@ -38,16 +39,16 @@ class TransitMode(AssignmentMode):
         for scenario, tp in (
                 (day_scenario, "vrk"), (self.emme_scenario, self.time_period)):
             for res, attr in param.segment_results.items():
-                attr_name = f"@{self.name[:11]}_{attr}_{tp}"
+                attr_name = f"#{self.name}_{attr[1:]}_{tp}"
                 self.segment_results[res] = attr_name
-                self.emme_project.create_extra_attribute(
-                    "TRANSIT_SEGMENT", attr_name, f"{self.name} {res}",
+                self.emme_project.create_network_field(
+                    "TRANSIT_SEGMENT", "REAL", attr_name, f"{self.name} {res}",
                     overwrite=True, scenario=scenario)
                 if res != "transit_volumes":
-                    attr_name = f"@{self.name[:10]}n_{attr}_{tp}"
+                    attr_name = f"#node_{self.name}_{attr[1:]}_{tp}"
                     self.node_results[res] = attr_name
-                    self.emme_project.create_extra_attribute(
-                        "NODE", attr_name, f"{self.name} {res}",
+                    self.emme_project.create_network_field(
+                        "NODE", "REAL", attr_name, f"{self.name} {res}",
                         overwrite=True, scenario=scenario)
 
         # Specify
@@ -117,7 +118,7 @@ class TransitMode(AssignmentMode):
         self.ntw_results_spec = {
             "type": "EXTENDED_TRANSIT_NETWORK_RESULTS",
             "analyzed_demand": self.demand.id,
-            "on_segments": self.segment_results,
+            "on_segments": param.segment_results,
         }
         is_park_and_ride = self._add_park_and_ride()
         self.transit_spec["journey_levels"] = [JourneyLevel(
@@ -136,6 +137,7 @@ class TransitMode(AssignmentMode):
         self.gen_cost = self._create_matrix("gen_cost")
         self.inv_cost = self._create_matrix("inv_cost")
         self.board_cost = self._create_matrix("board_cost")
+        self.main_mode_dist = self._create_matrix("main_mode_dist")
 
     def _add_park_and_ride(self):
         return False
@@ -152,10 +154,41 @@ class TransitMode(AssignmentMode):
                 "avg_boardings": self.num_board.id,
             },
         }]
+        # For daily tours, use main_mode_dist for analyzing train usage
+        self.transit_result_specs.append({
+            "type": "EXTENDED_TRANSIT_MATRIX_RESULTS",
+            subset: {
+                "modes": ['j', 'r'],
+                "distance": self.main_mode_dist.id,
+            },
+        })
         return [
             self.transit_result_specs[0],
             self.transit_result_specs[0][subset],
         ]
+
+    def assign(self, add_volumes: bool):
+        """Assign transit class.
+
+        Parameters
+        ----------
+        add_volumes : bool
+            Whether volumes should be added to existing link volumes.
+        """
+        self.init_matrices()
+        self._set_link_parking_costs()
+        self.emme_project.transit_assignment(
+            specification=self.transit_spec, scenario=self.emme_scenario,
+            add_volumes=add_volumes, save_strategies=True,
+            class_name=self.name)
+        for result_spec in self.transit_result_specs:
+            self.emme_project.matrix_results(
+                result_spec, scenario=self.emme_scenario,
+                class_name=self.name)
+
+    def _set_link_parking_costs(self):
+        """Used in MixedMode for setting parking costs on links."""
+        pass
 
     def get_matrices(self):
         transfer_penalty = (param.transfer_penalty[self.name]
@@ -164,11 +197,30 @@ class TransitMode(AssignmentMode):
         time = self.gen_cost.data - self.vot_inv*cost - transfer_penalty
         time[cost > 999999] = 999999
         mtxs = {"time": time, "cost": cost}
+        if not self.name in param.long_distance_transit_classes:
+            mtxs["train_users"] = self.demand.data
+            mtxs["train_users"][self.main_mode_dist.data == 0] = 0
         for mtx_name in param.impedance_output:
             if mtx_name in self._matrices:
                 mtxs[mtx_name] = self._matrices[mtx_name].data
         self._soft_release_matrices()
         return mtxs
+
+    def calc_transit_network_results(self):
+        self.emme_project.network_results(
+            self.ntw_results_spec, scenario=self.emme_scenario,
+            class_name=self.name)
+        network = self.emme_scenario.get_network()
+        for result, attr in param.segment_results.items():
+            netfield = self.segment_results[result]
+            for segment in network.transit_segments():
+                segment[netfield] = segment[attr]
+        self._save_link_results(network)
+        self.emme_scenario.publish_network(network)
+
+    def _save_link_results(self, network):
+        """Used in MixedMode for saving park-and-ride volumes."""
+        pass
 
 
 class MixedMode(TransitMode):
@@ -202,15 +254,15 @@ class MixedMode(TransitMode):
             for mode_cost in aux_transit_times:
                 mode_cost["cost"] = param.park_cost_attr_l
                 mode_cost["cost_perception_factor"] = self.vot_inv
-        park_and_ride_results = f"@{self.name[0]}{self.name[2:]}_aux"
-        self.emme_project.create_extra_attribute(
-            "LINK", park_and_ride_results, self.name,
+        self.park_ride_results = f"#park_and_ride_vol_{self.name}"
+        self.emme_project.create_network_field(
+            "LINK", "REAL", self.park_ride_results, self.name,
             overwrite=True, scenario=self.emme_scenario)
         self.transit_spec["modes"].append(param.park_and_ride_mode)
         self.ntw_results_spec["on_links"] = {
             "aux_transit_volumes_by_mode": [{
                 "mode": param.park_and_ride_mode,
-                "volume": park_and_ride_results,
+                "volume": param.park_ride_vol_attr,
             }],
         }
         return True
@@ -242,9 +294,32 @@ class MixedMode(TransitMode):
         } for spec in specs]
         return result_specs
 
+    def _set_link_parking_costs(self):
+        network = self.emme_scenario.get_network()
+        avg_days = tour_duration[self.name]["avg"]
+        for node in network.nodes():
+            parking_cost = node[param.park_cost_attr_n]
+            if parking_cost > 0:
+                parking_cost *= 0.5 * avg_days
+                if self.name in param.car_access_classes:
+                    parking_links = node.incoming_links()
+                    other_links = node.outgoing_links()
+                else:
+                    other_links = node.incoming_links()
+                    parking_links = node.outgoing_links()
+                for link in parking_links:
+                    link[param.park_cost_attr_l] = parking_cost
+                for link in other_links:
+                    link[param.park_cost_attr_l] = 0
+        self.emme_scenario.publish_network(network)
+
     def get_matrices(self):
         car_cost = self.dist_unit_cost * self.car_dist.data
         mtxs = TransitMode.get_matrices(self)
         mtxs["cost"] += car_cost
         mtxs["transfer_time"] = self.loc_time.data + self.aux_time.data
         return mtxs
+
+    def _save_link_results(self, network):
+        for link in network.links():
+            link[self.park_ride_results] = link[param.park_ride_vol_attr]

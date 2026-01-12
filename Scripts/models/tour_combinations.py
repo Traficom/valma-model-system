@@ -1,7 +1,7 @@
 from typing import Union, Dict, Tuple
 import numpy # type: ignore
 
-import parameters.tour_generation as param
+import parameters.tour_combinations as param
 
 
 class TourCombinationModel:
