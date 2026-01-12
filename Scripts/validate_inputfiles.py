@@ -20,7 +20,7 @@ def main(args):
     base_zonedata_path = Path(args.base_data_folder, BASE_ZONEDATA_FILE)
     emme_paths: Union[str,List[str]] = args.emme_paths
     first_scenario_ids: Union[int,List[int]] = args.first_scenario_ids
-    zone_data_paths: Union[str,List[str]] = args.zone_data_paths
+    zone_data_file: Union[str,List[str]] = args.zone_data_file
 
     if not emme_paths:
         msg = "Missing required argument 'emme-paths'."
@@ -30,7 +30,7 @@ def main(args):
         msg = "Missing required argument 'first-scenario-ids'."
         log.error(msg)
         raise ValueError(msg)
-    if not zone_data_paths:
+    if not zone_data_file:
         msg = "Missing required argument 'zone-data-path'."
         log.error(msg)
         raise ValueError(msg)
@@ -40,7 +40,7 @@ def main(args):
                + "vs. number of first-scenario-ids")
         log.error(msg)
         raise ValueError(msg)
-    if not (len(emme_paths) == len(zone_data_paths)):
+    if not (len(emme_paths) == len(zone_data_file)):
         msg = ("Non-matching number of emme-paths (.emp files) "
                + "vs. number of zone-data-path")
         log.error(msg)
@@ -61,7 +61,7 @@ def main(args):
     for i, emp_path in enumerate(emme_paths):
         log.info("Checking input data for scenario #{} ...".format(i))
 
-        data_path = args.cost_data_files[i]
+        data_path = args.cost_data_file[i]
         if not os.path.exists(data_path):
             msg = "Forecast data file '{}' does not exist.".format(
                 data_path)
@@ -219,9 +219,9 @@ def main(args):
             long_dist_result_paths.append(
                 Path(args.result_data_folder, name, "Matrices", "koko_suomi"))
     model_types = (args.model_types if args.model_types
-                   else ["passenger_transport" for _ in zone_data_paths])
+                   else ["passenger_transport" for _ in zone_data_file])
     for model_type, data_path, submodel, long_dist_forecast, freight_path in zip(
-            model_types, zone_data_paths, args.submodel,
+            model_types, zone_data_file, args.submodel,
             args.long_dist_demand_forecast, args.freight_matrix_paths):
         # Check forecasted zonedata
         if not os.path.exists(data_path):
