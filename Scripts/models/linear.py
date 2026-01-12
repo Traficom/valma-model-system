@@ -3,8 +3,6 @@ import pandas
 import math
 
 import parameters.car
-import parameters.income
-
 
 class LinearModel(object):
     """Initialize a linear model.
@@ -125,43 +123,3 @@ class CarDensityModel(LinearModel):
             self.resultdata.print_data(
                 aggregation, f"car_density_{area_type}.txt")
 
-
-class IncomeModel(LinearModel):
-    """Initialize income model.
-
-    Parameters
-    ----------
-    zone_data : datahandling.ZoneData
-        Zone input data for forecast year
-    bounds : slice
-        Defines the area on which the model is predicting to (usually the
-        metropolitan area)
-    resultdata : datahandling.ResultData
-        Writer object for result directory
-    age_groups : tuple
-        tuple
-            int
-                Age intervals for validation
-    is_helsinki : bool (optional)
-        If model is for the municipality of Helsinki
-    """
-    def __init__(self, zone_data, bounds, resultdata, age_groups,
-                 is_helsinki=False):
-        LinearModel.__init__(self, zone_data, bounds, resultdata)
-        self.param = (parameters.income.log_income_helsinki if is_helsinki
-            else parameters.income.log_income)
-        for age_group in self.param["age_dummies"]:
-            age_interval = age_group.split('_')[1]
-            if tuple(map(int, age_interval.split('-'))) not in age_groups:
-                raise AttributeError("Income dummy {} not valid.".format(
-                    age_group))
-
-    def predict(self):
-        prediction = pandas.Series(
-            self.param["constant"], self.zone_data.zone_numbers[self.bounds])
-        prediction = self._add_zone_terms(prediction, self.param["zone"], True)
-        for municipality in self.param["municipality_dummies"]:
-            dummy = self.zone_data.dummy(
-                "municipality", municipality, self.bounds)
-            prediction += self.param["municipality_dummies"][municipality] * dummy
-        self.log_income = prediction
