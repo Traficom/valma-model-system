@@ -269,12 +269,12 @@ class TourPurpose(Purpose):
         else:
             log.error(f"Tour generation model not defined for {self.name}")
         args = (self, specification, self.attraction_zone_data, resultdata)
-        if self.name == "sop":
-            self.model = logit.OriginModel(*args)
+        if specification["struct"] == "mode>dest":
+            self.model = logit.ModeDestModel(*args)
         elif specification["struct"] == "dest>mode":
             self.model = logit.DestModeModel(*args)
         else:
-            self.model = logit.ModeDestModel(*args)
+            log.error(f"Unknown struct in {self.name} parameters.")
         for mode in self.impedance_share:
             if mode not in self.demand_share:
                 self.demand_share[mode] = self.impedance_share[mode]
