@@ -683,9 +683,6 @@ class SecDestModel(LogitModel):
         return dest_exps.T / dest_exps.sum(1)
 
 
-class OriginModel(DestModeModel):
-    pass
-
 class GenerationLogit(LogitModel):
     """Logit model with generation count response.
 
