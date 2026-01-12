@@ -90,10 +90,10 @@ def run_logistics_module(purpose: FreightPurpose, demand_truck : numpy.ndarray,
                                                    ddm_params=purpose.logistics_params,
                                                    lc_indices=lc_indices,
                                                    lc_sizes=lc_sizes)
-    for _ in range(1, iterations + 1):
+    for i in range(1, iterations + 1):
         demand_truck = process_logistics_inference(model=logistics_module,
-                                                   n_zones=zonedata.nr_zones,
-                                                   demand=demand_truck)
+                                                   demand=demand_truck, 
+                                                   iteration=i)
     return demand_truck
 
 

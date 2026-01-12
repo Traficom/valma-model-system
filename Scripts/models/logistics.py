@@ -3,6 +3,8 @@ from typing import NamedTuple, Sequence, Union
 from concurrent.futures import ThreadPoolExecutor
 from threading import Lock
 
+import utils.log as log
+
 class DDMParameters(NamedTuple):
     orig_lc_detour: float
     lc_dest_detour: float
@@ -122,12 +124,14 @@ def process_batch(origin_offset: int, batch_size: int, n: int, k_plus1: int,
     
     return origin_offset, current_batch_size
 
-def process_logistics_inference(model: DetourDistributionInference, n_zones: int, demand: np.ndarray) -> None:
+def process_logistics_inference(model: DetourDistributionInference, demand: np.ndarray, 
+                                iteration: int) -> np.ndarray:
 
     # Process full matrix in origin batches to limit memory usage
     # Process full matrix in origin batches in parallel
     k_plus1 = len(model.lc_indices) + 1
     batch_size = 15
+    n_zones = demand.shape[0]
     final_demand = np.zeros((n_zones, n_zones), dtype=np.float32)
     total_per_route = np.zeros((k_plus1,), dtype=np.float32)
     lock = Lock()
@@ -141,16 +145,16 @@ def process_logistics_inference(model: DetourDistributionInference, n_zones: int
     # Process batches in parallel
     with ThreadPoolExecutor(max_workers=16) as executor:
         futures = [executor.submit(process_batch, *args) for args in batch_args]
-        results = [future.result() for future in futures]
+        _ = [future.result() for future in futures]
     
     # after processing all batches
     detour_total = np.sum(total_per_route[:-1])
     direct_total = total_per_route[-1]
-    print(f"Total demand via logistics centers: {detour_total:.4f}")
-    print(f"Total direct demand: {direct_total:.4f}")
-    
-    print("Final demand matrix including detour legs and direct:")
-    print(f'orig_demand: {np.sum(demand)}, final_demand: {np.sum(final_demand)}')
-
-    # output the final demand matrix
+    log.info(
+        f"Logistics module results after iteration {iteration}:\n"
+        f"Total demand via logistics centers {detour_total:.4f}\n"
+        f"Total direct demand {direct_total:.4f}\n"
+        "Final demand matrix including detour legs and direct for\n"
+        f"orig_demand {np.sum(demand)}, final_demand {np.sum(final_demand)}"
+    )
     return final_demand
