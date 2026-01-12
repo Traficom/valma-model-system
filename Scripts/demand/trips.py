@@ -9,7 +9,6 @@ if TYPE_CHECKING:
 
 import utils.log as log
 import parameters.zone as param
-from parameters.tour_combinations import tour_combination_area
 from datatypes.purpose import SecDestPurpose
 from models import linear
 from models.logit import GenerationLogit
@@ -38,7 +37,6 @@ class DemandModel:
         self.zone_data = zone_data
         self.tour_purposes = tour_purposes
         self.purpose_dict = {purpose.name: purpose for purpose in tour_purposes}
-        self._use_tour_combination_model = False
         for purpose in tour_purposes:
             try:
                 sources = purpose.sources
@@ -49,7 +47,7 @@ class DemandModel:
                 if isinstance(purpose, SecDestPurpose):
                     for source in purpose.sources:
                         source.sec_dest_purpose = purpose
-        bounds = param.purpose_areas[tour_combination_area]
+        bounds = param.purpose_areas["domestic"]
         self.bounds = slice(*zone_data.all_zone_numbers.searchsorted(
             [bounds[0], bounds[-1]]))
         self.car_ownership_models = {
