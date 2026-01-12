@@ -1,24 +1,4 @@
-# Share of demand that will be simulated in agent model
 from typing import Any, Dict, List, Tuple, Union
-
-# O-D pairs with demand below threshold are neglected in sec dest calculation
-secondary_destination_threshold = 0.1
-
-agent_demand_fraction = 1.0
-
-# Seed number for population attributes:
-# int = fixed seed and same population for each run
-# None = different population for each run
-population_draw = 31
-
-# Age groups in zone data
-age_groups: List[Tuple[int, int]] = [ #changed to list for type checker
-        (7, 17),
-        (18, 29),
-        (30, 49),
-        (50, 64),
-        (65, 99),
-]
 
 ### DEMAND MODEL REFERENCES ###
 

@@ -21,8 +21,6 @@ from demand.trips import DemandModel
 from demand.external import ExternalPurpose
 from datatypes.purpose import new_tour_purpose
 from datatypes.purpose import Purpose, TourPurpose, SecDestPurpose
-from datatypes.person import Person
-from datatypes.tour import Tour
 from datatypes.demand import Demand
 import parameters.assignment as param
 import parameters.zone as zone_param
@@ -167,8 +165,7 @@ class ModelSystem:
 
     def _init_demand_model(self, tour_purposes: List[TourPurpose]):
         return DemandModel(
-            self._zone_datas["domestic"], self.resultdata, tour_purposes,
-            is_agent_model=False)
+            self._zone_datas["domestic"], self.resultdata, tour_purposes)
 
     def _add_internal_demand(self, previous_iter_impedance, is_last_iteration):
         """Produce mode-specific demand matrices.
@@ -560,155 +557,3 @@ class ModelSystem:
         for orig in origs:
             demand = purpose.distribute_tours(mode, impedance[mode], orig)
             container.add_demand(demand)
-
-
-class AgentModelSystem(ModelSystem):
-    """Object keeping track of all sub-models and tasks in agent model system.
-
-    Agents are added one-by-one to departure time model,
-    where they are (so far) split in deterministic fractions.
-    
-    Parameters
-    ----------
-    zone_data_path : str
-        Directory path where input data for forecast year are found
-    base_zone_data_path : str
-        Directory path where input data for base year are found
-    base_matrices_path : str
-        Directory path where base demand matrices are found
-    results_path : str
-        Directory path where to store results
-    assignment_model : assignment.abstract_assignment.AssignmentModel
-        Assignment model wrapper used in model runs,
-        can be EmmeAssignmentModel or MockAssignmentModel
-    name : str
-        Name of scenario, used for results subfolder
-    """
-
-    def _init_demand_model(self, tour_purposes: List[TourPurpose]):
-        log.info("Creating synthetic population")
-        random.seed(zone_param.population_draw)
-        return DemandModel(
-            self._zone_datas["domestic"], self.resultdata, tour_purposes,
-            is_agent_model=True)
-
-    def _add_internal_demand(self, previous_iter_impedance, is_last_iteration):
-        """Produce tours and add fractions of them
-        for each time-period to container in departure time model.
-
-        Parameters
-        ----------
-        previous_iter_impedance : dict
-            key : str
-                Time period (aht/pt/iht)
-            value : dict
-                key : str
-                    Impedance type (time/cost/dist)
-                value : dict
-                    key : str
-                        Assignment class (car_work/transit/...)
-                    value : numpy.ndarray
-                        Impedance (float 2-d matrix)
-        is_last_iteration : bool (optional)
-            If this is the last iteration, 
-            secondary destinations are calculated for all modes
-        """
-        log.info("Demand calculation started...")
-        random.seed(None)
-        self.dm.car_use_model.calc_basic_prob()
-        for purpose in self.dm.tour_purposes:
-            for mode_demand in purpose.calc_basic_prob(
-                    previous_iter_impedance, is_last_iteration):
-                # `demand` contains matrices only for non-agent purposes
-                self.dtm.add_demand(mode_demand)
-        tour_probs = self.dm.generate_tour_probs()
-        log.info("Assigning mode and destination for {} agents ({} % of total population)".format(
-            len(self.dm.population), int(zone_param.agent_demand_fraction*100)))
-        purpose = self.dm.purpose_dict["hoo"]
-        sec_dest_tours = {mode: [defaultdict(list) for _ in purpose.orig_zone_numbers]
-            for mode in purpose.modes}
-        # Add keys for work-tour-related modes (e.g., "car_work"),
-        # which refer to the same demand containers as for leisure tours.
-        # They are all assigned as leisure trips.
-        work_tours = {mode.replace("leisure", "work"): sec_dest_tours[mode]
-                      for mode in sec_dest_tours}
-        sec_dest_tours.update(work_tours)
-        car_users = pandas.Series(
-            0, self.zone_numbers[self.dm.car_use_model.bounds])
-        for person in self.dm.population:
-            person.decide_car_use()
-            car_users[person.zone.number] += person.is_car_user
-            person.add_tours(self.dm.purpose_dict, tour_probs)
-            for tour in person.tours:
-                tour.choose_mode(person.is_car_user)
-                tour.choose_destination(sec_dest_tours)
-        for purpose in self.dm.tour_purposes:
-            try:
-                purpose.model.cumul_dest_prob.clear()
-            except AttributeError:
-                pass
-        car_share = car_users / self.dm.zone_population
-        car_share.name = "car_share"
-        self.dm.car_use_model.print_results(car_share, self.dm.zone_population)
-        log.info("Primary destinations assigned")
-        purpose = self.dm.purpose_dict["hoo"]
-        purpose_impedance = purpose.transform_impedance(
-            previous_iter_impedance)
-        nr_threads = param.performance_settings["number_of_processors"]
-        if nr_threads == "max":
-            nr_threads = multiprocessing.cpu_count()
-        elif nr_threads <= 0:
-            nr_threads = 1
-        bounds = next(iter(purpose.sources)).bounds
-        modes = purpose.modes if is_last_iteration else ["car_leisure"]
-        for mode in modes:
-            threads = []
-            for i in range(nr_threads):
-                origs = range(i, bounds.stop - bounds.start, nr_threads)
-                thread = threading.Thread(
-                    target=self._distribute_tours,
-                    args=(
-                        mode, origs, sec_dest_tours[mode],
-                        purpose_impedance[mode]))
-                threads.append(thread)
-                thread.start()
-            for thread in threads:
-                thread.join()
-        if is_last_iteration:
-            random.seed(zone_param.population_draw)
-            self.dm.predict_income()
-            random.seed(None)
-            fname0 = "agents"
-            fname1 = "tours"
-            # print person and tour attr to files
-            self.resultdata.print_line("\t".join(Person.attr), fname0)
-            self.resultdata.print_line("\t".join(Tour.attr), fname1)
-            for person in self.dm.population:
-                person.calc_income()
-                self.resultdata.print_line(str(person), fname0)
-                for tour in person.tours:
-                    tour.calc_cost(previous_iter_impedance)
-                    self.resultdata.print_line(str(tour), fname1)
-            log.info("Results printed to files {} and {}".format(
-                fname0, fname1))
-        previous_iter_impedance.clear()
-        dtm = dt.DepartureTimeModel(
-            self.ass_model.nr_zones, self.ass_model.time_periods,
-            self.travel_modes)
-        for person in self.dm.population:
-            for tour in person.tours:
-                dtm.add_demand(tour)
-        for tp in dtm.demand:
-            for ass_class in dtm.demand[tp]:
-                self.dtm.demand[tp][ass_class] = dtm.demand[tp][ass_class]
-        log.info("Demand calculation completed")
-
-    def _distribute_tours(self, mode, origs, sec_dest_tours, impedance):
-        sec_dest_purpose = self.dm.purpose_dict["hoo"]
-        for orig in origs:
-                dests = list(sec_dest_tours[orig])
-                probs = sec_dest_purpose.calc_sec_dest_prob(
-                    mode, impedance, orig, dests).cumsum(axis=0)
-                for j, dest in enumerate(dests):
-                    for tour in sec_dest_tours[orig][dest]:
-                        tour.choose_secondary_destination(probs[:, j])
