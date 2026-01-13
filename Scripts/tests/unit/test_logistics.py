@@ -73,8 +73,8 @@ class LogisticsModelTest(unittest.TestCase):
             demand = purpose.calc_traffic(impedance)
             if hasattr(purpose, "logistics_module") and iterations > 0:
                 demand_truck, per_route = purpose.run_logistics_module(demand["truck"],
-                                                                       impedance, zonedata, 
-                                                                       mapping, iterations)
+                                                                       impedance, mapping, 
+                                                                       iterations)
                 self.assertTrue(numpy.isfinite(demand_truck).all())
                 self.assertTrue((demand_truck >= 0).all())
                 self.assertTrue(demand_truck.shape == (zonedata.nr_zones, zonedata.nr_zones))

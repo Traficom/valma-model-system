@@ -5,7 +5,7 @@ from collections import defaultdict
 import numpy # type: ignore
 import pandas
 from datahandling.resultdata import ResultsData
-from datahandling.zonedata import ZoneData, FreightZoneData
+from datahandling.zonedata import ZoneData
 from datahandling.matrixdata import MatrixData
 import utils.log as log
 import parameters.zone as param
@@ -769,8 +769,7 @@ class FreightPurpose(Purpose):
         vehicles += vehicles.T * costdata["empty_share"]
         return vehicles
 
-    def run_logistics_module(self, demand_truck : numpy.ndarray, 
-                             impedance: numpy.ndarray, zonedata: FreightZoneData, 
+    def run_logistics_module(self, demand_truck: numpy.ndarray, impedance: numpy.ndarray, 
                              zone_index_map: dict, iterations: int) -> tuple:
         """Entry point for running logistics module for truck demand within Finland
 
@@ -781,8 +780,6 @@ class FreightPurpose(Purpose):
         impedance : dict
             Mode (truck/train/...) : dict
                 Type (time/dist/toll_cost/canal_cost) : numpy 2d matrix
-        zonedata : FreightZoneData
-            Purpose zone data
         zone_index_map : dict 
             zone id number : index
         iterations : int
@@ -794,9 +791,9 @@ class FreightPurpose(Purpose):
             Routed truck demand, and totals for detoured and direct demand
         """
         try:
-            lcs_areas = zonedata[f"lc_area_{self.name}"]
+            lcs_areas = self.generation_zone_data[f"lc_area_{self.name}"]
         except KeyError:
-            lcs_areas = zonedata["lc_area"]
+            lcs_areas = self.generation_zone_data["lc_area"]
         lc_sizes = lcs_areas[lcs_areas > 0]
         lc_indices = numpy.array([zone_index_map.get(id, None) 
                                 for id in list(lc_sizes.index)])

@@ -76,7 +76,7 @@ def main(args):
         demand = purpose.calc_traffic(impedance)
         if hasattr(purpose, "logistics_module") and args.logistics_iterations > 0:
             demand["truck"], _ = purpose.run_logistics_module(demand["truck"], impedance, 
-                                                              zonedata, ass_model.mapping, 
+                                                              ass_model.mapping, 
                                                               args.logistics_iterations)
         for mode in demand:
             omx_filename = ("freight_demand_tons" if purpose.name 
