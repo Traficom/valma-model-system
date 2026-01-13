@@ -1,7 +1,7 @@
 import json
 import numpy
 from pathlib import Path
-from typing import Dict
+from typing import Dict, Tuple
 
 import utils.log as log
 from datatypes.purpose import FreightPurpose
@@ -53,7 +53,7 @@ def create_purposes(parameters_path: Path, zonedata: FreightZoneData,
 
 def run_logistics_module(purpose: FreightPurpose, demand_truck : numpy.ndarray,
                          impedance: numpy.ndarray, zonedata: FreightZoneData, 
-                         zone_index_map: dict, iterations: int) -> numpy.ndarray:
+                         zone_index_map: dict, iterations: int) -> Tuple[numpy.ndarray]:
     """Entry point for running logistics module for truck demand within Finland
 
     Parameters
@@ -74,8 +74,8 @@ def run_logistics_module(purpose: FreightPurpose, demand_truck : numpy.ndarray,
 
     Returns:
     -------
-    np.ndarray
-        Truck demand for purpose that is routed through logistic centers
+    Tuple[np.ndarray]
+        Routed truck demand, and totals for detoured and direct demand
     """
     try:
         lcs_areas = zonedata[f"lc_area_{purpose.name}"]
@@ -91,10 +91,10 @@ def run_logistics_module(purpose: FreightPurpose, demand_truck : numpy.ndarray,
                                                    lc_indices=lc_indices,
                                                    lc_sizes=lc_sizes)
     for i in range(1, iterations + 1):
-        demand_truck = process_logistics_inference(model=logistics_module,
-                                                   demand=demand_truck, 
-                                                   iteration=i)
-    return demand_truck
+        demand_truck, per_route = process_logistics_inference(model=logistics_module,
+                                                              demand=demand_truck, 
+                                                              iteration=i)
+    return demand_truck, per_route
 
 
 class StoreDemand():

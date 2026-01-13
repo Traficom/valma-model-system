@@ -157,4 +157,4 @@ def process_logistics_inference(model: DetourDistributionInference, demand: np.n
         "Final demand matrix including detour legs and direct for\n"
         f"orig_demand {np.sum(demand)}, final_demand {np.sum(final_demand)}"
     )
-    return final_demand
+    return final_demand, total_per_route

@@ -72,8 +72,18 @@ class LogisticsModelTest(unittest.TestCase):
         for purpose in purposes.values():
             demand = purpose.calc_traffic(impedance)
             if hasattr(purpose, "logistics_module") and iterations > 0:
-                demand["truck"] = run_logistics_module(purpose, demand["truck"], impedance, 
-                                                       zonedata, mapping, iterations)
-                self.assertTrue(numpy.isfinite(demand["truck"]).all())
-                self.assertTrue((demand["truck"] >= 0).all())
-                self.assertTrue(demand["truck"].shape == (zonedata.nr_zones, zonedata.nr_zones))
+                demand_truck, per_route = run_logistics_module(purpose, demand["truck"],
+                                                               impedance, zonedata, 
+                                                               mapping, iterations)
+                self.assertTrue(numpy.isfinite(demand_truck).all())
+                self.assertTrue((demand_truck >= 0).all())
+                self.assertTrue(demand_truck.shape == (zonedata.nr_zones, zonedata.nr_zones))
+
+                detour_total = numpy.sum(per_route[:-1])
+                direct_total = per_route[-1]
+                if purpose.name == "kemlaa":
+                    self.assertAlmostEqual(detour_total, 12.948977, places=3)
+                    self.assertAlmostEqual(direct_total, 12956.025, places=3)
+                elif purpose.name == "kummuo":
+                    self.assertAlmostEqual(detour_total, 54.282013, places=3)
+                    self.assertAlmostEqual(direct_total, 15736.507, places=3)
