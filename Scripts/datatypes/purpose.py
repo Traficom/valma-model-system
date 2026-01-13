@@ -13,7 +13,8 @@ import models.logit as logit
 from parameters.assignment import (
     assignment_classes,
     intermodals,
-    mixed_mode_classes)
+    mixed_mode_classes,
+    marine_ships_name)
 import parameters.cost as cost
 import models.generation as generation
 from datatypes.demand import Demand
@@ -669,10 +670,12 @@ class FreightPurpose(Purpose):
         if specification["struct"] == "dest>mode":
             self.model = logit.DestModeModel(self, specification, zone_data[self.model_category], 
                                              resultdata)
-        else:
+        elif specification["struct"] == "mode>dest":
             self.model = logit.ModeDestModel(self, specification, zone_data[self.model_category], 
                                              resultdata)
-        self.modes = list(self.model.mode_choice_param)
+        else:
+            self.model = None
+        self.modes = list(specification["mode_choice"])
 
         if specification.get("logistics_module"):
             self.logistics_module = specification["logistics_module"]
@@ -705,13 +708,15 @@ class FreightPurpose(Purpose):
         demand = {mode: (probs.pop(mode) * generation).T for mode in self.modes}
         return demand
 
-    def calc_route(self, impedance: dict, origs: dict, dests: dict):
-        """Calculates route choice for foreign freight trade. 
-        
+    def get_split_impedances(self, impedance: dict, origs: dict, dests: dict,
+                             is_export: bool) -> dict:
+        """Forms impedance matrices for the three route splits of foreign 
+        trade route choice model. 
+            
         Parameters
         ----------
         impedance : dict
-            Freight assignment mode (truck/train/...) : dict
+            Mode (truck/train/...) : dict
                 Type (time/dist/toll_cost/canal_cost) : numpy 2d matrix
         origs : dict
             Origin border id (FIHEL/SESTO...) : str
@@ -719,9 +724,71 @@ class FreightPurpose(Purpose):
         dests : dict
             Destination border id (FIHEL/SESTO...) : str
                 Centroid id : int
-        
+        is_export : bool
+            Whether data should be fetched for export (True) or import (False)
+
+        Returns
+        -------
+        dict
+            Split name (1/2/3) : dict
+                Mode (truck/train/marine ships) : mask indexed numpy 2d matrix
         """
+        def _slice(matrix, row_mask, col_mask):
+            return matrix[numpy.ix_(row_mask, col_mask)]
+        
+        # Get costs and update impedance structure for marine ships
         costs = self.get_costs(impedance, origs, dests)
+        costs[marine_ships_name] = costs[marine_ships_name]["cost"]
+        for mode in costs[marine_ships_name]:
+            costs[marine_ships_name][mode].update(
+                {"frequency": impedance[marine_ships_name][mode]["frequency"]})
+        
+        # Get zone masks and prep attributes
+        masks = self._form_split_masks(origs, dests)
+        truck_cost = costs["truck"]["cost"]
+        train_cost = costs["freight_train"]["cost"]
+        rows_fin = (masks["fin_zones"] | masks["orig_borders"] if is_export else 
+                    masks["fin_zones"] | masks["dest_borders"])
+        
+        # Form impedances for splits
+        split_impedances = {
+            True: {
+                "split_one": {
+                    "truck": _slice(truck_cost, rows_fin, masks["orig_borders"]),
+                    "freight_train": _slice(train_cost, rows_fin, masks["orig_borders"]),
+                },
+                "split_three": {
+                    "truck": _slice(truck_cost, masks["dest_borders"], masks["cluster_zones"])
+                }
+            },
+            False: {
+                "split_one": {
+                    "truck": _slice(truck_cost, masks["cluster_zones"], masks["orig_borders"])
+                },
+                "split_three": {
+                    "truck": _slice(truck_cost, masks["dest_borders"], rows_fin),
+                    "freight_train": _slice(train_cost, masks["dest_borders"], rows_fin)
+                }
+            }
+        }[is_export]
+        split_impedances["split_two"] = {
+            "truck": _slice(truck_cost, masks["orig_borders"], masks["dest_borders"]),
+            "freight_train": _slice(train_cost, masks["orig_borders"], masks["dest_borders"]),
+            marine_ships_name: costs.get(marine_ships_name, {})
+        }
+        return split_impedances
+
+    def _form_split_masks(self, origs: dict, dests: dict):
+        orig_zones = numpy.array(list(origs.values()), dtype=numpy.int32)
+        dest_zones = numpy.array(list(dests.values()), dtype=numpy.int32)
+        all_zones = self.generation_zone_data.all_zone_numbers
+        masks = {
+            "orig_borders": numpy.isin(all_zones, orig_zones),
+            "dest_borders": numpy.isin(all_zones, dest_zones),
+            "fin_zones": numpy.isin(all_zones, self.orig_zone_numbers)
+        }
+        masks["cluster_zones"] = ~masks["fin_zones"] & ~masks["dest_borders"]
+        return masks
 
     def get_costs(self, impedance: dict, origs: dict = None, dests: dict = None):
         """Fetches calculated costs for each mode in model's mode choice.
