@@ -6,7 +6,7 @@
     "SCENARIO_NAME": "test",
     "RESULT_DATA_FOLDER": "",
     "SUBMODEL": "uusimaa",
-    "EMME_PATH": "",
+    "EMME_PROJECT_FILE": "",
     "NUMBER_OF_EMME_SCENARIOS": 5,
     "FIRST_SCENARIO_ID": 1,
     "FIRST_MATRIX_ID": 100,

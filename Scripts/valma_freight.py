@@ -27,7 +27,7 @@ def main(args):
     zone_data_file = Path(args.zone_data_file)
     cost_data_file = Path(args.cost_data_file)
     result_data_folder = Path(args.result_data_folder, args.scenario_name)
-    emme_project_path = Path(args.emme_path)
+    emme_project_path = Path(args.emme_project_file)
     parameters_path = Path(__file__).parent / "parameters" / "freight"
     save_matrices = True if args.specify_commodity_names else False
     ep = EmmeProject(emme_project_path)
@@ -197,7 +197,7 @@ if __name__ == "__main__":
         type=str,
         help="Path to folder where result data is saved to.")
     parser.add_argument(
-        "--emme-path",
+        "--emme-project-file",
         type=str,
         help="Filepath to .emp EMME-project-file.")
     parser.add_argument(

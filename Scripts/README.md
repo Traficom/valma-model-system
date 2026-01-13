@@ -50,7 +50,7 @@ you need to initialize temporary result matrices to `RESULT_PATH\\SCENARIO_NAME\
 Name of submodel (e.g., "uusimaa", "koko_suomi"),
 used for choosing appropriate zone mapping and base matrices.
 
-### `EMME_PATH`
+### `EMME_PROJECT_FILE`
 
 If you are using Emme assignment, you need to specify where your `.emp` file is located.
 

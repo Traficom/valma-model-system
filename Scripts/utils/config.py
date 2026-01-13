@@ -75,7 +75,7 @@ def create_config(config: dict):
         "COST_DATA_FILE": None,
         "RESULT_DATA_FOLDER": None,
         "SUBMODEL": None,
-        "EMME_PATH": None,
+        "EMME_PROJECT_FILE": None,
         "FIRST_SCENARIO_ID": None,
         "FIRST_MATRIX_ID": None,
         "END_ASSIGNMENT_ONLY": False,

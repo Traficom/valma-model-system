@@ -18,12 +18,12 @@ from valma_travel import BASE_ZONEDATA_FILE
 
 def main(args):
     base_zonedata_path = Path(args.base_data_folder, BASE_ZONEDATA_FILE)
-    emme_paths: Union[str,List[str]] = args.emme_paths
+    emme_project_files: Union[str,List[str]] = args.emme_project_files
     first_scenario_ids: Union[int,List[int]] = args.first_scenario_ids
     zone_data_file: Union[str,List[str]] = args.zone_data_file
 
-    if not emme_paths:
-        msg = "Missing required argument 'emme-paths'."
+    if not emme_project_files:
+        msg = "Missing required argument 'emme-project-files'."
         log.error(msg)
         raise ValueError(msg)
     if not first_scenario_ids:
@@ -35,13 +35,13 @@ def main(args):
         log.error(msg)
         raise ValueError(msg)
     # Check arg lengths
-    if not (len(emme_paths) == len(first_scenario_ids)):
-        msg = ("Non-matching number of emme-paths (.emp files) "
+    if not (len(emme_project_files) == len(first_scenario_ids)):
+        msg = ("Non-matching number of emme-project-files (.emp files) "
                + "vs. number of first-scenario-ids")
         log.error(msg)
         raise ValueError(msg)
-    if not (len(emme_paths) == len(zone_data_file)):
-        msg = ("Non-matching number of emme-paths (.emp files) "
+    if not (len(emme_project_files) == len(zone_data_file)):
+        msg = ("Non-matching number of emme-project-files (.emp files) "
                + "vs. number of zone-data-path")
         log.error(msg)
         raise ValueError(msg)
@@ -58,7 +58,7 @@ def main(args):
 
     # Check scenario based input data
     log.info("Checking base zonedata & scenario-based input data...")
-    for i, emp_path in enumerate(emme_paths):
+    for i, emp_path in enumerate(emme_project_files):
         log.info("Checking input data for scenario #{} ...".format(i))
 
         data_path = args.cost_data_file[i]
@@ -337,7 +337,7 @@ if __name__ == "__main__":
         required=True,
         help="Name of submodel, used for choosing appropriate zone mapping"),
     parser.add_argument(
-        "--emme-paths",
+        "--emme-project-files",
         type=str,
         nargs="+",
         required=True,

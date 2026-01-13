@@ -36,7 +36,7 @@ def main(args):
     zone_data_file = Path(args.zone_data_file)
     cost_data_file = Path(args.cost_data_file)
     result_data_folder = Path(args.result_data_folder, args.scenario_name)
-    emme_project_path = Path(args.emme_path)
+    emme_project_path = Path(args.emme_project_file)
     log_extra = {
         "status": {
             "name": args.scenario_name,
@@ -268,7 +268,7 @@ if __name__ == "__main__":
         type=str,
         help="Name of submodel, used for choosing appropriate zone mapping"),
     parser.add_argument(
-        "--emme-path",
+        "--emme-project-file",
         type=str,
         help="Filepath to .emp EMME-project-file"),
     parser.add_argument(

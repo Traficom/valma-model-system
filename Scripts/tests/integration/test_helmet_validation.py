@@ -12,7 +12,7 @@ class Args:
     model_types = ["passenger_transport"]
     end_assignment_only = False
     base_data_folder = TEST_DATA_PATH / "Scenario_input_data"
-    emme_paths = [ZONEDATA_PATH / "2016.cco"]
+    emme_project_files = [ZONEDATA_PATH / "2016.cco"]
     first_scenario_ids = ["test"]
     zone_data_file = [ZONEDATA_PATH]
     cost_data_file = [COSTDATA_PATH]
