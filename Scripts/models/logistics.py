@@ -1,5 +1,5 @@
 import numpy as np
-from typing import NamedTuple, Sequence, Union
+from typing import NamedTuple, Sequence, Union, Tuple
 from concurrent.futures import ThreadPoolExecutor
 from threading import Lock
 
@@ -125,8 +125,7 @@ def process_batch(origin_offset: int, batch_size: int, n: int, k_plus1: int,
     return origin_offset, current_batch_size
 
 def process_logistics_inference(model: DetourDistributionInference, demand: np.ndarray, 
-                                iteration: int) -> np.ndarray:
-
+                                iteration: int) -> Tuple[np.ndarray]:
     # Process full matrix in origin batches to limit memory usage
     # Process full matrix in origin batches in parallel
     k_plus1 = len(model.lc_indices) + 1
