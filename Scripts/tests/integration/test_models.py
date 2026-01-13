@@ -13,8 +13,8 @@ from tests.integration.test_data_handling import (
     ZONEDATA_PATH,
     COSTDATA_PATH,
     BASE_MATRICES_PATH,
-    MODE_DEST_CALIBRATION_PATH,
-    MUNICIPALITY_CALIBRATION_PATH
+    MODE_DEST_CALIBRATION_FILE,
+    MUNICIPALITY_CALIBRATION_FILE
 )
 
 
@@ -34,8 +34,8 @@ class ModelTest(unittest.TestCase):
             RESULTS_PATH / "Matrices" / "uusimaa"))
         model = ModelSystem(
             ZONEDATA_PATH, COSTDATA_PATH, BASE_MATRICES_PATH, RESULTS_PATH,
-            ass_model, "uusimaa", MODE_DEST_CALIBRATION_PATH,
-            MUNICIPALITY_CALIBRATION_PATH)
+            ass_model, "uusimaa", MODE_DEST_CALIBRATION_FILE,
+            MUNICIPALITY_CALIBRATION_FILE)
         impedance = model.assign_base_demand()
         for ap in ass_model.assignment_periods:
             tp = ap.name

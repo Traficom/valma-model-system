@@ -101,8 +101,8 @@ def main(args):
     log.info("Initializing matrices and models...", extra=log_extra)
     model_args = (zone_data_file, cost_data_file, base_zonedata_path,
                   base_matrices_path, result_data_folder, ass_model, args.submodel,
-                  args.mode_dest_calibration_path,
-                  args.municipality_calibration_path,
+                  args.mode_dest_calibration_file,
+                  args.municipality_calibration_file,
                   long_dist_matrices_path, freight_matrices_path)
     model = (AgentModelSystem(*model_args) if args.is_agent_model
              else ModelSystem(*model_args))
@@ -292,11 +292,11 @@ if __name__ == "__main__":
         type=str,
         help="Path to file containing transport cost data"),
     parser.add_argument(
-        "--mode-dest-calibration-path",
+        "--mode-dest-calibration-file",
         type=str,
         help="Path to file containing mode and destination choice calibration data"),
     parser.add_argument(
-        "--municipality-calibration-path",
+        "--municipality-calibration-file",
         type=str,
         help="Path to file containing municipality calibration data"),
     parser.add_argument(
