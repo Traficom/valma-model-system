@@ -9,8 +9,6 @@ import openmatrix as omx
 from datahandling.resultdata import ResultsData
 from datahandling.zonedata import FreightZoneData
 from utils.freight_utils import create_purposes
-from models.logistics import DetourDistributionInference, process_logistics_inference
-from utils.get_zone_indices import get_zone_indices
 from assignment.mock_assignment import MockAssignmentModel
 from datahandling.matrixdata import MatrixData
 
@@ -70,21 +68,22 @@ class LogisticsModelTest(unittest.TestCase):
             for ass_class, mtx in impedance[mtx_type].items():
                 impedance[mtx_type][ass_class] = mtx[:zonedata.nr_zones, :zonedata.nr_zones]
         
+        iterations = 1
         for purpose in purposes.values():
             demand = purpose.calc_traffic(impedance)
-            if hasattr(purpose, "logistics_module"):
-                lcs_areas = zonedata[f"lc_area_{purpose.name}"] if hasattr(zonedata, f"lc_area_{purpose.name}") else zonedata["lc_area"]
-                lcs_sizes = lcs_areas[lcs_areas > 0]
-                lc_indices = get_zone_indices(mapping, lcs_sizes.index.to_list())
-                purpose_truck_costs = purpose.get_costs(impedance)["truck"]["cost"]
-                logistics_module = DetourDistributionInference(cost_matrix=purpose_truck_costs,
-                                                            ddm_params=purpose.logistics_params,
-                                                            lc_indices=numpy.array(lc_indices),
-                                                            lc_sizes=numpy.array(lcs_sizes.values))
-                final_demand = process_logistics_inference(model=logistics_module,
-                                                            n_zones=zonedata.nr_zones,
-                                                            demand=demand["truck"])
-                demand["truck"] = final_demand
-                self.assertTrue(numpy.isfinite(demand["truck"]).all())
-                self.assertTrue((demand["truck"] >= 0).all())
-                self.assertTrue(demand["truck"].shape == (zonedata.nr_zones, zonedata.nr_zones))
+            if hasattr(purpose, "logistics_module") and iterations > 0:
+                demand_truck, per_route = purpose.run_logistics_module(demand["truck"],
+                                                                       impedance, mapping, 
+                                                                       iterations)
+                self.assertTrue(numpy.isfinite(demand_truck).all())
+                self.assertTrue((demand_truck >= 0).all())
+                self.assertTrue(demand_truck.shape == (zonedata.nr_zones, zonedata.nr_zones))
+
+                detour_total = numpy.sum(per_route[:-1])
+                direct_total = per_route[-1]
+                if purpose.name == "kemlaa":
+                    self.assertAlmostEqual(detour_total, 12.948977, places=3)
+                    self.assertAlmostEqual(direct_total, 12956.025, places=3)
+                elif purpose.name == "kummuo":
+                    self.assertAlmostEqual(detour_total, 54.282013, places=3)
+                    self.assertAlmostEqual(direct_total, 15736.507, places=3)

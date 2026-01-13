@@ -16,8 +16,6 @@ from datahandling.matrixdata import MatrixData
 from datatypes.purpose import FreightPurpose
 
 from utils.freight_utils import create_purposes, StoreDemand
-from models.logistics import DetourDistributionInference, process_logistics_inference
-from utils.get_zone_indices import get_zone_indices
 from datahandling.traversaldata import transform_traversal_data
 from parameters.commodity import commodity_conversion
 
@@ -52,6 +50,7 @@ def main(args):
     store_demand = StoreDemand(ass_model.freight_network, resultmatrices, 
                                zonedata.all_zone_numbers, zonedata.zone_numbers)
     impedance = ass_model.freight_network.assign()
+    impedance[param.marine_ships_name] = {}
     
     # Run foreign trade route choice
     # Export for now. Export/import logic will be introduced later
@@ -75,23 +74,10 @@ def main(args):
     for purpose in purposes.values():
         log.info(f"Calculating demand for domestic purpose: {purpose.name}")
         demand = purpose.calc_traffic(impedance)
-        if hasattr(purpose, "logistics_module"):
-            try:
-                lcs_areas = zonedata[f"lc_area_{purpose.name}"]
-            except KeyError:
-                lcs_areas = zonedata["lc_area"]
-            lcs_sizes = lcs_areas[lcs_areas > 0]
-            lc_indices = get_zone_indices(ass_model.mapping, lcs_sizes.index.to_list())
-            purpose_truck_costs = purpose.get_costs(impedance)["truck"]["cost"]
-            logistics_module = DetourDistributionInference(cost_matrix=purpose_truck_costs,
-                                                           ddm_params=purpose.logistics_params,
-                                                           lc_indices=numpy.array(lc_indices),
-                                                           lc_sizes=numpy.array(lcs_sizes.values))
-            for i in range(args.logistics_iterations):
-                final_demand = process_logistics_inference(model=logistics_module,
-                                                            n_zones=zonedata.nr_zones,
-                                                            demand=demand["truck"])
-                demand["truck"] = final_demand
+        if hasattr(purpose, "logistics_module") and args.logistics_iterations > 0:
+            demand["truck"], _ = purpose.run_logistics_module(demand["truck"], impedance, 
+                                                              ass_model.mapping, 
+                                                              args.logistics_iterations)
         for mode in demand:
             omx_filename = ("freight_demand_tons" if purpose.name 
                             in args.specify_commodity_names else "")

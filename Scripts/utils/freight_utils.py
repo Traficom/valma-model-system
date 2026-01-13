@@ -10,7 +10,6 @@ from datahandling.resultdata import ResultsData
 from parameters.commodity import commodity_conversion
 from datahandling.matrixdata import MatrixData
 from assignment.freight_assignment import FreightAssignmentPeriod
-    
 
 def create_purposes(parameters_path: Path, zonedata: FreightZoneData, 
                     resultdata: ResultsData, costdata: Dict[str, dict]) -> dict:
