@@ -409,7 +409,7 @@ if __name__ == "__main__":
         default=config["SCENARIO_NAME"],
         help="Name of HELMET scenario. Influences result folder name and log file name."),
     parser.add_argument(
-        "--results-path", type=str, required=True,
+        "--result-data-folder", type=str, required=True,
         help="Path to Results directory.")
     parser.add_argument(
         "--submodel",
