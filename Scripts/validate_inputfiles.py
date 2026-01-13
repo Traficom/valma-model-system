@@ -31,7 +31,7 @@ def main(args):
         log.error(msg)
         raise ValueError(msg)
     if not zone_data_file:
-        msg = "Missing required argument 'zone-data-path'."
+        msg = "Missing required argument 'zone-data-file'."
         log.error(msg)
         raise ValueError(msg)
     # Check arg lengths
@@ -42,7 +42,7 @@ def main(args):
         raise ValueError(msg)
     if not (len(emme_project_files) == len(zone_data_file)):
         msg = ("Non-matching number of emme-project-files (.emp files) "
-               + "vs. number of zone-data-path")
+               + "vs. number of zone-data-file")
         log.error(msg)
         raise ValueError(msg)
 
