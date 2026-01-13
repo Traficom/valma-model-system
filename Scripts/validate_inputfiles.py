@@ -321,12 +321,12 @@ if __name__ == "__main__":
         required=True,
         help="Name of HELMET scenario. Influences result folder name and log file name."),
     parser.add_argument(
-        "--results-path",
+        "--result-data-folder",
         type=str,
         help="Path to folder where result data is saved to."),
     # Base input (across all scenarios)
     parser.add_argument(
-        "--baseline-data-path",
+        "--base-data-folder",
         type=str,
         help="Path to folder containing both baseline zonedata and -matrices (Given privately by project manager)"),
     # Scenarios' individual input
@@ -349,17 +349,17 @@ if __name__ == "__main__":
         required=True,
         help="List of first (biking) scenario IDs within EMME project (.emp)."),
     parser.add_argument(
-        "--forecast-data-paths",
+        "--zone-data-file",
         type=str,
         nargs="+",
         required=True,
-        help="List of paths to folder containing forecast zonedata"),
+        help="List of paths to zone data files."),
     parser.add_argument(
-        "--cost-data-paths",
+        "--cost-data-file",
         type=str,
         nargs="+",
         required=True,
-        help="List of paths to files containing transport cost data"),
+        help="List of paths to files containing transport cost data."),
     parser.set_defaults(
         **{key.lower(): val for key, val in config.items()})
     args = parser.parse_args()
