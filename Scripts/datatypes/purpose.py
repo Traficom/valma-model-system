@@ -5,7 +5,7 @@ from collections import defaultdict
 import numpy # type: ignore
 import pandas
 from datahandling.resultdata import ResultsData
-from datahandling.zonedata import ZoneData
+from datahandling.zonedata import ZoneData, FreightZoneData
 from datahandling.matrixdata import MatrixData
 import utils.log as log
 import parameters.zone as param
@@ -21,6 +21,8 @@ from datatypes.histogram import TourLengthHistogram
 from utils.freight_costs import calc_cost
 from models.logistics import DDMParameters
 from utils.calibrate import attempt_calibration
+from models.logistics import (DetourDistributionInference, 
+                              process_logistics_inference)
 
 
 class Purpose:
@@ -766,3 +768,46 @@ class FreightPurpose(Purpose):
                     / costdata["avg_load"] / 365)
         vehicles += vehicles.T * costdata["empty_share"]
         return vehicles
+
+    def run_logistics_module(self, demand_truck : numpy.ndarray, 
+                             impedance: numpy.ndarray, zonedata: FreightZoneData, 
+                             zone_index_map: dict, iterations: int) -> tuple:
+        """Entry point for running logistics module for truck demand within Finland
+
+        Parameters
+        ----------
+        demand_truck : numpy.ndarray
+            Modelled truck demand for purpose
+        impedance : dict
+            Mode (truck/train/...) : dict
+                Type (time/dist/toll_cost/canal_cost) : numpy 2d matrix
+        zonedata : FreightZoneData
+            Purpose zone data
+        zone_index_map : dict 
+            zone id number : index
+        iterations : int
+            Number of times logistics module is run
+
+        Returns:
+        -------
+        Tuple[np.ndarray]
+            Routed truck demand, and totals for detoured and direct demand
+        """
+        try:
+            lcs_areas = zonedata[f"lc_area_{self.name}"]
+        except KeyError:
+            lcs_areas = zonedata["lc_area"]
+        lc_sizes = lcs_areas[lcs_areas > 0]
+        lc_indices = numpy.array([zone_index_map.get(id, None) 
+                                for id in list(lc_sizes.index)])
+        lc_sizes = lc_sizes.to_numpy()
+        cost = self.get_costs(impedance)["truck"]["cost"]
+        logistics_module = DetourDistributionInference(cost_matrix=cost,
+                                                       ddm_params=self.logistics_params,
+                                                       lc_indices=lc_indices,
+                                                       lc_sizes=lc_sizes)
+        for i in range(1, iterations + 1):
+            demand_truck, per_route = process_logistics_inference(model=logistics_module,
+                                                                  demand=demand_truck,
+                                                                  iteration=i)
+        return demand_truck, per_route

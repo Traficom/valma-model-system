@@ -15,7 +15,7 @@ from assignment.emme_bindings.emme_project import EmmeProject
 from datahandling.matrixdata import MatrixData
 from datatypes.purpose import FreightPurpose
 
-from utils.freight_utils import create_purposes, run_logistics_module, StoreDemand
+from utils.freight_utils import create_purposes, StoreDemand
 from datahandling.traversaldata import transform_traversal_data
 from parameters.commodity import commodity_conversion
 
@@ -75,8 +75,9 @@ def main(args):
         log.info(f"Calculating demand for domestic purpose: {purpose.name}")
         demand = purpose.calc_traffic(impedance)
         if hasattr(purpose, "logistics_module") and args.logistics_iterations > 0:
-            demand["truck"], _ = run_logistics_module(purpose, demand["truck"], impedance, zonedata, 
-                                                      ass_model.mapping, args.logistics_iterations)
+            demand["truck"], _ = purpose.run_logistics_module(demand["truck"], impedance, 
+                                                              zonedata, ass_model.mapping, 
+                                                              args.logistics_iterations)
         for mode in demand:
             omx_filename = ("freight_demand_tons" if purpose.name 
                             in args.specify_commodity_names else "")

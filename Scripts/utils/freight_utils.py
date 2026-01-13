@@ -1,7 +1,7 @@
 import json
 import numpy
 from pathlib import Path
-from typing import Dict, Tuple
+from typing import Dict
 
 import utils.log as log
 from datatypes.purpose import FreightPurpose
@@ -10,7 +10,6 @@ from datahandling.resultdata import ResultsData
 from parameters.commodity import commodity_conversion
 from datahandling.matrixdata import MatrixData
 from assignment.freight_assignment import FreightAssignmentPeriod
-from models.logistics import DetourDistributionInference, process_logistics_inference
 
 def create_purposes(parameters_path: Path, zonedata: FreightZoneData, 
                     resultdata: ResultsData, costdata: Dict[str, dict]) -> dict:
@@ -50,52 +49,6 @@ def create_purposes(parameters_path: Path, zonedata: FreightZoneData,
                                              {parameters_path.stem: zonedata},
                                              resultdata, purpose_cost)
     return purposes
-
-def run_logistics_module(purpose: FreightPurpose, demand_truck : numpy.ndarray,
-                         impedance: numpy.ndarray, zonedata: FreightZoneData, 
-                         zone_index_map: dict, iterations: int) -> Tuple[numpy.ndarray]:
-    """Entry point for running logistics module for truck demand within Finland
-
-    Parameters
-    ----------
-    purpose : FreightPurpose
-        Freight purpose being modelled
-    demand_truck : numpy.ndarray
-        Modelled truck demand for purpose
-     impedance : dict
-        Mode (truck/train/...) : dict
-            Type (time/dist/toll_cost/canal_cost) : numpy 2d matrix
-    zonedata : FreightZoneData
-        Purpose zone data
-    zone_index_map : dict 
-        zone id number : index
-    iterations : int
-        Number of times logistics module is run
-
-    Returns:
-    -------
-    Tuple[np.ndarray]
-        Routed truck demand, and totals for detoured and direct demand
-    """
-    try:
-        lcs_areas = zonedata[f"lc_area_{purpose.name}"]
-    except KeyError:
-        lcs_areas = zonedata["lc_area"]
-    lc_sizes = lcs_areas[lcs_areas > 0]
-    lc_indices = numpy.array([zone_index_map.get(id, None) 
-                            for id in list(lc_sizes.index)])
-    lc_sizes = lc_sizes.to_numpy()
-    cost = purpose.get_costs(impedance)["truck"]["cost"]
-    logistics_module = DetourDistributionInference(cost_matrix=cost,
-                                                   ddm_params=purpose.logistics_params,
-                                                   lc_indices=lc_indices,
-                                                   lc_sizes=lc_sizes)
-    for i in range(1, iterations + 1):
-        demand_truck, per_route = process_logistics_inference(model=logistics_module,
-                                                              demand=demand_truck, 
-                                                              iteration=i)
-    return demand_truck, per_route
-
 
 class StoreDemand():
     """Handles demand dimension compatibility when storing demand matrices 

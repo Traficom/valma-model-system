@@ -8,7 +8,7 @@ import openmatrix as omx
 
 from datahandling.resultdata import ResultsData
 from datahandling.zonedata import FreightZoneData
-from utils.freight_utils import create_purposes, run_logistics_module
+from utils.freight_utils import create_purposes
 from assignment.mock_assignment import MockAssignmentModel
 from datahandling.matrixdata import MatrixData
 
@@ -72,9 +72,9 @@ class LogisticsModelTest(unittest.TestCase):
         for purpose in purposes.values():
             demand = purpose.calc_traffic(impedance)
             if hasattr(purpose, "logistics_module") and iterations > 0:
-                demand_truck, per_route = run_logistics_module(purpose, demand["truck"],
-                                                               impedance, zonedata, 
-                                                               mapping, iterations)
+                demand_truck, per_route = purpose.run_logistics_module(demand["truck"],
+                                                                       impedance, zonedata, 
+                                                                       mapping, iterations)
                 self.assertTrue(numpy.isfinite(demand_truck).all())
                 self.assertTrue((demand_truck >= 0).all())
                 self.assertTrue(demand_truck.shape == (zonedata.nr_zones, zonedata.nr_zones))
