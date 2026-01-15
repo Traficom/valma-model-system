@@ -3,11 +3,32 @@
         "car_work": 0.12,
         "car_leisure": 0.12,
         "car_electric": 0.04,
-        "share_electric_cars": 0.0,
         "van": 0.20,
         "truck": 0.23,
         "semi_trailer": 0.35,
         "trailer_truck": 0.44
+    },
+    "car_shares": {
+        "Uusimaa": {
+            "bev": 0,
+            "phev": 0
+        },
+        "Varsinais-Suomi": {
+            "bev": 0,
+            "phev": 0
+        },
+        "Pirkanmaa": {
+            "bev": 0,
+            "phev": 0
+        },
+        "Kanta-Hame": {
+            "bev": 0,
+            "phev": 0
+        },
+        "default": {
+            "bev": 0,
+            "phev": 0
+        }
     },
     "transit_cost": {
         "HSL": {

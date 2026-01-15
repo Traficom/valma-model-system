@@ -18,6 +18,8 @@ ZONE_INDEXES = numpy.array(INTERNAL_ZONES + EXTERNAL_ZONES)
 class TourCombinationModelTest(unittest.TestCase):
     def test_generation(self):
         zi = numpy.array(INTERNAL_ZONES + EXTERNAL_ZONES)
-        zd = ZoneData(ZONEDATA_PATH, zi, "uusimaa", car_dist_cost=0.12)
+        zd = ZoneData(
+            ZONEDATA_PATH, zi, "uusimaa", car_dist_cost=0.12,
+            electric_car_share={"default": {"bev": 0.1, "phev": 0.2}})
         zd._values["hb_edu_student"] = pandas.Series(0.0, INTERNAL_ZONES)
         model = TourCombinationModel(zd)

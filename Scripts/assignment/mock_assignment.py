@@ -197,7 +197,8 @@ class MockPeriod(Period):
             mtx = matrices[mode][idx[:, None], idx]
             matrices[mode] = mtx
             if mode == "car_work":
-                matrices["car_electric"] = mtx
+                matrices["bev"] = mtx
+                matrices["phev"] = mtx
         return matrices
 
     def get_matrix(self,

@@ -27,7 +27,9 @@ class LogitModelTest(unittest.TestCase):
             pass
         pur = Purpose()
         zi = numpy.array(INTERNAL_ZONES + EXTERNAL_ZONES)
-        zd = ZoneData(ZONEDATA_PATH, zi, "uusimaa", car_dist_cost=0.12)
+        zd = ZoneData(
+            ZONEDATA_PATH, zi, "uusimaa", car_dist_cost=0.12,
+            electric_car_share={"default": {"bev": 0.1, "phev": 0.2}})
         mtx = numpy.arange(720, dtype=numpy.float32)
         mtx.shape = (24, 30)
         mtx[numpy.diag_indices(24)] = 0
@@ -67,7 +69,10 @@ class LogitModelTest(unittest.TestCase):
         pur.bounds = slice(0, 24)
         pur.orig_zone_numbers = INTERNAL_ZONES
         pur.dist = mtx
-        pur.car_modes = {}
+        pur.car_modes = {
+            "car_work": ["bev", "phev"],
+            "car_leisure": ["bev", "phev"],
+        }
         parameters_path = Path(__file__).parents[2] / "parameters" / "demand"
         for file in parameters_path.rglob("*.json"):
             parameters = json.loads(file.read_text("utf-8"))

@@ -12,7 +12,6 @@ if TYPE_CHECKING:
     from datatypes.purpose import TourPurpose
 
 import utils.log
-from parameters.assignment import ec_mode
 
 
 def log(a: numpy.ndarray):
@@ -209,17 +208,28 @@ class LogitModel:
                 zdata.get_data(i, self.bounds, generation) + 1, b[i])
         return exps
 
-    def _calc_electric_car_shares(self, probs: Dict[str, numpy.ndarray],
-                                  ec_probs: Dict[str, numpy.ndarray]):
-        ec_share = self.zone_data.get_data(
-            "share_electric_cars", self.bounds, generation=True)
+    def _calc_electric_car_shares(self,
+                                  ec_probs: Dict[str, Dict[str, numpy.ndarray]]
+                                  ) -> Dict[str, numpy.ndarray]:
+        probs = {}
         for mode in self.mode_choice_param:
             if mode in self.purpose.car_modes:
-                probs[mode] = (1-ec_share) * probs[mode]
-                probs[self.purpose.car_modes[mode]] = ec_share * ec_probs[mode]
+                for vehicle_type in ec_probs:
+                    vehicle_share = self.zone_data.get_data(
+                        "sh_" + vehicle_type, self.bounds, generation=True)
+                    if vehicle_type == "icev":
+                        new_mode = mode
+                    elif mode == "car_pax":
+                        new_mode = vehicle_type + "_pax"
+                    else:
+                        new_mode = vehicle_type
+                    probs[new_mode] = vehicle_share * ec_probs[vehicle_type][mode]
             else:
-                probs[mode] = ((1-ec_share) * probs[mode]
-                                    + ec_share * ec_probs[mode])
+                probs[mode] = 0
+                for vehicle_type in ec_probs:
+                    vehicle_share = self.zone_data.get_data(
+                        "sh_" + vehicle_type, self.bounds, generation=True)
+                    probs[mode] += vehicle_share * ec_probs[vehicle_type][mode]
         return probs
 
 
@@ -330,10 +340,10 @@ class ModeDestModel(LogitModel):
             Mode (car/transit/bike/walk) : numpy 2-d matrix
                 Choice probabilities
         """
-        ec_impedance = {}
-        for mode, electric_mode in self.purpose.car_modes.items():
-            if electric_mode in impedance:
-                ec_impedance[mode] = impedance.pop(electric_mode)
+        ec_impedance = defaultdict(dict)
+        for mode, electric_modes in self.purpose.car_modes.items():
+            for e_mode in electric_modes:
+                ec_impedance[e_mode.split("_")[0]][mode] = impedance.pop(e_mode)
         mode_exps, mode_expsum, dest_exps, dest_expsums = self._calc_utils(
             impedance)
         logsum = pandas.Series(
@@ -419,16 +429,23 @@ class ModeDestModel(LogitModel):
     def _calc_electric_car_prob(self, impedance: Dict[str, numpy.ndarray],
                                 mode_exps: Dict[str, numpy.ndarray],
                                 mode_probs: Dict[str, numpy.ndarray]):
-        ec_mode_exps, _, dest_exps, dest_expsums = self._calc_utils(
-            impedance)
-        for mode, electric_mode in self.purpose.car_modes.items():
-            for d in (dest_exps, dest_expsums):
-                if mode in d:
-                    d[electric_mode] = d.pop(mode)
-        mode_exps.update(ec_mode_exps)
-        ec_mode_probs = self._calc_mode_prob(
-            mode_exps, sum(mode_exps.values()))
-        mode_probs = self._calc_electric_car_shares(mode_probs, ec_mode_probs)
+        dest_exps = {}
+        dest_expsums = {}
+        ec_mode_probs = {"icev": mode_probs}
+        for vehicle_type in impedance:
+            ec_mode_exps, _, ec_dest_exps, ec_dest_expsums = self._calc_utils(
+                impedance[vehicle_type])
+            mode_exps.update(ec_mode_exps)
+            ec_mode_probs[vehicle_type] = self._calc_mode_prob(
+                mode_exps, sum(mode_exps.values()))
+            for mode in self.purpose.car_modes:
+                for array_dict in (ec_dest_exps, ec_dest_expsums):
+                    new_mode = (vehicle_type + "_pax" if mode == "car_pax"
+                                else vehicle_type)
+                    array_dict[new_mode] = array_dict.pop(mode)
+            dest_exps.update(ec_dest_exps)
+            dest_expsums.update(ec_dest_expsums)
+        mode_probs = self._calc_electric_car_shares(ec_mode_probs)
         return mode_probs, dest_exps, dest_expsums
 
     def _calc_individual_prob(self, mod_modes: list[str], dummy: str,
@@ -646,14 +663,18 @@ class DestModeModel(LogitModel):
         prob = self._calc_dummy_prob(impedance, store_logsum=True)
 
         # Calculate electric car probability and add to prob
-        includes_electric = False
-        for mode, electric_mode in self.purpose.car_modes.items():
-            if electric_mode in impedance:
-                impedance[mode] = impedance[electric_mode]
-                includes_electric = True
-        if includes_electric:
-            ec_prob = self._calc_dummy_prob(impedance)
-            prob = self._calc_electric_car_shares(prob, ec_prob)
+        electric_modes = [{}, {}]
+        for mode, e_modes in self.purpose.car_modes.items():
+            for i, e_mode in enumerate(e_modes):
+                electric_modes[i][e_mode] = mode
+        ec_probs = {"icev": prob}
+        for mode_pairs in electric_modes:
+            for e_mode, mode in mode_pairs.items():
+                impedance[mode] = impedance[e_mode]
+            if mode_pairs:
+                ec_probs[e_mode] = self._calc_dummy_prob(impedance)
+        if electric_modes[0]:
+            prob = self._calc_electric_car_shares(ec_probs)
 
         return prob
 

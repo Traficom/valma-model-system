@@ -374,7 +374,15 @@ volume_factors = {
         "it": 0.3,
         "vrk": 1.0,
     },
-    "car_electric": {
+    "bev": {
+        "aht": 0.436,
+        "pt": 0.100,
+        "iht": 0.481,
+        "it": 0.3,
+        "vrk": 1.0,
+
+    },
+    "phev": {
         "aht": 0.436,
         "pt": 0.100,
         "iht": 0.481,
@@ -549,13 +557,13 @@ time_periods = {
     "it": "TransitAssignmentPeriod",
 }
 cp_mode = "car_pax"
-ec_mode = "car_electric"
-ecp_mode = "car_e_pax"
-pax_modes = (cp_mode, ecp_mode)
+ec_modes = ("bev", "phev")
+ecp_modes = ("bev_pax", "phev_pax")
+pax_modes = (cp_mode,) + ecp_modes
 car_classes = (
     "car_work",
     "car_leisure",
-) + (ec_mode,)
+) + ec_modes
 car_and_van_classes = car_classes + ("van",)
 private_classes = car_and_van_classes + ("bike",)
 car_access_classes = (
@@ -620,7 +628,8 @@ bike_mode = 'f'
 assignment_modes = {
     "car_work": 'c',
     "car_leisure": 'c',
-    "car_electric": 'c',
+    "bev": 'c',
+    "phev": 'c',
     "trailer_truck": 'y',
     "semi_trailer": 'y',
     "truck": 'k',
@@ -629,7 +638,8 @@ assignment_modes = {
 vot_classes = {
     "car_work": "work",
     "car_leisure": "leisure",
-    "car_electric": "work",
+    "bev": "work",
+    "phev": "work",
     "trailer_truck": "trailer_truck",
     "semi_trailer": "semi_trailer",
     "truck": "truck",

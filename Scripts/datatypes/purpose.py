@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Dict, Iterator, Optional, cast
+from typing import Dict, Tuple, Iterator, Optional, cast
 from copy import copy
 from collections import defaultdict
 import numpy # type: ignore
@@ -16,9 +16,9 @@ from parameters.assignment import (
     tour_duration,
     mixed_mode_classes,
     car_classes,
-    ec_mode,
+    ec_modes,
     cp_mode,
-    ecp_mode,
+    ecp_modes,
     pax_modes)
 import parameters.cost as cost
 import models.generation as generation
@@ -70,13 +70,17 @@ class Purpose:
         self.generation_area = specification["generation_area"]
         self.attraction_area = specification["attraction_area"]
         self.impedance_share = specification["impedance_share"]
-        self.car_modes: Dict[str, str] = {cp_mode: ecp_mode}
+        self.car_modes: Dict[str, Tuple[str, str]] = {}
         if self.name in assignment_classes:
-            self.car_modes["car_" + assignment_classes[self.name]] = ec_mode
-        for mode, electric_mode in self.car_modes.items():
+            self.car_modes[cp_mode] = ecp_modes
+            car_mode = "car_" + assignment_classes[self.name]
+            if car_mode in self.impedance_share:
+                self.car_modes[car_mode] = ec_modes
+        for mode, electric_modes in self.car_modes.items():
             if mode in self.impedance_share:
                 car_imp_share = self.impedance_share[mode]
-                self.impedance_share[electric_mode] = car_imp_share
+                for electric_mode in electric_modes:
+                    self.impedance_share[electric_mode] = car_imp_share
         self.demand_share = specification["demand_share"]
         self.generation_zone_data = zone_datas[self.generation_area]
         self.attraction_zone_data = zone_datas[self.attraction_area]
@@ -134,8 +138,8 @@ class Purpose:
         day_imp = defaultdict(lambda: defaultdict(float))
         for mode in self.impedance_share:
             share_sum = 0
-            if mode == ecp_mode:
-                ass_class = ec_mode
+            if mode in ecp_modes:
+                ass_class = mode.replace("_pax", "")
             else:
                 ass_class = mode.replace("pax", assignment_classes[self.name])
             for time_period in self.impedance_share[mode]:
@@ -294,9 +298,10 @@ class TourPurpose(Purpose):
         for mode in self.impedance_share:
             if mode not in self.demand_share:
                 self.demand_share[mode] = self.impedance_share[mode]
-        for mode, electric_mode in self.car_modes.items():
+        for mode, electric_modes in self.car_modes.items():
             if mode in self.demand_share:
-                self.demand_share[electric_mode] = self.demand_share[mode]
+                for electric_mode in electric_modes:
+                    self.demand_share[electric_mode] = self.demand_share[mode]
         self.modes = list(self.impedance_share)
         self.connection_models: Dict[str, logit.LogitModel] = {}
         for mode in intermodals:

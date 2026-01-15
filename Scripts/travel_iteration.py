@@ -105,11 +105,9 @@ class ModelSystem:
                 zone_data_path, self.zone_numbers, submodel,
                 model_area=model_area, municipality_calibration=municip_calib,
                 extra_dummies=extra_dummies,
-                car_dist_cost=self.car_dist_cost["car_work"]
+                car_dist_cost=self.car_dist_cost["car_work"],
+                electric_car_share=cost_data["car_shares"]
             ) for model_area in ["domestic"]}
-        ec_sh = "share_electric_cars"
-        self._zone_datas["domestic"].share[ec_sh] = pandas.Series(
-            self.car_dist_cost[ec_sh], self.zone_numbers, dtype=numpy.float32)
 
         # Output data
         self.resultdata = ResultsData(results_path)

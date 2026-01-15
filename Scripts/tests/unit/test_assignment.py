@@ -21,7 +21,8 @@ class EmmeAssignmentTest(unittest.TestCase):
         self.dist_cost = {
             "car_work": 0.12,
             "car_leisure": 0.12,
-            "car_electric": 0.04,
+            "bev": 0.04,
+            "phev": 0.06,
             "trailer_truck": 0.5,
             "semi_trailer": 0.4,
             "truck": 0.3,
@@ -54,7 +55,8 @@ class EmmeAssignmentTest(unittest.TestCase):
         demand = [
             "car_work",
             "car_leisure",
-            "car_electric",
+            "bev",
+            "phev",
             "transit_work",
             "transit_leisure",
             "bike",
@@ -91,7 +93,8 @@ class EmmeAssignmentTest(unittest.TestCase):
         demand = [
             "car_work",
             "car_leisure",
-            "car_electric",
+            "bev",
+            "phev",
             "train",
             "coach",
             "airplane",
