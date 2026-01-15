@@ -63,29 +63,6 @@ custom_roadtypes = {
     94: "arterial",
     95: "local",
 }
-# Bike delay function ids
-bikepath_vdfs = (
-    {  # 0 - Mixed traffic
-        None: 78,
-        "collector": 77,
-        "arterial": 77,
-        "highway": 76,
-    },
-    {  # 1 - Bike lane
-        None: 75,
-    },
-    {  # 2 - Road-side bike path
-        None: 74,
-        "arterial": 73,
-        "highway": 72,
-    },
-    {  # 3 - Separate bike path
-        None: 71
-    },
-    {  # 4 - BAANA
-        None: 70,
-    }
-)
 # Transit delay function ids
 transit_delay_funcs = {
     ("bus", "bge"): {
@@ -99,15 +76,6 @@ transit_delay_funcs = {
         "it": 6,
         "vrk": 6,
     },
-}
-# Node numbers used in HSL official networks and their allowed modes
-official_node_numbers = {
-    "hcvkyasf": (1, 35000),
-    "hcvkybgdewasf": (40000, 600000),
-    "hmaf": (800000, 800500),
-    "hrjasf": (801000, 801500),
-    "htpaf": (802000, 806000),
-    "hpaf": (810000, 816000),
 }
 vdf_temp = ("(put(60/ul2)*(1+{}*put((volau+volad)/{})/"
             + "(ul1-get(2))))*(get(2).le.put(ul1*{}))*length+(get(2).gt."
@@ -171,8 +139,6 @@ bus_dwell_time = {
     'g': 0.4,
     'e': 0.4,
 }
-# Node labels for HSL members (new and old fare zones)
-hsl_area = "ABCDE HEXL"
 # Performance settings
 performance_settings = {
     "number_of_processors": "max",
@@ -189,48 +155,6 @@ vot_inv = {
     "trailer_truck": 1.667, # 1 / ((36 eur/h) / (60 min/h)) = 1.667 min/eur
 }
 congested_time_weight = 1.5
-tour_duration = {
-    "train_car_acc": {
-        "avg": 2.18,
-        "hb_business": 1.12,
-        "hb_leisure_overnight": 9,
-    },
-    "train_taxi_acc": {
-        "avg": 2.18,
-        "hb_business": 1.12,
-        "hb_leisure_overnight": 9,
-    },
-    "coach_car_acc": {
-        "avg": 2.62,
-        "hb_business": 2.43,
-        "hb_leisure_overnight": 14,
-    },
-    "airpl_car_acc": {
-        "avg": 2.39,
-        "hb_business": 2.01,
-        "hb_leisure_overnight": 9,
-    },
-    "train_car_egr": {
-        "avg": 2.18,
-        "hb_business": 1.12,
-        "hb_leisure_overnight": 9,
-    },
-    "train_taxi_egr": {
-        "avg": 2.18,
-        "hb_business": 1.12,
-        "hb_leisure_overnight": 9,
-    },
-    "coach_car_egr": {
-        "avg": 2.62,
-        "hb_business": 2.43,
-        "hb_leisure_overnight": 14,
-    },
-    "airpl_car_egr": {
-        "avg": 2.39,
-        "hb_business": 2.01,
-        "hb_leisure_overnight": 9,
-    },
-}
 freight_terminal_cost = {
     'D': 0,
     'J': 0,
@@ -344,12 +268,6 @@ aux_time_perception_factor = 1.75
 aux_time_perception_factor_long = 2.5
 aux_time_perception_factor_car = 7.5
 aux_time_perception_factor_truck = 30
-# Stochastic bike assignment distribution
-bike_dist = {
-    "type": "UNIFORM", 
-    "A": 0.5, 
-    "B": 1.5,
-}
 # Factors for 24-h expansion of volumes
 # TODO: Trucks and vans
 volume_factors = {
@@ -674,6 +592,7 @@ freight_modes = {
         'W': "@ship",
     },
 }
+marine_ships_name = "marine_ships"
 freight_marine_modes = {
     "container_ship": {
         "C": "@container_ship"
@@ -706,7 +625,8 @@ segment_results = {
     "transfer_boardings": "@transfer_board",
 }
 uncongested_transit_time = "base_timtr"
-basic_impedance_output = ["time", "cost", "dist", "toll_cost", "inv_time"]
+basic_impedance_output = ["time", "cost", "dist", "toll_cost", "inv_time",
+                          "train_users"]
 mixed_mode_output = ["car_time", "transfer_time", "park_cost"]
 impedance_output = basic_impedance_output + mixed_mode_output
 transit_impedance_matrices = {
@@ -767,8 +687,4 @@ roadtypes = {
     5: "single-lane",
     11: "ferry",
     99: "connector",
-}
-station_ids = {
-    "metro": 13,
-    "train": 14,
 }

@@ -47,11 +47,6 @@ def validate(network, time_periods=param.time_periods, fares=None):
         validate_mode(network, m, EMME_TRANSIT_MODE)
     for m in param.aux_modes + [param.bike_mode]:
         validate_mode(network, m, EMME_AUX_TRANSIT_MODE)
-    modesets = []
-    intervals = []
-    for modes in param.official_node_numbers:
-        modesets.append({network.mode(m) for m in modes})
-        intervals += param.official_node_numbers[modes]
     car_time_attrs = [f"#car_time_{tp}" for tp in time_periods]
     for link in network.links():
         if not link.modes:

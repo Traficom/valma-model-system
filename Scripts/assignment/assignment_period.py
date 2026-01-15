@@ -217,6 +217,7 @@ class AssignmentPeriod(Period):
         self._check_congestion()
         del mtxs["dist"]
         del mtxs["toll_cost"]
+        del mtxs["train_users"]
         return mtxs
 
     def end_assign(self,

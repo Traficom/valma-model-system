@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 import utils.log
 
 
-def log(a: numpy.array):
+def log(a: numpy.ndarray):
     with numpy.errstate(divide="ignore"):
         return numpy.log(a)
 
@@ -101,6 +101,7 @@ class LogitModel:
 
     def _calc_dest_util(self, mode: str, impedance: dict) -> numpy.ndarray:
         b = self.dest_choice_param[mode]
+        b["attraction"][f"municipality_calibration_{mode}"] = 1.0
         utility = numpy.zeros_like(next(iter(impedance.values())))
         impedance["attraction_size"] = self._add_zone_util(
             numpy.zeros_like(utility), b["attraction_size"])
@@ -681,9 +682,6 @@ class SecDestModel(LogitModel):
         dest_exps = self._calc_sec_dest_util(mode, impedance, origin, destination)
         return dest_exps.T / dest_exps.sum(1)
 
-
-class OriginModel(DestModeModel):
-    pass
 
 class GenerationLogit(LogitModel):
     """Logit model with generation count response.

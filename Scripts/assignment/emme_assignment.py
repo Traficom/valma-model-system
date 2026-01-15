@@ -376,8 +376,7 @@ class EmmeAssignmentModel(AssignmentModel):
 
         # Print mode boardings per municipality
         boardings = defaultdict(lambda: defaultdict(float))
-        modes = self.assignment_periods[0].assignment_modes
-        attrs = [modes[transit_class].segment_results["total_boardings"]
+        attrs = [self._netfield(f"{transit_class}_total_board")
             for transit_class in self.transit_classes]
         for line in network.transit_lines():
             mode = line.mode.id
@@ -387,16 +386,6 @@ class EmmeAssignmentModel(AssignmentModel):
                     boardings[mode][municipality] += seg[tc]
         resultdata.print_data(
             pandas.DataFrame.from_dict(boardings), "municipality_boardings.txt")
-
-        # Aggregate and print numbers of stations
-        stations = pandas.Series(0, param.station_ids, name="number")
-        for node in network.regular_nodes():
-            for mode in param.station_ids:
-                if (node.data2 == param.station_ids[mode]
-                        and node[self._extra("transit_won_boa")] > 0):
-                    stations[mode] += 1
-                    break
-        resultdata.print_data(stations, "transit_stations.txt")
 
         # Export link, node and segnment extra attributes to GeoPackage file
         fname = "assignment_results.gpkg"

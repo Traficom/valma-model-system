@@ -56,7 +56,8 @@
             "aggregate_results_municipality",
             "aggregate_results_county",
             "aggregate_results_subarea",
-            "aggregate_results_submodel"
+            "aggregate_results_submodel",
+			"aggregate_results_ykr_km"
         ]
     },
     "freight": {

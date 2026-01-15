@@ -82,6 +82,8 @@ def create_config(config: dict):
         "CAR_END_ASSIGNMENT_ONLY": False,
         "LONG_DIST_DEMAND_FORECAST": None,
         "FREIGHT_MATRIX_PATH": None,
+        "MODE_DEST_CALIBRATION_PATH": None,
+        "MUNICIPALITY_CALIBRATION_PATH": None,
         "STORED_SPEED_ASSIGNMENT": None,
         "RUN_AGENT_SIMULATION": False,
         "DO_NOT_USE_EMME": False,

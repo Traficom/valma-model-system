@@ -10,10 +10,9 @@ import json
 
 import parameters.zone as param
 import utils.log as log
-from datatypes.zone import Zone, ZoneAggregations, avg
+from datatypes.zone import Zone, ZoneAggregations, WeightedAverage
+from models.logit import divide
 
-def divide(a, b):
-    return numpy.divide(a, b, out=numpy.zeros_like(a), where=b!=0)
 
 class ZoneData:
     """Container for zone data read from input file.
@@ -27,6 +26,11 @@ class ZoneData:
     zone_mapping : str
             Name of column where mapping between data zones (index)
             and assignment zones
+    municipality_calibration : dict
+        key : str
+            Transport mode (car_work/bike/...)
+        value : pandas.Series
+            Municipality-pair calibration factors
     extra_dummies : dict
         key : str
             Name of aggregation level
@@ -41,6 +45,7 @@ class ZoneData:
     def _init_data(self, data_path: Path, zone_numbers: Sequence,
                  zone_mapping: str, data_type: str = "domestic_travel",
                  model_area: str = "domestic",
+                 municipality_calibration: Dict[str, pandas.Series] = {},
                  extra_dummies: Dict[str, Sequence[str]] = {},
                  car_dist_cost: Optional[float] = None):
         self._values = {}
@@ -68,6 +73,7 @@ class ZoneData:
         self.zones = {number: Zone(number, self.aggregations)
             for number in self.zone_numbers}
         self.nr_zones = len(self.zone_numbers)
+        self._municip_calib = municipality_calibration
         self._add_transformations(data, extra_dummies, car_dist_cost)
 
     def _add_transformations(self,
@@ -134,6 +140,7 @@ class ZoneData:
         self["within_municipality"] = within_municipality
         self["outside_municipality"] = ~within_municipality
         dummies = {
+            "zone": {},
             "subarea": {
                 "Helsingin_kantakaupunki",
                 "Tampereen_kantakaupunki",
@@ -199,7 +206,11 @@ class ZoneData:
                 couples_no_children, couples)
 
     def dummy(self, division_type, name, bounds=slice(None)):
-        dummy = self.aggregations.mappings[division_type][bounds] == name
+        if division_type == "zone":
+            dummy = pandas.Series(
+                self.zone_numbers == int(name), self.zone_numbers)
+        else:
+            dummy = self.aggregations.mappings[division_type][bounds] == name
         if not dummy.any():
             log.warn(f"Dummy variable {name} not found in {division_type}")
         return dummy
@@ -287,6 +298,16 @@ class ZoneData:
                 beeline, lower, upper, _ = key.split('_')
                 mtx = self[beeline]
                 return (mtx > int(lower)) & (mtx <= int(upper))[bounds, :]
+            elif "municipality_calibration" in key:
+                try:
+                    # Try to find mode-specific calibration matrix
+                    calib = self._municip_calib[key.split('_')[-1]]
+                except KeyError:
+                    return 0
+                else:
+                    idx = self.aggregations.mappings["municipality"].values
+                    return calib.unstack("attraction").reindex(
+                        index=idx, columns=idx, fill_value=0.0).values[bounds, :]
             else:
                 raise KeyError(err)
         if val.ndim == 1: # If not a compound (i.e., matrix)
@@ -401,13 +422,14 @@ def read_zonedata(path: Path,
         for col in cols:
             try:
                 total = col["total"]
-                shares[total] = defaultdict(list)
             except TypeError:
                 aggs[col] = func
             else:
                 aggs[total] = func
+                wa = WeightedAverage(data[total])
+                shares[total] = defaultdict(list)
                 for share in col["shares"]:
-                    aggs[share] = lambda x: avg(x, weights=data[total])
+                    aggs[share] = wa.avg
                     shares[total][share.split('_')[1]].append(share)
     data = data.groupby(zone_mapping_name).agg(aggs)
     data.index = data.index.astype(int)

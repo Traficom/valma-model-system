@@ -13,6 +13,8 @@ from tests.integration.test_data_handling import (
     ZONEDATA_PATH,
     COSTDATA_PATH,
     BASE_MATRICES_PATH,
+    MODE_DEST_CALIBRATION_PATH,
+    MUNICIPALITY_CALIBRATION_PATH
 )
 
 
@@ -31,8 +33,9 @@ class ModelTest(unittest.TestCase):
         ass_model = MockAssignmentModel(MatrixData(
             RESULTS_PATH / "Matrices" / "uusimaa"))
         model = ModelSystem(
-            ZONEDATA_PATH, COSTDATA_PATH, ZONEDATA_PATH,
-            BASE_MATRICES_PATH, RESULTS_PATH, ass_model, "uusimaa")
+            ZONEDATA_PATH, COSTDATA_PATH, BASE_MATRICES_PATH, RESULTS_PATH,
+            ass_model, "uusimaa", MODE_DEST_CALIBRATION_PATH,
+            MUNICIPALITY_CALIBRATION_PATH)
         impedance = model.assign_base_demand()
         for ap in ass_model.assignment_periods:
             tp = ap.name
@@ -64,8 +67,8 @@ class ModelTest(unittest.TestCase):
             MatrixData(RESULTS_PATH / "Matrices" / "koko_suomi"),
             use_free_flow_speeds=True, time_periods={"vrk": "WholeDayPeriod"})
         model = ModelSystem(
-            ZONEDATA_PATH, COSTDATA_PATH, ZONEDATA_PATH,
-            BASE_MATRICES_PATH, RESULTS_PATH, ass_model, "koko_suomi")
+            ZONEDATA_PATH, COSTDATA_PATH, BASE_MATRICES_PATH, RESULTS_PATH,
+            ass_model, "koko_suomi")
         impedance = model.assign_base_demand()
 
         print("Adding demand and assigning")

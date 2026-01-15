@@ -13,7 +13,6 @@ import models.logit as logit
 from parameters.assignment import (
     assignment_classes,
     intermodals,
-    tour_duration,
     mixed_mode_classes)
 import parameters.cost as cost
 import models.generation as generation
@@ -22,6 +21,8 @@ from datatypes.histogram import TourLengthHistogram
 from utils.freight_costs import calc_cost
 from models.logistics import DDMParameters
 from utils.calibrate import attempt_calibration
+from models.logistics import (DetourDistributionInference, 
+                              process_logistics_inference)
 
 
 class Purpose:
@@ -270,12 +271,12 @@ class TourPurpose(Purpose):
         else:
             log.error(f"Tour generation model not defined for {self.name}")
         args = (self, specification, self.attraction_zone_data, resultdata)
-        if self.name == "sop":
-            self.model = logit.OriginModel(*args)
+        if specification["struct"] == "mode>dest":
+            self.model = logit.ModeDestModel(*args)
         elif specification["struct"] == "dest>mode":
             self.model = logit.DestModeModel(*args)
         else:
-            self.model = logit.ModeDestModel(*args)
+            log.error(f"Unknown struct in {self.name} parameters.")
         for mode in self.impedance_share:
             if mode not in self.demand_share:
                 self.demand_share[mode] = self.impedance_share[mode]
@@ -418,7 +419,7 @@ class TourPurpose(Purpose):
             impedance["airpl_taxi_acc"] = impedance["airpl_car_acc"]
         for mode in access_modes:
             if mode in mixed_mode_classes:
-                self.reweight_parking_cost(impedance[mode], tour_duration[mode])
+                self.reweight_parking_cost(impedance[mode], cost.tour_duration[mode])
         model = self.connection_models[pt_mode]
         prob, logsum = model.calc_mode_prob(impedance)
         if "airpl_taxi_acc" in prob:
@@ -710,7 +711,7 @@ class FreightPurpose(Purpose):
         Parameters
         ----------
         impedance : dict
-            Mode (truck/train/...) : dict
+            Freight assignment mode (truck/train/...) : dict
                 Type (time/dist/toll_cost/canal_cost) : numpy 2d matrix
         origs : dict
             Origin border id (FIHEL/SESTO...) : str
@@ -767,3 +768,43 @@ class FreightPurpose(Purpose):
                     / costdata["avg_load"] / 365)
         vehicles += vehicles.T * costdata["empty_share"]
         return vehicles
+
+    def run_logistics_module(self, demand_truck: numpy.ndarray, impedance: numpy.ndarray, 
+                             zone_index_map: dict, iterations: int) -> tuple:
+        """Entry point for running logistics module for truck demand within Finland
+
+        Parameters
+        ----------
+        demand_truck : numpy.ndarray
+            Modelled truck demand for purpose
+        impedance : dict
+            Mode (truck/train/...) : dict
+                Type (time/dist/toll_cost/canal_cost) : numpy 2d matrix
+        zone_index_map : dict 
+            zone id number : index
+        iterations : int
+            Number of times logistics module is run
+
+        Returns:
+        -------
+        Tuple[np.ndarray]
+            Routed truck demand, and totals for detoured and direct demand
+        """
+        try:
+            lcs_areas = self.generation_zone_data[f"lc_area_{self.name}"]
+        except KeyError:
+            lcs_areas = self.generation_zone_data["lc_area"]
+        lc_sizes = lcs_areas[lcs_areas > 0]
+        lc_indices = numpy.array([zone_index_map.get(id, None) 
+                                for id in list(lc_sizes.index)])
+        lc_sizes = lc_sizes.to_numpy()
+        cost = self.get_costs(impedance)["truck"]["cost"]
+        logistics_module = DetourDistributionInference(cost_matrix=cost,
+                                                       ddm_params=self.logistics_params,
+                                                       lc_indices=lc_indices,
+                                                       lc_sizes=lc_sizes)
+        for i in range(1, iterations + 1):
+            demand_truck, per_route = process_logistics_inference(model=logistics_module,
+                                                                  demand=demand_truck,
+                                                                  iteration=i)
+        return demand_truck, per_route
