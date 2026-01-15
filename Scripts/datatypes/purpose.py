@@ -742,38 +742,58 @@ class FreightPurpose(Purpose):
         for mode in costs[marine_ships_name]:
             costs[marine_ships_name][mode].update(
                 {"frequency": impedance[marine_ships_name][mode]["frequency"]})
-        
-        # Get zone masks and prep attributes
         masks = self._form_split_masks(origs, dests)
-        truck_cost = costs["truck"]["cost"]
-        train_cost = costs["freight_train"]["cost"]
-        rows_fin = (masks["fin_zones"] | masks["orig_borders"] if is_export else 
-                    masks["fin_zones"] | masks["dest_borders"])
         
-        # Form impedances for splits
         split_impedances = {
             True: {
                 "split_one": {
-                    "truck": _slice(truck_cost, rows_fin, masks["orig_borders"]),
-                    "freight_train": _slice(train_cost, rows_fin, masks["orig_borders"]),
+                    "truck": {
+                        "cost": _slice(costs["truck"]["cost"], masks["fin_zones"], 
+                                       masks["orig_borders"])
+                    },
+                    "freight_train": {
+                        "cost": _slice(costs["freight_train"]["cost"], masks["fin_zones"], 
+                                       masks["orig_borders"])
+                    }
                 },
                 "split_three": {
-                    "truck": _slice(truck_cost, masks["dest_borders"], masks["cluster_zones"])
+                    "truck": {
+                        "cost": _slice(costs["truck"]["cost"], masks["dest_borders"], 
+                                       masks["cluster_zones"])
+                    }
                 }
             },
             False: {
                 "split_one": {
-                    "truck": _slice(truck_cost, masks["cluster_zones"], masks["orig_borders"])
+                    "truck": {
+                        "cost": _slice(costs["truck"]["cost"], masks["cluster_zones"], 
+                                       masks["orig_borders"])
+                    }
                 },
                 "split_three": {
-                    "truck": _slice(truck_cost, masks["dest_borders"], rows_fin),
-                    "freight_train": _slice(train_cost, masks["dest_borders"], rows_fin)
+                    "truck": {
+                        "cost": _slice(costs["truck"]["cost"], masks["dest_borders"], 
+                                       masks["fin_zones"])
+                    },
+                    "freight_train": {
+                        "cost": _slice(costs["freight_train"]["cost"], 
+                                       masks["dest_borders"], masks["fin_zones"])
+                    }
                 }
             }
-        }[is_export]
+        }
+        split_impedances = split_impedances[is_export]
+        # Second split impedance direction is always from origin borders to 
+        # destination borders in both exporting and importing situations
         split_impedances["split_two"] = {
-            "truck": _slice(truck_cost, masks["orig_borders"], masks["dest_borders"]),
-            "freight_train": _slice(train_cost, masks["orig_borders"], masks["dest_borders"]),
+            "truck": {
+                "cost": _slice(costs["truck"]["cost"], masks["orig_borders"], 
+                                     masks["dest_borders"])
+            },
+            "freight_train": {
+                "cost": _slice(costs["freight_train"]["cost"], masks["orig_borders"], 
+                               masks["dest_borders"])
+            },
             marine_ships_name: costs.get(marine_ships_name, {})
         }
         return split_impedances
@@ -785,7 +805,8 @@ class FreightPurpose(Purpose):
         masks = {
             "orig_borders": numpy.isin(all_zones, orig_zones),
             "dest_borders": numpy.isin(all_zones, dest_zones),
-            "fin_zones": numpy.isin(all_zones, self.orig_zone_numbers)
+            "fin_zones": numpy.isin(all_zones, numpy.union1d(
+                                    self.orig_zone_numbers, orig_zones)),
         }
         masks["cluster_zones"] = ~masks["fin_zones"] & ~masks["dest_borders"]
         return masks
