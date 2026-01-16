@@ -19,10 +19,8 @@ import models.generation as generation
 from datatypes.demand import Demand
 from datatypes.histogram import TourLengthHistogram
 from utils.freight_costs import calc_cost
-from models.logistics import DDMParameters
 from utils.calibrate import attempt_calibration
-from models.logistics import (DetourDistributionInference, 
-                              process_logistics_inference)
+from models.logistics import (LogisticsModule, run_logistics_model)
 
 
 class Purpose:
@@ -672,16 +670,9 @@ class FreightPurpose(Purpose):
         else:
             self.model = logit.ModeDestModel(self, specification, zone_data[self.model_category], 
                                              resultdata)
+        
         self.modes = list(self.model.mode_choice_param)
-
-        if specification.get("logistics_module"):
-            self.logistics_module = specification["logistics_module"]
-            self.logistics_params = DDMParameters(orig_lc_detour=self.logistics_module["orig_lc_detour"],
-                                                  lc_dest_detour=self.logistics_module["lc_dest_detour"],
-                                                  constant_detour=self.logistics_module["constant_detour"],
-                                                  orig_dest_direct=self.logistics_module["orig_dest_direct"],
-                                                  constant_direct=self.logistics_module["constant_direct"],
-                                                  size_factor=self.logistics_module["size_factor"])
+        self.route_params = specification.get("route_choice", None)
 
     def calc_traffic(self, impedance: dict):
         """Calculate freight traffic matrix.
@@ -798,13 +789,10 @@ class FreightPurpose(Purpose):
         lc_indices = numpy.array([zone_index_map.get(id, None) 
                                 for id in list(lc_sizes.index)])
         lc_sizes = lc_sizes.to_numpy()
-        cost = self.get_costs(impedance)["truck"]["cost"]
-        logistics_module = DetourDistributionInference(cost_matrix=cost,
-                                                       ddm_params=self.logistics_params,
-                                                       lc_indices=lc_indices,
-                                                       lc_sizes=lc_sizes)
+        cost = self.get_costs(impedance)
+        logistics_module = LogisticsModule(cost, self.route_params,
+                                           lc_indices, lc_sizes)
         for i in range(1, iterations + 1):
-            demand_truck, per_route = process_logistics_inference(model=logistics_module,
-                                                                  demand=demand_truck,
-                                                                  iteration=i)
+            logistics_module.demand = demand_truck
+            demand_truck, per_route = run_logistics_model(logistics_module, i)
         return demand_truck, per_route

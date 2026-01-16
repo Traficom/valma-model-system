@@ -74,7 +74,7 @@ def main(args):
     for purpose in purposes.values():
         log.info(f"Calculating demand for domestic purpose: {purpose.name}")
         demand = purpose.calc_traffic(impedance)
-        if hasattr(purpose, "logistics_module") and args.logistics_iterations > 0:
+        if purpose.route_params and args.logistics_iterations > 0:
             demand["truck"], _ = purpose.run_logistics_module(demand["truck"], impedance, 
                                                               ass_model.mapping, 
                                                               args.logistics_iterations)
