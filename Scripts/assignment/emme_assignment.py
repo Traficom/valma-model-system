@@ -136,7 +136,7 @@ class EmmeAssignmentModel(AssignmentModel):
                 use_stored_speeds=(car_time_files is not None),
                 delete_extra_matrices=self.delete_extra_matrices,
                 delete_strat_files=self._delete_strat_files))
-        ass_classes = (param.car_classes + param.transit_classes + + ("bike",)
+        ass_classes = (param.car_classes + param.transit_classes + ("bike",)
             if self.use_free_flow_speeds else param.simple_transport_classes)
         ass_classes += ("bus",)
         self._create_attributes(
