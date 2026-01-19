@@ -245,13 +245,13 @@ boarding_penalty = {
 long_boarding_penalty = {
     'b': 0, # Bus
     'g': 0, # Trunk bus
-    'e': 0, # Coach bus
+    'e': 15, # Coach bus
     't': 0, # Tram
     'p': 0, # Light rail
     'm': 0, # Metro
     'w': 0, # Ferry
     'r': 0, # Commuter train
-    'j': 2, # Long-distance train
+    'j': 0, # Long-distance train
 }
 # Headway standard deviation function parameters for different transit modes
 headway_sd_func = {
@@ -309,17 +309,17 @@ trass_stop = {
 }
 # Specification for the transit assignment
 transfer_penalty = {
-    "transit_work": 3,
-    "transit_leisure": 5,
-    "transit": 5,
-    "train": 5,
-    "airplane": 5,
-    "pt_car_acc": 5,
-    "pt_taxi_acc": 5,
-    "airpl_car_acc": 5,
-    "pt_car_egr": 5,
-    "pt_taxi_egr": 5,
-    "airpl_car_egr": 5,
+    "transit_work": 15,
+    "transit_leisure": 10,
+    "transit": 15,
+    "train": 15,
+    "airplane": 15,
+    "pt_car_acc": 15,
+    "pt_taxi_acc": 15,
+    "airpl_car_acc": 15,
+    "pt_car_egr": 15,
+    "pt_taxi_egr": 15,
+    "airpl_car_egr": 15,
 }
 extra_waiting_time = {
     "penalty": "@wait_time_dev",
