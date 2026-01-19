@@ -82,7 +82,7 @@ class TransitMode(AssignmentMode):
             # so here we just set the default to zero.
             "boarding_cost": no_penalty,
             "in_vehicle_time": {
-                "perception_factor": 1
+                "perception_factor": param.in_vehice_weight_attr
             },
             "in_vehicle_cost": {
                 "penalty": param.line_penalty_attr,
