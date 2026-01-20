@@ -749,12 +749,10 @@ class FreightPurpose(Purpose):
                                self.orig_zone_numbers, orig_zones))
         cluster_zones = ~fin_zones & ~dest_borders
         
-        leg_one, leg_two, leg_three = "leg_one", "leg_two", "leg_three"
-        impedance_legs = {leg_one: {}, leg_two: {}, leg_three: {}}
         if is_export:
             leg_one_modes = ("truck", "freight_train")
-            leg_two_modes = leg_one_modes
             leg_three_modes = ("truck",)
+            leg_two_modes = leg_one_modes
             leg_one_masks = (fin_zones, orig_borders)
             leg_three_masks = (dest_borders, cluster_zones)
         else:
@@ -764,15 +762,16 @@ class FreightPurpose(Purpose):
             leg_one_masks = (cluster_zones, orig_borders)
             leg_three_masks = (dest_borders, fin_zones)
         leg_two_masks = (orig_borders, dest_borders)
-        
-        impedance_legs[leg_one] = {mode: {"cost": costs[mode]["cost"][numpy.ix_(*leg_one_masks)]}
-                                   for mode in leg_one_modes}
-        impedance_legs[leg_two] = {mode: {"cost": costs[mode]["cost"][numpy.ix_(*leg_two_masks)]}
-                                   for mode in leg_two_modes}
-        impedance_legs[leg_two].update({mode: costs[marine_ships_name][mode]
-                                        for mode in costs[marine_ships_name]})
-        impedance_legs[leg_three] = {mode: {"cost": costs[mode]["cost"][numpy.ix_(*leg_three_masks)]}
-                                     for mode in leg_three_modes}
+        impedance_legs = {
+            "leg_one": {mode: {"cost": costs[mode]["cost"][numpy.ix_(*leg_one_masks)]}
+                        for mode in leg_one_modes},
+            "leg_two": {mode: {"cost": costs[mode]["cost"][numpy.ix_(*leg_two_masks)]}
+                        for mode in leg_two_modes},
+            "leg_three": {mode: {"cost": costs[mode]["cost"][numpy.ix_(*leg_three_masks)]}
+                          for mode in leg_three_modes}
+        }
+        impedance_legs["leg_two"].update({mode: costs[marine_ships_name][mode]
+                                          for mode in costs[marine_ships_name]})
         return impedance_legs
 
     def get_costs(self, impedance: dict, origs: dict = None, dests: dict = None):
