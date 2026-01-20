@@ -708,10 +708,10 @@ class FreightPurpose(Purpose):
         demand = {mode: (probs.pop(mode) * generation).T for mode in self.modes}
         return demand
 
-    def get_split_impedances(self, impedance: dict, origs: dict, dests: dict,
-                             is_export: bool) -> dict:
-        """Forms impedance matrices for the three route splits of foreign 
-        trade route choice model. 
+    def form_impedance_legs(self, impedance: dict, origs: dict, dests: dict,
+                                 is_export: bool) -> dict:
+        """Forms impedance matrices for the three legs of foreign trade 
+        route choice model. 
             
         Parameters
         ----------
@@ -730,86 +730,50 @@ class FreightPurpose(Purpose):
         Returns
         -------
         dict
-            Split name (1/2/3) : dict
-                Mode (truck/train/marine ships) : mask indexed numpy 2d matrix
+            Name of a leg (leg_one/...) : dict
+                Mode (truck/train/marine ships) : dict
+                    Type (cost/frequency/draught) : mask indexed numpy 2d matrix
         """
-        def _slice(matrix, row_mask, col_mask):
-            return matrix[numpy.ix_(row_mask, col_mask)]
-        
-        # Get costs and update impedance structure for marine ships
         costs = self.get_costs(impedance, origs, dests)
         costs[marine_ships_name] = costs[marine_ships_name]["cost"]
         for mode in costs[marine_ships_name]:
             costs[marine_ships_name][mode].update(
                 {"frequency": impedance[marine_ships_name][mode]["frequency"]})
-        masks = self._form_split_masks(origs, dests)
         
-        split_impedances = {
-            True: {
-                "split_one": {
-                    "truck": {
-                        "cost": _slice(costs["truck"]["cost"], masks["fin_zones"], 
-                                       masks["orig_borders"])
-                    },
-                    "freight_train": {
-                        "cost": _slice(costs["freight_train"]["cost"], masks["fin_zones"], 
-                                       masks["orig_borders"])
-                    }
-                },
-                "split_three": {
-                    "truck": {
-                        "cost": _slice(costs["truck"]["cost"], masks["dest_borders"], 
-                                       masks["cluster_zones"])
-                    }
-                }
-            },
-            False: {
-                "split_one": {
-                    "truck": {
-                        "cost": _slice(costs["truck"]["cost"], masks["cluster_zones"], 
-                                       masks["orig_borders"])
-                    }
-                },
-                "split_three": {
-                    "truck": {
-                        "cost": _slice(costs["truck"]["cost"], masks["dest_borders"], 
-                                       masks["fin_zones"])
-                    },
-                    "freight_train": {
-                        "cost": _slice(costs["freight_train"]["cost"], 
-                                       masks["dest_borders"], masks["fin_zones"])
-                    }
-                }
-            }
-        }
-        split_impedances = split_impedances[is_export]
-        # Second split impedance direction is always from origin borders to 
-        # destination borders in both exporting and importing situations
-        split_impedances["split_two"] = {
-            "truck": {
-                "cost": _slice(costs["truck"]["cost"], masks["orig_borders"], 
-                                     masks["dest_borders"])
-            },
-            "freight_train": {
-                "cost": _slice(costs["freight_train"]["cost"], masks["orig_borders"], 
-                               masks["dest_borders"])
-            },
-            marine_ships_name: costs.get(marine_ships_name, {})
-        }
-        return split_impedances
-
-    def _form_split_masks(self, origs: dict, dests: dict):
         orig_zones = numpy.array(list(origs.values()), dtype=numpy.int32)
         dest_zones = numpy.array(list(dests.values()), dtype=numpy.int32)
         all_zones = self.generation_zone_data.all_zone_numbers
-        masks = {
-            "orig_borders": numpy.isin(all_zones, orig_zones),
-            "dest_borders": numpy.isin(all_zones, dest_zones),
-            "fin_zones": numpy.isin(all_zones, numpy.union1d(
-                                    self.orig_zone_numbers, orig_zones)),
-        }
-        masks["cluster_zones"] = ~masks["fin_zones"] & ~masks["dest_borders"]
-        return masks
+        orig_borders = numpy.isin(all_zones, orig_zones)
+        dest_borders = numpy.isin(all_zones, dest_zones)
+        fin_zones = numpy.isin(all_zones, numpy.union1d(
+                               self.orig_zone_numbers, orig_zones))
+        cluster_zones = ~fin_zones & ~dest_borders
+        
+        leg_one, leg_two, leg_three = "leg_one", "leg_two", "leg_three"
+        impedance_legs = {leg_one: {}, leg_two: {}, leg_three: {}}
+        if is_export:
+            leg_one_modes = ("truck", "freight_train")
+            leg_two_modes = leg_one_modes
+            leg_three_modes = ("truck",)
+            leg_one_masks = (fin_zones, orig_borders)
+            leg_three_masks = (dest_borders, cluster_zones)
+        else:
+            leg_one_modes = ("truck",)
+            leg_three_modes = ("truck", "freight_train")
+            leg_two_modes = leg_three_modes
+            leg_one_masks = (cluster_zones, orig_borders)
+            leg_three_masks = (dest_borders, fin_zones)
+        leg_two_masks = (orig_borders, dest_borders)
+        
+        impedance_legs[leg_one] = {mode: {"cost": costs[mode]["cost"][numpy.ix_(*leg_one_masks)]}
+                                   for mode in leg_one_modes}
+        impedance_legs[leg_two] = {mode: {"cost": costs[mode]["cost"][numpy.ix_(*leg_two_masks)]}
+                                   for mode in leg_two_modes}
+        impedance_legs[leg_two].update({mode: costs[marine_ships_name][mode]
+                                        for mode in costs[marine_ships_name]})
+        impedance_legs[leg_three] = {mode: {"cost": costs[mode]["cost"][numpy.ix_(*leg_three_masks)]}
+                                     for mode in leg_three_modes}
+        return impedance_legs
 
     def get_costs(self, impedance: dict, origs: dict = None, dests: dict = None):
         """Fetches calculated costs for each mode in model's mode choice.

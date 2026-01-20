@@ -59,7 +59,7 @@ def main(args):
     for purpose in purposes.values():
         log.info(f"Calculating route for foreign purpose: {purpose.name}")
         impedance[param.marine_ships_name] = ship_imps
-        split_impedances = purpose.get_split_impedances(impedance, origs, dests, is_export)
+        impedance_legs = purpose.form_impedance_legs(impedance, origs, dests, is_export)
     del impedance[param.marine_ships_name]
 
     # prepare domestic model by splicing impedances and initializing final demand matrix 
