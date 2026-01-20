@@ -125,7 +125,8 @@ class WholeDayPeriod(AssignmentPeriod):
                     param.transit_classes, calc_network_results=True,
                     delete_strat_files=self._delete_strat_files)
             self._calc_transit_link_results()
-        return self._get_impedances(param.car_classes + param.transit_classes)
+        return self._get_impedances(
+            param.car_classes + param.transit_classes + ("walk",))
 
     @property
     def boarding_penalty(self):
