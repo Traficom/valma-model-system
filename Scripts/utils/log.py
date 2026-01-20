@@ -40,7 +40,7 @@ def initialize(args):
     fileFormat = logging.Formatter(
         '%(asctime)s [%(levelname)s] %(message)s', '%Y-%m-%d %H:%M:%S')
     fileHandler = logging.handlers.TimedRotatingFileHandler(
-        filename, when='H', interval=10, backupCount=7)
+        filename, when="midnight", backupCount=7)
     fileHandler.setFormatter(fileFormat)
     fileHandler.setLevel(numeric_level)
     logger.addHandler(fileHandler)
