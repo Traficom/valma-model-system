@@ -624,10 +624,10 @@ long_dist_transit_modes = {
     "train": ['j'],
     "coach": ['e'],
     "airplane": ['l'],
-    "pt_car_acc": ['e', 'j'],
+    "pt_car_acc": ['j'],
     "pt_taxi_acc": ['e', 'j'],
     "airpl_car_acc": ['l'],
-    "pt_car_egr": ['e', 'j'],
+    "pt_car_egr": ['j'],
     "pt_taxi_egr": ['e', 'j'],
     "airpl_car_egr": ['l'],
 }
