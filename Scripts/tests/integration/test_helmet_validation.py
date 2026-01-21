@@ -14,8 +14,8 @@ class Args:
     base_data_folder = TEST_DATA_PATH / "Scenario_input_data"
     emme_project_files = [ZONEDATA_PATH / "2016.cco"]
     first_scenario_ids = ["test"]
-    zone_data_file = [ZONEDATA_PATH]
-    cost_data_file = [COSTDATA_PATH]
+    zone_data_files = [ZONEDATA_PATH]
+    cost_data_files = [COSTDATA_PATH]
     result_data_folder = TEST_DATA_PATH / "Results"
     scenario_name = ["test"]
     do_not_use_emme = True
