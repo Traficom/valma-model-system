@@ -20,7 +20,7 @@ def main(args):
     base_zonedata_path = Path(args.base_data_folder, BASE_ZONEDATA_FILE)
     emme_project_files: Union[str,List[str]] = args.emme_project_files
     first_scenario_ids: Union[int,List[int]] = args.first_scenario_ids
-    zone_data_file: Union[str,List[str]] = args.zone_data_file
+    zone_data_files: Union[str,List[str]] = args.zone_data_files
 
     if not emme_project_files:
         msg = "Missing required argument 'emme-project-files'."
@@ -30,8 +30,8 @@ def main(args):
         msg = "Missing required argument 'first-scenario-ids'."
         log.error(msg)
         raise ValueError(msg)
-    if not zone_data_file:
-        msg = "Missing required argument 'zone-data-file'."
+    if not zone_data_files:
+        msg = "Missing required argument 'zone-data-files'."
         log.error(msg)
         raise ValueError(msg)
     # Check arg lengths
@@ -40,9 +40,9 @@ def main(args):
                + "vs. number of first-scenario-ids")
         log.error(msg)
         raise ValueError(msg)
-    if not (len(emme_project_files) == len(zone_data_file)):
+    if not (len(emme_project_files) == len(zone_data_files)):
         msg = ("Non-matching number of emme-project-files (.emp files) "
-               + "vs. number of zone-data-file")
+               + "vs. number of zone-data-files")
         log.error(msg)
         raise ValueError(msg)
 
@@ -61,7 +61,7 @@ def main(args):
     for i, emp_path in enumerate(emme_project_files):
         log.info("Checking input data for scenario #{} ...".format(i))
 
-        data_path = args.cost_data_file[i]
+        data_path = args.cost_data_files[i]
         if not os.path.exists(data_path):
             msg = "Forecast data file '{}' does not exist.".format(
                 data_path)
@@ -221,9 +221,9 @@ def main(args):
             long_dist_result_paths.append(
                 Path(args.result_data_folder, name, "Matrices", "koko_suomi"))
     model_types = (args.model_types if args.model_types
-                   else ["passenger_transport" for _ in zone_data_file])
+                   else ["passenger_transport" for _ in zone_data_files])
     for model_type, data_path, submodel, long_dist_forecast, freight_path in zip(
-            model_types, zone_data_file, args.submodel,
+            model_types, zone_data_files, args.submodel,
             args.long_dist_demand_forecast, args.freight_matrix_paths):
         # Check forecasted zonedata
         if not os.path.exists(data_path):
@@ -349,13 +349,13 @@ if __name__ == "__main__":
         required=True,
         help="List of first (biking) scenario IDs within EMME project (.emp)."),
     parser.add_argument(
-        "--zone-data-file",
+        "--zone-data-files",
         type=str,
         nargs="+",
         required=True,
         help="List of paths to zone data files."),
     parser.add_argument(
-        "--cost-data-file",
+        "--cost-data-files",
         type=str,
         nargs="+",
         required=True,
