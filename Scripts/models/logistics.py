@@ -130,7 +130,6 @@ class LogisticsModule(FreightDetourInference):
         
         return origin_offset, current_batch_size
 
-
 def run_logistics_model(model: LogisticsModule, iteration: int) -> Tuple[np.ndarray]:
         """Domestic logistics model entry point
         Process full matrix in origin batches to limit memory usage
