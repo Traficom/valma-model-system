@@ -148,16 +148,14 @@ class EmmeAssignmentTest:
         ass_classes = [
             "car_work",
             "car_leisure",
-            "train",
-            "coach",
+            "transit_work",
+            "transit_leisure",
             "airplane",
-            "train_car_acc",
-            "train_taxi_acc",
-            "coach_car_acc",
+            "pt_car_acc",
+            "pt_taxi_acc",
             "airpl_car_acc",
-            "train_car_egr",
-            "train_taxi_egr",
-            "coach_car_egr",
+            "pt_car_egr",
+            "pt_taxi_egr",
             "airpl_car_egr",
         ]
         demand = {ass_class: car_matrix for ass_class in ass_classes}
