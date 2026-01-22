@@ -89,9 +89,12 @@ class EmmeAssignmentTest(unittest.TestCase):
         demand = [
             "car_work",
             "car_leisure",
-            "train",
-            "coach",
+            "transit_work",
+            "transit_leisure",
             "airplane",
+            "pt_car_acc",
+            "pt_taxi_acc",
+            "airpl_car_acc",
         ]
         for ap in ass_model.assignment_periods:
             for ass_class in demand:

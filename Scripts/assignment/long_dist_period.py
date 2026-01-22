@@ -2,6 +2,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Dict, Iterable
 import numpy
 
+import utils.log as log
 from assignment.assignment_period import AssignmentPeriod
 import parameters.assignment as param
 from assignment.datatypes.transit import TransitMode
@@ -42,19 +43,26 @@ class WholeDayPeriod(AssignmentPeriod):
         """
         self._prepare_cars(
             dist_unit_cost, save_matrices, param.car_classes, truck_classes=[])
+        self._prepare_walk_and_bike(save_matrices=True)
         self._prepare_transit(
             day_scenario, save_standard_matrices=True,
             save_extra_matrices=save_matrices,
-            transit_classes=param.long_dist_simple_classes,
+            transit_classes=(param.long_dist_simple_classes
+                             + param.local_transit_classes),
             mixed_classes=param.mixed_mode_classes,
             dist_unit_cost=dist_unit_cost["car_work"])
 
     def init_assign(self):
-         self._set_car_vdfs(use_free_flow_speeds=True)
-         return []
+        log.info("Pedestrian assignment started...")
+        self.walk_mode.assign()
+        log.info(f"Pedestrians assigned for scenario {self.emme_scenario.id}")
+        self._set_bike_vdfs()
+        self._assign_bikes()
+        self._set_car_vdfs(use_free_flow_speeds=True)
+        return []
 
     def get_soft_mode_impedances(self):
-        return []
+        return self._get_impedances([self.bike_mode.name, self.walk_mode.name])
 
     def assign_trucks_init(self):
          pass
@@ -77,12 +85,12 @@ class WholeDayPeriod(AssignmentPeriod):
                 Assignment class (car_work/transit/...) : numpy 2-d matrix
         """
         self._assign_cars(self.stopping_criteria["coarse"])
-        self._assign_transit(
-            param.long_dist_simple_classes + param.car_access_classes)
+        self._assign_transit(param.transit_classes)
         self._long_distance_trips_assigned = True
         mtxs = self._get_impedances(modes)
         for ass_cl in param.car_classes:
-            del mtxs["dist"][ass_cl]
+            if ass_cl in mtxs["dist"]:
+                del mtxs["dist"][ass_cl]
         del mtxs["toll_cost"]
         return mtxs
 
@@ -107,23 +115,18 @@ class WholeDayPeriod(AssignmentPeriod):
         if assign_transit:
             if self._long_distance_trips_assigned:
                 strategy_paths = self._strategy_paths
-                for transit_class in (param.long_dist_simple_classes
-                                    + param.car_access_classes):
+                for transit_class in param.transit_classes:
                     tc: TransitMode = self.assignment_modes[transit_class]
                     tc.calc_transit_network_results()
                     if self._delete_strat_files:
                         strategy_paths[transit_class].unlink(missing_ok=True)
-                self._assign_transit(
-                    param.car_egress_classes, calc_network_results=True,
-                    delete_strat_files=self._delete_strat_files)
             else:
                 self._assign_transit(
-                    param.long_distance_transit_classes,
-                    calc_network_results=True,
+                    param.transit_classes, calc_network_results=True,
                     delete_strat_files=self._delete_strat_files)
             self._calc_transit_link_results()
-        return self._get_impedances(param.car_classes
-                                    + param.long_distance_transit_classes)
+        return self._get_impedances(
+            param.car_classes + param.transit_classes + ("walk",))
 
     @property
     def boarding_penalty(self):
