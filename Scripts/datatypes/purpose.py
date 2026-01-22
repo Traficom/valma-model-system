@@ -13,7 +13,8 @@ import models.logit as logit
 from parameters.assignment import (
     assignment_classes,
     intermodals,
-    mixed_mode_classes)
+    mixed_mode_classes,
+    marine_ships_name)
 import parameters.cost as cost
 import models.generation as generation
 from datatypes.demand import Demand
@@ -681,10 +682,12 @@ class FreightPurpose(Purpose):
         if specification["struct"] == "dest>mode":
             self.model = logit.DestModeModel(self, specification, zone_data[self.model_category], 
                                              resultdata)
-        else:
+        elif specification["struct"] == "mode>dest":
             self.model = logit.ModeDestModel(self, specification, zone_data[self.model_category], 
                                              resultdata)
-        self.modes = list(self.model.mode_choice_param)
+        else:
+            self.model = None
+        self.modes = list(specification["mode_choice"])
 
         if specification.get("logistics_module"):
             self.logistics_module = specification["logistics_module"]
@@ -717,13 +720,15 @@ class FreightPurpose(Purpose):
         demand = {mode: (probs.pop(mode) * generation).T for mode in self.modes}
         return demand
 
-    def calc_route(self, impedance: dict, origs: dict, dests: dict):
-        """Calculates route choice for foreign freight trade. 
-        
+    def form_impedance_legs(self, impedance: dict, origs: dict, dests: dict,
+                                 is_export: bool) -> dict:
+        """Forms impedance matrices for the three legs of foreign trade 
+        route choice model. 
+            
         Parameters
         ----------
         impedance : dict
-            Freight assignment mode (truck/train/...) : dict
+            Mode (truck/train/...) : dict
                 Type (time/dist/toll_cost/canal_cost) : numpy 2d matrix
         origs : dict
             Origin border id (FIHEL/SESTO...) : str
@@ -731,9 +736,51 @@ class FreightPurpose(Purpose):
         dests : dict
             Destination border id (FIHEL/SESTO...) : str
                 Centroid id : int
-        
+        is_export : bool
+            Whether data should be fetched for export (True) or import (False)
+
+        Returns
+        -------
+        dict
+            Name of a leg (leg_one/...) : dict
+                Mode (truck/train/marine ships) : dict
+                    Type (cost/frequency/draught) : mask indexed numpy 2d matrix
         """
+        orig_zones = numpy.array(list(origs.values()), dtype=numpy.int32)
+        dest_zones = numpy.array(list(dests.values()), dtype=numpy.int32)
+        all_zones = self.generation_zone_data.all_zone_numbers
+        orig_borders = numpy.isin(all_zones, orig_zones)
+        dest_borders = numpy.isin(all_zones, dest_zones)
+        fin_zones = numpy.isin(all_zones, numpy.union1d(
+                               self.orig_zone_numbers, orig_zones))
+        cluster_zones = ~fin_zones & ~dest_borders
+        
+        if is_export:
+            leg_one_modes = ("truck", "freight_train")
+            leg_three_modes = ("truck",)
+            leg_two_modes = leg_one_modes
+            leg_one_masks = (fin_zones, orig_borders)
+            leg_three_masks = (dest_borders, cluster_zones)
+        else:
+            leg_one_modes = ("truck",)
+            leg_three_modes = ("truck", "freight_train")
+            leg_two_modes = leg_three_modes
+            leg_one_masks = (cluster_zones, orig_borders)
+            leg_three_masks = (dest_borders, fin_zones)
+        leg_two_masks = (orig_borders, dest_borders)
+        
         costs = self.get_costs(impedance, origs, dests)
+        impedance_legs = {
+            "leg_one": {mode: {"cost": costs[mode]["cost"][numpy.ix_(*leg_one_masks)]}
+                        for mode in leg_one_modes},
+            "leg_two": {mode: {"cost": costs[mode]["cost"][numpy.ix_(*leg_two_masks)]}
+                        for mode in leg_two_modes},
+            "leg_three": {mode: {"cost": costs[mode]["cost"][numpy.ix_(*leg_three_masks)]}
+                          for mode in leg_three_modes}
+        }
+        impedance_legs["leg_two"].update({mode: costs[marine_ships_name]["cost"][mode]
+                                          for mode in costs[marine_ships_name]["cost"]})
+        return impedance_legs
 
     def get_costs(self, impedance: dict, origs: dict = None, dests: dict = None):
         """Fetches calculated costs for each mode in model's mode choice.

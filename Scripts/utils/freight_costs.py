@@ -232,7 +232,8 @@ def get_foreign_ship_cost(unit_costs: Dict[str, dict], impedance: Dict[str, dict
             continue
         ship_info[mode] = {
             "cost": inf_mtx.copy(),
-            "draught": inf_mtx.copy()
+            "draught": inf_mtx.copy(),
+            "frequency": impedance[mode]["frequency"]
         }
         for draught in map(int, unit_costs["ship"][mode]):
             impedance[mode]["time"] = (impedance[mode]["dist"] 

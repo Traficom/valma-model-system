@@ -54,11 +54,12 @@ def main(args):
     
     # Run foreign trade route choice
     # Export for now. Export/import logic will be introduced later
-    ship_imps, origs, dests = ass_model.freight_network.read_ship_impedances(is_export=True)
+    is_export = True
+    ship_imps, origs, dests = ass_model.freight_network.read_ship_impedances(is_export)
     for purpose in purposes.values():
         log.info(f"Calculating route for foreign purpose: {purpose.name}")
         impedance[param.marine_ships_name] = ship_imps
-        purpose.calc_route(impedance, origs, dests)
+        impedance_legs = purpose.form_impedance_legs(impedance, origs, dests, is_export)
     del impedance[param.marine_ships_name]
 
     # prepare domestic model by splicing impedances and initializing final demand matrix 
