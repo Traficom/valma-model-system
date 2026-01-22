@@ -227,13 +227,13 @@ freight_terminal_cost = {
     'W': 0
 }
 in_vehicle_weight = {
-    'j': 0.7,
+    'j': 0.6,
 }
 # Boarding penalties for different transit modes
 boarding_penalty = {
     'b': 3, # Bus
     'g': 3, # Trunk bus
-    'e': 5, # Coach bus
+    'e': 8, # Coach bus
     't': 0, # Tram
     'p': 0, # Light rail
     'm': 0, # Metro
@@ -243,14 +243,14 @@ boarding_penalty = {
 }
 # Boarding penalties for long-distance trips
 long_boarding_penalty = {
-    'b': 0, # Bus
-    'g': 0, # Trunk bus
-    'e': 0, # Coach bus
+    'b': 3, # Bus
+    'g': 3, # Trunk bus
+    'e': 8, # Coach bus
     't': 0, # Tram
     'p': 0, # Light rail
     'm': 0, # Metro
     'w': 0, # Ferry
-    'r': 0, # Commuter train
+    'r': 2, # Commuter train
     'j': 2, # Long-distance train
 }
 # Headway standard deviation function parameters for different transit modes
@@ -624,10 +624,10 @@ long_dist_transit_modes = {
     "train": ['j'],
     "coach": ['e'],
     "airplane": ['l'],
-    "pt_car_acc": ['e', 'j'],
+    "pt_car_acc": ['j'],
     "pt_taxi_acc": ['e', 'j'],
     "airpl_car_acc": ['l'],
-    "pt_car_egr": ['e', 'j'],
+    "pt_car_egr": ['j'],
     "pt_taxi_egr": ['e', 'j'],
     "airpl_car_egr": ['l'],
 }

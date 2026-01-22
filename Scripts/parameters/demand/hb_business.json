@@ -226,6 +226,23 @@
             },
             "log": {},
             "individual_dummy": {}
+        },
+        "calibration": {
+            "car_leisure": {
+                "constant": -0.038
+            },
+            "car_pax": {
+                "constant": 0.138
+            },
+            "transit_leisure": {
+                "constant": 0.040
+            },
+            "airplane": {
+                "constant": -0.062
+            },
+            "walk": {
+                "constant": 0.156
+            }
         }
     },
     "access_mode_choice": {
