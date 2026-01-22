@@ -99,3 +99,46 @@ vot = {
         "car_pax": 11.4,
     }
 }
+
+tour_duration = {
+    "train_car_acc": {
+        "avg": 2.18,
+        "hb_business": 1.12,
+        "hb_leisure_overnight": 9,
+    },
+    "train_taxi_acc": {
+        "avg": 2.18,
+        "hb_business": 1.12,
+        "hb_leisure_overnight": 9,
+    },
+    "coach_car_acc": {
+        "avg": 2.62,
+        "hb_business": 2.43,
+        "hb_leisure_overnight": 14,
+    },
+    "airpl_car_acc": {
+        "avg": 2.39,
+        "hb_business": 2.01,
+        "hb_leisure_overnight": 9,
+    },
+    "train_car_egr": {
+        "avg": 2.18,
+        "hb_business": 1.12,
+        "hb_leisure_overnight": 9,
+    },
+    "train_taxi_egr": {
+        "avg": 2.18,
+        "hb_business": 1.12,
+        "hb_leisure_overnight": 9,
+    },
+    "coach_car_egr": {
+        "avg": 2.62,
+        "hb_business": 2.43,
+        "hb_leisure_overnight": 14,
+    },
+    "airpl_car_egr": {
+        "avg": 2.39,
+        "hb_business": 2.01,
+        "hb_leisure_overnight": 9,
+    }
+}

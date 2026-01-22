@@ -18,7 +18,6 @@ VEHICLE_KMS_FILE = "vehicle_kms_vdfs.txt"
 TRANSIT_KMS_FILE = "transit_kms.txt"
 LINK_LENGTH_FILE = "link_lengths.txt"
 NOISE_FILE = "noise_areas.txt"
-STATION_FILE = "transit_stations.txt"
 
 TRANSIT_AGGREGATIONS = {
     "bus": ("Bus", "Long_d_bus", "BRT"),
@@ -141,16 +140,6 @@ CELL_INDICES = {
         1: "I24",
         2: "I36",
     },
-    "transit_stations": {
-        1: {
-            "metro": "U11",
-            "train": "U12",
-        },
-        2: {
-            "metro": "U19",
-            "train": "U20",
-        },
-    },
     "link_lengths": {
         1: {
             "motorway": "G73",
@@ -242,13 +231,6 @@ def run_cost_benefit_analysis(scenario_0, scenario_1, year, workbook, submodel):
     indices = CELL_INDICES["link_lengths"][year]
     for linktype in indices:
         ws[indices[linktype]] = linklength_diff["length"][linktype]
-
-    # Calculate transit station differences
-    station_diff = (read(STATION_FILE, scenario_1)
-                    - read(STATION_FILE, scenario_0))
-    indices = CELL_INDICES["transit_stations"][year]
-    for mode in indices:
-        ws[indices[mode]] = station_diff["number"][mode]
 
     # Calculate gains and revenues
     results = defaultdict(float)
