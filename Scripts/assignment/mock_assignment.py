@@ -127,13 +127,6 @@ class MockPeriod(Period):
                 Assignment class (car_work/transit_leisure/...) : numpy 2-d matrix
         """
         mtxs = self._get_impedances(modes)
-        for ass_cl in param.car_classes:
-            mtxs["cost"][ass_cl] = (self.dist_unit_cost[ass_cl]
-                                    * mtxs["dist"][ass_cl])
-        if "toll_cost" in mtxs:
-            for ass_cl in mtxs["toll_cost"]:
-                mtxs["cost"][ass_cl] += mtxs["toll_cost"][ass_cl]
-            del mtxs["toll_cost"]
         for ass_cl in param.car_classes + param.transit_classes:
             if ass_cl in mtxs["dist"]:
                 del mtxs["dist"][ass_cl]
@@ -160,15 +153,6 @@ class MockPeriod(Period):
             if mtx_type not in ("toll_cost", "train_users")]
         mtxs = {mtx_type: self._get_matrices(mtx_type, assignment_classes)
             for mtx_type in impedance_output}
-        # TODO This is a temporary solution to maintain backwards compability.
-        # Fresh LOS matrices will from now on include toll_cost,
-        # so when the old LOS matrix folders are no longer in use,
-        # we can remove this separate handling of toll_cost.
-        try:
-            mtxs["toll_cost"] = self._get_matrices(
-                "toll_cost", assignment_classes)
-        except FileNotFoundError:
-            pass
         for mtx_type in mtxs:
             for mode, mtx in mtxs[mtx_type].items():
                 output_od_los(mtx, self.mapping, mtx_type, mode)
@@ -232,7 +216,8 @@ class WholeDayPeriod(MockPeriod):
     def __init__(self, *args, **kwargs):
         MockPeriod.__init__(self, *args, **kwargs)
         self.assignment_modes = (param.car_classes
-                                 + param.long_distance_transit_classes)
+                                 + param.long_distance_transit_classes
+                                 + ("bike", "walk"))
 
     def end_assign(self) -> Dict[str, Dict[str, numpy.ndarray]]:
         """ Get travel impedance matrices for whole day from files.

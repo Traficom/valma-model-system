@@ -585,7 +585,12 @@ class AssignmentPeriod(Period):
         network = self.emme_scenario.get_network()
         missing_penalties = set()
         penalty_attr = param.boarding_penalty_attr
+        weight_attr = param.in_vehice_weight_attr.replace("ut", "data")
         for line in network.transit_lines():
+            try:
+                line[weight_attr] = param.in_vehicle_weight[line.mode.id]
+            except KeyError:
+                line[weight_attr] = 1.0
             try:
                 penalty = self.boarding_penalty[line.mode.id] + extra_penalty
             except KeyError:

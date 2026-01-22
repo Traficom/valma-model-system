@@ -160,11 +160,14 @@ freight_terminal_cost = {
     'J': 0,
     'W': 0
 }
+in_vehicle_weight = {
+    'j': 0.6,
+}
 # Boarding penalties for different transit modes
 boarding_penalty = {
     'b': 3, # Bus
     'g': 3, # Trunk bus
-    'e': 5, # Coach bus
+    'e': 8, # Coach bus
     't': 0, # Tram
     'p': 0, # Light rail
     'm': 0, # Metro
@@ -174,14 +177,14 @@ boarding_penalty = {
 }
 # Boarding penalties for long-distance trips
 long_boarding_penalty = {
-    'b': 0, # Bus
-    'g': 0, # Trunk bus
-    'e': 0, # Coach bus
+    'b': 3, # Bus
+    'g': 3, # Trunk bus
+    'e': 8, # Coach bus
     't': 0, # Tram
     'p': 0, # Light rail
     'm': 0, # Metro
     'w': 0, # Ferry
-    'r': 0, # Commuter train
+    'r': 2, # Commuter train
     'j': 2, # Long-distance train
 }
 # Headway standard deviation function parameters for different transit modes
@@ -242,19 +245,13 @@ trass_stop = {
 transfer_penalty = {
     "transit_work": 3,
     "transit_leisure": 5,
-    "car_first_mile": 5,
-    "car_last_mile": 5,
     "transit": 5,
-    "train": 5,
-    "coach": 5,
     "airplane": 5,
-    "train_car_acc": 5,
-    "train_taxi_acc": 5,
-    "coach_car_acc": 5,
+    "pt_car_acc": 5,
+    "pt_taxi_acc": 5,
     "airpl_car_acc": 5,
-    "train_car_egr": 5,
-    "train_taxi_egr": 5,
-    "coach_car_egr": 5,
+    "pt_car_egr": 5,
+    "pt_taxi_egr": 5,
     "airpl_car_egr": 5,
 }
 extra_waiting_time = {
@@ -311,20 +308,6 @@ volume_factors = {
         "pt": 0.167,
         "iht": 0.345,
         "it": 0.248,
-        "vrk": 1.0,
-    },
-    "train": {
-        "aht": 0.524,
-        "pt": 0.167,
-        "iht": 0.400,
-        "it": 0.255,
-        "vrk": 1.0,
-    },
-    "coach": {
-        "aht": 0.524,
-        "pt": 0.167,
-        "iht": 0.400,
-        "it": 0.255,
         "vrk": 1.0,
     },
     "airplane": {
@@ -400,25 +383,19 @@ volume_factors = {
     "airpl_car_acc": {
         "vrk": 1.0,
     },
-    "train_car_acc": {
+    "pt_car_acc": {
         "vrk": 1.0,
     },
-    "train_taxi_acc": {
-        "vrk": 1.0,
-    },
-    "coach_car_acc": {
+    "pt_taxi_acc": {
         "vrk": 1.0,
     },
     "airpl_car_egr": {
         "vrk": 1.0,
     },
-    "train_car_egr": {
+    "pt_car_egr": {
         "vrk": 1.0,
     },
-    "train_taxi_egr": {
-        "vrk": 1.0,
-    },
-    "coach_car_egr": {
+    "pt_taxi_egr": {
         "vrk": 1.0,
     },
 }
@@ -465,21 +442,17 @@ car_classes = (
 car_and_van_classes = car_classes + ("van",)
 private_classes = car_and_van_classes + ("bike",)
 car_access_classes = (
-    "train_car_acc",
-    "train_taxi_acc",
-    "coach_car_acc",
+    "pt_car_acc",
+    "pt_taxi_acc",
     "airpl_car_acc",
 )
 car_egress_classes = (
-    "train_car_egr",
-    "coach_car_egr",
-    "train_taxi_egr",
+    "pt_car_egr",
+    "pt_taxi_egr",
     "airpl_car_egr",
 )
 mixed_mode_classes = car_access_classes + car_egress_classes
 long_dist_simple_classes = (
-    "train",
-    "coach",
     "airplane",
 )
 long_distance_transit_classes = (mixed_mode_classes
@@ -500,9 +473,8 @@ simple_transport_classes = (private_classes
                             + truck_classes)
 transport_classes = simple_transport_classes + mixed_mode_classes
 intermodals = {
-    "train": ["train_car_acc", "train_taxi_acc"],
-    "coach": ["coach_car_acc"],
-    "airplane": ["airpl_car_acc"],
+    "transit_leisure": ["pt_car_acc", "pt_taxi_acc", "pt_taxi_egr"],
+    "airplane": ["airpl_car_acc", "airpl_car_egr"],
 }
 assignment_classes = {
     "hb_work": "work",
@@ -515,7 +487,7 @@ assignment_classes = {
     "hb_sport": "leisure",
     "hb_visit": "leisure",
     "hb_leisure_overnight": "leisure",
-    "hb_business": "work",
+    "hb_business": "leisure",
     "wb_business": "work",
     "wb_other": "leisure",
     "ob_other": "leisure",
@@ -540,18 +512,12 @@ vot_classes = {
     "van": "business",
     "transit_work": "work",
     "transit_leisure": "leisure",
-    "car_first_mile": "work",
-    "car_last_mile": "work",
-    "train": "work",
-    "coach": "leisure",
     "airplane": "work",
-    "train_car_acc": "work",
-    "train_taxi_acc": "work",
-    "coach_car_acc": "leisure",
+    "pt_car_acc": "work",
+    "pt_taxi_acc": "work",
     "airpl_car_acc": "work",
-    "train_car_egr": "work",
-    "train_taxi_egr": "work",
-    "coach_car_egr": "leisure",
+    "pt_car_egr": "work",
+    "pt_taxi_egr": "work",
     "airpl_car_egr": "work",
 }
 local_transit_modes = [
@@ -565,18 +531,14 @@ local_transit_modes = [
     'e',
 ]
 long_dist_transit_modes = {
-  	"transit_work": ['e', 'j', 'l'],
-    "transit_leisure": ['e', 'j', 'l'],
-    "train": ['j'],
-    "coach": ['e'],
+    "transit_work": ['e', 'j'],
+    "transit_leisure": ['e', 'j'],
     "airplane": ['l'],
-    "train_car_acc": ['j'],
-    "train_taxi_acc": ['j'],
-    "coach_car_acc": ['e'],
+    "pt_car_acc": ['j'],
+    "pt_taxi_acc": ['e', 'j'],
     "airpl_car_acc": ['l'],
-    "train_car_egr": ['j'],
-    "train_taxi_egr": ['j'],
-    "coach_car_egr": ['e'],
+    "pt_car_egr": ['j'],
+    "pt_taxi_egr": ['e', 'j'],
     "airpl_car_egr": ['l'],
 }
 aux_modes = [
@@ -649,6 +611,7 @@ transit_delay_attr = "us1"
 line_penalty_attr = "us2"
 line_operator_attr = "ut1"
 effective_headway_attr = "ut2"
+in_vehice_weight_attr = "ut3"
 ship_attrs = {
     "dist": "ut1",
     "frequency": "ut2",

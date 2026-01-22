@@ -223,21 +223,21 @@ class ModelSystem:
         class_list = ", ".join(long_dist_classes)
         log.info(f"Get matrices for {class_list}...")
         zone_numbers = self.ass_model.zone_numbers
-        car_matrices = {}
+        matrices_to_add = {}
         with long_dist_matrices.open(
                 "demand", "vrk", zone_numbers,
                 self._zone_datas["domestic"].mapping, long_dist_classes) as mtx:
             for ass_class in long_dist_classes:
                 demand = Demand(self.external_purpose, ass_class, mtx[ass_class])
                 self.dtm.add_demand(demand)
-                if ass_class in param.car_classes:
-                    car_matrices[ass_class] = demand.matrix
+                if ass_class in param.car_classes + param.local_transit_classes:
+                    matrices_to_add[ass_class] = demand.matrix
             log.info(f"Demand imported from {long_dist_matrices.path}")
-        if car_matrices:
+        if matrices_to_add:
             with self.resultmatrices.open(
                     "demand", "vrk", zone_numbers, m='w') as mtx:
-                for ass_class in car_matrices:
-                    mtx[ass_class] = car_matrices[ass_class]
+                for ass_class in matrices_to_add:
+                    mtx[ass_class] = matrices_to_add[ass_class]
 
     # possibly merge with init
     def assign_base_demand(self, 
@@ -367,9 +367,10 @@ class ModelSystem:
         self._add_internal_demand(previous_iter_impedance, iteration=="last")
         if (not self.ass_model.use_free_flow_speeds
                 and not isinstance(self.ass_model, MockAssignmentModel)):
-            car_matrices = (self.basematrices if self.long_dist_matrices is None
+            matrices = (self.basematrices if self.long_dist_matrices is None
                 else self.long_dist_matrices)
-            self._add_external_demand(car_matrices, param.car_classes)
+            self._add_external_demand(
+                matrices, param.car_classes + param.local_transit_classes)
 
         # Add vans and save demand matrices
         zd = self._zone_datas["domestic"]

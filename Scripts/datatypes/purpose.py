@@ -185,6 +185,18 @@ class Purpose:
                                                     cost.car_pax_occupancy[self.name])
                     except KeyError:
                         pass
+                airpl_access_modes = ["airpl_car_acc", "airpl_taxi_acc", "airpl_car_egr"]
+                transit_access_modes = ["pt_car_acc", "pt_taxi_acc", "pt_taxi_egr"]
+                if mtx_type == "time" and mode in airpl_access_modes:
+                    day_imp[mode][mtx_type] -= day_imp[mode]["car_time"] * 1.5
+                if mtx_type == "time" and mode in transit_access_modes:
+                    day_imp[mode][mtx_type] -= day_imp[mode]["car_time"] * 6.5
+            try:
+                vot = cost.vot[self.name][mode]
+                day_imp[mode]["gen_cost"] = day_imp[mode]["cost"] + (day_imp[mode]["time"]/60) * vot
+                log.info(f"Generalized cost calculated for {self.name} {mode}.")
+            except KeyError:
+                pass
         return day_imp
 
 def new_tour_purpose(*args):
@@ -282,8 +294,8 @@ class TourPurpose(Purpose):
                 self.demand_share[mode] = self.impedance_share[mode]
         self.modes = list(self.model.mode_choice_param)
         self.connection_models: Dict[str, logit.LogitModel] = {}
-        for mode in intermodals:
-            if mode in self.modes:
+        if "access_mode_choice" in specification:
+            for mode in intermodals:
                 self.modes += intermodals[mode]
                 new_spec = copy(specification)
                 new_spec["mode_choice"] = new_spec["access_mode_choice"][mode]
