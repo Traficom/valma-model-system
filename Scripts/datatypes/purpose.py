@@ -734,12 +734,6 @@ class FreightPurpose(Purpose):
                 Mode (truck/train/marine ships) : dict
                     Type (cost/frequency/draught) : mask indexed numpy 2d matrix
         """
-        costs = self.get_costs(impedance, origs, dests)
-        costs[marine_ships_name] = costs[marine_ships_name]["cost"]
-        for mode in costs[marine_ships_name]:
-            costs[marine_ships_name][mode].update(
-                {"frequency": impedance[marine_ships_name][mode]["frequency"]})
-        
         orig_zones = numpy.array(list(origs.values()), dtype=numpy.int32)
         dest_zones = numpy.array(list(dests.values()), dtype=numpy.int32)
         all_zones = self.generation_zone_data.all_zone_numbers
@@ -762,6 +756,8 @@ class FreightPurpose(Purpose):
             leg_one_masks = (cluster_zones, orig_borders)
             leg_three_masks = (dest_borders, fin_zones)
         leg_two_masks = (orig_borders, dest_borders)
+        
+        costs = self.get_costs(impedance, origs, dests)
         impedance_legs = {
             "leg_one": {mode: {"cost": costs[mode]["cost"][numpy.ix_(*leg_one_masks)]}
                         for mode in leg_one_modes},
@@ -770,8 +766,8 @@ class FreightPurpose(Purpose):
             "leg_three": {mode: {"cost": costs[mode]["cost"][numpy.ix_(*leg_three_masks)]}
                           for mode in leg_three_modes}
         }
-        impedance_legs["leg_two"].update({mode: costs[marine_ships_name][mode]
-                                          for mode in costs[marine_ships_name]})
+        impedance_legs["leg_two"].update({mode: costs[marine_ships_name]["cost"][mode]
+                                          for mode in costs[marine_ships_name]["cost"]})
         return impedance_legs
 
     def get_costs(self, impedance: dict, origs: dict = None, dests: dict = None):
