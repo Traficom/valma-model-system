@@ -33,7 +33,7 @@ class WholeDayPeriod(AssignmentPeriod):
         ----------
         dist_unit_cost : dict
             key : str
-                Assignment class (car_work/truck/...)
+                Assignment class (car/truck/...)
             value : float
                 Length multiplier to calculate link cost
         day_scenario : int
@@ -50,7 +50,7 @@ class WholeDayPeriod(AssignmentPeriod):
             transit_classes=(param.long_dist_simple_classes
                              + param.local_transit_classes),
             mixed_classes=param.mixed_mode_classes,
-            dist_unit_cost=dist_unit_cost["car_work"])
+            dist_unit_cost=dist_unit_cost["car"])
 
     def init_assign(self):
         log.info("Pedestrian assignment started...")
@@ -82,7 +82,7 @@ class WholeDayPeriod(AssignmentPeriod):
         -------
         dict
             Type (time/cost/dist) : dict
-                Assignment class (car_work/transit/...) : numpy 2-d matrix
+                Assignment class (car/transit/...) : numpy 2-d matrix
         """
         self._assign_cars(self.stopping_criteria["coarse"])
         self._assign_transit(param.transit_classes)
@@ -109,7 +109,7 @@ class WholeDayPeriod(AssignmentPeriod):
         -------
         dict
             Type (time/cost/dist) : dict
-                Assignment class (car_work/transit/...) : numpy 2-d matrix
+                Assignment class (car/transit/...) : numpy 2-d matrix
         """
         self._assign_cars(self.stopping_criteria["fine"])
         if assign_transit:

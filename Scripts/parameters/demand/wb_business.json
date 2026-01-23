@@ -13,7 +13,7 @@
         "hb_work": 0.0454
     },
     "impedance_share": {
-        "car_work": {
+        "car_drv": {
             "aht": [
                 0.2841,
                 0.0415
@@ -41,7 +41,7 @@
                 0.1982
             ]
         },
-        "transit_work": {
+        "transit": {
             "aht": [
                 0.2841,
                 0.0415
@@ -73,7 +73,7 @@
         }
     },
     "distance_boundaries": {
-        "car_work": [
+        "car_drv": [
             0,
             300
         ],
@@ -81,7 +81,7 @@
             0,
             300
         ],
-        "transit_work": [
+        "transit": [
             0,
             300
         ],
@@ -95,7 +95,7 @@
         ]
     },
     "destination_choice": {
-        "car_work": {
+        "car_drv": {
             "attraction": {
                 "time*within_zone": -0.05321
             },
@@ -123,7 +123,7 @@
                 "workplaces": 1
             }
         },
-        "transit_work": {
+        "transit": {
             "attraction": {
                 "within_zone_inf": -1
             },
@@ -167,7 +167,7 @@
         }
     },
     "mode_choice": {
-        "car_work": {
+        "car_drv": {
             "constant": -2.441,
             "generation": {},
             "attraction": {},
@@ -176,7 +176,7 @@
                 "logsum": 1
             },
             "individual_dummy": {
-                "wb_business_parent_car_work_share": 2.457
+                "wb_business_parent_car_drv_share": 2.457
             }
         },
         "car_pax": {
@@ -189,7 +189,7 @@
             },
             "individual_dummy": {}
         },
-        "transit_work": {
+        "transit": {
             "constant": -2.719,
             "generation": {},
             "attraction": {},
@@ -222,16 +222,16 @@
             "individual_dummy": {}
         },
         "scaling": {
-            "car_work": {
+            "car_drv": {
                 "constant": 1,
                 "individual_dummy": {
-                    "wb_business_parent_car_work_share": 1
+                    "wb_business_parent_car_drv_share": 1
                 }
             },
             "car_pax": {
                 "constant": 1
             },
-            "transit_work": {
+            "transit": {
                 "constant": 1
             },
             "bike": {

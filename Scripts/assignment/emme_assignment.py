@@ -94,7 +94,7 @@ class EmmeAssignmentModel(AssignmentModel):
         ----------
         dist_unit_cost : dict
             key : str
-                Assignment class (car_work/truck/...)
+                Assignment class (car/truck/...)
             value : float
                 Car cost per km in euros
         car_time_files : list (optional)
@@ -163,7 +163,7 @@ class EmmeAssignmentModel(AssignmentModel):
         ----------
         dist_unit_cost : dict
             key : str
-                Assignment class (car_work/truck/...)
+                Assignment class (car/truck/...)
             value : float
                 Car cost per km in euros
         commodity_classes : list of str
@@ -580,8 +580,7 @@ class EmmeAssignmentModel(AssignmentModel):
         for link in network.links():
             # Aggregate traffic
             light_modes = (
-                self._extra("car_work"),
-                self._extra("car_leisure"),
+                self._extra("car"),
                 self._extra("van"),
             )
             traffic = sum([link[mode] for mode in light_modes])

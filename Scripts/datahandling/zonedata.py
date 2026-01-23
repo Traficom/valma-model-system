@@ -28,7 +28,7 @@ class ZoneData:
             and assignment zones
     municipality_calibration : dict
         key : str
-            Transport mode (car_work/bike/...)
+            Transport mode (car/bike/...)
         value : pandas.Series
             Municipality-pair calibration factors
     extra_dummies : dict

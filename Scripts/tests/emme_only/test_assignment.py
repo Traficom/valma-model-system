@@ -82,8 +82,7 @@ class EmmeAssignmentTest:
             emme_context, scenario_num, "koko_suomi",
             use_free_flow_speeds=True, time_periods={"vrk": "WholeDayPeriod"})
         self.dist_cost = {
-            "car_work": 0.12,
-            "car_leisure": 0.12,
+            "car": 0.12,
             "trailer_truck": 0.5,
             "semi_trailer": 0.4,
             "truck": 0.3,
@@ -96,10 +95,8 @@ class EmmeAssignmentTest:
         nr_zones = self.ass_model.nr_zones
         car_matrix = numpy.full((nr_zones, nr_zones), 10.0)
         demand = {
-            "car_work": car_matrix,
-            "car_leisure": car_matrix,
-            "transit_work": car_matrix,
-            "transit_leisure": car_matrix,
+            "car": car_matrix,
+            "transit": car_matrix,
             "bike": car_matrix,
             "trailer_truck": car_matrix,
             "semi_trailer": car_matrix,
@@ -146,10 +143,8 @@ class EmmeAssignmentTest:
         nr_zones = self.ass_model.nr_zones
         car_matrix = numpy.full((nr_zones, nr_zones), 10.0)
         ass_classes = [
-            "car_work",
-            "car_leisure",
-            "transit_work",
-            "transit_leisure",
+            "car",
+            "transit",
             "airplane",
             "pt_car_acc",
             "pt_taxi_acc",

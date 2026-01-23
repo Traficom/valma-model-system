@@ -275,17 +275,10 @@ volume_factors = {
         "it": 0.3,
         "vrk": 1.0,
     },
-    "car_work": {
+    "car_drv": {
         "aht": 0.436,
         "pt": 0.100,
         "iht": 0.481,
-        "it": 0.3,
-        "vrk": 1.0,
-    },
-    "car_leisure": {
-        "aht": 0.449,
-        "pt": 0.098,
-        "iht": 0.310,
         "it": 0.3,
         "vrk": 1.0,
     },
@@ -294,20 +287,6 @@ volume_factors = {
         "pt": 0.167,
         "iht": 0.414,
         "it": 0.238,
-        "vrk": 1.0,
-    },
-    "transit_work": {
-        "aht": 0.521,
-        "pt": 0.167,
-        "iht": 0.444,
-        "it": 0.222,
-        "vrk": 1.0,
-    },
-    "transit_leisure": {
-        "aht": 0.417,
-        "pt": 0.167,
-        "iht": 0.345,
-        "it": 0.248,
         "vrk": 1.0,
     },
     "airplane": {
@@ -324,17 +303,10 @@ volume_factors = {
         "it": 0.3,
         "vrk": 1.0,
     },
-    "bike_work": {
+    "bike": {
         "aht": 0.556,
         "pt": 0.134,
         "iht": 0.414,
-        "it": 0.3,
-        "vrk": 1.0,
-    },
-    "bike_leisure": {
-        "aht": 0.423,
-        "pt": 0.096,
-        "iht": 0.322,
         "it": 0.3,
         "vrk": 1.0,
     },
@@ -436,8 +408,7 @@ time_periods = {
     "it": "TransitAssignmentPeriod",
 }
 car_classes = (
-    "car_work",
-    "car_leisure",
+    "car",
 )
 car_and_van_classes = car_classes + ("van",)
 private_classes = car_and_van_classes + ("bike",)
@@ -458,8 +429,7 @@ long_dist_simple_classes = (
 long_distance_transit_classes = (mixed_mode_classes
                                  + long_dist_simple_classes)
 local_transit_classes = (
-    "transit_work",
-    "transit_leisure",
+    "transit",
 )
 simple_transit_classes = local_transit_classes + long_dist_simple_classes
 transit_classes = simple_transit_classes + mixed_mode_classes
@@ -473,7 +443,7 @@ simple_transport_classes = (private_classes
                             + truck_classes)
 transport_classes = simple_transport_classes + mixed_mode_classes
 intermodals = {
-    "transit_leisure": ["pt_car_acc", "pt_taxi_acc", "pt_taxi_egr"],
+    "transit": ["pt_car_acc", "pt_taxi_acc", "pt_taxi_egr"],
     "airplane": ["airpl_car_acc", "airpl_car_egr"],
 }
 assignment_classes = {
@@ -496,22 +466,19 @@ assignment_classes = {
 main_mode = 'h'
 bike_mode = 'f'
 assignment_modes = {
-    "car_work": 'c',
-    "car_leisure": 'c',
+    "car": 'c',
     "trailer_truck": 'y',
     "semi_trailer": 'y',
     "truck": 'k',
     "van": 'v',
 }
 vot_classes = {
-    "car_work": "work",
-    "car_leisure": "leisure",
+    "car": "work",
     "trailer_truck": "trailer_truck",
     "semi_trailer": "semi_trailer",
     "truck": "truck",
     "van": "business",
-    "transit_work": "work",
-    "transit_leisure": "leisure",
+    "transit": "work",
     "airplane": "work",
     "pt_car_acc": "work",
     "pt_taxi_acc": "work",
@@ -531,8 +498,7 @@ local_transit_modes = [
     'e',
 ]
 long_dist_transit_modes = {
-    "transit_work": ['e', 'j'],
-    "transit_leisure": ['e', 'j'],
+    "transit": ['e', 'j'],
     "airplane": ['l'],
     "pt_car_acc": ['j'],
     "pt_taxi_acc": ['e', 'j'],
@@ -576,8 +542,8 @@ freight_marine_modes = {
     }
 }
 external_modes = [
-    "car_leisure",
-    "transit_leisure",
+    "car_drv",
+    "transit",
     "truck",
     "trailer_truck",
 ]

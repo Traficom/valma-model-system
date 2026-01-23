@@ -23,7 +23,7 @@
         }
     },
     "impedance_share": {
-        "car_leisure": {
+        "car_drv": {
             "aht": [
                 0.111,
                 0.038
@@ -51,7 +51,7 @@
                 0.2423
             ]
         },
-        "transit_leisure": {
+        "transit": {
             "aht": [
                 0.111,
                 0.038
@@ -83,7 +83,7 @@
         }
     },
     "distance_boundaries": {
-        "car_leisure": [
+        "car_drv": [
             0,
             100
         ],
@@ -91,7 +91,7 @@
             0,
             100
         ],
-        "transit_leisure": [
+        "transit": [
             0,
             100
         ],
@@ -105,7 +105,7 @@
         ]
     },
     "destination_choice": {
-        "car_leisure": {
+        "car_drv": {
             "attraction": {
                 "time*within_zone": -0.05761,
                 "cost*within_zone": -0.03917
@@ -157,7 +157,7 @@
                 }
             }
         },
-        "transit_leisure": {
+        "transit": {
             "attraction": {
                 "within_zone_inf": -1
             },
@@ -206,7 +206,7 @@
         }
     },
     "mode_choice": {
-        "car_leisure": {
+        "car_drv": {
             "constant": -6.606,
             "generation": {},
             "attraction": {},
@@ -233,7 +233,7 @@
                 "sh_cars2_hh2": 3.126
             }
         },
-        "transit_leisure": {
+        "transit": {
             "constant": -2.093,
             "generation": {},
             "attraction": {},
@@ -264,7 +264,7 @@
             "individual_dummy": {}
         },
         "scaling": {
-            "car_leisure": {
+            "car_drv": {
                 "constant": 0.5387,
                 "individual_dummy": {
                     "sh_cars1_hh1": 0.5387,
@@ -279,7 +279,7 @@
                     "sh_cars2_hh2": 0.5387
                 }
             },
-            "transit_leisure": {
+            "transit": {
                 "constant": 0.5387
             },
             "bike": {
