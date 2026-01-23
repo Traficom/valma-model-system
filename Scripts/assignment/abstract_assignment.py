@@ -34,10 +34,6 @@ class AssignmentModel:
         pass
 
     @abstractmethod
-    def calc_noise(self):
-        pass
-
-    @abstractmethod
     def prepare_network(self, car_dist_unit_cost=None, *args):
         pass
 
