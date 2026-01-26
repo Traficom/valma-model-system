@@ -226,9 +226,12 @@ class ModelSystem:
                 self._zone_datas["domestic"].mapping, long_dist_classes) as mtx:
             for ass_class in long_dist_classes:
                 demand = Demand(self.external_purpose, ass_class, mtx[ass_class])
-                self.dtm.add_demand(demand)
-                if ass_class in param.car_classes + param.local_transit_classes:
-                    matrices_to_add[ass_class] = demand.matrix
+                try:
+                    self.dtm.add_demand(demand)
+                    if ass_class in param.car_classes + param.local_transit_classes:
+                        matrices_to_add[ass_class] = demand.matrix
+                except KeyError:
+                    log.warn(f"Demand empty for {ass_class}.")
             log.info(f"Demand imported from {long_dist_matrices.path}")
         if matrices_to_add:
             with self.resultmatrices.open(
@@ -422,7 +425,7 @@ class ModelSystem:
         zone_numbers = self.ass_model.zone_numbers
         tp = ap.name
         demand_sum_string = tp
-        transport_classes = (param.car_classes + param.long_dist_simple_classes
+        transport_classes = (param.car_classes + param.simple_transit_classes
             if self.ass_model.use_free_flow_speeds
             else ap.assignment_modes)
         with self.resultmatrices.open("demand", tp, zone_numbers, m='w') as mtx:
