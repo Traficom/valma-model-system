@@ -3,7 +3,7 @@ import numpy
 from pathlib import Path
 
 import utils.log as log
-from travel_iteration import ModelSystem, AgentModelSystem
+from travel_iteration import ModelSystem
 from assignment.mock_assignment import MockAssignmentModel
 from datahandling.matrixdata import MatrixData
 from datatypes.demand import Demand

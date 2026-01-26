@@ -72,7 +72,6 @@ class EmmeAssignmentTest(unittest.TestCase):
                         imp[mtx_type][ass_class].dtype, numpy.float32)
             ap.end_assign()
         ass_model.aggregate_results(self.resultdata, self.mapping)
-        ass_model.calc_noise(self.mapping)
         self.resultdata.flush()
 
     def test_long_dist_assignment(self):

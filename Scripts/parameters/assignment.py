@@ -388,17 +388,6 @@ effective_headway_ld = {
     (0, 60): lambda x: 0.5*x,
     (60, float("inf")): lambda x: 30 + 0.3*x,
 }
-# Noise zone width as function of start noise
-noise_zone_width = {
-    (0, 55): lambda x: 5,
-    (55, 65): lambda x: 10 + 31./10*x,
-    (65, 68): lambda x: 41 + 16./3*x,
-    (68, 71): lambda x: 57 + 21./3*x,
-    (71, 74): lambda x: 78 + 31./3*x,
-    (74, 77): lambda x: 109 + 44./3*x,
-    (77, 80): lambda x: 153 + 66./3*x,
-    (80, float("inf")): lambda x: 225,
-}
 
 ### ASSIGNMENT REFERENCES ###
 time_periods = {

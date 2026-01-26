@@ -1,24 +1,4 @@
-# Share of demand that will be simulated in agent model
 from typing import Any, Dict, List, Tuple, Union
-
-# O-D pairs with demand below threshold are neglected in sec dest calculation
-secondary_destination_threshold = 0.1
-
-agent_demand_fraction = 1.0
-
-# Seed number for population attributes:
-# int = fixed seed and same population for each run
-# None = different population for each run
-population_draw = 31
-
-# Age groups in zone data
-age_groups: List[Tuple[int, int]] = [ #changed to list for type checker
-        (7, 17),
-        (18, 29),
-        (30, 49),
-        (50, 64),
-        (65, 99),
-]
 
 ### DEMAND MODEL REFERENCES ###
 
@@ -33,16 +13,6 @@ purpose_areas: Dict[str, Tuple[int,int]] = {
 }
 tour_length_intervals = (0, 3, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100,
                          200, 300, 400, 500, 600, 700, 800, float("inf"))
-# Population in noise zones as share of total area population as
-# function only of zone area, calculated by Ramboll Feb 2021
-pop_share_per_noise_area = {
-    "helsinki_cbd": 0.028816313,
-    "helsinki_other": 0.005536503,
-    "espoo_vant_kau": 0.002148004,
-    "surround_train": 0.0019966,
-    "surround_other": 0.001407824,
-    "peripheral": 0,  # Not calculated
-}
 
 # Finnish ports and road border control points
 finland_border_points = {
