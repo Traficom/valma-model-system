@@ -422,7 +422,7 @@ class ModelSystem:
         zone_numbers = self.ass_model.zone_numbers
         tp = ap.name
         demand_sum_string = tp
-        transport_classes = (param.car_classes + param.long_dist_simple_classes
+        transport_classes = (param.car_classes + param.simple_transit_classes
             if self.ass_model.use_free_flow_speeds
             else ap.assignment_modes)
         with self.resultmatrices.open("demand", tp, zone_numbers, m='w') as mtx:
