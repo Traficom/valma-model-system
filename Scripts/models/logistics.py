@@ -10,7 +10,6 @@ class FreightDetourInference:
                  lc_indices: np.ndarray) -> None:
         self.impedance = impedance
         self.lc_indices = lc_indices
-        self.demand = None
 
         # Estimation parameters
         self.constant = model_parameters["constant"]
@@ -90,7 +89,7 @@ class LogisticsModule(FreightDetourInference):
         probs_batch = np.concatenate([p_detour, p_direct], axis=1)
         return probs_batch
     
-    def process_batch(self, origin_offset: int, n: int, k_plus1: int,
+    def process_batch(self, origin_offset: int, n: int, k_plus1: int, demand: np.ndarray,
                       final_demand: np.ndarray, total_per_route: np.ndarray, lock: Lock):
         """Process a single batch of origins."""
         current_batch_size = min(self.batch_size, n - origin_offset)
@@ -107,8 +106,8 @@ class LogisticsModule(FreightDetourInference):
         probs_batch = probs_batch_flat.reshape(current_batch_size, n, k_plus1)
         
         # Get demand batch and expand dimensions
-        demand_batch = self.demand[origin_offset:origin_offset 
-                                   + current_batch_size, :, np.newaxis]
+        demand_batch = demand[origin_offset:origin_offset 
+                              + current_batch_size, :, np.newaxis]
         
         # Compute distribution using broadcasting
         dist_batch = demand_batch * probs_batch
@@ -130,36 +129,37 @@ class LogisticsModule(FreightDetourInference):
         
         return origin_offset, current_batch_size
 
-def run_logistics_model(model: LogisticsModule, iteration: int) -> Tuple[np.ndarray]:
-        """Domestic logistics model entry point
-        Process full matrix in origin batches to limit memory usage
-        Process full matrix in origin batches in parallel
-        """
-        n_zones = model.demand.shape[0]
-        k_plus1 = len(model.lc_indices) + 1
-        final_demand = np.zeros((n_zones, n_zones), dtype=np.float32)
-        total_per_route = np.zeros((k_plus1,), dtype=np.float32)
-        lock = Lock()
-        
-        # Create list of batch arguments including shared arrays
-        batch_args = [
-            (offset, n_zones, k_plus1, final_demand, total_per_route, lock)
-            for offset in range(0, n_zones, model.batch_size)
-        ]
-        
-        # Process batches in parallel
-        with ThreadPoolExecutor(max_workers=model.max_workers) as executor:
-            futures = [executor.submit(model.process_batch, *args) for args in batch_args]
-            _ = [future.result() for future in futures]
-        
-        # after processing all batches
-        detour_total = np.sum(total_per_route[:-1])
-        direct_total = total_per_route[-1]
-        log.info(
-            f"Logistics module results after iteration {iteration}:\n"
-            f"Total demand via logistics centers {detour_total:.4f}\n"
-            f"Total direct demand {direct_total:.4f}\n"
-            "Final demand matrix including detour legs and direct for\n"
-            f"orig_demand {np.sum(model.demand)}, final_demand {np.sum(final_demand)}"
-        )
-        return final_demand, total_per_route
+def run_logistics_model(model: LogisticsModule, demand: np.ndarray, 
+                        iteration: int) -> Tuple[np.ndarray]:
+    """Domestic logistics model entry point
+    Process full matrix in origin batches to limit memory usage
+    Process full matrix in origin batches in parallel
+    """
+    n_zones = demand.shape[0]
+    k_plus1 = len(model.lc_indices) + 1
+    final_demand = np.zeros((n_zones, n_zones), dtype=np.float32)
+    total_per_route = np.zeros((k_plus1,), dtype=np.float32)
+    lock = Lock()
+    
+    # Create list of batch arguments including shared arrays
+    batch_args = [
+        (offset, n_zones, k_plus1, demand, final_demand, total_per_route, lock)
+        for offset in range(0, n_zones, model.batch_size)
+    ]
+    
+    # Process batches in parallel
+    with ThreadPoolExecutor(max_workers=model.max_workers) as executor:
+        futures = [executor.submit(model.process_batch, *args) for args in batch_args]
+        _ = [future.result() for future in futures]
+    
+    # after processing all batches
+    detour_total = np.sum(total_per_route[:-1])
+    direct_total = total_per_route[-1]
+    log.info(
+        f"Logistics module results after iteration {iteration}:\n"
+        f"Total demand via logistics centers {detour_total:.4f}\n"
+        f"Total direct demand {direct_total:.4f}\n"
+        "Final demand matrix including detour legs and direct for\n"
+        f"orig_demand {np.sum(demand)}, final_demand {np.sum(final_demand)}"
+    )
+    return final_demand, total_per_route

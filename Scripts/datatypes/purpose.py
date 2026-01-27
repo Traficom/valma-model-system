@@ -851,6 +851,5 @@ class FreightPurpose(Purpose):
         cost = self.get_costs(impedance)
         model = LogisticsModule(cost, self.route_params, lc_indices, lc_sizes)
         for i in range(1, iterations + 1):
-            model.demand = demand_truck
-            demand_truck, per_route = run_logistics_model(model, i)
+            demand_truck, per_route = run_logistics_model(model, demand_truck, i)
         return demand_truck, per_route
