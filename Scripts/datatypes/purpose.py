@@ -21,7 +21,8 @@ from datatypes.demand import Demand
 from datatypes.histogram import TourLengthHistogram
 from utils.freight_costs import calc_cost
 from utils.calibrate import attempt_calibration
-from models.logistics import (LogisticsModule, run_logistics_model)
+from models.logistics import (LogisticsModule, TradeRouteModule,
+                              run_logistics_model, run_trade_model)
 
 
 class Purpose:
@@ -688,6 +689,7 @@ class FreightPurpose(Purpose):
         
         self.modes = list(specification["mode_choice"])
         self.route_params = specification.get("route_choice", None)
+        self.is_export = {"export": True, "import": False}.get(specification["struct"])
 
     def calc_traffic(self, impedance: dict):
         """Calculate freight traffic matrix.
@@ -711,8 +713,7 @@ class FreightPurpose(Purpose):
         demand = {mode: (probs.pop(mode) * generation).T for mode in self.modes}
         return demand
 
-    def form_impedance_legs(self, impedance: dict, origs: dict, dests: dict,
-                                 is_export: bool) -> dict:
+    def form_impedance_legs(self, impedance: dict, origs: dict, dests: dict) -> dict:
         """Forms impedance matrices for the three legs of foreign trade 
         route choice model. 
             
@@ -727,8 +728,6 @@ class FreightPurpose(Purpose):
         dests : dict
             Destination border id (FIHEL/SESTO...) : str
                 Centroid id : int
-        is_export : bool
-            Whether data should be fetched for export (True) or import (False)
 
         Returns
         -------
@@ -746,7 +745,7 @@ class FreightPurpose(Purpose):
                                self.orig_zone_numbers, orig_zones))
         cluster_zones = ~fin_zones & ~dest_borders
         
-        if is_export:
+        if self.is_export:
             leg_one_modes = ("truck", "freight_train")
             leg_three_modes = ("truck",)
             leg_two_modes = leg_one_modes
@@ -835,7 +834,7 @@ class FreightPurpose(Purpose):
         iterations : int
             Number of times logistics module is run
 
-        Returns:
+        Returns
         -------
         Tuple[np.ndarray]
             Routed truck demand, and totals for detoured and direct demand
@@ -853,3 +852,42 @@ class FreightPurpose(Purpose):
         for i in range(1, iterations + 1):
             demand_truck, per_route = run_logistics_model(model, demand_truck, i)
         return demand_truck, per_route
+
+    def run_trade_route_module(self, impedance_legs: dict, demand: numpy.ndarray,
+                               origs: dict, dests: dict):
+        """Entry point for running foreign trade route choice module. 
+        
+        Parameters
+        ----------
+        impedance_legs : dict
+            name of a leg (leg_one/...) : dict
+                Mode (truck/train/marine ships) : dict
+                    Type (cost/frequency/draught) : mask indexed numpy 2d matrix
+        demand : numpy.ndarray
+            trade related export or import demand
+        origs : dict
+            origin border id (FIHEL/SESTO...) : str
+                Centroid id : int
+        dests : dict
+            destination border id (FIHEL/SESTO...) : str
+                Centroid id : int
+        
+        Returns
+        -------
+        __type__
+            _description_
+        """
+        idx = ["finland_zone_number", "cluster_zone_number"]
+        for i, name in enumerate(idx):
+            indeces = numpy.array([demand.mapping(name).get(id, None) 
+                                for id in self.generation_zone_data.all_zone_numbers])
+            idx[i] = indeces[indeces != None].astype(numpy.int32)
+        demand = demand[numpy.ix_(idx[0], idx[1])]
+
+        fin_port_indices = origs if self.is_export else dests
+        port_names = dict(zip(fin_port_indices.keys(), range(len(fin_port_indices))))
+        port_indices = numpy.array(tuple(port_names.values()))
+
+        route_model = TradeRouteModule(impedance_legs, self.route_params, port_indices)
+        trade_demand = run_trade_model(route_model, demand)
+        return trade_demand

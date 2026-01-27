@@ -45,7 +45,7 @@ def create_purposes(parameters_path: Path, zonedata: FreightZoneData,
             log.warn(f"Aggregated commodity class '{commodity_conversion[commodity]}' "
                      f"for commodity '{commodity}' not found in costs json")
             continue
-        purposes[commodity] = FreightPurpose(commodity_params, 
+        purposes[file.stem] = FreightPurpose(commodity_params, 
                                              {parameters_path.stem: zonedata},
                                              resultdata, purpose_cost)
     return purposes

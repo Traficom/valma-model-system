@@ -4,6 +4,7 @@ from pathlib import Path
 import numpy
 import json
 from pandas import DataFrame
+import openmatrix as omx
 
 import utils.log as log
 import utils.config
@@ -52,15 +53,30 @@ def main(args):
     impedance = ass_model.freight_network.assign()
     impedance[param.marine_ships_name] = {}
     
-    # Run foreign trade route choice
-    # Export for now. Export/import logic will be introduced later
-    is_export = True
-    ship_imps, origs, dests = ass_model.freight_network.read_ship_impedances(is_export)
+    log.info("Read marine ship impedances from network")
+    marine_export = ass_model.freight_network.read_ship_impedances(True)
+    marine_import = ass_model.freight_network.read_ship_impedances(False)
     for purpose in purposes.values():
         log.info(f"Calculating route for foreign purpose: {purpose.name}")
+        if purpose.is_export:
+            ship_imps, origs, dests = marine_export[0], marine_export[1], marine_export[2]
+            omx_key = f"{purpose.name}_export"
+        else:
+            ship_imps, origs, dests = marine_import[0], marine_import[1], marine_import[2]
+            omx_key = f"{purpose.name}_import"
+        
+        # All matrices are stored in export format due to limitations
+        with omx.open_file(args.trade_demand_data_path) as mtx:
+            demand = numpy.array(mtx[omx_key])
+        if not purpose.is_export:
+            demand = demand.T
+        
         impedance[param.marine_ships_name] = ship_imps
-        impedance_legs = purpose.form_impedance_legs(impedance, origs, dests, is_export)
+        impedance_legs = purpose.form_impedance_legs(impedance, origs, dests)
+        trade_demand = purpose.run_trade_route_model(impedance_legs, demand, origs, dests)
     del impedance[param.marine_ships_name]
+    marine_export = None
+    marine_import = None
 
     # prepare domestic model by splicing impedances and initializing final demand matrix 
     for ass_class in list(impedance):
