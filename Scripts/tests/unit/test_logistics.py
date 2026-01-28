@@ -71,7 +71,7 @@ class LogisticsModelTest(unittest.TestCase):
         iterations = 1
         for purpose in purposes.values():
             demand = purpose.calc_traffic(impedance)
-            if hasattr(purpose, "logistics_module") and iterations > 0:
+            if purpose.route_params and iterations > 0:
                 demand_truck, per_route = purpose.run_logistics_module(demand["truck"],
                                                                        impedance, mapping, 
                                                                        iterations)
