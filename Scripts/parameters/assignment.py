@@ -243,8 +243,6 @@ trass_stop = {
 }
 # Specification for the transit assignment
 transfer_penalty = {
-    "transit_work": 3,
-    "transit_leisure": 5,
     "transit": 5,
     "airplane": 5,
     "pt_car_acc": 5,

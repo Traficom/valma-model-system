@@ -2,7 +2,7 @@
 
 cost_discount = {
     "hb_edu_student": {
-        "transit_work": 0.5
+        "transit": 0.5
     }
 }
 

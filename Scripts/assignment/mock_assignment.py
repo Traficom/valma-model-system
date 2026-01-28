@@ -263,7 +263,7 @@ class TransitAssignmentPeriod(OffPeakPeriod):
         -------
         dict
             Type (time/cost/dist) : dict
-                Assignment class (transit_work/transit_leisure) : numpy 2-d matrix
+                Assignment class (transit) : numpy 2-d matrix
         """
         mtxs = self._get_impedances(param.local_transit_classes)
         del mtxs["dist"]
