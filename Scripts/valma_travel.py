@@ -99,7 +99,7 @@ def main(args):
     # and providing demand calculations as Python modules)
     # Read input matrices (.omx) and zonedata (.csv)
     log.info("Initializing matrices and models...", extra=log_extra)
-    model_args = (zone_data_file, cost_data_file, base_zonedata_path,
+    model_args = (zone_data_file, cost_data_file,
                   base_matrices_path, result_data_folder, ass_model, args.submodel,
                   args.mode_dest_calibration_file,
                   args.municipality_calibration_file,
