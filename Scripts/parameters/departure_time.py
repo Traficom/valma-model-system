@@ -43,13 +43,7 @@ demand_share: Dict[str,Dict[str,Any]] = {
             "iht": (0.270, 0.0),
             "it": (0.203, 0.0),
         },
-        "transit_work": {
-            "aht": (0.200, 0.0),
-            "pt": (0.327, 0.0),
-            "iht": (0.270, 0.0),
-            "it": (0.203, 0.0),
-        },
-        "transit_leisure": {
+        "transit": {
             "aht": (0.200, 0.0),
             "pt": (0.327, 0.0),
             "iht": (0.270, 0.0),
