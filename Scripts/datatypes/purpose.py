@@ -690,6 +690,26 @@ class FreightPurpose(Purpose):
         self.modes = list(specification["mode_choice"])
         self.route_params = specification.get("route_choice", None)
         self.is_export = {"export": True, "import": False}.get(specification["struct"])
+        self._check_variables(specification)
+
+    def _check_variables(self, specification):
+        msg = ""
+        if len(self.modes) == 0:
+            msg = "No modes in specification"
+
+        elif self.model_category == "domestic" and self.model is None:
+            msg = f"Invalid domestic model struct '{specification['struct']}'"
+        
+        elif self.model_category == "foreign" and self.is_export is None:
+            msg = f"Invalid foreign model struct '{specification['struct']}'"
+        
+        elif self.model_category == "foreign" and self.route_params is None:
+            msg = "Missing route choice in specification"
+
+        if len(msg) > 0:
+            msg += f" for purpose {self.name}"
+            log.error(msg)
+            raise ValueError(msg)
 
     def calc_traffic(self, impedance: dict):
         """Calculate freight traffic matrix.
