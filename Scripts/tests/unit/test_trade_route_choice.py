@@ -73,13 +73,13 @@ class TradeRouteChoiceTest(unittest.TestCase):
         impedance[marine_ships_name]["roro_vessel"]["dist"][0][0] = 126
         impedance[marine_ships_name]["roro_vessel"]["frequency"][0][0] = 162
 
-        for name, purpose in purposes.items():
+        for purpose in purposes.values():
             if purpose.is_export:
                 origs, dests = origs_exp, dests_exp
             else:
                 origs, dests = origs_imp, dests_imp
             split_impedances = purpose.form_impedance_legs(impedance, origs, dests)
-            self._assert_split_impedances(name, split_impedances, truck_name, 
+            self._assert_split_impedances(purpose.name, split_impedances, truck_name, 
                                           train_name, marine_modes)
 
     def _assert_split_impedances(self, name, split_impedances,
@@ -105,6 +105,3 @@ class TradeRouteChoiceTest(unittest.TestCase):
                 self.assertEqual(len(split_impedances[leg_one]), 1)
                 self.assertEqual(split_impedances[leg_one][truck_name]["cost"].shape, (2, 2))
                 self.assertEqual(split_impedances[leg_three][truck_name]["cost"].shape, (2, 30))
-
-a = TradeRouteChoiceTest()
-a.test_route_choice()

@@ -59,11 +59,9 @@ def main(args):
         log.info(f"Calculating route for foreign purpose: {purpose.name}")
         if purpose.is_export:
             ship_imps, origs, dests = marine_export[0], marine_export[1], marine_export[2]
-            mtx_key = f"{purpose.name}_export"
         else:
             ship_imps, origs, dests = marine_import[0], marine_import[1], marine_import[2]
-            mtx_key = f"{purpose.name}_import"
-        demand, trade_mappings = read_omx_item(Path(args.trade_demand_data_path), mtx_key)
+        demand, trade_mappings = read_omx_item(Path(args.trade_demand_data_path), purpose.name)
         impedance[param.marine_ships_name] = ship_imps
         impedance_legs = purpose.form_impedance_legs(impedance, origs, dests)
         demand = purpose.run_trade_route_module(impedance_legs, origs, dests,
