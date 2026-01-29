@@ -4,7 +4,6 @@ from pathlib import Path
 import numpy
 import json
 from pandas import DataFrame
-import openmatrix as omx
 
 import utils.log as log
 import utils.config
@@ -13,7 +12,7 @@ from datahandling.zonedata import FreightZoneData
 from datahandling.resultdata import ResultsData
 from assignment.emme_assignment import EmmeAssignmentModel
 from assignment.emme_bindings.emme_project import EmmeProject
-from datahandling.matrixdata import MatrixData
+from datahandling.matrixdata import MatrixData, read_omx_item
 from datatypes.purpose import FreightPurpose
 
 from utils.freight_utils import create_purposes, StoreDemand
@@ -60,23 +59,17 @@ def main(args):
         log.info(f"Calculating route for foreign purpose: {purpose.name}")
         if purpose.is_export:
             ship_imps, origs, dests = marine_export[0], marine_export[1], marine_export[2]
-            omx_key = f"{purpose.name}_export"
+            mtx_key = f"{purpose.name}_export"
         else:
             ship_imps, origs, dests = marine_import[0], marine_import[1], marine_import[2]
-            omx_key = f"{purpose.name}_import"
-        
-        # All matrices are stored in export format due to limitations
-        with omx.open_file(args.trade_demand_data_path) as mtx:
-            demand = numpy.array(mtx[omx_key])
-        if not purpose.is_export:
-            demand = demand.T
-        
+            mtx_key = f"{purpose.name}_import"
+        demand, trade_mappings = read_omx_item(Path(args.trade_demand_data_path), mtx_key)
         impedance[param.marine_ships_name] = ship_imps
         impedance_legs = purpose.form_impedance_legs(impedance, origs, dests)
-        trade_demand = purpose.run_trade_route_model(impedance_legs, demand, origs, dests)
+        demand = purpose.run_trade_route_module(impedance_legs, origs, dests,
+                                                demand, trade_mappings)
     del impedance[param.marine_ships_name]
-    marine_export = None
-    marine_import = None
+    impedance_legs, marine_export, marine_import = None, None, None
 
     # prepare domestic model by splicing impedances and initializing final demand matrix 
     for ass_class in list(impedance):

@@ -853,37 +853,51 @@ class FreightPurpose(Purpose):
             demand_truck, per_route = run_logistics_model(model, demand_truck, i)
         return demand_truck, per_route
 
-    def run_trade_route_module(self, impedance_legs: dict, demand: numpy.ndarray,
-                               origs: dict, dests: dict):
+    def run_trade_route_module(self, impedance_legs: dict, origs: dict, dests: dict,
+                               demand: numpy.ndarray, trade_mappings: dict):
         """Entry point for running foreign trade route choice module. 
         
         Parameters
         ----------
         impedance_legs : dict
-            name of a leg (leg_one/...) : dict
+            Name of a leg (leg_one/...) : dict
                 Mode (truck/train/marine ships) : dict
                     Type (cost/frequency/draught) : mask indexed numpy 2d matrix
-        demand : numpy.ndarray
-            trade related export or import demand
         origs : dict
             origin border id (FIHEL/SESTO...) : str
                 Centroid id : int
         dests : dict
             destination border id (FIHEL/SESTO...) : str
                 Centroid id : int
+        demand : numpy.ndarray
+            trade demand. All given demand matrices are stored in 
+            (finnish zones, cluster zones) shape format due to omx limitations
+        trade_mappings : dict
+            mapping name : dict
+                network zone id : index
         
         Returns
         -------
         __type__
             _description_
         """
-        idx = ["finland_zone_number", "cluster_zone_number"]
-        for i, name in enumerate(idx):
-            indeces = numpy.array([demand.mapping(name).get(id, None) 
-                                for id in self.generation_zone_data.all_zone_numbers])
-            idx[i] = indeces[indeces != None].astype(numpy.int32)
-        demand = demand[numpy.ix_(idx[0], idx[1])]
+        all_zones = self.generation_zone_data.all_zone_numbers
+        if sum(demand.shape) != len(all_zones):
+            # Prepare demand when running anything else besides koko suomi
+            row_mask, col_mask = None, None
+            for mapping in trade_mappings:
+                zones = numpy.array(list(trade_mappings[mapping]))
+                if mapping == "finland_zone_number":
+                    row_mask = numpy.isin(zones, all_zones)
+                elif mapping == "cluster_zone_number":
+                    col_mask = numpy.isin(zones, all_zones)
+                else:
+                    msg = f"Invalid mapping '{mapping}'"
+                    log.warn(msg)
+                    raise ValueError(msg)
+            demand = demand[row_mask][:, col_mask]
 
+        # Prepare port indeces
         fin_port_indices = origs if self.is_export else dests
         port_names = dict(zip(fin_port_indices.keys(), range(len(fin_port_indices))))
         port_indices = numpy.array(tuple(port_names.values()))
