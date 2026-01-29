@@ -761,9 +761,11 @@ class FreightPurpose(Purpose):
         all_zones = self.generation_zone_data.all_zone_numbers
         orig_borders = numpy.isin(all_zones, orig_zones)
         dest_borders = numpy.isin(all_zones, dest_zones)
-        fin_zones = numpy.isin(all_zones, numpy.union1d(
-                               self.orig_zone_numbers, orig_zones))
-        cluster_zones = ~fin_zones & ~dest_borders
+        fin_borders = orig_zones if self.is_export else dest_zones
+        fin_zones = numpy.isin(all_zones, numpy.union1d(self.orig_zone_numbers, 
+                                                        fin_borders))
+        cluster_zones = (~fin_zones & ~dest_borders if self.is_export 
+                         else ~fin_zones & ~orig_borders)
         
         if self.is_export:
             leg_one_modes = ("truck", "freight_train")

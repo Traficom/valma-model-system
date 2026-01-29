@@ -26,12 +26,13 @@ ZONE_NUMBERS = [202, 1344, 1755, 2037, 2129, 2224, 2333, 2413, 2519, 2621,
 class TradeRouteChoiceTest(unittest.TestCase):
     
     def test_route_choice(self): 
-        is_export = True
         truck_name = "truck"
         train_name = "freight_train"
         marine_modes = ("container_ship", "roro_vessel")
-        origs = {"FIHMN": 19401, "FIHNK": 4102}
-        dests = {"EETLL": 50107, "SESTO": 50127}
+        origs_exp = {"FIHMN": 19401, "FIHNK": 4102}
+        dests_exp = {"EETLL": 50107, "SESTO": 50127}
+        origs_imp = dests_exp.copy()
+        dests_imp = origs_exp.copy()
 
         zonedata = FreightZoneData(TEST_DATA_PATH / "freight_zonedata.gpkg", 
                                    numpy.array(ZONE_NUMBERS), "koko_suomi")
@@ -40,7 +41,7 @@ class TradeRouteChoiceTest(unittest.TestCase):
             costdata = json.load(file)
         purposes = create_purposes(PARAMETERS_PATH / "foreign", zonedata, 
                                    resultdata, costdata["freight"])
-        self.assertGreaterEqual(len(purposes), 1)
+        self.assertEqual(len(purposes), 2)
 
         with open(TEST_DATA_PATH / "costdata.json") as file:
             costdata = json.load(file)
@@ -61,7 +62,7 @@ class TradeRouteChoiceTest(unittest.TestCase):
                 "toll_cost": numpy.array(toll_impedance[train_name])
             },
             marine_ships_name: {
-                mode: {imp: numpy.full((len(origs), len(origs)), numpy.inf, dtype="float32")
+                mode: {imp: numpy.full((len(origs_exp), len(origs_exp)), numpy.inf, dtype="float32")
                                        for imp in ("dist", "frequency")}
                         for mode in marine_modes
             }
@@ -72,26 +73,38 @@ class TradeRouteChoiceTest(unittest.TestCase):
         impedance[marine_ships_name]["roro_vessel"]["dist"][0][0] = 126
         impedance[marine_ships_name]["roro_vessel"]["frequency"][0][0] = 162
 
-        for purpose in purposes.values():
-            split_impedances = purpose.form_impedance_legs(impedance, origs, dests, is_export)
-            self._assert_split_impedances(purpose, split_impedances, 
-                                          truck_name, train_name, marine_modes)
+        for name, purpose in purposes.items():
+            if purpose.is_export:
+                origs, dests = origs_exp, dests_exp
+            else:
+                origs, dests = origs_imp, dests_imp
+            split_impedances = purpose.form_impedance_legs(impedance, origs, dests)
+            self._assert_split_impedances(name, split_impedances, truck_name, 
+                                          train_name, marine_modes)
 
-
-    def _assert_split_impedances(self, purpose, split_impedances,
+    def _assert_split_impedances(self, name, split_impedances,
                                  truck_name, train_name, marine_modes):
-        if purpose.name == "kemlaa":
+        if name.split("_")[0] == "kemlaa":
             leg_one, leg_two, leg_three = "leg_one", "leg_two", "leg_three"
             self.assertEqual(len(split_impedances), 3)
             self.assertEqual([leg_one, leg_two, leg_three], 
                                 list(split_impedances))
-            self.assertEqual(len(split_impedances[leg_one]), 2)
             self.assertTrue(all(mode in split_impedances[leg_two] for mode in marine_modes) 
                             and all(mode not in split_impedances[leg_one] for mode in marine_modes)
                             and all(mode not in split_impedances[leg_three] for mode in marine_modes))
-            self.assertEqual(split_impedances[leg_one][truck_name]["cost"].shape, (30, 2))
-            self.assertEqual(split_impedances[leg_two][truck_name]["cost"].shape, (2, 2))
             self.assertEqual(["cost", "draught", "frequency"], 
-                            list(split_impedances[leg_two]["container_ship"]))
+                             list(split_impedances[leg_two]["container_ship"]))
             self.assertTrue(numpy.all(numpy.isinf(split_impedances[leg_two][train_name]["cost"])))
-            self.assertEqual(split_impedances[leg_three][truck_name]["cost"].shape, (2, 2))
+            self.assertEqual(split_impedances[leg_two][truck_name]["cost"].shape, (2, 2))
+            
+            if name == "kemlaa_export":
+                self.assertEqual(len(split_impedances[leg_one]), 2)
+                self.assertEqual(split_impedances[leg_one][truck_name]["cost"].shape, (30, 2))
+                self.assertEqual(split_impedances[leg_three][truck_name]["cost"].shape, (2, 2))
+            elif name == "kemlaa_import":
+                self.assertEqual(len(split_impedances[leg_one]), 1)
+                self.assertEqual(split_impedances[leg_one][truck_name]["cost"].shape, (2, 2))
+                self.assertEqual(split_impedances[leg_three][truck_name]["cost"].shape, (2, 30))
+
+a = TradeRouteChoiceTest()
+a.test_route_choice()
