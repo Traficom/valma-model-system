@@ -6,7 +6,7 @@ import numpy # type: ignore
 import pandas
 from datahandling.resultdata import ResultsData
 from datahandling.zonedata import ZoneData
-from datahandling.matrixdata import MatrixData
+from datahandling.matrixdata import MatrixData, read_omx_item
 import utils.log as log
 import parameters.zone as param
 import models.logit as logit
@@ -677,6 +677,7 @@ class FreightPurpose(Purpose):
         Purpose.__init__(self, specification, zone_data, resultdata)
         self.costdata = costdata
         self.model_category = list(zone_data)[0]
+        self.modes = list(specification["mode_choice"])
 
         if specification["struct"] == "dest>mode":
             self.model = logit.DestModeModel(self, specification, zone_data[self.model_category], 
@@ -686,28 +687,17 @@ class FreightPurpose(Purpose):
                                              resultdata)
         else:
             self.model = None
-        
-        self.modes = list(specification["mode_choice"])
         self.route_params = specification.get("route_choice", None)
         self.is_export = {"export": True, "import": False}.get(specification["struct"])
-        self._check_variables(specification)
-
-    def _check_variables(self, specification):
+        
         msg = ""
-        if len(self.modes) == 0:
-            msg = "No modes in specification"
-
-        elif self.model_category == "domestic" and self.model is None:
-            msg = f"Invalid domestic model struct '{specification['struct']}'"
-        
-        elif self.model_category == "foreign" and self.is_export is None:
-            msg = f"Invalid foreign model struct '{specification['struct']}'"
-        
-        elif self.model_category == "foreign" and self.route_params is None:
-            msg = "Missing route choice in specification"
-
+        if self.model is None and self.model_category == "domestic":
+            msg = f"Purpose {self.name} is missing route choice specification"
+        elif self.route_params is None and self.model_category == "foreign":
+            msg = f"Purpose {self.name} is missing route choice specification"
+        elif self.is_export is None and self.model_category == "foreign":
+            msg = f"Purpose {self.name} has invalid struct in specification"
         if len(msg) > 0:
-            msg += f" for purpose {self.name}"
             log.error(msg)
             raise ValueError(msg)
 
@@ -875,51 +865,38 @@ class FreightPurpose(Purpose):
             demand_truck, per_route = run_logistics_model(model, demand_truck, i)
         return demand_truck, per_route
 
-    def run_trade_route_module(self, impedance_legs: dict, origs: dict, dests: dict,
-                               demand: numpy.ndarray, trade_mappings: dict):
+    def run_trade_route_module(self, impedance: dict, origs: dict, dests: dict,
+                               trade_demand_path):
         """Entry point for running foreign trade route choice module. 
         
         Parameters
         ----------
-        impedance_legs : dict
-            Name of a leg (leg_one/...) : dict
-                Mode (truck/train/marine ships) : dict
-                    Type (cost/frequency/draught) : mask indexed numpy 2d matrix
+        impedance : dict
+            Mode (truck/train/...) : dict
+                Type (time/dist/toll_cost/canal_cost) : numpy 2d matrix
         origs : dict
             origin border id (FIHEL/SESTO...) : str
                 Centroid id : int
         dests : dict
             destination border id (FIHEL/SESTO...) : str
                 Centroid id : int
-        demand : numpy.ndarray
-            trade demand. All given demand matrices are stored in 
-            (finnish zones, cluster zones) shape format due to omx limitations
-        trade_mappings : dict
-            mapping name : dict
-                network zone id : index
-        
+        trade_demand_path : Path
+            argument path to trade demand omx-file
+
         Returns
         -------
         __type__
             _description_
         """
-        all_zones = self.generation_zone_data.all_zone_numbers
-        if sum(demand.shape) != len(all_zones):
-            # Prepare demand when running anything else besides koko suomi
-            row_mask, col_mask = None, None
-            for mapping in trade_mappings:
-                zones = numpy.array(list(trade_mappings[mapping]))
-                if mapping == "finland_zone_number":
-                    row_mask = numpy.isin(zones, all_zones)
-                elif mapping == "cluster_zone_number":
-                    col_mask = numpy.isin(zones, all_zones)
-                else:
-                    msg = f"Invalid mapping '{mapping}'"
-                    log.warn(msg)
-                    raise ValueError(msg)
-            demand = demand[row_mask][:, col_mask]
+        impedance_legs = self.form_impedance_legs(impedance, origs, dests)
+        demand, trade_mappings = read_omx_item(trade_demand_path, self.name)
 
-        # Prepare port indeces
+        mapping_name = (self.generation_zone_data.mapping.name if self.is_export 
+                        else self.attraction_zone_data.mapping.name)
+        if mapping_name == "municipality_center":
+            df = pandas.DataFrame(demand, trade_mappings["finland_zone_number"])
+            demand = df.groupby(self.generation_zone_data.mapping).sum().to_numpy()
+
         fin_port_indices = origs if self.is_export else dests
         port_names = dict(zip(fin_port_indices.keys(), range(len(fin_port_indices))))
         port_indices = numpy.array(tuple(port_names.values()))

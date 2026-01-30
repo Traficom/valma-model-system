@@ -12,7 +12,7 @@ from datahandling.zonedata import FreightZoneData
 from datahandling.resultdata import ResultsData
 from assignment.emme_assignment import EmmeAssignmentModel
 from assignment.emme_bindings.emme_project import EmmeProject
-from datahandling.matrixdata import MatrixData, read_omx_item
+from datahandling.matrixdata import MatrixData
 from datatypes.purpose import FreightPurpose
 
 from utils.freight_utils import create_purposes, StoreDemand
@@ -36,9 +36,9 @@ def main(args):
                                     submodel="freight",
                                     save_matrices=save_matrices,
                                     first_matrix_id=args.first_matrix_id)
-    zonedata = FreightZoneData(zonedata_path, ass_model.zone_numbers, "koko_suomi")
+    zonedata = FreightZoneData(zonedata_path, ass_model.zone_numbers, "municipality_center")
     resultdata = ResultsData(results_path)
-    resultmatrices = MatrixData(results_path / "Matrices" / "koko_suomi")
+    resultmatrices = MatrixData(results_path / "Matrices" / "municipality_center")
     costdata = json.loads(cost_data_path.read_text("utf-8"))
     
     # Set purposes and fetch impedances
@@ -61,13 +61,11 @@ def main(args):
             ship_imps, origs, dests = marine_export[0], marine_export[1], marine_export[2]
         else:
             ship_imps, origs, dests = marine_import[0], marine_import[1], marine_import[2]
-        demand, trade_mappings = read_omx_item(Path(args.trade_demand_data_path), purpose.name)
         impedance[param.marine_ships_name] = ship_imps
-        impedance_legs = purpose.form_impedance_legs(impedance, origs, dests)
-        demand = purpose.run_trade_route_module(impedance_legs, origs, dests,
-                                                demand, trade_mappings)
+        demand = purpose.run_trade_route_module(impedance, origs, dests,
+                                                Path(args.trade_demand_data_path))
     del impedance[param.marine_ships_name]
-    impedance_legs, marine_export, marine_import = None, None, None
+    marine_export, marine_import = None, None
 
     # prepare domestic model by splicing impedances and initializing final demand matrix 
     for ass_class in list(impedance):

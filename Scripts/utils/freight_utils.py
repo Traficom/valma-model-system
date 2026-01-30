@@ -45,9 +45,12 @@ def create_purposes(parameters_path: Path, zonedata: FreightZoneData,
             log.warn(f"Aggregated commodity class '{commodity_conversion[commodity]}' "
                      f"for commodity '{commodity}' not found in costs json")
             continue
+        zone_data = {parameters_path.stem: zonedata}
+        if parameters_path.stem == "foreign":
+            zone_data["domestic"] = zonedata
         purposes[commodity_params["name"]] = FreightPurpose(commodity_params, 
-                                                            {parameters_path.stem: zonedata},
-                                                            resultdata, purpose_cost)
+                                                            zone_data, resultdata,
+                                                            purpose_cost)
     return purposes
 
 class StoreDemand():

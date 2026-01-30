@@ -142,11 +142,11 @@ class MatrixFile:
 def read_omx_item(path: Path, key: str):
     with omx.open_file(path) as omx_file:
         try:
-            demand = numpy.array(omx_file[key])
+            matrix = numpy.array(omx_file[key])
         except NodeError:
             msg = f"Invalid omx key '{key}' in {path.name}"
             log.error(msg)
             raise NodeError(msg)
-        mappings = {name: omx_file.mapping(name)
+        mappings = {name: omx_file.map_entries(name)
                     for name in omx_file.list_mappings()}
-    return demand, mappings
+    return matrix, mappings

@@ -2,7 +2,7 @@
     "name": "kemlaa_export",
     "orig": "null",
     "dest": "null",
-    "generation_area": "foreign",
+    "generation_area": "domestic",
     "attraction_area": "foreign",
     "struct": "export",
     "impedance_share": {},
