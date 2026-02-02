@@ -689,19 +689,19 @@ class FreightPurpose(Purpose):
             self.model = None
         self.route_params = specification.get("route_choice", None)
         self.is_export = {"export": True, "import": False}.get(specification["struct"])
+
+        if (self.model is None and self.model_category == "domestic"
+            or self.is_export is None and self.model_category == "foreign"):
+            msg = f"Purpose {self.name} has invalid struct in specification"
+            log.error(msg)
+            raise ValueError(msg)
         
-        msg = ""
-        if self.model is None and self.model_category == "domestic":
-            msg = f"Purpose {self.name} is missing route choice specification"
         elif self.route_params is None and self.model_category == "foreign":
             msg = f"Purpose {self.name} is missing route choice specification"
-        elif self.is_export is None and self.model_category == "foreign":
-            msg = f"Purpose {self.name} has invalid struct in specification"
-        if len(msg) > 0:
             log.error(msg)
             raise ValueError(msg)
 
-    def calc_traffic(self, impedance: dict):
+    def calc_traffic(self, impedance: dict):                                                                                    
         """Calculate freight traffic matrix.
 
         Parameters

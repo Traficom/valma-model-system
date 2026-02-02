@@ -56,7 +56,7 @@ def main(args):
     marine_export = ass_model.freight_network.read_ship_impedances(True)
     marine_import = ass_model.freight_network.read_ship_impedances(False)
     for purpose in purposes.values():
-        log.info(f"Calculating route for foreign purpose: {purpose.name}")
+        log.info(f"Calculating trade routes for foreign purpose: {purpose.name}")
         if purpose.is_export:
             ship_imps, origs, dests = marine_export[0], marine_export[1], marine_export[2]
         else:
