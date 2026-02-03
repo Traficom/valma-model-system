@@ -745,30 +745,24 @@ class FreightPurpose(Purpose):
         fin_zones = numpy.isin(all_zones, numpy.union1d(
                                self.orig_zone_numbers, orig_zones))
         cluster_zones = ~fin_zones & ~dest_borders
-        
-        if is_export:
-            leg_one_modes = ("truck", "freight_train")
-            leg_three_modes = ("truck",)
-            leg_two_modes = leg_one_modes
-            leg_one_masks = (fin_zones, orig_borders)
-            leg_three_masks = (dest_borders, cluster_zones)
-        else:
-            leg_one_modes = ("truck",)
-            leg_three_modes = ("truck", "freight_train")
-            leg_two_modes = leg_three_modes
-            leg_one_masks = (cluster_zones, orig_borders)
-            leg_three_masks = (dest_borders, fin_zones)
-        leg_two_masks = (orig_borders, dest_borders)
-        
+
+        masks = (fin_zones, orig_borders, dest_borders, cluster_zones)
+        modes = (
+            ("truck", "freight_train"),
+            ("truck", "freight_train"),
+            ("truck",)
+        )
+        if not is_export:
+            masks = reversed(masks)
+            modes = reversed(modes)
+
         costs = self.get_costs(impedance, origs, dests)
-        impedance_legs = {
-            "leg_one": {mode: {"cost": costs[mode]["cost"][numpy.ix_(*leg_one_masks)]}
-                        for mode in leg_one_modes},
-            "leg_two": {mode: {"cost": costs[mode]["cost"][numpy.ix_(*leg_two_masks)]}
-                        for mode in leg_two_modes},
-            "leg_three": {mode: {"cost": costs[mode]["cost"][numpy.ix_(*leg_three_masks)]}
-                          for mode in leg_three_modes}
-        }
+        impedance_legs = {leg: {} for leg in ["leg_one", "leg_two", "leg_three"]}
+        for i, leg in enumerate(impedance_legs):
+            for mode in modes[i]:
+                for imp_type, mtx in costs[mode].items():
+                    impedance_legs[leg][mode] = {
+                        imp_type: mtx[numpy.ix_(masks[i], masks[i+1])]}
         impedance_legs["leg_two"].update({mode: costs[marine_ships_name]["cost"][mode]
                                           for mode in costs[marine_ships_name]["cost"]})
         return impedance_legs
