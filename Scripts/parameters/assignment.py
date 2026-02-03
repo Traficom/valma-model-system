@@ -147,6 +147,7 @@ performance_settings = {
 }
 # Inversed value of time [min/eur]
 vot_inv = {
+    "all": 8.721, # 1 / ((6.88 eur/h) / (60 min/h)) = 7.576 min/eur
     "work": 7.576, # 1 / ((7.92 eur/h) / (60 min/h)) = 7.576 min/eur
     "business": 2.439, # 1 / ((24.60 eur/h) / (60 min/h)) = 2.439 min/eur
     "leisure": 11.173, # 1 / ((5.37 eur/h) / (60 min/h)) = 11.173 min/eur
@@ -460,19 +461,19 @@ assignment_modes = {
     "van": 'v',
 }
 vot_classes = {
-    "car": "work",
+    "car": "all",
     "trailer_truck": "trailer_truck",
     "semi_trailer": "semi_trailer",
     "truck": "truck",
     "van": "business",
-    "transit": "work",
-    "airplane": "work",
-    "pt_car_acc": "work",
-    "pt_taxi_acc": "work",
-    "airpl_car_acc": "work",
-    "pt_car_egr": "work",
-    "pt_taxi_egr": "work",
-    "airpl_car_egr": "work",
+    "transit": "all",
+    "airplane": "all",
+    "pt_car_acc": "all",
+    "pt_taxi_acc": "all",
+    "airpl_car_acc": "all",
+    "pt_car_egr": "all",
+    "pt_taxi_egr": "all",
+    "airpl_car_egr": "all",
 }
 local_transit_modes = [
     'b',
