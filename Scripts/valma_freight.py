@@ -27,6 +27,7 @@ def main(args):
     results_path = Path(args.results_path, args.scenario_name)
     emme_project_path = Path(args.emme_path)
     parameters_path = Path(__file__).parent / "parameters" / "freight"
+    trade_demand_path = Path(args.trade_demand_data_path)
     save_matrices = True if args.specify_commodity_names else False
     ep = EmmeProject(emme_project_path)
     ep.try_open_db("koko_suomi")
@@ -50,17 +51,19 @@ def main(args):
     store_demand = StoreDemand(ass_model.freight_network, resultmatrices, 
                                zonedata.all_zone_numbers, zonedata.zone_numbers)
     impedance = ass_model.freight_network.assign()
-    impedance[param.marine_ships_name] = {}
     
-    # Run foreign trade route choice
-    # Export for now. Export/import logic will be introduced later
-    is_export = True
-    ship_imps, origs, dests = ass_model.freight_network.read_ship_impedances(is_export)
+    log.info("Read marine ship impedances from network")
+    marine_export = ass_model.freight_network.read_ship_impedances(True)
+    marine_import = ass_model.freight_network.read_ship_impedances(False)
     for purpose in purposes.values():
-        log.info(f"Calculating route for foreign purpose: {purpose.name}")
-        impedance[param.marine_ships_name] = ship_imps
-        impedance_legs = purpose.form_impedance_legs(impedance, origs, dests, is_export)
-    del impedance[param.marine_ships_name]
+        log.info(f"Calculating trade routes for foreign purpose: {purpose.name}")
+        if purpose.is_export:
+            demand = purpose.run_trade_route_module(impedance, *marine_export,
+                                                    trade_demand_path)
+        else:
+            demand = purpose.run_trade_route_module(impedance, *marine_import,
+                                                    trade_demand_path)
+    marine_export, marine_import = None, None
 
     # prepare domestic model by splicing impedances and initializing final demand matrix 
     for ass_class in list(impedance):
