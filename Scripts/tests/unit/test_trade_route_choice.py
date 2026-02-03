@@ -9,7 +9,6 @@ import openmatrix as omx
 from datahandling.resultdata import ResultsData
 from datahandling.zonedata import FreightZoneData
 from utils.freight_utils import create_purposes
-from parameters.assignment import marine_ships_name
 
 
 TEST_PATH = Path(__file__).parent.parent / "test_data"
@@ -60,30 +59,32 @@ class TradeRouteChoiceTest(unittest.TestCase):
                 "aux_time": numpy.array(time_impedance[f"{train_name}_aux"]),
                 "aux_dist": numpy.array(dist_impedance[f"{train_name}_aux"]),
                 "toll_cost": numpy.array(toll_impedance[train_name])
-            },
-            marine_ships_name: {
-                mode: {imp: numpy.full((len(origs_exp), len(origs_exp)), numpy.inf, dtype="float32")
-                                       for imp in ("dist", "frequency")}
-                        for mode in marine_modes
             }
         }
 
-        impedance[marine_ships_name]["container_ship"]["dist"][1][1] = 532
-        impedance[marine_ships_name]["container_ship"]["frequency"][1][1] = 38
-        impedance[marine_ships_name]["roro_vessel"]["dist"][0][0] = 126
-        impedance[marine_ships_name]["roro_vessel"]["frequency"][0][0] = 162
+        ship_imps = {
+            mode: {
+                imp: numpy.full((len(origs_exp), len(origs_exp)), numpy.inf, dtype="float32")
+                for imp in ("dist", "frequency")}
+            for mode in marine_modes
+        }
+        ship_imps["container_ship"]["dist"][1][1] = 532
+        ship_imps["container_ship"]["frequency"][1][1] = 38
+        ship_imps["roro_vessel"]["dist"][0][0] = 126
+        ship_imps["roro_vessel"]["frequency"][0][0] = 162
 
+        marine_export = (ship_imps, origs_exp, dests_exp)
+        marine_import = (ship_imps, origs_imp, dests_imp)
         for purpose in purposes.values():
             if purpose.is_export:
-                origs, dests = origs_exp, dests_exp
+                split_impedances = purpose.form_impedance_legs(impedance, *marine_export)
             else:
-                origs, dests = origs_imp, dests_imp
-            split_impedances = purpose.form_impedance_legs(impedance, origs, dests)
+                split_impedances = purpose.form_impedance_legs(impedance, *marine_import)
             self._assert_split_impedances(purpose.name, split_impedances, truck_name, 
                                           train_name, marine_modes)
 
-    def _assert_split_impedances(self, name, split_impedances,
-                                 truck_name, train_name, marine_modes):
+    def _assert_split_impedances(self, name, split_impedances, truck_name, 
+                                 train_name, marine_modes):
         if name.split("_")[0] == "kemlaa":
             leg_one, leg_two, leg_three = "leg_one", "leg_two", "leg_three"
             self.assertEqual(len(split_impedances), 3)

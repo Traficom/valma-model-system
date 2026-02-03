@@ -13,13 +13,12 @@ import models.logit as logit
 from parameters.assignment import (
     assignment_classes,
     intermodals,
-    mixed_mode_classes,
-    marine_ships_name)
+    mixed_mode_classes)
 import parameters.cost as cost
 import models.generation as generation
 from datatypes.demand import Demand
 from datatypes.histogram import TourLengthHistogram
-from utils.freight_costs import calc_cost
+from utils.freight_costs import calc_cost, get_foreign_ship_cost
 from utils.calibrate import attempt_calibration
 from models.logistics import (LogisticsModule, TradeRouteModule,
                               run_logistics_model, run_trade_model)
@@ -723,7 +722,8 @@ class FreightPurpose(Purpose):
         demand = {mode: (probs.pop(mode) * generation).T for mode in self.modes}
         return demand
 
-    def form_impedance_legs(self, impedance: dict, origs: dict, dests: dict) -> dict:
+    def form_impedance_legs(self, impedance: dict, ship_imps: dict, 
+                            origs: dict, dests: dict) -> dict:
         """Forms impedance matrices for the three legs of foreign trade 
         route choice model. 
             
@@ -732,6 +732,9 @@ class FreightPurpose(Purpose):
         impedance : dict
             Mode (truck/train/...) : dict
                 Type (time/dist/toll_cost/canal_cost) : numpy 2d matrix
+        ship_imps : dict
+            Mode (container_ship/general_cargo...) : attribute
+                Type (dist/frequency) : numpy.ndarray
         origs : dict
             Origin border id (FIHEL/SESTO...) : str
                 Centroid id : int
@@ -780,8 +783,9 @@ class FreightPurpose(Purpose):
             "leg_three": {mode: {"cost": costs[mode]["cost"][numpy.ix_(*leg_three_masks)]}
                           for mode in leg_three_modes}
         }
-        impedance_legs["leg_two"].update({mode: costs[marine_ships_name]["cost"][mode]
-                                          for mode in costs[marine_ships_name]["cost"]})
+        ship_costs = get_foreign_ship_cost(self.costdata, ship_imps, self.model_category, 
+                                           origs, dests)
+        impedance_legs["leg_two"].update({mode: ship_costs[mode] for mode in ship_costs})
         return impedance_legs
 
     def get_costs(self, impedance: dict, origs: dict = None, dests: dict = None):
@@ -865,8 +869,8 @@ class FreightPurpose(Purpose):
             demand_truck, per_route = run_logistics_model(model, demand_truck, i)
         return demand_truck, per_route
 
-    def run_trade_route_module(self, impedance: dict, origs: dict, dests: dict,
-                               trade_demand_path):
+    def run_trade_route_module(self, impedance: dict, ship_imps: dict,
+                               origs: dict, dests: dict, trade_demand_path):
         """Entry point for running foreign trade route choice module. 
         
         Parameters
@@ -874,6 +878,9 @@ class FreightPurpose(Purpose):
         impedance : dict
             Mode (truck/train/...) : dict
                 Type (time/dist/toll_cost/canal_cost) : numpy 2d matrix
+        ship_imps : dict
+            Mode (container_ship/general_cargo...) : attribute
+                Type (dist/frequency) : numpy.ndarray
         origs : dict
             origin border id (FIHEL/SESTO...) : str
                 Centroid id : int
@@ -888,7 +895,7 @@ class FreightPurpose(Purpose):
         __type__
             _description_
         """
-        impedance_legs = self.form_impedance_legs(impedance, origs, dests)
+        impedance_legs = self.form_impedance_legs(impedance, ship_imps, origs, dests)
         demand, trade_mappings = read_omx_item(trade_demand_path, self.name)
 
         mapping_name = (self.generation_zone_data.mapping.name if self.is_export 
@@ -898,8 +905,7 @@ class FreightPurpose(Purpose):
             demand = df.groupby(self.generation_zone_data.mapping).sum().to_numpy()
 
         fin_port_indices = origs if self.is_export else dests
-        port_names = dict(zip(fin_port_indices.keys(), range(len(fin_port_indices))))
-        port_indices = numpy.array(tuple(port_names.values()))
+        port_indices = numpy.arange(len(fin_port_indices))
 
         route_model = TradeRouteModule(impedance_legs, self.route_params, port_indices)
         trade_demand = run_trade_model(route_model, demand)

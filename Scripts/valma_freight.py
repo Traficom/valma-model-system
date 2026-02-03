@@ -27,6 +27,7 @@ def main(args):
     results_path = Path(args.results_path, args.scenario_name)
     emme_project_path = Path(args.emme_path)
     parameters_path = Path(__file__).parent / "parameters" / "freight"
+    trade_demand_path = Path(args.trade_demand_data_path)
     save_matrices = True if args.specify_commodity_names else False
     ep = EmmeProject(emme_project_path)
     ep.try_open_db("koko_suomi")
@@ -36,9 +37,9 @@ def main(args):
                                     submodel="freight",
                                     save_matrices=save_matrices,
                                     first_matrix_id=args.first_matrix_id)
-    zonedata = FreightZoneData(zonedata_path, ass_model.zone_numbers, "municipality_center")
+    zonedata = FreightZoneData(zonedata_path, ass_model.zone_numbers, "koko_suomi")
     resultdata = ResultsData(results_path)
-    resultmatrices = MatrixData(results_path / "Matrices" / "municipality_center")
+    resultmatrices = MatrixData(results_path / "Matrices" / "koko_suomi")
     costdata = json.loads(cost_data_path.read_text("utf-8"))
     
     # Set purposes and fetch impedances
@@ -50,7 +51,6 @@ def main(args):
     store_demand = StoreDemand(ass_model.freight_network, resultmatrices, 
                                zonedata.all_zone_numbers, zonedata.zone_numbers)
     impedance = ass_model.freight_network.assign()
-    impedance[param.marine_ships_name] = {}
     
     log.info("Read marine ship impedances from network")
     marine_export = ass_model.freight_network.read_ship_impedances(True)
@@ -58,13 +58,11 @@ def main(args):
     for purpose in purposes.values():
         log.info(f"Calculating trade routes for foreign purpose: {purpose.name}")
         if purpose.is_export:
-            ship_imps, origs, dests = marine_export[0], marine_export[1], marine_export[2]
+            demand = purpose.run_trade_route_module(impedance, *marine_export,
+                                                    trade_demand_path)
         else:
-            ship_imps, origs, dests = marine_import[0], marine_import[1], marine_import[2]
-        impedance[param.marine_ships_name] = ship_imps
-        demand = purpose.run_trade_route_module(impedance, origs, dests,
-                                                Path(args.trade_demand_data_path))
-    del impedance[param.marine_ships_name]
+            demand = purpose.run_trade_route_module(impedance, *marine_import,
+                                                    trade_demand_path)
     marine_export, marine_import = None, None
 
     # prepare domestic model by splicing impedances and initializing final demand matrix 

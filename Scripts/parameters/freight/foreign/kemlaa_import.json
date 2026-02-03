@@ -23,8 +23,7 @@
     "destination_choice": {},
     "mode_choice": {
 		"truck": {},
-		"freight_train": {},
-		"marine_ships": {}
+		"freight_train": {}
 	},
 	"demand_share": {},
     "route_choice": {
