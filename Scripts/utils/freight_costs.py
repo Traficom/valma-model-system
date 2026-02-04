@@ -1,5 +1,5 @@
 import numpy
-from typing import Dict
+from typing import Dict, Iterable
 import utils.log as log
 from parameters.marine_ship import port_draught_limit, ship_draught_speed
 
@@ -183,8 +183,11 @@ def get_aux_cost(unit_costs: Dict[str, Dict],
         calc_road_cost(unit_costs, impedance_aux, model_category))
     return aux_cost
 
-def get_foreign_ship_cost(unit_costs: Dict[str, dict], impedance: Dict[str, dict], 
-                          model_category: str, fin_ports: dict, is_export: bool):
+def get_foreign_ship_cost(unit_costs: Dict[str, dict],
+                          impedance: Dict[str, dict],
+                          model_category: str,
+                          fin_ports: Iterable[str],
+                          is_export: bool):
     """Fetch smallest general cost for each marine ship in unit costs.
     
     Parameters
@@ -199,12 +202,10 @@ def get_foreign_ship_cost(unit_costs: Dict[str, dict], impedance: Dict[str, dict
             Type (dist) : numpy 2d matrix
     model_category : str
         purpose estimation category, domestic or foreign
-    origs : dict
-        Origin border id (FIHEL/SESTO...) : str
-            Centroid id : int
-    dests : dict
-        Destination border id (FIHEL/SESTO...) : str
-            Centroid id : int
+    fin_ports : iterable of str
+        Finland border id (FIHEL/FISKV...) : str
+    is_export : bool
+        True if export, False if import
 
     Returns
     -------
@@ -223,21 +224,20 @@ def get_foreign_ship_cost(unit_costs: Dict[str, dict], impedance: Dict[str, dict
             "draught": inf_mtx.copy(),
             "frequency": impedance[mode]["frequency"]
         }
+        draught_limits = port_draught_limit[mode]
         for draught in map(int, unit_costs["ship"][mode]):
             impedance[mode]["time"] = (impedance[mode]["dist"] 
                                        / ship_draught_speed[mode][draught]
                                        * 60)
-            draught_mask = numpy.ones_like(inf_mtx)
-            port_draught = port_draught_limit[mode]
-            for index, port in enumerate(fin_ports):
-                if port in port_draught and draught > port_draught[port]:
-                    if is_export:
-                        draught_mask[index, :] = numpy.inf
-                    else:
-                        draught_mask[:, index] = numpy.inf
             cost = calc_ship_cost(unit_costs["ship"][mode][f"{draught}"],
                                   impedance[mode], model_category)
-            cost *= draught_mask
+            port_draughts = numpy.array(
+                [draught_limits.get(port, numpy.inf) for port in fin_ports])
+            too_shallow_ports = draught > port_draughts
+            if is_export:
+                cost[too_shallow_ports, :] = numpy.inf
+            else:
+                cost[:, too_shallow_ports] = numpy.inf
             is_cheaper = cost < ship_info[mode]["cost"]
             ship_info[mode]["cost"][is_cheaper] = cost[is_cheaper]
             ship_info[mode]["draught"][is_cheaper] = draught
