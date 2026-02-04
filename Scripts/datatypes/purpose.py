@@ -196,6 +196,10 @@ class Purpose:
                 log.info(f"Generalized cost calculated for {self.name} {mode}.")
             except KeyError:
                 pass
+            if mode in mixed_mode_classes:
+                day_imp[mode]["park_cost"] = (day_imp[mode]["park_cost"]
+                                              * cost.tour_duration[mode][self.name]
+                                              / cost.tour_duration[mode]["avg"])
         return day_imp
 
 def new_tour_purpose(*args):
@@ -429,19 +433,12 @@ class TourPurpose(Purpose):
         if pt_mode == "airplane":
             access_modes.append("airpl_taxi_acc")
             impedance["airpl_taxi_acc"] = impedance["airpl_car_acc"]
-        for mode in access_modes:
-            if mode in mixed_mode_classes:
-                self.reweight_parking_cost(impedance[mode], cost.tour_duration[mode])
         model = self.connection_models[pt_mode]
         prob, logsum = model.calc_mode_prob(impedance)
         if "airpl_taxi_acc" in prob:
             prob["airpl_car_acc"] += prob.pop("airpl_taxi_acc")
         return prob, logsum
 
-    def reweight_parking_cost(self, impedance, duration):
-        impedance["park_cost"] = (impedance["park_cost"]
-                                  * duration[self.name]
-                                  / duration["avg"])
 
     def calc_basic_prob(self, impedance, is_last_iteration):
         """Calculate mode and destination probabilities.
