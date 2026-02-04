@@ -410,7 +410,7 @@ class TourPurpose(Purpose):
                     mode_impedance = {mode: purpose_impedance.pop(mode)
                         for mode in [main_mode] + acc_modes}
                     acc_splits[main_mode], logsum = self.split_connection_mode(
-                        mode_impedance, main_mode, acc_modes)
+                        mode_impedance, main_mode)
                     purpose_impedance[main_mode] = {"logsum": logsum}
                     mtx[main_mode] = logsum
 
@@ -428,10 +428,8 @@ class TourPurpose(Purpose):
                     prob[acc_mode] = split[acc_mode] * main_prob
         return prob
 
-    def split_connection_mode(self, impedance, pt_mode, car_acc_modes):
-        access_modes = car_acc_modes + [pt_mode]
+    def split_connection_mode(self, impedance, pt_mode):
         if pt_mode == "airplane":
-            access_modes.append("airpl_taxi_acc")
             impedance["airpl_taxi_acc"] = impedance["airpl_car_acc"]
         model = self.connection_models[pt_mode]
         prob, logsum = model.calc_mode_prob(impedance)
