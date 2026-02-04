@@ -147,10 +147,10 @@ class FreightAssignmentPeriod(AssignmentPeriod):
             Mode (container_ship/general_cargo...) : attribute
                 Type (dist/frequency) : numpy.ndarray
         dict
-            Origin border id (FIHEL/SESTO...) : str
+            Finland border id (FIHEL/FISKV...) : str
                 Centroid id : int
         dict
-            Destination border id (FIHEL/SESTO...) : str
+            Foreign border id (AEJEA/SESTO...) : str
                 Centroid id : int
         """
         fin_borders = self._filter_border_points(finland_border_points)
