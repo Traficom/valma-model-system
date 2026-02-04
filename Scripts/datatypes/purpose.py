@@ -724,11 +724,11 @@ class FreightPurpose(Purpose):
 
     def form_impedance_legs(self, impedance: dict,
                             ship_imps: dict,
-                            fin_ports: dict,
-                            cluster_ports: dict) -> dict:
+                            fin_border_ids: dict,
+                            cluster_border_ids: dict) -> dict:
         """Forms impedance matrices for the three legs of foreign trade 
         route choice model. 
-            
+
         Parameters
         ----------
         impedance : dict
@@ -737,10 +737,10 @@ class FreightPurpose(Purpose):
         ship_imps : dict
             Mode (container_ship/general_cargo...) : attribute
                 Type (dist/frequency) : numpy.ndarray
-        fin_ports : dict
+        fin_border_ids : dict
             Finland border id (FIHEL/FISKV...) : str
                 Centroid id : int
-        cluster_ports : dict
+        cluster_border_ids : dict
             Foreign border id (AEJEA/SESTO...) : str
                 Centroid id : int
 
@@ -752,9 +752,9 @@ class FreightPurpose(Purpose):
                     Type (cost/frequency/draught) : mask indexed numpy 2d matrix
         """
         fin_port_zones = numpy.array(
-            list(fin_ports.values()), dtype=numpy.int32)
+            list(fin_border_ids.values()), dtype=numpy.int32)
         cluster_port_zones = numpy.array(
-            list(cluster_ports.values()), dtype=numpy.int32)
+            list(cluster_border_ids.values()), dtype=numpy.int32)
         all_zones = self.generation_zone_data.all_zone_numbers
         fin_borders = numpy.isin(all_zones, fin_port_zones)
         cluster_borders = numpy.isin(all_zones, cluster_port_zones)
@@ -779,7 +779,7 @@ class FreightPurpose(Purpose):
                 imp_leg[mode] = {imp_type: mtx[numpy.ix_(masks[i], masks[i+1])]
                                  for imp_type, mtx in costs[mode].items()}
         ship_costs = get_foreign_ship_cost(
-            self.costdata, ship_imps, self.model_category, fin_ports,
+            self.costdata, ship_imps, self.model_category, fin_border_ids,
             self.is_export)
         impedance_legs["leg_two"].update(ship_costs)
         return impedance_legs
@@ -861,8 +861,8 @@ class FreightPurpose(Purpose):
 
     def run_trade_route_module(self, impedance: dict,
                                ship_imps: dict,
-                               fin_port_indices: dict,
-                               cluster_port_indices: dict,
+                               fin_border_ids: dict,
+                               cluster_border_ids: dict,
                                trade_demand_path):
         """Entry point for running foreign trade route choice module. 
         
@@ -874,10 +874,10 @@ class FreightPurpose(Purpose):
         ship_imps : dict
             Mode (container_ship/general_cargo...) : attribute
                 Type (dist/frequency) : numpy.ndarray
-        fin_port_indices : dict
+        fin_border_ids : dict
             Finland border id (FIHEL/FISKV...) : str
                 Centroid id : int
-        cluster_port_indices : dict
+        cluster_border_ids : dict
             Foreign border id (AEJEA/SESTO...) : str
                 Centroid id : int
         trade_demand_path : Path
@@ -889,7 +889,7 @@ class FreightPurpose(Purpose):
             _description_
         """
         impedance_legs = self.form_impedance_legs(
-            impedance, ship_imps, fin_port_indices, cluster_port_indices)
+            impedance, ship_imps, fin_border_ids, cluster_border_ids)
         demand, trade_mappings = read_omx_item(trade_demand_path, self.name)
 
         mapping_name = (self.generation_zone_data.mapping.name if self.is_export 
@@ -898,7 +898,7 @@ class FreightPurpose(Purpose):
             df = pandas.DataFrame(demand, trade_mappings["finland_zone_number"])
             demand = df.groupby(self.generation_zone_data.mapping).sum().to_numpy()
 
-        port_indices = numpy.arange(len(fin_port_indices))
+        port_indices = numpy.arange(len(fin_border_ids))
 
         route_model = TradeRouteModule(impedance_legs, self.route_params, port_indices)
         trade_demand = run_trade_model(route_model, demand)
