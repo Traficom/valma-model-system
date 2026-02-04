@@ -184,7 +184,7 @@ class Purpose:
                                                     cost.car_pax_occupancy[self.name])
                     except KeyError:
                         pass
-                airpl_access_modes = ["airpl_car_acc", "airpl_taxi_acc", "airpl_car_egr"]
+                airpl_access_modes = ["airpl_car_acc", "airpl_car_egr"]
                 transit_access_modes = ["pt_car_acc", "pt_taxi_acc", "pt_taxi_egr"]
                 if mtx_type == "time" and mode in airpl_access_modes:
                     day_imp[mode][mtx_type] -= day_imp[mode]["car_time"] * 1.5
@@ -429,12 +429,8 @@ class TourPurpose(Purpose):
         return prob
 
     def split_connection_mode(self, impedance, pt_mode):
-        if pt_mode == "airplane":
-            impedance["airpl_taxi_acc"] = impedance["airpl_car_acc"]
         model = self.connection_models[pt_mode]
         prob, logsum = model.calc_mode_prob(impedance)
-        if "airpl_taxi_acc" in prob:
-            prob["airpl_car_acc"] += prob.pop("airpl_taxi_acc")
         return prob, logsum
 
 
