@@ -105,6 +105,10 @@
             0,
             9999
         ],
+        "airpl_taxi_acc": [
+            0,
+            9999
+        ],
         "airpl_car_egr": [
             0,
             9999
@@ -293,6 +297,27 @@
                     "sh_cars1_hh1": 4.218,
                     "sh_cars2_hh2": 4.218,
                     "sh_cars1_hh2": 3.2
+                }
+            },
+            "airpl_taxi_acc": {
+                "constant": -3.313,
+                "generation": {},
+                "attraction": {},
+                "impedance": {
+                    "gen_cost": -0.04309
+                },
+                "log": {
+                    "transform": -1.982
+                },
+                "transform": {
+                    "attraction": {},
+                    "impedance": {
+                        "gen_cost": 1
+                    }
+                },
+                "individual_dummy": {
+                    "sh_cars1_hh2": 1.578,
+                    "sh_cars2_hh2": 1.578
                 }
             },
             "airpl_car_egr": {

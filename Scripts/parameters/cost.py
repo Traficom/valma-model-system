@@ -75,6 +75,7 @@ vot = {
     "hb_leisure_overnight": {
         "airplane": 11.4,
         "airpl_car_acc": 11.4,
+        "airpl_taxi_acc": 11.4,
         "airpl_car_egr": 11.4,
         "transit_leisure": 7.7,
         "pt_car_acc": 7.7,
@@ -87,6 +88,7 @@ vot = {
     "hb_business": {
         "airplane": 11.4,
         "airpl_car_acc": 11.4,
+        "airpl_taxi_acc": 11.4,
         "airpl_car_egr": 11.4,
         "transit_work": 7.7,
         "pt_car_acc": 7.7,
