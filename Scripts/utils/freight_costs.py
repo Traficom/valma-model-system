@@ -41,7 +41,7 @@ def calc_cost(mode: str, unit_costs: Dict[str, Dict],
 
 def calc_road_cost(unit_costs: Dict[str, Dict],
                    impedance: Dict[str, numpy.ndarray],
-                   model_category: str):
+                   model_category: str) -> numpy.ndarray:
     """Calculate freight road costs.
 
     Parameters
@@ -69,7 +69,7 @@ def calc_road_cost(unit_costs: Dict[str, Dict],
 
 def calc_rail_cost(unit_costs: Dict[str, Dict],
                    impedance: Dict[str, numpy.ndarray],
-                   model_category: str):
+                   model_category: str) -> numpy.ndarray:
     """Calculate freight rail based costs.
 
     Parameters

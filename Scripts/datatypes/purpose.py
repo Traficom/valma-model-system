@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Dict, Iterator, Optional, cast
+from typing import Dict, Iterator, Optional, List, cast
 from copy import copy
 from collections import defaultdict
 import numpy # type: ignore
@@ -676,7 +676,7 @@ class FreightPurpose(Purpose):
         Purpose.__init__(self, specification, zone_data, resultdata)
         self.costdata = costdata
         self.model_category = list(zone_data)[0]
-        self.modes = list(specification["mode_choice"])
+        self.modes: List[str] = list(specification["mode_choice"])
 
         if specification["struct"] == "dest>mode":
             self.model = logit.DestModeModel(self, specification, zone_data[self.model_category], 
@@ -763,28 +763,28 @@ class FreightPurpose(Purpose):
         cluster_zones = ~fin_zones & ~cluster_borders
 
         masks = (fin_zones, fin_borders, cluster_borders, cluster_zones)
-        modes = (
-            ("truck", "freight_train"),
-            ("truck", "freight_train"),
-            ("truck",)
+        leg_modes = (
+            ("truck", "freight_train"),  # finland domestic leg
+            ("truck", "freight_train"),  # international land leg
+            ("truck",)  # foreign domestic leg
         )
         if not self.is_export:
             masks = masks[::-1]
-            modes = modes[::-1]
+            leg_modes = leg_modes[::-1]
 
         costs = self.get_costs(impedance)
-        impedance_legs = {leg: {} for leg in ["leg_one", "leg_two", "leg_three"]}
-        for i, leg in enumerate(impedance_legs):
-            for mode in modes[i]:
-                for imp_type, mtx in costs[mode].items():
-                    impedance_legs[leg][mode] = {
-                        imp_type: mtx[numpy.ix_(masks[i], masks[i+1])]}
+        impedance_legs = {l: {} for l in ["leg_one", "leg_two", "leg_three"]}
+        for i, imp_leg in enumerate(impedance_legs.values()):
+            for mode in leg_modes[i]:
+                imp_leg[mode] = {imp_type: mtx[numpy.ix_(masks[i], masks[i+1])]
+                                 for imp_type, mtx in costs[mode].items()}
         ship_costs = get_foreign_ship_cost(
-            self.costdata, ship_imps, self.model_category, fin_ports, self.is_export)
+            self.costdata, ship_imps, self.model_category, fin_ports,
+            self.is_export)
         impedance_legs["leg_two"].update(ship_costs)
         return impedance_legs
 
-    def get_costs(self, impedance: dict) -> dict:
+    def get_costs(self, impedance: dict):
         """Fetches calculated costs for each mode in model's mode choice.
 
         Parameters
