@@ -292,10 +292,11 @@ class TourPurpose(Purpose):
             if mode not in self.demand_share:
                 self.demand_share[mode] = self.impedance_share[mode]
         self.modes = list(self.model.mode_choice_param)
+        self.intermodals = {key: intermodals[key] for key in self.modes if key in intermodals}
         self.connection_models: Dict[str, logit.LogitModel] = {}
         if "access_mode_choice" in specification:
-            for mode in intermodals:
-                self.modes += intermodals[mode]
+            for mode in self.intermodals:
+                self.modes += self.intermodals[mode]
                 new_spec = copy(specification)
                 new_spec["mode_choice"] = new_spec["access_mode_choice"][mode]
                 self.connection_models[mode] = logit.LogitModel(
@@ -401,7 +402,7 @@ class TourPurpose(Purpose):
             with matrixdata.open(
                     f"logsum_{self.name}", "vrk", list(self.orig_zone_numbers), m='w'
                     ) as mtx:
-                for main_mode, acc_modes in intermodals.items():
+                for main_mode, acc_modes in self.intermodals.items():
                     mode_impedance = {mode: purpose_impedance.pop(mode)
                         for mode in [main_mode] + acc_modes}
                     acc_splits[main_mode], logsum = self.split_connection_mode(

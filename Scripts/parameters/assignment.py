@@ -472,6 +472,7 @@ simple_transport_classes = (private_classes
 transport_classes = simple_transport_classes + mixed_mode_classes
 intermodals = {
     "transit_leisure": ["pt_car_acc", "pt_taxi_acc", "pt_taxi_egr"],
+    "transit_work": ["pt_car_acc", "pt_taxi_acc", "pt_taxi_egr"],
     "airplane": ["airpl_car_acc", "airpl_car_egr"],
 }
 assignment_classes = {
@@ -485,7 +486,7 @@ assignment_classes = {
     "hb_sport": "leisure",
     "hb_visit": "leisure",
     "hb_leisure_overnight": "leisure",
-    "hb_business": "leisure",
+    "hb_business": "work",
     "wb_business": "work",
     "wb_other": "leisure",
     "ob_other": "leisure",

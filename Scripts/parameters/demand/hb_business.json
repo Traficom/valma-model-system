@@ -29,7 +29,7 @@
                 1.0
               ]
             },
-        "car_leisure": {
+        "car_work": {
             "vrk": [
                 1.0,
                 1.0
@@ -47,7 +47,7 @@
                 1.0
               ]
             },
-        "transit_leisure": {
+        "transit_work": {
             "vrk": [
                 1.0,
                 1.0
@@ -89,7 +89,7 @@
             0,
             30
         ],
-        "car_leisure": [
+        "car_work": [
             0,
             9999
         ],
@@ -113,7 +113,7 @@
             0,
             9999
         ],
-        "transit_leisure": [
+        "transit_work": [
             0,
             9999
         ],
@@ -144,7 +144,7 @@
         }
     },
     "mode_choice": {
-        "car_leisure": {
+        "car_work": {
             "constant": -8.378,
             "generation": {},
             "transform": {
@@ -191,7 +191,7 @@
                 "sh_cars2_hh2": 0.9903
             }
         },
-        "transit_leisure": {
+        "transit_work": {
             "constant": -6.853,
             "generation": {},
             "attraction": {
@@ -228,13 +228,13 @@
             "individual_dummy": {}
         },
         "calibration": {
-            "car_leisure": {
+            "car_work": {
                 "constant": -0.038
             },
             "car_pax": {
                 "constant": 0.138
             },
-            "transit_leisure": {
+            "transit_work": {
                 "constant": 0.040
             },
             "airplane": {
@@ -327,8 +327,8 @@
                 "individual_dummy": {}
             }
         },
-        "transit_leisure": {
-            "transit_leisure": {
+        "transit_work": {
+            "transit_work": {
                 "constant": 0,
                 "generation": {},
                 "attraction": {},
@@ -416,7 +416,7 @@
                 1.0
               ]
         },
-        "car_leisure": {
+        "car_work": {
             "vrk": [
                 1.0,
                 1.0
@@ -434,7 +434,7 @@
                 1.0
               ]
         },
-        "transit_leisure": {
+        "transit_work": {
             "vrk": [
                 1.0,
                 1.0
