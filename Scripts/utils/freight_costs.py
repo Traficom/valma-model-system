@@ -224,15 +224,15 @@ def get_foreign_ship_cost(unit_costs: Dict[str, dict],
             "draught": inf_mtx.copy(),
             "frequency": impedance[mode]["frequency"]
         }
-        draught_limits = port_draught_limit[mode]
+        port_draughts = numpy.array(
+            [port_draught_limit[mode].get(port, numpy.inf)
+             for port in fin_ports])
         for draught in map(int, unit_costs["ship"][mode]):
             impedance[mode]["time"] = (impedance[mode]["dist"] 
                                        / ship_draught_speed[mode][draught]
                                        * 60)
             cost = calc_ship_cost(unit_costs["ship"][mode][f"{draught}"],
                                   impedance[mode], model_category)
-            port_draughts = numpy.array(
-                [draught_limits.get(port, numpy.inf) for port in fin_ports])
             too_shallow_ports = draught > port_draughts
             if is_export:
                 cost[too_shallow_ports, :] = numpy.inf
