@@ -233,6 +233,7 @@ def get_foreign_ship_cost(unit_costs: Dict[str, dict],
                                        * 60)
             cost = calc_ship_cost(unit_costs["ship"][mode][f"{draught}"],
                                   impedance[mode], model_category)
+            # Evaluate whether ship type can enter Finnish ports
             too_shallow_ports = draught > port_draughts
             if is_export:
                 cost[too_shallow_ports, :] = numpy.inf
