@@ -389,6 +389,15 @@ effective_headway_ld = {
 }
 
 ### ASSIGNMENT REFERENCES ###
+asymmetric_demand = {
+    "pt_car_acc": "pt_car_egr",
+    "pt_taxi_acc": "pt_taxi_egr",
+    "airpl_car_acc": "airpl_car_egr",
+    "pt_car_egr": "pt_car_acc",
+    "pt_taxi_egr": "pt_taxi_acc",
+    "airpl_car_egr": "airpl_car_acc"
+}
+
 time_periods = {
     "aht": "AssignmentPeriod",
     "pt": "OffPeakPeriod",
@@ -445,7 +454,7 @@ assignment_classes = {
     "hb_sport": "leisure",
     "hb_visit": "leisure",
     "hb_leisure_overnight": "leisure",
-    "hb_business": "leisure",
+    "hb_business": "work",
     "wb_business": "work",
     "wb_other": "leisure",
     "ob_other": "leisure",
@@ -508,7 +517,6 @@ freight_modes = {
         'W': "@ship",
     },
 }
-marine_ships_name = "marine_ships"
 freight_marine_modes = {
     "container_ship": {
         "C": "@container_ship"

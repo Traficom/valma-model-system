@@ -1,10 +1,10 @@
 {
-    "name": "kemlaa",
+    "name": "kemlaa_import",
     "orig": "null",
     "dest": "null",
     "generation_area": "foreign",
-    "attraction_area": "foreign",
-    "struct": "export",
+    "attraction_area": "domestic",
+    "struct": "import",
     "impedance_share": {},
     "distance_boundaries": {
         "truck": [
@@ -23,8 +23,12 @@
     "destination_choice": {},
     "mode_choice": {
 		"truck": {},
-		"freight_train": {},
-		"marine_ships": {}
+		"freight_train": {}
 	},
-	"demand_share": {}
+	"demand_share": {},
+    "route_choice": {
+        "size": 1.0,
+        "constant": {},
+        "impedance": {}
+    }
 }

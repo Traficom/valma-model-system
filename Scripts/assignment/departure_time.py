@@ -6,7 +6,7 @@ from datatypes.demand import Demand
 import utils.log as log
 from assignment.abstract_assignment import AssignmentModel, Period
 import parameters.departure_time as param
-from parameters.assignment import transport_classes, volume_factors
+from parameters.assignment import transport_classes, volume_factors, asymmetric_demand
 
 
 class DepartureTimeModel:
@@ -97,8 +97,8 @@ class DepartureTimeModel:
                     self._add_2d_demand(
                         share[ap.name], demand.mode, ap.name,
                         demand.matrix, position)
-            if "acc" in demand.mode:
-                mode = demand.mode.replace("acc", "egr")
+            if demand.mode in asymmetric_demand:
+                mode = asymmetric_demand[demand.mode]
                 share: Dict[str, Any] = demand.purpose.demand_share[mode]
                 for ap in self.assignment_periods:
                     if demand.mode in ap.assignment_modes:

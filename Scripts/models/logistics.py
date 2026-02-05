@@ -129,11 +129,33 @@ class LogisticsModule(FreightDetourInference):
         
         return origin_offset, current_batch_size
 
+
+class TradeRouteModule(FreightDetourInference):
+    def __init__(self, impedance: Dict[str, np.ndarray], model_parameters: dict, 
+                 port_indices: np.ndarray):
+        FreightDetourInference.__init__(self, impedance, model_parameters, port_indices)
+
+
 def run_logistics_model(model: LogisticsModule, demand: np.ndarray, 
                         iteration: int) -> Tuple[np.ndarray]:
-    """Domestic logistics model entry point
-    Process full matrix in origin batches to limit memory usage
-    Process full matrix in origin batches in parallel
+    """Using given truck demand full matrix, calculates share of direct demand
+    between OD pairs and share of detoured demand between OD pairs that route
+    through designated logistics centers.
+    Processes demand matrix in origin batches and in parallel to limit memory usage.
+    
+    Parameters
+    ----------
+    model : LogisticsModule
+        LogisticsModule class object
+    demand : np.ndarray
+        calculated truck demand for commodity
+    iteration : int
+        ordinal iteration number
+        
+    Returns
+    -------
+    Tuple[np.ndarray]
+        processed truck demand matrix and totals for detoured and direct demand
     """
     n_zones = demand.shape[0]
     k_plus1 = len(model.lc_indices) + 1
@@ -163,3 +185,22 @@ def run_logistics_model(model: LogisticsModule, demand: np.ndarray,
         f"orig_demand {np.sum(demand)}, final_demand {np.sum(final_demand)}"
     )
     return final_demand, total_per_route
+
+def run_trade_model(model: TradeRouteModule, demand: np.ndarray):
+    """Using given truck demand full matrix, calculates share of demand for 
+    mode-route alternatives between Finnish zones and foreign country clusters
+    through designated border control points.
+
+    Parameters
+    ----------
+    model : TradeRouteModule
+        TradeRouteModule class object
+    demand : np.ndarray
+        external export/import trade demand for commodity
+
+    Returns
+    -------
+    __type__
+        _description_
+    """
+    return demand
