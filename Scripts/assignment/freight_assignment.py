@@ -147,32 +147,29 @@ class FreightAssignmentPeriod(AssignmentPeriod):
             Mode (container_ship/general_cargo...) : attribute
                 Type (dist/frequency) : numpy.ndarray
         dict
-            Origin border id (FIHEL/SESTO...) : str
+            Finland border id (FIHEL/FISKV...) : str
                 Centroid id : int
         dict
-            Destination border id (FIHEL/SESTO...) : str
+            Foreign border id (AEJEA/SESTO...) : str
                 Centroid id : int
         """
-        if is_export:
-            origins = finland_border_points
-            destinations = cluster_border_points
-        else:
-            origins = cluster_border_points
-            destinations = finland_border_points
-        origins = self._filter_border_points(origins)
-        destinations = self._filter_border_points(destinations)
-        orig_mapping = {pid: idx for idx, pid in enumerate(origins)}
-        dest_mapping = {pid: idx for idx, pid in enumerate(destinations)}
+        fin_borders = self._filter_border_points(finland_border_points)
+        cluster_borders = self._filter_border_points(cluster_border_points)
+        fin_mapping = {pid: idx for idx, pid in enumerate(fin_borders)}
+        cluster_mapping = {pid: idx for idx, pid in enumerate(cluster_borders)}
+        mappings = ((fin_mapping, cluster_mapping) if is_export
+                    else (cluster_mapping, fin_mapping))
+
         transit_lines = self._get_marine_transit_lines(is_export)
-        
+
         ship_impedances = {}
         for marine_ship, modes in param.freight_marine_modes.items():
             ship_impedances[marine_ship] = {}
             ship_mode = next(iter(modes))
             for key, attr in param.ship_attrs.items():
                 ship_impedances[marine_ship][key] = self._line_data_to_matrix(
-                    transit_lines[ship_mode], attr, orig_mapping, dest_mapping)
-        return ship_impedances, origins, destinations
+                    transit_lines[ship_mode], attr, *mappings)
+        return ship_impedances, fin_borders, cluster_borders
 
     def _filter_border_points(self, border_data: dict) -> Dict[str, int]:
         """Filter out border centroids that don't exist in scenario's network.

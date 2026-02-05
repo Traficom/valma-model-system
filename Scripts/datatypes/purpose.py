@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Dict, Iterator, Optional, cast
+from typing import Dict, Iterator, Optional, List, cast
 from copy import copy
 from collections import defaultdict
 import numpy # type: ignore
@@ -672,7 +672,7 @@ class FreightPurpose(Purpose):
         Purpose.__init__(self, specification, zone_data, resultdata)
         self.costdata = costdata
         self.model_category = list(zone_data)[0]
-        self.modes = list(specification["mode_choice"])
+        self.modes: List[str] = list(specification["mode_choice"])
 
         if specification["struct"] == "dest>mode":
             self.model = logit.DestModeModel(self, specification, zone_data[self.model_category], 
@@ -718,11 +718,13 @@ class FreightPurpose(Purpose):
         demand = {mode: (probs.pop(mode) * generation).T for mode in self.modes}
         return demand
 
-    def form_impedance_legs(self, impedance: dict, ship_imps: dict, 
-                            origs: dict, dests: dict) -> dict:
+    def form_impedance_legs(self, impedance: dict,
+                            ship_imps: dict,
+                            fin_border_ids: dict,
+                            cluster_border_ids: dict) -> dict:
         """Forms impedance matrices for the three legs of foreign trade 
         route choice model. 
-            
+
         Parameters
         ----------
         impedance : dict
@@ -731,11 +733,11 @@ class FreightPurpose(Purpose):
         ship_imps : dict
             Mode (container_ship/general_cargo...) : attribute
                 Type (dist/frequency) : numpy.ndarray
-        origs : dict
-            Origin border id (FIHEL/SESTO...) : str
+        fin_border_ids : dict
+            Finland border id (FIHEL/FISKV...) : str
                 Centroid id : int
-        dests : dict
-            Destination border id (FIHEL/SESTO...) : str
+        cluster_border_ids : dict
+            Foreign border id (AEJEA/SESTO...) : str
                 Centroid id : int
 
         Returns
@@ -745,46 +747,40 @@ class FreightPurpose(Purpose):
                 Mode (truck/train/marine ships) : dict
                     Type (cost/frequency/draught) : mask indexed numpy 2d matrix
         """
-        orig_zones = numpy.array(list(origs.values()), dtype=numpy.int32)
-        dest_zones = numpy.array(list(dests.values()), dtype=numpy.int32)
+        fin_port_zones = numpy.array(
+            list(fin_border_ids.values()), dtype=numpy.int32)
+        cluster_port_zones = numpy.array(
+            list(cluster_border_ids.values()), dtype=numpy.int32)
         all_zones = self.generation_zone_data.all_zone_numbers
-        orig_borders = numpy.isin(all_zones, orig_zones)
-        dest_borders = numpy.isin(all_zones, dest_zones)
-        fin_borders = orig_zones if self.is_export else dest_zones
+        fin_borders = numpy.isin(all_zones, fin_port_zones)
+        cluster_borders = numpy.isin(all_zones, cluster_port_zones)
         fin_zones = numpy.isin(all_zones, numpy.union1d(self.orig_zone_numbers, 
-                                                        fin_borders))
-        cluster_zones = (~fin_zones & ~dest_borders if self.is_export 
-                         else ~fin_zones & ~orig_borders)
-        
-        if self.is_export:
-            leg_one_modes = ("truck", "freight_train")
-            leg_three_modes = ("truck",)
-            leg_two_modes = leg_one_modes
-            leg_one_masks = (fin_zones, orig_borders)
-            leg_three_masks = (dest_borders, cluster_zones)
-        else:
-            leg_one_modes = ("truck",)
-            leg_three_modes = ("truck", "freight_train")
-            leg_two_modes = leg_three_modes
-            leg_one_masks = (cluster_zones, orig_borders)
-            leg_three_masks = (dest_borders, fin_zones)
-        leg_two_masks = (orig_borders, dest_borders)
-        
-        costs = self.get_costs(impedance, origs, dests)
-        impedance_legs = {
-            "leg_one": {mode: {"cost": costs[mode]["cost"][numpy.ix_(*leg_one_masks)]}
-                        for mode in leg_one_modes},
-            "leg_two": {mode: {"cost": costs[mode]["cost"][numpy.ix_(*leg_two_masks)]}
-                        for mode in leg_two_modes},
-            "leg_three": {mode: {"cost": costs[mode]["cost"][numpy.ix_(*leg_three_masks)]}
-                          for mode in leg_three_modes}
-        }
-        ship_costs = get_foreign_ship_cost(self.costdata, ship_imps, self.model_category, 
-                                           origs, dests)
-        impedance_legs["leg_two"].update({mode: ship_costs[mode] for mode in ship_costs})
+                                                        fin_port_zones))
+        cluster_zones = ~fin_zones & ~cluster_borders
+
+        masks = (fin_zones, fin_borders, cluster_borders, cluster_zones)
+        leg_modes = (
+            ("truck", "freight_train"),  # finland domestic leg
+            ("truck", "freight_train"),  # international land leg
+            ("truck",)  # foreign domestic leg
+        )
+        if not self.is_export:
+            masks = masks[::-1]
+            leg_modes = leg_modes[::-1]
+
+        costs = self.get_costs(impedance)
+        impedance_legs = {l: {} for l in ["leg_one", "leg_two", "leg_three"]}
+        for i, imp_leg in enumerate(impedance_legs.values()):
+            for mode in leg_modes[i]:
+                imp_leg[mode] = {imp_type: mtx[numpy.ix_(masks[i], masks[i+1])]
+                                 for imp_type, mtx in costs[mode].items()}
+        ship_costs = get_foreign_ship_cost(
+            self.costdata, ship_imps, self.model_category, fin_border_ids,
+            self.is_export)
+        impedance_legs["leg_two"].update(ship_costs)
         return impedance_legs
 
-    def get_costs(self, impedance: dict, origs: dict = None, dests: dict = None):
+    def get_costs(self, impedance: dict):
         """Fetches calculated costs for each mode in model's mode choice.
 
         Parameters
@@ -792,12 +788,6 @@ class FreightPurpose(Purpose):
         impedance : dict 
             Mode (truck/train/...) : dict
                 Type (time/dist/toll_cost/canal_cost) : numpy 2d matrix
-        origs : dict
-            Origin border id (FIHEL/SESTO...) : str
-                Centroid id : int
-        dests : dict
-            Destination border id (FIHEL/SESTO...) : str
-                Centroid id : int
 
         Returns
         -------
@@ -805,7 +795,7 @@ class FreightPurpose(Purpose):
             Mode (truck/freight_train/...) : cost : numpy.ndarray
         """
         return {mode: {"cost": calc_cost(mode, self.costdata, impedance[mode],
-                                         self.model_category, origs, dests)}
+                                         self.model_category)}
                 for mode in self.modes}
 
     def calc_vehicles(self, matrix: numpy.ndarray, ass_class: str):
@@ -865,8 +855,11 @@ class FreightPurpose(Purpose):
             demand_truck, per_route = run_logistics_model(model, demand_truck, i)
         return demand_truck, per_route
 
-    def run_trade_route_module(self, impedance: dict, ship_imps: dict,
-                               origs: dict, dests: dict, trade_demand_path):
+    def run_trade_route_module(self, impedance: dict,
+                               ship_imps: dict,
+                               fin_border_ids: dict,
+                               cluster_border_ids: dict,
+                               trade_demand_path):
         """Entry point for running foreign trade route choice module. 
         
         Parameters
@@ -877,11 +870,11 @@ class FreightPurpose(Purpose):
         ship_imps : dict
             Mode (container_ship/general_cargo...) : attribute
                 Type (dist/frequency) : numpy.ndarray
-        origs : dict
-            origin border id (FIHEL/SESTO...) : str
+        fin_border_ids : dict
+            Finland border id (FIHEL/FISKV...) : str
                 Centroid id : int
-        dests : dict
-            destination border id (FIHEL/SESTO...) : str
+        cluster_border_ids : dict
+            Foreign border id (AEJEA/SESTO...) : str
                 Centroid id : int
         trade_demand_path : Path
             argument path to trade demand omx-file
@@ -891,7 +884,8 @@ class FreightPurpose(Purpose):
         __type__
             _description_
         """
-        impedance_legs = self.form_impedance_legs(impedance, ship_imps, origs, dests)
+        impedance_legs = self.form_impedance_legs(
+            impedance, ship_imps, fin_border_ids, cluster_border_ids)
         demand, trade_mappings = read_omx_item(trade_demand_path, self.name)
 
         mapping_name = (self.generation_zone_data.mapping.name if self.is_export 
@@ -900,8 +894,7 @@ class FreightPurpose(Purpose):
             df = pandas.DataFrame(demand, trade_mappings["finland_zone_number"])
             demand = df.groupby(self.generation_zone_data.mapping).sum().to_numpy()
 
-        fin_port_indices = origs if self.is_export else dests
-        port_indices = numpy.arange(len(fin_port_indices))
+        port_indices = numpy.arange(len(fin_border_ids))
 
         route_model = TradeRouteModule(impedance_legs, self.route_params, port_indices)
         trade_demand = run_trade_model(route_model, demand)
