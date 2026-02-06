@@ -130,7 +130,7 @@ def main(args):
                     log.warn("Scenarios with different zones found in EMME bank!")
             attrs = {
                 "NODE": (list(param.stop_codes.values())
-                         + [param.subarea_attr]),
+                         + [param.submodel_attr]),
                 "LINK": ["#buslane"],
                 "TRANSIT_LINE": [param.keep_stops_attr],
             }

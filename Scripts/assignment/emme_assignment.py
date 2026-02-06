@@ -318,7 +318,7 @@ class EmmeAssignmentModel(AssignmentModel):
                      + list(dict.fromkeys(param.railtypes.values())))
         linklengths = pandas.Series(0.0, linktypes, name="length")
         for link in network.links():
-            if link.i_node[param.subarea_attr] == 2:
+            if link.i_node[param.submodel_attr] == 2:
                 linktype = link.type % 100
                 if linktype in param.roadclasses:
                     vdf = param.roadclasses[linktype].volume_delay_func
