@@ -60,17 +60,17 @@ class ZoneData:
         data, mapping = read_zonedata(
             data_path, self.zone_numbers, zone_mapping, data_type)
         self.mapping = mapping
+        dummies = ["municipality", "county", "submodel"]
         agg_keys = [key for key in data if "aggregate_results_" in key]
-        aggs = data[agg_keys].rename(
-            columns=lambda x : x.replace("aggregate_results_", ""))
-        self.aggregations = ZoneAggregations(aggs)
+        self.dummy_aggs = ZoneAggregations(data[dummies])
+        self.result_aggs = ZoneAggregations(data[agg_keys])
         for col in data:
-            if col not in agg_keys:
+            if col not in agg_keys + dummies:
                 if col.startswith("sh_"):
                     self.share[col] = data[col]
                 else:
                     self[col] = data[col]
-        self.zones = {number: Zone(number, self.aggregations)
+        self.zones = {number: Zone(number, self.dummy_aggs)
             for number in self.zone_numbers}
         self.nr_zones = len(self.zone_numbers)
         self._municip_calib = municipality_calibration
@@ -124,19 +124,12 @@ class ZoneData:
         self["within_zone_inf"][numpy.diag_indices(self.nr_zones)] = numpy.inf
         # Create matrix where value is True if origin and destination is in
         # same municipality
-        municipalities = self.aggregations.mappings["municipality"].values
+        municipalities = self.dummy_aggs.mappings["municipality"].values
         within_municipality = municipalities[:, numpy.newaxis] == municipalities
         self["within_municipality"] = within_municipality
         self["outside_municipality"] = ~within_municipality
         dummies = {
             "zone": {},
-            "subarea": {
-                "Helsingin_kantakaupunki",
-                "Tampereen_kantakaupunki",
-            },
-            "county": {
-                "Lappi",
-            },
             "municipality": {},
             "submodel": {},
         }
@@ -150,7 +143,7 @@ class ZoneData:
             dummy = pandas.Series(
                 self.zone_numbers == int(name), self.zone_numbers)
         else:
-            dummy = self.aggregations.mappings[division_type][bounds] == name
+            dummy = self.dummy_aggs.mappings[division_type][bounds] == name
         if not dummy.any():
             log.warn(f"Dummy variable {name} not found in {division_type}")
         return dummy
@@ -245,7 +238,7 @@ class ZoneData:
                 except KeyError:
                     return 0
                 else:
-                    idx = self.aggregations.mappings["municipality"].values
+                    idx = self.dummy_aggs.mappings["municipality"].values
                     return calib.unstack("attraction").reindex(
                         index=idx, columns=idx, fill_value=0.0).values[bounds, :]
             else:
@@ -261,7 +254,7 @@ class ZoneData:
     @property
     def is_in_submodel(self) -> pandas.Series:
         """Boolean mapping of zones, whether in proper sub-model area."""
-        mapping = self.aggregations.mappings["submodel"]
+        mapping = self.dummy_aggs.mappings["submodel"]
         submodels = mapping.drop_duplicates()
         for submodel in submodels:
             if self.mapping.name == submodel.lower().replace('-', '_'):
@@ -363,7 +356,7 @@ def read_zonedata(path: Path,
             try:
                 total = col["total"]
             except TypeError:
-                aggs[col] = func
+                aggs[col] = "first"
             else:
                 aggs[total] = func
                 wa = WeightedAverage(data[total])
@@ -371,6 +364,9 @@ def read_zonedata(path: Path,
                 for share in col["shares"]:
                     aggs[share] = wa.avg
                     shares[total][share.split('_')[1]].append(share)
+    optional = [col for col in data if col.startswith("aggregate_results_")]
+    for col in optional:
+        aggs[col] = "first"
     data = data.groupby(zone_mapping_name).agg(aggs)
     data.index = data.index.astype(int)
     data.index.name = "analysis_zone_id"

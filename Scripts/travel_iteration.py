@@ -320,7 +320,7 @@ class ModelSystem:
                 impedance.clear()
         if is_end_assignment:
             self.ass_model.aggregate_results(
-                self.resultdata, zd.aggregations.municipality_mapping)
+                self.resultdata, zd.result_aggs.municipality_mapping)
             self.resultdata.flush()
         return impedance
 
@@ -414,7 +414,7 @@ class ModelSystem:
                 impedance.clear()
         if iteration=="last":
             self.ass_model.aggregate_results(
-                self.resultdata, zd.aggregations.municipality_mapping)
+                self.resultdata, zd.result_aggs.municipality_mapping)
             self.resultdata.flush()
         return impedance
 
