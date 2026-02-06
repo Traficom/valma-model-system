@@ -326,7 +326,6 @@ class EmmeAssignmentModel(AssignmentModel):
                     vdf = linktype - 90
                 else:
                     vdf = 0
-                municipality = link.i_node[param.municipality_attr]
                 for ass_class in ass_classes:
                     veh_kms = link[self._extra(ass_class)] * link.length
                     kms[ass_class] += veh_kms
@@ -345,19 +344,6 @@ class EmmeAssignmentModel(AssignmentModel):
                 "{}:\t{:1.0f}".format(ass_class, kms[ass_class]),
                 "result_summary")
         resultdata.print_data(linklengths, "link_lengths.txt")
-
-        # Print mode boardings per municipality
-        boardings = defaultdict(lambda: defaultdict(float))
-        attrs = [self._netfield(f"{transit_class}_total_board")
-            for transit_class in self.transit_classes]
-        for line in network.transit_lines():
-            mode = line.mode.id
-            for seg in line.segments():
-                municipality = seg.i_node[param.municipality_attr]
-                for tc in attrs:
-                    boardings[mode][municipality] += seg[tc]
-        resultdata.print_data(
-            pandas.DataFrame.from_dict(boardings), "municipality_boardings.txt")
 
         # Export link, node and segnment extra attributes to GeoPackage file
         fname = "assignment_results.gpkg"
