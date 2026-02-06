@@ -174,7 +174,7 @@ class Purpose:
                                                     self.attraction_zone_data["avg_park_cost"].values)
                     except KeyError:
                         pass
-                if mtx_type == "cost" and mode in ["car_drv"]:
+                if mtx_type == "cost" and mode == "car_drv":
                     try:
                         day_imp[mode][mtx_type] *= (1 - cost.sharing_factor[self.name] *
                                                     (cost.car_drv_occupancy[self.name] - 1) /
