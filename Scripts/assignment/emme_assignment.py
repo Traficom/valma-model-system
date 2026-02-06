@@ -248,9 +248,7 @@ class EmmeAssignmentModel(AssignmentModel):
         return numpy.sqrt(
             sum((xy[:, axis] - xy[:, axis, None])**2 for axis in (0, 1)))
 
-    def aggregate_results(self,
-                          resultdata: ResultsData,
-                          mapping: pandas.Series):
+    def aggregate_results(self, resultdata: ResultsData):
         """Aggregate results to 24h and print vehicle kms.
 
         Parameters
@@ -315,16 +313,10 @@ class EmmeAssignmentModel(AssignmentModel):
             {ass_class: pandas.Series(0.0, vdfs, name="veh_km")
                 for ass_class in ass_classes},
             names=["class", "v/d-func"])
-        areas = mapping.drop_duplicates()
-        area_kms = {ass_class: pandas.Series(0.0, areas)
-            for ass_class in ass_classes}
-        vdf_area_kms = {vdf: pandas.Series(0.0, areas) for vdf in vdfs}
         #The following line only works well in Python 3.7+
         linktypes = (list(dict.fromkeys(param.roadtypes.values()))
                      + list(dict.fromkeys(param.railtypes.values())))
         linklengths = pandas.Series(0.0, linktypes, name="length")
-        soft_modes = param.transit_classes + ("bike",)
-        faulty_kela_code_nodes = set()
         for link in network.links():
             if link.i_node[param.subarea_attr] == 2:
                 linktype = link.type % 100
@@ -335,11 +327,6 @@ class EmmeAssignmentModel(AssignmentModel):
                 else:
                     vdf = 0
                 municipality = link.i_node[param.municipality_attr]
-                try:
-                    area = mapping[municipality]
-                except KeyError:
-                    faulty_kela_code_nodes.add(municipality)
-                    area = None
                 for ass_class in ass_classes:
                     veh_kms = link[self._extra(ass_class)] * link.length
                     kms[ass_class] += veh_kms
@@ -347,31 +334,16 @@ class EmmeAssignmentModel(AssignmentModel):
                         vdf_kms[ass_class][vdf] += veh_kms
                     except KeyError:
                         pass
-                    try:
-                        area_kms[ass_class][area] += veh_kms
-                    except KeyError:
-                        pass
-                    if ass_class not in soft_modes:
-                        try:
-                            vdf_area_kms[vdf][area] += veh_kms
-                        except KeyError:
-                            pass
                 if vdf == 0 and linktype in param.railtypes:
                     linklengths[param.railtypes[linktype]] += link.length
                 else:
                     linklengths[param.roadtypes[vdf]] += link.length / 2
-        if faulty_kela_code_nodes:
-            s = ("County not found for #municipality when aggregating link data: "
-                 + ", ".join(faulty_kela_code_nodes))
-            log.warn(s)
         resultdata.print_line("\nVehicle kilometres", "result_summary")
         resultdata.print_concat(vdf_kms, "vehicle_kms_vdfs.txt")
         for ass_class in ass_classes:
             resultdata.print_line(
                 "{}:\t{:1.0f}".format(ass_class, kms[ass_class]),
                 "result_summary")
-        resultdata.print_data(area_kms, "vehicle_kms_county.txt")
-        resultdata.print_data(vdf_area_kms, "vehicle_kms_vdfs_county.txt")
         resultdata.print_data(linklengths, "link_lengths.txt")
 
         # Print mode boardings per municipality

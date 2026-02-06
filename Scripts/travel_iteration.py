@@ -319,8 +319,7 @@ class ModelSystem:
                     self._save_to_omx(impedance[tp], tp)
                 impedance.clear()
         if is_end_assignment:
-            self.ass_model.aggregate_results(
-                self.resultdata, zd.aggregations.municipality_mapping)
+            self.ass_model.aggregate_results(self.resultdata)
             self.resultdata.flush()
         return impedance
 
@@ -413,8 +412,7 @@ class ModelSystem:
                     self._save_to_omx(impedance[tp], tp)
                 impedance.clear()
         if iteration=="last":
-            self.ass_model.aggregate_results(
-                self.resultdata, zd.aggregations.municipality_mapping)
+            self.ass_model.aggregate_results(self.resultdata)
             self.resultdata.flush()
         return impedance
 
