@@ -60,7 +60,7 @@ class ZoneData:
         data, mapping = read_zonedata(
             data_path, self.zone_numbers, zone_mapping, data_type)
         self.mapping = mapping
-        demand_aggs = ["municipality", "county", "submodel", "calibration_subarea"]
+        demand_aggs = ["municipality", "county", "submodel", "calibration_area"]
         result_aggs = demand_aggs + [key for key in data if "aggregate_results_" in key]
         self.demand_aggs = ZoneAggregations(data[demand_aggs])
         self.result_aggs = ZoneAggregations(data[result_aggs])
