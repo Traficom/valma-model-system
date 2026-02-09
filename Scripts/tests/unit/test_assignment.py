@@ -32,12 +32,6 @@ class EmmeAssignmentTest(unittest.TestCase):
             {i: {"firstb_single": firstb_single[i],
                  "dist_single": dist_single[i]}
              for i in range(0, len(firstb_single))})
-        self.mapping = pandas.Series({
-            "Helsinki": "Uusimaa",
-            "Espoo": "Uusimaa",
-            "Lohja": "Uusimaa",
-            "Salo": "Varsinais-Suomi",
-        })
         self.resultdata = ResultsData(RESULTS_PATH)
 
     def test_assignment(self):
@@ -74,7 +68,7 @@ class EmmeAssignmentTest(unittest.TestCase):
                     self.assertEqual(
                         imp[mtx_type][ass_class].dtype, numpy.float32)
             ap.end_assign()
-        ass_model.aggregate_results(self.resultdata, self.mapping)
+        ass_model.aggregate_results(self.resultdata)
         self.resultdata.flush()
 
     def test_long_dist_assignment(self):
@@ -102,7 +96,7 @@ class EmmeAssignmentTest(unittest.TestCase):
             ap.assign_trucks_init()
             ap.assign(demand + ["car_pax"])
             ap.end_assign()
-        ass_model.aggregate_results(self.resultdata, self.mapping)
+        ass_model.aggregate_results(self.resultdata)
 
     def test_freight_assignment(self):
         ass_model = EmmeAssignmentModel(
