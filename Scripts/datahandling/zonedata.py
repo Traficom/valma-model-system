@@ -133,7 +133,7 @@ class ZoneData:
             "municipality": {},
             "county": {"Lappi"},
             "submodel": {},
-            "calibration_subarea": {}
+            "calibration_area": {}
         }
         for division_type in dummies:
             dummies[division_type].update(extra_dummies.get(division_type, []))
