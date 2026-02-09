@@ -55,7 +55,7 @@
             "municipality",
             "county",
             "submodel",
-            "calibration_subarea"
+            "calibration_area"
         ]
     },
     "freight": {
@@ -115,7 +115,7 @@
             "municipality",
             "county",
             "submodel",
-            "calibration_subarea"
+            "calibration_area"
         ]
     }
 }
