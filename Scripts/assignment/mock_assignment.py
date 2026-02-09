@@ -57,7 +57,7 @@ class MockAssignmentModel(AssignmentModel):
     def calc_transit_cost(self, fare):
         pass
 
-    def aggregate_results(self, resultdata, mapping):
+    def aggregate_results(self, resultdata):
         pass
 
     def prepare_network(self, car_dist_unit_cost: Dict[str, float], *args):

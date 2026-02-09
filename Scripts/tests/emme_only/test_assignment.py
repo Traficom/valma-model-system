@@ -114,21 +114,7 @@ class EmmeAssignmentTest:
                 if ass_class in ap.assignment_modes:
                     ap.set_matrix(ass_class, car_matrix)
             travel_cost[ap.name] = ap.end_assign()
-        mapping = pandas.Series({
-            "Helsinki": "Uusimaa",
-            "Espoo": "Uusimaa",
-            "Vantaa": "Uusimaa",
-            "Kauniainen": "Uusimaa",
-            "Hyvinkaa": "Uusimaa",
-            "Lohja": "Uusimaa",
-            "Hameenlinna": "Kanta-Hame",
-            "Tampere": "Pirkanmaa",
-            "Turku": "Varsinais-Suomi",
-            "Jyvaskyla": "Keski-Suomi",
-            "Kotka": "Kymenlaakso",
-            "Lahti": "Paijat-Hame"
-        })
-        self.ass_model.aggregate_results(self.resultdata, mapping)
+        self.ass_model.aggregate_results(self.resultdata)
         self.resultdata.flush()
         costs_files = MatrixData(
             TEST_DATA_PATH / "Results" / "assignment" / "Matrices")
