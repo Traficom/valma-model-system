@@ -1,6 +1,6 @@
 {
     "mode_choice_calibration": {
-        "subarea": {
+        "calibration_subarea": {
             "Helsingin kantakaupunki": {
                 "car_work":  0.0
             }
@@ -12,7 +12,7 @@
                 "car_work": 0.0
             }
         },
-        "subarea": {
+        "calibration_subarea": {
             "Helsingin kantakaupunki": {
                 "transit_work":  0.0
             }

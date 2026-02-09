@@ -54,7 +54,8 @@
         "first": [
             "municipality",
             "county",
-            "Submodel"
+            "submodel",
+            "calibration_subarea"
         ]
     },
     "freight": {
@@ -113,7 +114,8 @@
         "first": [
             "municipality",
             "county",
-            "Submodel"
+            "submodel",
+            "calibration_subarea"
         ]
     }
 }
