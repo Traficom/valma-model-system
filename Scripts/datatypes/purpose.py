@@ -887,15 +887,23 @@ class FreightPurpose(Purpose):
         impedance_legs = self.form_impedance_legs(
             impedance, ship_imps, fin_border_ids, cluster_border_ids)
         demand, trade_mappings = read_omx_item(trade_demand_path, self.name)
+        all_zones = self.generation_zone_data.all_zone_numbers
 
         mapping_name = (self.generation_zone_data.mapping.name if self.is_export 
                         else self.attraction_zone_data.mapping.name)
         if mapping_name == "municipality_center":
             df = pandas.DataFrame(demand, trade_mappings["finland_zone_number"])
             demand = df.groupby(self.generation_zone_data.mapping).sum().to_numpy()
+        elif demand.shape[0] != all_zones.size:
+            idx_names = ["finland_zone_number", "cluster_zone_number"]
+            idx = [None, None]
+            for i, name in enumerate(idx_names):
+                mapping_arr = numpy.array(trade_mappings[name], dtype=all_zones.dtype)
+                mask = numpy.isin(all_zones, mapping_arr)
+                idx[i] = numpy.where(mask)[0].astype(numpy.int32)
+            demand = demand[numpy.ix_(idx[0], idx[1])]
 
-        port_indices = numpy.arange(len(fin_border_ids))
-
+        port_indices = dict(zip(fin_border_ids.keys(), range(len(fin_border_ids))))
         route_model = TradeRouteModule(impedance_legs, self.route_params, port_indices)
         trade_demand = run_trade_model(route_model, demand)
         return trade_demand

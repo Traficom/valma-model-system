@@ -27,8 +27,26 @@
 	},
 	"demand_share": {},
     "route_choice": {
-        "size": 1.0,
-        "constant": {},
-        "impedance": {}
+		"size": 1.0,
+		"constant": {
+			"FIVAA": -0.7816,
+			"FIUKI": 1.115,
+			"FITKU": -0.3329,
+			"FISKV": 4.41,
+			"FIRAA": 0.325,
+			"FIPOR": 0.921,
+			"FIOUL": 0.439,
+			"FIKOK": 1.814,
+			"FIHNK": -0.5651,
+			"FIRAU": 0.8787,
+			"FIHMN": 0.5149,
+			"FIHEL": -0.9208
+		},
+		"impedance": {
+			"leg_one_cost": -0.02377,
+			"leg_two_cost": -0.00001094,
+            "leg_two_frequency": 0.0000698,
+			"leg_three_cost": -0.00001094
+		}
     }
 }
