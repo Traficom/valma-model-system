@@ -134,10 +134,8 @@ class TradeRouteModule(FreightDetourInference):
 
     def compute_utilities(self, origin_indices: np.ndarray, 
                           cluster_indices: np.ndarray) -> Tuple[np.ndarray]:
-        """Compute utility components for the three legs used in trade route choice.
-
-        Parameters
-        ----------
+        """Compute utility components for the three legs used in trade route choice
+        origin - origin BCP - destination BCP - cluster
         
         Returns
         -------
@@ -175,125 +173,88 @@ class TradeRouteModule(FreightDetourInference):
 
         truck_leg_three_mtx = self.impedance["leg_three"]["truck"]["cost"][:, cluster_indices]
         util_three = (self.impedance_coeff["leg_three_cost"] * truck_leg_three_mtx).T
-        util_three = np.concatenate([util_three] * len(util_parts_one), axis=1)
+        util_three = np.concatenate([util_three] * len(self.leg2_modes), axis=1)
         return util_one, util_two, util_three
 
-    def forward(self, probs_indices: np.ndarray) -> Tuple[np.ndarray]:
-        """Compute top-level and conditional bottom probabilities for
-        foreign route choice.
+    def forward(self, probs_indices: np.ndarray, n_orig_bcp: int) -> Tuple[np.ndarray]:
+        """Compute choice probabilities
 
-        Returns (P_top, P_bottom_given_top):
-        - P_top: marginal probability of selecting a top alternative
-                 (domestic BCP + split_one mode), shape (n_pairs, n_top_alts)
-        - P_bottom_given_top: conditional probability of bottom alternatives
-                 given the top choice, shape (n_pairs, n_top_alts, n_bottom_alts)
+        Returns
+        -------
+        Tuple[np.ndarray]
+            probability of choosing upper alternative i
+            probability of choosing lower alternative j given choice of i
         """
         origin_set = probs_indices[:, 0]
         cluster_set = probs_indices[:, 1]
-        split_one, split_two, split_three = self.compute_utilities(origin_set, cluster_set)
+        util_one, util_two, util_three = self.compute_utilities(origin_set, cluster_set)
 
-        # split_two repeats utilities over border control points in the pattern:
-        #   [bcp0-for-all-modes, bcp1-for-all-modes, ...]
-        # whereas top_util columns are ordered as:
-        #   [mode0-bcp0, mode0-bcp1, ..., mode1-bcp0, mode1-bcp1, ...]
-        # reshape and transpose to align
-        n_pairs, n_top_alts = split_one.shape
-        n_bottom_alts = split_two.shape[1]
-        n_split_one = len(self.impedance["leg_one"])
-        k_bcp = split_two.shape[0] // n_split_one  # number of domestic BCPs (k_dom)
-
-        # (n_split_one, k_bcp, n_bottom_alts) -> (k_bcp, n_split_one, n_bottom_alts)
-        # -> (k_bcp * n_split_one, n_bottom_alts) == (n_top_alts, n_bottom_alts)
-        split_two = split_two.reshape(n_split_one, k_bcp, n_bottom_alts)
-        split_two = split_two.transpose(1, 0, 2)
-        split_two = split_two.reshape(n_top_alts, n_bottom_alts)
-
-        # V[p, i_top, j_bottom] -> (n_pairs, n_top_alts, n_bottom_alts)
+        n_origin, n_orig_alt = util_one.shape
+        n_dest_bcp_alt = util_two.shape[1]
+        util_two = util_two.reshape(len(self.impedance["leg_one"]), n_orig_bcp, n_dest_bcp_alt)
+        # swap axes 0 and 1 to get (n_orig_bcp, leg1_modes, n_dest_bcp_alt)
+        util_two = np.moveaxis(util_two, 0, 1)
+        # flatten to (n_top_alts, n_dest_bcp_alt) where n_top_alts == leg1_modes * n_orig_bcp
+        util_two = util_two.reshape(n_orig_alt, n_dest_bcp_alt)
         route_util = (
-            split_one[:, :, None] # (n_pairs, n_top_alts, 1)
-            + split_two[None, :, :] # (1, n_top_alts, n_bottom_alts)
-            + split_three[:, None, :] # (n_pairs, 1, n_bottom_alts)
+            util_one[:, :, None]
+            + util_two[None, :, :]
+            + util_three[:, None, :]
         )
 
-        # Flatten top and bottom into a single "route" axis
-        route_logits_2d = route_util.reshape(n_pairs, n_top_alts * n_bottom_alts)
-        route_probs_flat = self.softmax(route_logits_2d, axis=1) 
-        # Reshape back to (pair, top, bottom)
-        route_probs = route_probs_flat.reshape(n_pairs, n_top_alts, n_bottom_alts)
+        route_flat = route_util.reshape(n_origin, n_orig_alt * n_dest_bcp_alt)
+        route_probs_flat = self.softmax(route_flat, axis=1) 
+        route_probs = route_probs_flat.reshape(n_origin, n_orig_alt, n_dest_bcp_alt) # P(i,j)
 
-        # Marginal over bottom alternatives: P_top[p, i_top] = sum_j P_route[p, i_top, j]
-        P_top = np.sum(route_probs, axis=2)
+        P_top = np.sum(route_probs, axis=2) # P(i) = Σj P(i, j)
+        denom = P_top[:, :, None] # Expand P(i)
+        P_bottom = np.zeros_like(route_probs) # P(j | i)
+        np.divide(route_probs, denom, out=P_bottom, where=denom > 0.0)
+        return P_top, P_bottom
 
-        # Conditional bottom choice: P(bottom | top), shape (n_pairs, n_top_alts, n_bottom_alts)
-        denom = P_top[:, :, None]
-
-        # Safely compute conditional probabilities without evaluating the
-        # division where denom == 0
-        P_bottom_given_top = np.zeros_like(route_probs)
-        np.divide(route_probs, denom, out=P_bottom_given_top, where=denom > 0.0)
-        return P_top, P_bottom_given_top
-
-    def process_batch(self, origin_offset: int, n_origin: int, n_cluster: int,
+    def process_batch(self, origin_offset: int, n_origin: int, n_cluster: int, 
+                      n_orig_bcp: int, n_dest_bcp: int, demand: np.ndarray, 
                       flow_leg1: np.ndarray, flow_leg2: np.ndarray, 
-                      flow_leg3: np.ndarray, lock: Lock) -> Tuple[np.ndarray]:
-        """Process a batch of origins for foreign route choice inference.
-        
-        Key dimension tracking:
-        - P_top shape: (n_pairs, k_dom_sel) where k_dom_sel = len(split_one_modes) 
-        - P_bottom shape: (n_pairs, k_dom_sel, k_for*n_alt2)
-        - dist_BD_BF shape: (n_origins_batch, n_clusters, k_dom_sel, k_for*n_alt2)
-        - flow_B_batch shape after sum(axis=0,1): (k_dom_sel, k_for*n_alt2)
-        """
+                      flow_leg3: np.ndarray, lock: Lock) -> None:
+        """Distribute demand across logit route alternatives and aggregate flows"""
         current_batch_size = min(self.batch_size, n_origin - origin_offset)
         origin_indices = np.arange(origin_offset, origin_offset + current_batch_size,
                                    dtype=np.int32)
         cluster_indices = np.arange(n_cluster, dtype=np.int32)
         o_grid, c_grid = np.meshgrid(origin_indices, cluster_indices, indexing='ij')
         eval_indices = np.stack([o_grid.ravel(), c_grid.ravel()], axis=1)
-        P_top, P_bottom = self.forward(eval_indices)
+        P_top, P_bottom = self.forward(eval_indices, n_orig_bcp)
         
-        # Number of split one alternatives
-        k_dom_sel = P_top.shape[1]  
-        # P_bottom.shape[2] is already k_for*n_alt2, concatenated in compute_foreign_utilities
-        k_for_n_alt2 = P_bottom.shape[2]
-        P_bd = P_top.reshape(current_batch_size, n_cluster, k_dom_sel)
-        P_bf_given_bd = P_bottom.reshape(current_batch_size, n_cluster, k_dom_sel, k_for_n_alt2)
-
-        demand_batch = self.demand[origin_offset:origin_offset + current_batch_size, :]
-        dist_BD_BF = (
+        n_orig_bcp_alt = P_top.shape[1]
+        dest_bcp_alt = P_bottom.shape[2]
+        P_top_batch = P_top.reshape(current_batch_size, n_cluster, n_orig_bcp_alt)
+        P_bottom_batch = P_bottom.reshape(current_batch_size, n_cluster,
+                                          n_orig_bcp_alt, dest_bcp_alt)
+        demand_batch = demand[origin_offset:origin_offset + current_batch_size, :]
+        demand_routed = (
             demand_batch[:, :, None, None]
-            * P_bd[:, :, :, None]
-            * P_bf_given_bd)
+            * P_top_batch[:, :, :, None]
+            * P_bottom_batch
+        )
         
-        # Get dimensions needed for aggregation
-        k_orig_borders = self.impedance["leg_one"]["truck"].shape[1]
-        k_dest_borders = self.impedance["leg_three"]["truck"].shape[0]
-        n_alt2 = len(self.leg2_modes)
-        
-        # Form batches
-        flow_A_batch = np.sum(demand_batch[:, :, None] * P_bd, axis=1)
-        
-        # Aggregate flow_B_batch from (k_dom_sel, k_for*n_alt2) to (k_dom, k_for*n_alt2)
-        # by summing across split_one modes
-        # flow_B_batch shape is (k_dom_sel=k_dom*m1, k_for*n_alt2) where m1=len(split_one_modes)
-        # Reshape to (m1, k_dom, k_for*n_alt2) to separate modes from BCPs
-        flow_B_batch = np.sum(dist_BD_BF, axis=(0, 1)) # (k_dom_sel, k_for*n_alt2)
-        num_split_one_modes = k_dom_sel // k_orig_borders  # Calculate number of split_one modes
-        flow_B_batch_aggregated = flow_B_batch.reshape(
-            num_split_one_modes, k_orig_borders, k_dest_borders * n_alt2).sum(axis=0)
+        flow_leg1_batch = np.sum(demand_batch[:, :, None] * P_top_batch, axis=1)
+        # Aggregate leg2 batch to shape (n_dom_bcp, n_for_bcp * n_leg2_modes)
+        flow_leg2_batch = np.sum(demand_routed, axis=(0, 1))
+        flow_leg2_batch = flow_leg2_batch.reshape(
+            len(self.impedance["leg_one"]), n_orig_bcp,
+            n_dest_bcp * len(self.leg2_modes)).sum(axis=0)
 
-        # Compute flow_C
-        tmp = np.sum(dist_BD_BF, axis=0)  # (n_cluster, k_dom_sel, k_for*n_alt2)
-        tmp = np.sum(tmp, axis=1) # sum over k_dom_sel dimension -> (n_cluster, k_for*n_alt2)
-        flow_C_batch = tmp.T # transpose to (k_for*n_alt2, n_cluster)
-        flow_C_batch = flow_C_batch.reshape(n_alt2, k_dest_borders, n_cluster).sum(axis=0)
+        # Flows by cluster and leg3 alternatives
+        cluster_flow = np.sum(demand_routed, axis=0)
+        cluster_flow = np.sum(cluster_flow, axis=1)
+        flow_leg3_batch = cluster_flow.T
+        flow_leg3_batch = flow_leg3_batch.reshape(
+            len(self.leg2_modes), n_dest_bcp, n_cluster).sum(axis=0)
 
         with lock:
-            flow_leg1[origin_offset:origin_offset + current_batch_size, :] += flow_A_batch.astype(flow_leg1.dtype, copy=False)
-            # flow_B_batch_aggregated now has shape (k_dom, k_for*n_alt2) which matches flow_B
-            flow_leg2[:, :] += flow_B_batch_aggregated.astype(flow_leg2.dtype, copy=False)
-            flow_leg3[:, :] += flow_C_batch.astype(flow_leg3.dtype, copy=False)
-        return origin_offset, current_batch_size
+            flow_leg1[origin_offset:origin_offset + current_batch_size, :] += flow_leg1_batch
+            flow_leg2[:, :] += flow_leg2_batch
+            flow_leg3[:, :] += flow_leg3_batch
 
 
 def run_logistics_model(model: LogisticsModule, demand: np.ndarray, 
@@ -363,42 +324,42 @@ def run_trade_model(model: TradeRouteModule, demand: np.ndarray):
 
     Returns
     -------
-    __type__
-        _description_
+    Tuple[dict]
+        mode : np.ndarray, demand from origin -> origin BCP
+        mode : np.ndarray, demand from origin BCP -> destination BCP
+        mode : np.ndarray, demand from destination BCP -> destination
     """
     n_origin, n_cluster = demand.shape
-    k_orig_bcp = model.impedance["leg_one"]["truck"]["cost"].shape[1]
-    k_dest_bcp = model.impedance["leg_three"]["truck"]["cost"].shape[0]
+    n_orig_bcp = model.impedance["leg_one"]["truck"]["cost"].shape[1]
+    n_dest_bcp = model.impedance["leg_three"]["truck"]["cost"].shape[0]
     
-    leg1_modes = len(list(model.impedance["leg_one"]))
-    k_orig_dims = k_orig_bcp * leg1_modes
-    k_dest_dims = k_dest_bcp * len(model.leg2_modes)
+    leg1_modes = list(model.impedance["leg_one"])
+    k_orig_dims = n_orig_bcp * len(leg1_modes)
+    k_dest_dims = n_dest_bcp * len(model.leg2_modes)
     
     flow_leg1 = np.zeros((n_origin, k_orig_dims), dtype=np.float32)
-    flow_leg2 = np.zeros((k_orig_bcp, k_dest_dims), dtype=np.float32)
-    flow_leg3 = np.zeros((k_dest_bcp, n_cluster), dtype=np.float32)
+    flow_leg2 = np.zeros((n_orig_bcp, k_dest_dims), dtype=np.float32)
+    flow_leg3 = np.zeros((n_dest_bcp, n_cluster), dtype=np.float32)
     lock = Lock()
     
     batch_args = [
-        (offset, n_origin, n_cluster, flow_leg1, flow_leg2, flow_leg3, lock)
+        (offset, n_origin, n_cluster, n_orig_bcp, n_dest_bcp, demand, 
+         flow_leg1, flow_leg2, flow_leg3, lock)
         for offset in range(0, n_origin, model.batch_size)
     ]
     with ThreadPoolExecutor(max_workers=model.max_workers) as executor:
         futures = [executor.submit(model.process_batch, *args) for args in batch_args]
         _ = [f.result() for f in futures]
 
-    # Extract split one modes
     flow_leg1_matrices = {}
     for i, mode in enumerate(leg1_modes):
-        sl = slice(i * k_orig_bcp, (i + 1) * k_orig_bcp)
+        sl = slice(i * n_orig_bcp, (i + 1) * n_orig_bcp)
         flow_leg1_matrices[mode] = flow_leg1[:, sl]
 
-    # Extract split two modes
     flow_leg2_matrices = {}
-    for j, mode in enumerate(model.leg2_modes):
-        col = slice(j * k_dest_bcp, (j + 1) * k_dest_bcp)
-        block = flow_leg2[:, col]  # (k_dom, k_for)
-        flow_leg2_matrices[mode] = block
+    for i, mode in enumerate(model.leg2_modes):
+        col = slice(i * n_dest_bcp, (i + 1) * n_dest_bcp)
+        flow_leg2_matrices[mode] = flow_leg2[:, col]
     
     flow_leg3_matrices = {"truck": flow_leg3}
     return flow_leg1_matrices, flow_leg2_matrices, flow_leg3_matrices
