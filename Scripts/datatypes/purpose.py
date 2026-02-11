@@ -894,7 +894,7 @@ class FreightPurpose(Purpose):
         if mapping_name == "municipality_center":
             df = pandas.DataFrame(demand, trade_mappings["finland_zone_number"])
             demand = df.groupby(self.generation_zone_data.mapping).sum().to_numpy()
-        elif demand.shape[0] != all_zones.size:
+        elif demand.shape[0] != self.orig_zone_numbers.size:
             idx_names = ["finland_zone_number", "cluster_zone_number"]
             idx = [None, None]
             for i, name in enumerate(idx_names):

@@ -320,7 +320,7 @@ def run_trade_model(model: TradeRouteModule, demand: np.ndarray):
     model : TradeRouteModule
         TradeRouteModule class object
     demand : np.ndarray
-        external export/import trade demand for some
+        external export/import trade demand
 
     Returns
     -------

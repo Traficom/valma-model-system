@@ -28,12 +28,13 @@ class TradeRouteChoiceTest(unittest.TestCase):
         truck_name = "truck"
         train_name = "freight_train"
         marine_modes = ("container_ship", "roro_vessel")
-        origs_exp = {"FIHMN": 19401, "FIHNK": 4102}
-        dests_exp = {"EETLL": 50107, "SESTO": 50127}
+        fin_border = {"FIHMN": 19401, "FIHNK": 4102}
+        cluster_border = {"EETLL": 50107, "SESTO": 50127}
 
         zonedata = FreightZoneData(TEST_DATA_PATH / "freight_zonedata.gpkg", 
                                    numpy.array(ZONE_NUMBERS), "koko_suomi")
         resultdata = ResultsData(RESULT_PATH)
+        trade_demand_path = Path(TEST_MATRICES / "trade_demand.omx")
         with open(TEST_DATA_PATH / "costdata.json") as file:
             costdata = json.load(file)
         purposes = create_purposes(PARAMETERS_PATH / "foreign", zonedata, 
@@ -62,7 +63,7 @@ class TradeRouteChoiceTest(unittest.TestCase):
 
         ship_imps = {
             mode: {
-                imp: numpy.full((len(origs_exp), len(origs_exp)), numpy.inf, dtype="float32")
+                imp: numpy.full((len(fin_border), len(fin_border)), numpy.inf, dtype="float32")
                 for imp in ("dist", "frequency")}
             for mode in marine_modes
         }
@@ -71,13 +72,18 @@ class TradeRouteChoiceTest(unittest.TestCase):
         ship_imps["roro_vessel"]["dist"][0][0] = 126
         ship_imps["roro_vessel"]["frequency"][0][0] = 162
 
+        marine_attr = (ship_imps, fin_border, cluster_border)
         for purpose in purposes.values():
             split_impedances = purpose.form_impedance_legs(
-                impedance, ship_imps, origs_exp, dests_exp)
-            self._assert_split_impedances(purpose.name, split_impedances, truck_name, 
-                                          train_name, marine_modes)
+                impedance, *marine_attr)
+            self._assert_leg_impedances(purpose.name, split_impedances, truck_name, 
+                                        train_name, marine_modes)
+            
+            demand = purpose.run_trade_route_module(impedance, *marine_attr,
+                                                    trade_demand_path)
+            self._assert_leg_demand(purpose.name, demand)
 
-    def _assert_split_impedances(self, name, split_impedances, truck_name, 
+    def _assert_leg_impedances(self, name, split_impedances, truck_name, 
                                  train_name, marine_modes):
         if name.split("_")[0] == "kemlaa":
             leg_one, leg_two, leg_three = "leg_one", "leg_two", "leg_three"
@@ -100,3 +106,36 @@ class TradeRouteChoiceTest(unittest.TestCase):
                 self.assertEqual(len(split_impedances[leg_one]), 1)
                 self.assertEqual(split_impedances[leg_one][truck_name]["cost"].shape, (2, 2))
                 self.assertEqual(split_impedances[leg_three][truck_name]["cost"].shape, (2, 30))
+
+    def _assert_leg_demand(self, name, demand):
+        self.assertEqual(len(demand[1]), 4)
+        if name == "kemlaa_export":
+            self.assertEqual(len(demand[0]), 2)
+            self.assertEqual(len(demand[2]), 1)
+
+            truck_leg1_cols = numpy.array((12.078133, 10.4063425))
+            self.assertAlmostEqual(numpy.sum(demand[0]["truck"]), 22.484474, places=3)
+            numpy.testing.assert_array_almost_equal(
+                numpy.sum(demand[0]["truck"], axis=0), truck_leg1_cols)
+            self.assertEqual(numpy.sum(demand[0]["freight_train"]), 0)
+
+            truck_leg2_cols = numpy.array((7.3290763, 7.287592))
+            truck_leg2_row = numpy.array((6.525911, 8.090757))
+            container_leg2_cols = numpy.array((0, 2.3155859))
+            roro_leg2_cols = numpy.array((5.5522237, 0))
+            self.assertAlmostEqual(numpy.sum(demand[1]["truck"]), 14.616669, places=3)
+            self.assertAlmostEqual(numpy.sum(demand[1]["container_ship"]), 2.3155859, places=3)
+            self.assertAlmostEqual(numpy.sum(demand[1]["roro_vessel"]), 5.5522237, places=3)
+            numpy.testing.assert_array_almost_equal(
+                numpy.sum(demand[1]["truck"], axis=0), truck_leg2_cols)
+            numpy.testing.assert_array_almost_equal(
+                numpy.sum(demand[1]["truck"], axis=1), truck_leg2_row)
+            numpy.testing.assert_array_almost_equal(
+                numpy.sum(demand[1]["container_ship"], axis=0), container_leg2_cols)
+            numpy.testing.assert_array_almost_equal(
+                numpy.sum(demand[1]["roro_vessel"], axis=0), roro_leg2_cols)
+
+            truck_leg3_cols = numpy.array((9.165112, 13.3193655))
+            self.assertAlmostEqual(numpy.sum(demand[2]["truck"]), 22.484474, places=3)
+            numpy.testing.assert_array_almost_equal(
+                numpy.sum(demand[2]["truck"], axis=0), truck_leg3_cols)
