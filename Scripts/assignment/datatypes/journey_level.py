@@ -107,8 +107,7 @@ class JourneyLevel:
                 "at_nodes": None,
                 "on_lines": {
                     "penalty": param.board_fare_attr,
-                    "perception_factor": param.vot_inv[param.vot_classes[
-                        transit_class]],
+                    "perception_factor": 60 / param.value_of_time[transit_class],
                 },
                 "on_segments": None,
             },

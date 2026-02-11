@@ -30,7 +30,7 @@ class TransitMode(AssignmentMode):
             Whether extra LOS-component matrices will be saved in Emme format
         """
         AssignmentMode.__init__(self, name, assignment_period, save_matrices)
-        self.vot_inv = param.vot_inv[param.vot_classes[self.name]]
+        self.vot_inv = 60 / param.value_of_time[self.name]
         self._create_matrices()
 
         # Create extra attributes
