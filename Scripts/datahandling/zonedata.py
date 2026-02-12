@@ -358,7 +358,7 @@ def read_zonedata(path: Path,
             try:
                 total = col["total"]
             except TypeError:
-                aggs[col] = "first"
+                aggs[col] = "mean"
             else:
                 aggs[total] = func
                 wa = WeightedAverage(data[total])
