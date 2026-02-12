@@ -34,7 +34,7 @@ finland_border_points = {
     "FIVRK": {"name": "Varkaus", "id": 22623},
     "FIVAR": {"name": "Vartius", "id": 26946},
     "FIKOK": {"name": "Kokkola", "id": 27964},
-    "FIHAA": {"name": "Haaparanta", "id": 28615},
+    "FITOR": {"name": "Tornio", "id": 28615},
     "FIKEM": {"name": "Kemi", "id": 28700},
     "FIKIL": {"name": "Kilpisjarvi", "id": 30219},
     "FIKAS": {"name": "Kaskinen", "id": 31000},

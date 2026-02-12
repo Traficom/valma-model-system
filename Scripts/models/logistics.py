@@ -127,9 +127,9 @@ class LogisticsModule(FreightDetourInference):
 
 class TradeRouteModule(FreightDetourInference):
     def __init__(self, impedance: Dict[str, np.ndarray], model_parameters: dict, 
-                 fin_bcp_map: dict):
+                 fin_borders: dict):
         FreightDetourInference.__init__(self, impedance, model_parameters)
-        self.fin_bcp_map = fin_bcp_map # Finland border - zone index
+        self.fin_borders = fin_borders # Finland border - zone index
         self.leg2_modes = list(impedance["leg_two"])
 
     def compute_utilities(self, origin_indices: np.ndarray, 
@@ -160,14 +160,11 @@ class TradeRouteModule(FreightDetourInference):
             item = self.impedance["leg_two"][mode]
             cost_mtx = item["cost"]
             util_two = self.impedance_coeff["leg_two_cost"] * cost_mtx
+            util_two += self.add_constants(mode, util_two.shape)
             if "frequency" in item:
                 freq_mtx = item["frequency"]
                 freq_mtx[freq_mtx == np.inf] = -np.inf
                 util_two += self.impedance_coeff["leg_two_frequency"] * freq_mtx
-                bcp_set = set(self.fin_bcp_map) & set(self.constant)
-                for bcp in bcp_set:
-                    row_idx = self.fin_bcp_map[bcp]
-                    util_two[row_idx, :] += self.constant[bcp]
             util_parts_two[mode] = np.repeat(util_two, repeats=split1_mode_len, axis=0)
         util_two = np.concatenate(list(util_parts_two.values()), axis=1)
 
@@ -175,6 +172,29 @@ class TradeRouteModule(FreightDetourInference):
         util_three = (self.impedance_coeff["leg_three_cost"] * truck_leg_three_mtx).T
         util_three = np.concatenate([util_three] * len(self.leg2_modes), axis=1)
         return util_one, util_two, util_three
+
+    def add_constants(self, mode, util_two_shape) -> np.ndarray:
+        """Sums second leg specific mode-border constants
+        
+        Returns
+        -------
+        numpy.ndarray
+            constant matrix
+        """
+        constants_mtx = np.zeros(util_two_shape, dtype="float32")
+        border_constants = {}
+        if mode in self.constant:
+            for class_items in self.constant[mode].values():
+                borders = set(self.fin_borders) & set(class_items[1])
+                border_constants.update({border: class_items[0] for border in borders})
+        elif "land_border" in self.constant and mode in ("truck", "freight_train"):
+            borders = set(self.fin_borders) & set(self.constant["land_border"][1])
+            border_constants.update(
+                {border: self.constant["land_border"][0] for border in borders})
+        for border, constant in border_constants.items():
+            row_idx = self.fin_borders[border]
+            constants_mtx[row_idx, :] += constant
+        return constants_mtx
 
     def forward(self, probs_indices: np.ndarray, n_orig_bcp: int) -> Tuple[np.ndarray]:
         """Compute choice probabilities
@@ -206,11 +226,11 @@ class TradeRouteModule(FreightDetourInference):
         route_probs_flat = self.softmax(route_flat, axis=1) 
         route_probs = route_probs_flat.reshape(n_origin, n_orig_alt, n_dest_bcp_alt) # P(i,j)
 
-        P_top = np.sum(route_probs, axis=2) # P(i) = Σj P(i, j)
-        denom = P_top[:, :, None] # Expand P(i)
-        P_bottom = np.zeros_like(route_probs) # P(j | i)
-        np.divide(route_probs, denom, out=P_bottom, where=denom > 0.0)
-        return P_top, P_bottom
+        prob_top = np.sum(route_probs, axis=2) # P(i) = Σj P(i, j)
+        denom = prob_top[:, :, None] # Expand P(i)
+        prob_bottom = np.zeros_like(route_probs) # P(j | i)
+        np.divide(route_probs, denom, out=prob_bottom, where=denom > 0.0)
+        return prob_top, prob_bottom
 
     def process_batch(self, origin_offset: int, n_origin: int, n_cluster: int, 
                       n_orig_bcp: int, n_dest_bcp: int, demand: np.ndarray, 
@@ -223,21 +243,21 @@ class TradeRouteModule(FreightDetourInference):
         cluster_indices = np.arange(n_cluster, dtype=np.int32)
         o_grid, c_grid = np.meshgrid(origin_indices, cluster_indices, indexing='ij')
         eval_indices = np.stack([o_grid.ravel(), c_grid.ravel()], axis=1)
-        P_top, P_bottom = self.forward(eval_indices, n_orig_bcp)
+        prob_top, prob_bottom = self.forward(eval_indices, n_orig_bcp)
         
-        n_orig_bcp_alt = P_top.shape[1]
-        dest_bcp_alt = P_bottom.shape[2]
-        P_top_batch = P_top.reshape(current_batch_size, n_cluster, n_orig_bcp_alt)
-        P_bottom_batch = P_bottom.reshape(current_batch_size, n_cluster,
+        n_orig_bcp_alt = prob_top.shape[1]
+        dest_bcp_alt = prob_bottom.shape[2]
+        prob_top_batch = prob_top.reshape(current_batch_size, n_cluster, n_orig_bcp_alt)
+        prob_bottom_batch = prob_bottom.reshape(current_batch_size, n_cluster,
                                           n_orig_bcp_alt, dest_bcp_alt)
         demand_batch = demand[origin_offset:origin_offset + current_batch_size, :]
         demand_routed = (
             demand_batch[:, :, None, None]
-            * P_top_batch[:, :, :, None]
-            * P_bottom_batch
+            * prob_top_batch[:, :, :, None]
+            * prob_bottom_batch
         )
         
-        flow_leg1_batch = np.sum(demand_batch[:, :, None] * P_top_batch, axis=1)
+        flow_leg1_batch = np.sum(demand_batch[:, :, None] * prob_top_batch, axis=1)
         # Aggregate leg2 batch to shape (n_dom_bcp, n_for_bcp * n_leg2_modes)
         flow_leg2_batch = np.sum(demand_routed, axis=(0, 1))
         flow_leg2_batch = flow_leg2_batch.reshape(
