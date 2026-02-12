@@ -358,7 +358,10 @@ def read_zonedata(path: Path,
             try:
                 total = col["total"]
             except TypeError:
-                aggs[col] = "mean"
+                if col.startswith("aggregate_results_"):
+                    aggs[col] = "first"
+                else:
+                    aggs[col] = func
             else:
                 aggs[total] = func
                 wa = WeightedAverage(data[total])
@@ -366,9 +369,6 @@ def read_zonedata(path: Path,
                 for share in col["shares"]:
                     aggs[share] = wa.avg
                     shares[total][share.split('_')[1]].append(share)
-    optional = [col for col in data if col.startswith("aggregate_results_")]
-    for col in optional:
-        aggs[col] = "first"
     data = data.groupby(zone_mapping_name).agg(aggs)
     data.index = data.index.astype(int)
     data.index.name = "analysis_zone_id"
