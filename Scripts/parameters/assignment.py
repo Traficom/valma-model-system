@@ -147,18 +147,18 @@ performance_settings = {
 }
 # Value of time [eur/hour]
 value_of_time = {
-    "car_work": 7.92,
-    "car_leisure": 5.37,
-    "transit_work": 6.50,
-    "transit_leisure": 4.40,
-    "airplane": 10.0,
-    "pt_car_acc": 6.50,
-    "pt_taxi_acc": 6.50,
-    "airpl_car_acc": 10.0,
-    "pt_car_egr": 6.50,
-    "pt_taxi_egr": 6.50,
-    "airpl_car_egr": 10.0,
-    "van": 24.60,
+    "car_work": 9.18,
+    "car_leisure": 6.22,
+    "transit_work": 7.3,
+    "transit_leisure": 5.6,
+    "airplane": 11.4,
+    "pt_car_acc": 7.7,
+    "pt_taxi_acc": 7.7,
+    "airpl_car_acc": 11.4,
+    "pt_car_egr": 7.7,
+    "pt_taxi_egr": 7.7,
+    "airpl_car_egr": 11.4,
+    "van": 29.02,
 }
 congested_time_weight = 1.5
 freight_terminal_cost = {
