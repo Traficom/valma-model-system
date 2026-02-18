@@ -98,3 +98,22 @@ class DemandModel:
                                                    * zd[f"sh_{hh_type}"])
         self.resultdata.print_data(result, "zone_car_ownership.txt")
         log.info("New car-ownership values calculated.")
+
+    def individual_car_ownership(self, impedance):
+        try:
+            acc_purpose = self.purpose_dict["hb_leisure"]
+        except KeyError:
+            raise AttributeError("Accessibility for model is not defined.")
+        log.info("Calc car ownership based on hb_leisure accessibility...")
+        purpose_impedance = acc_purpose.transform_impedance(impedance)
+        acc_purpose.model.calc_prob(purpose_impedance, calc_accessibility=True)
+        prob = {}
+        for hh_size, model in self.car_ownership_models.items():
+            for segment in model.param["0"]["individual_dummy"]:
+                prob[f"{hh_size}*{segment}"] = model.calc_segment_prob(segment)
+        result = {}
+        for key in prob:
+            for nr in prob[key]:
+                result[f"{key}*car{nr}"] = prob[key][nr]
+        self.resultdata.print_data(result, "zone_car_ownership_by_segment.txt")
+        log.info("Segmented car-ownership values calculated.")
