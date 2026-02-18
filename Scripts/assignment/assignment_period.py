@@ -357,7 +357,7 @@ class AssignmentPeriod(Period):
         network = self.emme_scenario.get_network()
         return {(link.i_node.id, link.j_node.id): link[time_attr]
             for link in network.links()
-            if link.i_node[param.subarea_attr] == 2 and link[time_attr] > 0}
+            if link.i_node[param.submodel_attr] == 2 and link[time_attr] > 0}
 
     def _set_car_vdfs(self, use_free_flow_speeds: bool = False):
         log.info("Sets car functions for scenario {}".format(
@@ -585,7 +585,12 @@ class AssignmentPeriod(Period):
         network = self.emme_scenario.get_network()
         missing_penalties = set()
         penalty_attr = param.boarding_penalty_attr
+        weight_attr = param.in_vehice_weight_attr.replace("ut", "data")
         for line in network.transit_lines():
+            try:
+                line[weight_attr] = param.in_vehicle_weight[line.mode.id]
+            except KeyError:
+                line[weight_attr] = 1.0
             try:
                 penalty = self.boarding_penalty[line.mode.id] + extra_penalty
             except KeyError:

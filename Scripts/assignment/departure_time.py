@@ -3,11 +3,10 @@ from typing import Any, Dict, List, Tuple, Union, Sequence, cast
 import numpy # type: ignore
 
 from datatypes.demand import Demand
-from datatypes.tour import Tour
 import utils.log as log
 from assignment.abstract_assignment import AssignmentModel, Period
 import parameters.departure_time as param
-from parameters.assignment import transport_classes, volume_factors
+from parameters.assignment import transport_classes, volume_factors, asymmetric_demand
 
 
 class DepartureTimeModel:
@@ -82,12 +81,12 @@ class DepartureTimeModel:
                     self.demand[ap.name][tc] = numpy.zeros(
                         (n, n), numpy.float32)
 
-    def add_demand(self, demand: Union[Demand, Tour]):
+    def add_demand(self, demand: Demand):
         """Add demand matrix for whole day.
         
         Parameters
         ----------
-        demand : Demand or Tour
+        demand : Demand
             Travel demand matrix or number of travellers
         """
         position: Sequence[int] = demand.position
@@ -98,8 +97,8 @@ class DepartureTimeModel:
                     self._add_2d_demand(
                         share[ap.name], demand.mode, ap.name,
                         demand.matrix, position)
-            if "acc" in demand.mode:
-                mode = demand.mode.replace("acc", "egr")
+            if demand.mode in asymmetric_demand:
+                mode = asymmetric_demand[demand.mode]
                 share: Dict[str, Any] = demand.purpose.demand_share[mode]
                 for ap in self.assignment_periods:
                     if demand.mode in ap.assignment_modes:
@@ -138,7 +137,7 @@ class DepartureTimeModel:
         self.demand[time_period][ass_class] = large_mtx
 
     def _add_3d_demand(self,
-                       demand: Union[Demand, Tour],
+                       demand: Demand,
                        ass_class: str,
                        time_period: str):
         """Add three-way demand."""
@@ -147,8 +146,6 @@ class DepartureTimeModel:
         (o, d1, d2) = demand.position
         share = demand.purpose.demand_share[demand.mode][tp]
         if demand.dest is not None:
-            # For agent simulation
-            self._add_2d_demand(share, ass_class, tp, mtx, (o, d1))
             share = demand.purpose.sec_dest_purpose.demand_share[demand.mode][tp]
         colsum = mtx.sum(0)[:, numpy.newaxis]
         self._add_2d_demand(share[0], ass_class, tp, mtx, (d1, d2))

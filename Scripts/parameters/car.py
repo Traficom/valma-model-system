@@ -4,20 +4,6 @@
 # Inverse of car occupancy
 from typing import Any, Dict, Tuple, Union
 
-
-car_driver_share = { }
-
-car_usage: Dict[str,Any] = {
-    "constant": 0.0,
-    "generation": {},
-    "log": { },
-    "individual_dummy": { },
-}
-car_density = {
-    "constant": 0.0,
-    "generation": { },
-    "log": { },
-}
 car_ownership = {
     "hh1_lic1": {
         "0": {

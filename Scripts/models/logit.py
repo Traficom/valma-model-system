@@ -354,29 +354,6 @@ class ModeDestModel(LogitModel):
             pass
         return self._calc_prob(mode_probs, dest_exps, dest_expsums)
 
-    def calc_basic_prob(self, impedance: dict, calc_accessibility=False):
-        """Calculate utilities and cumulative destination choice probabilities.
-
-        Only used in agent simulation.
-        Individual dummy variables are not included.
-        
-        Parameters
-        ----------
-        impedance : dict
-            Mode (car/transit/bike/walk) : dict
-                Type (time/cost/dist) : numpy 2-d matrix
-                    Impedances
-        calc_accessibility : bool (optional)
-            Whether to calclulate and store accessibility indicators
-        """
-        mode_exps, mode_expsum, dest_exps, _ = self._calc_utils(impedance)
-        if calc_accessibility:
-            self._calc_accessibility(mode_exps, mode_expsum)
-        self.cumul_dest_prob = {}
-        for mode in self.mode_choice_param:
-            cumsum = dest_exps.pop(mode).T.cumsum(axis=0)
-            self.cumul_dest_prob[mode] = cumsum / cumsum[-1]
-    
     def _calc_individual_prob(self, mod_modes: list[str], dummy: str,
                               mode_exps: Dict[str, numpy.ndarray]):
         """Calculate utilities with individual dummies included.
@@ -405,39 +382,6 @@ class ModeDestModel(LogitModel):
             b = self.mode_choice_param[mod_mode]["individual_dummy"][dummy]
             mode_exps2[mod_mode] *= numpy.exp(b)
         return mode_exps2
-    
-    def calc_individual_mode_prob(self, zone: int,
-                                  individual_dummy: Optional[str] = None,
-                                  ) -> Tuple[numpy.ndarray, float]:
-        """Calculate individual choice probabilities with individual dummies.
-        
-        Calculate mode choice probabilities for individual
-        agent with individual dummy variable included.
-
-        Additionally save and rescale logsum values for agent based accessibility 
-        analysis.
-        
-        Parameters
-        ----------
-        zone : int
-            Index of zone where the agent lives
-        individual_dummy : str (optional)
-            Name of individual dummy to take into account in utility
-        Returns
-        -------
-        numpy.ndarray
-            Choice probabilities for purpose modes
-        float
-            Total accessibility for individual (eur)
-        """
-        modes = self.purpose.modes
-        mode_utils = numpy.empty(len(modes))
-        for i, mode in enumerate(modes):
-            mode_utils[i] = self.mode_utils[mode][zone]
-            b = self.mode_choice_param[mode]["individual_dummy"]
-            if individual_dummy in b:
-                mode_utils[i] += b[individual_dummy]
-        return mode_utils
 
     def _calc_utils(self,
                     impedance: Dict[str, Dict[str, Dict[str, numpy.ndarray]]]):
@@ -654,8 +598,6 @@ class SecDestModel(LogitModel):
         Tour purpose (type of tour)
     resultdata : ResultData
         Writer object to result directory
-    is_agent_model : bool (optional)
-        Whether the model is used for agent-based simulation
     """
 
     def calc_prob(self, mode, impedance, origin, destination=None):
@@ -757,48 +699,4 @@ class GenerationLogit(LogitModel):
                     dummy, self.bounds, generation=True)
                 with_dummy = dummy_share * ind_prob
                 prob[nr] += with_dummy
-        return prob
-
-    def calc_individual_prob(self, 
-                             income: str, 
-                             gender: str, 
-                             zone: Optional[int] = None):
-        """Calculate tour generation probabilities with individual dummies included.
-
-        Uses results from previously run `calc_basic_prob()`.
-
-        Parameters
-        ----------
-        income : str
-            Agent/segment income group
-        gender : str
-            Agent/segment gender (female/male)
-        zone : int (optional)
-            Index of zone where the agent lives, if no zone index is given,
-            calculation is done for all zones
-
-        Returns
-        -------
-        dict
-            key : int
-                Number of cars in household (0, 1, 2(+))
-            value : numpy.ndarray
-                Choice probabilities
-        """
-        prob = {}
-        exps = {}
-        nr_expsum = 0
-        for nr in self.param:
-            if zone is None:
-                exps[nr] = self.exps[nr]
-            else:
-                exps[nr] = self.exps[nr][self.zone_data.zone_index(zone)]
-            b = self.param
-            if income in b["individual_dummy"]:
-                exps[nr] *= numpy.exp(b["individual_dummy"][income])
-            if gender in b["individual_dummy"]:
-                exps[nr] *= numpy.exp(b["individual_dummy"][gender])
-            nr_expsum += exps[nr]
-        for nr in self.param:
-            prob = exps[nr] / nr_expsum
         return prob

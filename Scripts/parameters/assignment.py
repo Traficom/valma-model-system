@@ -160,11 +160,14 @@ freight_terminal_cost = {
     'J': 0,
     'W': 0
 }
+in_vehicle_weight = {
+    'j': 0.6,
+}
 # Boarding penalties for different transit modes
 boarding_penalty = {
     'b': 3, # Bus
     'g': 3, # Trunk bus
-    'e': 5, # Coach bus
+    'e': 8, # Coach bus
     't': 0, # Tram
     'p': 0, # Light rail
     'm': 0, # Metro
@@ -174,14 +177,14 @@ boarding_penalty = {
 }
 # Boarding penalties for long-distance trips
 long_boarding_penalty = {
-    'b': 0, # Bus
-    'g': 0, # Trunk bus
-    'e': 0, # Coach bus
+    'b': 3, # Bus
+    'g': 3, # Trunk bus
+    'e': 8, # Coach bus
     't': 0, # Tram
     'p': 0, # Light rail
     'm': 0, # Metro
     'w': 0, # Ferry
-    'r': 0, # Commuter train
+    'r': 2, # Commuter train
     'j': 2, # Long-distance train
 }
 # Headway standard deviation function parameters for different transit modes
@@ -242,19 +245,13 @@ trass_stop = {
 transfer_penalty = {
     "transit_work": 3,
     "transit_leisure": 5,
-    "car_first_mile": 5,
-    "car_last_mile": 5,
     "transit": 5,
-    "train": 5,
-    "coach": 5,
     "airplane": 5,
-    "train_car_acc": 5,
-    "train_taxi_acc": 5,
-    "coach_car_acc": 5,
+    "pt_car_acc": 5,
+    "pt_taxi_acc": 5,
     "airpl_car_acc": 5,
-    "train_car_egr": 5,
-    "train_taxi_egr": 5,
-    "coach_car_egr": 5,
+    "pt_car_egr": 5,
+    "pt_taxi_egr": 5,
     "airpl_car_egr": 5,
 }
 extra_waiting_time = {
@@ -311,20 +308,6 @@ volume_factors = {
         "pt": 0.167,
         "iht": 0.345,
         "it": 0.248,
-        "vrk": 1.0,
-    },
-    "train": {
-        "aht": 0.524,
-        "pt": 0.167,
-        "iht": 0.400,
-        "it": 0.255,
-        "vrk": 1.0,
-    },
-    "coach": {
-        "aht": 0.524,
-        "pt": 0.167,
-        "iht": 0.400,
-        "it": 0.255,
         "vrk": 1.0,
     },
     "airplane": {
@@ -400,25 +383,19 @@ volume_factors = {
     "airpl_car_acc": {
         "vrk": 1.0,
     },
-    "train_car_acc": {
+    "pt_car_acc": {
         "vrk": 1.0,
     },
-    "train_taxi_acc": {
-        "vrk": 1.0,
-    },
-    "coach_car_acc": {
+    "pt_taxi_acc": {
         "vrk": 1.0,
     },
     "airpl_car_egr": {
         "vrk": 1.0,
     },
-    "train_car_egr": {
+    "pt_car_egr": {
         "vrk": 1.0,
     },
-    "train_taxi_egr": {
-        "vrk": 1.0,
-    },
-    "coach_car_egr": {
+    "pt_taxi_egr": {
         "vrk": 1.0,
     },
 }
@@ -439,19 +416,17 @@ effective_headway_ld = {
     (0, 60): lambda x: 0.5*x,
     (60, float("inf")): lambda x: 30 + 0.3*x,
 }
-# Noise zone width as function of start noise
-noise_zone_width = {
-    (0, 55): lambda x: 5,
-    (55, 65): lambda x: 10 + 31./10*x,
-    (65, 68): lambda x: 41 + 16./3*x,
-    (68, 71): lambda x: 57 + 21./3*x,
-    (71, 74): lambda x: 78 + 31./3*x,
-    (74, 77): lambda x: 109 + 44./3*x,
-    (77, 80): lambda x: 153 + 66./3*x,
-    (80, float("inf")): lambda x: 225,
-}
 
 ### ASSIGNMENT REFERENCES ###
+asymmetric_demand = {
+    "pt_car_acc": "pt_car_egr",
+    "pt_taxi_acc": "pt_taxi_egr",
+    "airpl_car_acc": "airpl_car_egr",
+    "pt_car_egr": "pt_car_acc",
+    "pt_taxi_egr": "pt_taxi_acc",
+    "airpl_car_egr": "airpl_car_acc"
+}
+
 time_periods = {
     "aht": "AssignmentPeriod",
     "pt": "OffPeakPeriod",
@@ -465,21 +440,17 @@ car_classes = (
 car_and_van_classes = car_classes + ("van",)
 private_classes = car_and_van_classes + ("bike",)
 car_access_classes = (
-    "train_car_acc",
-    "train_taxi_acc",
-    "coach_car_acc",
+    "pt_car_acc",
+    "pt_taxi_acc",
     "airpl_car_acc",
 )
 car_egress_classes = (
-    "train_car_egr",
-    "coach_car_egr",
-    "train_taxi_egr",
+    "pt_car_egr",
+    "pt_taxi_egr",
     "airpl_car_egr",
 )
 mixed_mode_classes = car_access_classes + car_egress_classes
 long_dist_simple_classes = (
-    "train",
-    "coach",
     "airplane",
 )
 long_distance_transit_classes = (mixed_mode_classes
@@ -500,9 +471,9 @@ simple_transport_classes = (private_classes
                             + truck_classes)
 transport_classes = simple_transport_classes + mixed_mode_classes
 intermodals = {
-    "train": ["train_car_acc", "train_taxi_acc"],
-    "coach": ["coach_car_acc"],
-    "airplane": ["airpl_car_acc"],
+    "transit_leisure": ["pt_car_acc", "pt_taxi_acc", "pt_taxi_egr"],
+    "transit_work": ["pt_car_acc", "pt_taxi_acc", "pt_taxi_egr"],
+    "airplane": ["airpl_car_acc", "airpl_car_egr"],
 }
 assignment_classes = {
     "hb_work": "work",
@@ -540,18 +511,12 @@ vot_classes = {
     "van": "business",
     "transit_work": "work",
     "transit_leisure": "leisure",
-    "car_first_mile": "work",
-    "car_last_mile": "work",
-    "train": "work",
-    "coach": "leisure",
     "airplane": "work",
-    "train_car_acc": "work",
-    "train_taxi_acc": "work",
-    "coach_car_acc": "leisure",
+    "pt_car_acc": "work",
+    "pt_taxi_acc": "work",
     "airpl_car_acc": "work",
-    "train_car_egr": "work",
-    "train_taxi_egr": "work",
-    "coach_car_egr": "leisure",
+    "pt_car_egr": "work",
+    "pt_taxi_egr": "work",
     "airpl_car_egr": "work",
 }
 local_transit_modes = [
@@ -565,18 +530,14 @@ local_transit_modes = [
     'e',
 ]
 long_dist_transit_modes = {
-  	"transit_work": ['e', 'j', 'l'],
-    "transit_leisure": ['e', 'j', 'l'],
-    "train": ['j'],
-    "coach": ['e'],
+    "transit_work": ['e', 'j'],
+    "transit_leisure": ['e', 'j'],
     "airplane": ['l'],
-    "train_car_acc": ['j'],
-    "train_taxi_acc": ['j'],
-    "coach_car_acc": ['e'],
+    "pt_car_acc": ['j'],
+    "pt_taxi_acc": ['e', 'j'],
     "airpl_car_acc": ['l'],
-    "train_car_egr": ['j'],
-    "train_taxi_egr": ['j'],
-    "coach_car_egr": ['e'],
+    "pt_car_egr": ['j'],
+    "pt_taxi_egr": ['e', 'j'],
     "airpl_car_egr": ['l'],
 }
 aux_modes = [
@@ -592,7 +553,6 @@ freight_modes = {
         'W': "@ship",
     },
 }
-marine_ships_name = "marine_ships"
 freight_marine_modes = {
     "container_ship": {
         "C": "@container_ship"
@@ -649,6 +609,7 @@ transit_delay_attr = "us1"
 line_penalty_attr = "us2"
 line_operator_attr = "ut1"
 effective_headway_attr = "ut2"
+in_vehice_weight_attr = "ut3"
 ship_attrs = {
     "dist": "ut1",
     "frequency": "ut2",
@@ -659,8 +620,7 @@ board_fare_attr = "@board_fare"
 board_long_dist_attr = "@board_long_dist"
 is_in_transit_zone_attr = "ui1"
 keep_stops_attr = "#keep_stops"
-subarea_attr = "#subarea"
-municipality_attr = "#municipality"
+submodel_attr = "#subarea"
 terminal_cost_attr = "@freight_term_cost"
 aux_transit_time_attr = "@walk_time"
 aux_car_time_attr = "@car_time"

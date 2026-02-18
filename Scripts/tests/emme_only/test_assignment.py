@@ -114,22 +114,7 @@ class EmmeAssignmentTest:
                 if ass_class in ap.assignment_modes:
                     ap.set_matrix(ass_class, car_matrix)
             travel_cost[ap.name] = ap.end_assign()
-        mapping = pandas.Series({
-            "Helsinki": "Uusimaa",
-            "Espoo": "Uusimaa",
-            "Vantaa": "Uusimaa",
-            "Kauniainen": "Uusimaa",
-            "Hyvinkaa": "Uusimaa",
-            "Lohja": "Uusimaa",
-            "Hameenlinna": "Kanta-Hame",
-            "Tampere": "Pirkanmaa",
-            "Turku": "Varsinais-Suomi",
-            "Jyvaskyla": "Keski-Suomi",
-            "Kotka": "Kymenlaakso",
-            "Lahti": "Paijat-Hame"
-        })
-        self.ass_model.aggregate_results(self.resultdata, mapping)
-        self.ass_model.calc_noise(mapping)
+        self.ass_model.aggregate_results(self.resultdata)
         self.resultdata.flush()
         costs_files = MatrixData(
             TEST_DATA_PATH / "Results" / "assignment" / "Matrices")
@@ -148,16 +133,14 @@ class EmmeAssignmentTest:
         ass_classes = [
             "car_work",
             "car_leisure",
-            "train",
-            "coach",
+            "transit_work",
+            "transit_leisure",
             "airplane",
-            "train_car_acc",
-            "train_taxi_acc",
-            "coach_car_acc",
+            "pt_car_acc",
+            "pt_taxi_acc",
             "airpl_car_acc",
-            "train_car_egr",
-            "train_taxi_egr",
-            "coach_car_egr",
+            "pt_car_egr",
+            "pt_taxi_egr",
             "airpl_car_egr",
         ]
         demand = {ass_class: car_matrix for ass_class in ass_classes}

@@ -3,7 +3,7 @@ import numpy
 from pathlib import Path
 
 import utils.log as log
-from travel_iteration import ModelSystem, AgentModelSystem
+from travel_iteration import ModelSystem
 from assignment.mock_assignment import MockAssignmentModel
 from datahandling.matrixdata import MatrixData
 from datatypes.demand import Demand
@@ -77,7 +77,7 @@ class ModelTest(unittest.TestCase):
         # Check that model result does not change
         self.assertAlmostEquals(
             model.mode_share[0]["car_work"] + model.mode_share[0]["car_leisure"],
-            0.649764972030997)
+            0.6362261891983951)
 
     def _validate_impedances(self, impedances):
         self.assertIsNotNone(impedances)
