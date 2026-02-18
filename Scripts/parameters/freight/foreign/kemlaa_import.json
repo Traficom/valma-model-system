@@ -27,8 +27,57 @@
 	},
 	"demand_share": {},
     "route_choice": {
-        "size": 1.0,
-        "constant": {},
-        "impedance": {}
+		"constant": {
+            "land_border": [
+                3.21, 
+                ["FIKIL", "FITOR"]
+            ],
+            "container_ship": {
+                "first_class": [
+                    -0.1914,
+                    ["FIRAU", "FIHMN", "FIHEL"]
+                ],
+                "second_class": [
+                    -5.925,
+                    ["FIOUL", "FIKEM"]
+                ]
+            },
+            "general_cargo": {
+                "first_class": [
+                    -0.4537,
+                    ["FIRAA", "FIKOK", "FIKEM", "FIRAU", "FIHMN"]
+                ],
+                "second_class": [
+                    -0.9546,
+                    ["FIUKI", "FITKU", "FIPOR", "FIKAS", "FIINK", "FIHEL"]
+                ]
+            },
+            "roro_vessel": {
+                "first_class": [
+                    0.2957,
+                    ["FIHKO", "FIHEL"]
+                ],
+                "second_class": [
+                    -0.4406,
+                    ["FIVAA", "FIUKI", "FITKU", "FIRAU", "FIHMN"]
+                ]
+            },
+            "product_tanker": {
+                "first_class": [
+                    3.407,
+                    ["FISKV"]
+                ],
+                "second_class": [
+                    0.2439, 
+                    ["FITKU", "FIPOR", "FIHMN"]
+                ]
+            }
+		},
+		"impedance": {
+			"leg_one_cost": -0.00000005643,
+			"leg_two_cost": -0.00000005643,
+			"leg_three_cost": -0.02575,
+            "leg_two_frequency": 0.000299
+		}
     }
 }

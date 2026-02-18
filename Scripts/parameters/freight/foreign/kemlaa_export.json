@@ -27,7 +27,6 @@
 	},
 	"demand_share": {},
     "route_choice": {
-		"size": 1.0,
 		"constant": {
             "land_border": [
                 1.459, 
@@ -77,8 +76,8 @@
 		"impedance": {
 			"leg_one_cost": -0.000000001157,
 			"leg_two_cost": -0.000000001157,
-            "leg_two_frequency": 0.0001383,
-			"leg_three_cost": -0.000000001157
+			"leg_three_cost": -0.000000001157,
+            "leg_two_frequency": 0.0001383
 		}
     }
 }

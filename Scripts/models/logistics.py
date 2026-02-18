@@ -10,7 +10,6 @@ class FreightDetourInference:
         self.impedance = impedance
         self.constant = model_parameters["constant"]
         self.impedance_coeff = model_parameters["impedance"]
-        self.size = model_parameters["size"]
         self.batch_size = 15
         self.max_workers = 16
 
@@ -33,7 +32,7 @@ class LogisticsModule(FreightDetourInference):
                  lc_indices: np.ndarray, lc_sizes: np.ndarray):
         FreightDetourInference.__init__(self, costs, model_parameters)
         self.lc_indices = lc_indices
-        self.size *= np.log(lc_sizes)
+        self.size = model_parameters["size"] * np.log(lc_sizes)
         self.scale = 5.0
 
     def compute_utilities(self, origin_indices: np.ndarray, 
@@ -127,15 +126,16 @@ class LogisticsModule(FreightDetourInference):
 
 class TradeRouteModule(FreightDetourInference):
     def __init__(self, impedance: Dict[str, np.ndarray], model_parameters: dict, 
-                 fin_borders: dict):
+                 fin_borders: dict, is_export: bool):
         FreightDetourInference.__init__(self, impedance, model_parameters)
         self.fin_borders = fin_borders # Finland border - zone index
+        self.is_export = is_export
         self.leg2_modes = list(impedance["leg_two"])
 
     def compute_utilities(self, origin_indices: np.ndarray, 
-                          cluster_indices: np.ndarray) -> Tuple[np.ndarray]:
+                          dest_indices: np.ndarray) -> Tuple[np.ndarray]:
         """Compute utility components for the three legs used in trade route choice
-        origin - origin BCP - destination BCP - cluster
+        origin - origin BCP - destination BCP - destination
         
         Returns
         -------
@@ -145,7 +145,7 @@ class TradeRouteModule(FreightDetourInference):
             leg three: dest BCP -> destinations
         """
         origin_indices = np.asarray(origin_indices, dtype=np.int32)
-        cluster_indices = np.asarray(cluster_indices, dtype=np.int32)
+        dest_indices = np.asarray(dest_indices, dtype=np.int32)
         split1_mode_len = len(self.impedance["leg_one"])
 
         util_parts_one = {}
@@ -168,7 +168,7 @@ class TradeRouteModule(FreightDetourInference):
             util_parts_two[mode] = np.repeat(util_two, repeats=split1_mode_len, axis=0)
         util_two = np.concatenate(list(util_parts_two.values()), axis=1)
 
-        truck_leg_three_mtx = self.impedance["leg_three"]["truck"]["cost"][:, cluster_indices]
+        truck_leg_three_mtx = self.impedance["leg_three"]["truck"]["cost"][:, dest_indices]
         util_three = (self.impedance_coeff["leg_three_cost"] * truck_leg_three_mtx).T
         util_three = np.concatenate([util_three] * len(self.leg2_modes), axis=1)
         return util_one, util_two, util_three
@@ -192,8 +192,11 @@ class TradeRouteModule(FreightDetourInference):
             border_constants.update(
                 {border: self.constant["land_border"][0] for border in borders})
         for border, constant in border_constants.items():
-            row_idx = self.fin_borders[border]
-            constants_mtx[row_idx, :] += constant
+            idx = self.fin_borders[border]
+            if self.is_export:
+                constants_mtx[idx, :] += constant
+            else:
+                constants_mtx[:, idx] += constant
         return constants_mtx
 
     def forward(self, probs_indices: np.ndarray, n_orig_bcp: int) -> Tuple[np.ndarray]:
@@ -206,8 +209,8 @@ class TradeRouteModule(FreightDetourInference):
             probability of choosing lower alternative j given choice of i
         """
         origin_set = probs_indices[:, 0]
-        cluster_set = probs_indices[:, 1]
-        util_one, util_two, util_three = self.compute_utilities(origin_set, cluster_set)
+        dest_set = probs_indices[:, 1]
+        util_one, util_two, util_three = self.compute_utilities(origin_set, dest_set)
 
         n_origin, n_orig_alt = util_one.shape
         n_dest_bcp_alt = util_two.shape[1]
@@ -232,7 +235,7 @@ class TradeRouteModule(FreightDetourInference):
         np.divide(route_probs, denom, out=prob_bottom, where=denom > 0.0)
         return prob_top, prob_bottom
 
-    def process_batch(self, origin_offset: int, n_origin: int, n_cluster: int, 
+    def process_batch(self, origin_offset: int, n_origin: int, n_dest: int, 
                       n_orig_bcp: int, n_dest_bcp: int, demand: np.ndarray, 
                       flow_leg1: np.ndarray, flow_leg2: np.ndarray, 
                       flow_leg3: np.ndarray, lock: Lock) -> None:
@@ -240,16 +243,16 @@ class TradeRouteModule(FreightDetourInference):
         current_batch_size = min(self.batch_size, n_origin - origin_offset)
         origin_indices = np.arange(origin_offset, origin_offset + current_batch_size,
                                    dtype=np.int32)
-        cluster_indices = np.arange(n_cluster, dtype=np.int32)
-        o_grid, c_grid = np.meshgrid(origin_indices, cluster_indices, indexing='ij')
+        dest_indices = np.arange(n_dest, dtype=np.int32)
+        o_grid, c_grid = np.meshgrid(origin_indices, dest_indices, indexing='ij')
         eval_indices = np.stack([o_grid.ravel(), c_grid.ravel()], axis=1)
         prob_top, prob_bottom = self.forward(eval_indices, n_orig_bcp)
         
         n_orig_bcp_alt = prob_top.shape[1]
         dest_bcp_alt = prob_bottom.shape[2]
-        prob_top_batch = prob_top.reshape(current_batch_size, n_cluster, n_orig_bcp_alt)
-        prob_bottom_batch = prob_bottom.reshape(current_batch_size, n_cluster,
-                                          n_orig_bcp_alt, dest_bcp_alt)
+        prob_top_batch = prob_top.reshape(current_batch_size, n_dest, n_orig_bcp_alt)
+        prob_bottom_batch = prob_bottom.reshape(current_batch_size, n_dest,
+                                                n_orig_bcp_alt, dest_bcp_alt)
         demand_batch = demand[origin_offset:origin_offset + current_batch_size, :]
         demand_routed = (
             demand_batch[:, :, None, None]
@@ -264,12 +267,12 @@ class TradeRouteModule(FreightDetourInference):
             len(self.impedance["leg_one"]), n_orig_bcp,
             n_dest_bcp * len(self.leg2_modes)).sum(axis=0)
 
-        # Flows by cluster and leg3 alternatives
-        cluster_flow = np.sum(demand_routed, axis=0)
-        cluster_flow = np.sum(cluster_flow, axis=1)
-        flow_leg3_batch = cluster_flow.T
+        # Flows by dest and leg3 alternatives
+        dest_flow = np.sum(demand_routed, axis=0)
+        dest_flow = np.sum(dest_flow, axis=1)
+        flow_leg3_batch = dest_flow.T
         flow_leg3_batch = flow_leg3_batch.reshape(
-            len(self.leg2_modes), n_dest_bcp, n_cluster).sum(axis=0)
+            len(self.leg2_modes), n_dest_bcp, n_dest).sum(axis=0)
 
         with lock:
             flow_leg1[origin_offset:origin_offset + current_batch_size, :] += flow_leg1_batch
@@ -349,21 +352,19 @@ def run_trade_model(model: TradeRouteModule, demand: np.ndarray):
         mode : np.ndarray, demand from origin BCP -> destination BCP
         mode : np.ndarray, demand from destination BCP -> destination
     """
-    n_origin, n_cluster = demand.shape
+    n_origin, n_dest = demand.shape
     n_orig_bcp = model.impedance["leg_one"]["truck"]["cost"].shape[1]
     n_dest_bcp = model.impedance["leg_three"]["truck"]["cost"].shape[0]
-    
     leg1_modes = list(model.impedance["leg_one"])
-    k_orig_dims = n_orig_bcp * len(leg1_modes)
-    k_dest_dims = n_dest_bcp * len(model.leg2_modes)
+    leg3_modes = list(model.impedance["leg_three"])
     
-    flow_leg1 = np.zeros((n_origin, k_orig_dims), dtype=np.float32)
-    flow_leg2 = np.zeros((n_orig_bcp, k_dest_dims), dtype=np.float32)
-    flow_leg3 = np.zeros((n_dest_bcp, n_cluster), dtype=np.float32)
+    flow_leg1 = np.zeros((n_origin, n_orig_bcp * len(leg1_modes)), dtype=np.float32)
+    flow_leg2 = np.zeros((n_orig_bcp, n_dest_bcp * len(model.leg2_modes)), dtype=np.float32)
+    flow_leg3 = np.zeros((n_dest_bcp * len(leg3_modes), n_dest), dtype=np.float32)
     lock = Lock()
     
     batch_args = [
-        (offset, n_origin, n_cluster, n_orig_bcp, n_dest_bcp, demand, 
+        (offset, n_origin, n_dest, n_orig_bcp, n_dest_bcp, demand, 
          flow_leg1, flow_leg2, flow_leg3, lock)
         for offset in range(0, n_origin, model.batch_size)
     ]
@@ -373,8 +374,8 @@ def run_trade_model(model: TradeRouteModule, demand: np.ndarray):
 
     flow_leg1_matrices = {}
     for i, mode in enumerate(leg1_modes):
-        sl = slice(i * n_orig_bcp, (i + 1) * n_orig_bcp)
-        flow_leg1_matrices[mode] = flow_leg1[:, sl]
+        col = slice(i * n_orig_bcp, (i + 1) * n_orig_bcp)
+        flow_leg1_matrices[mode] = flow_leg1[:, col]
 
     flow_leg2_matrices = {}
     for i, mode in enumerate(model.leg2_modes):
