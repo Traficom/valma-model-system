@@ -130,7 +130,9 @@ class TradeRouteModule(FreightDetourInference):
         FreightDetourInference.__init__(self, impedance, model_parameters)
         self.fin_borders = fin_borders # Finland border - zone index
         self.is_export = is_export
+        self.leg1_modes = list(impedance["leg_one"])
         self.leg2_modes = list(impedance["leg_two"])
+        self.leg3_modes = list(impedance["leg_three"])
 
     def compute_utilities(self, origin_indices: np.ndarray, 
                           dest_indices: np.ndarray) -> Tuple[np.ndarray]:
@@ -146,10 +148,9 @@ class TradeRouteModule(FreightDetourInference):
         """
         origin_indices = np.asarray(origin_indices, dtype=np.int32)
         dest_indices = np.asarray(dest_indices, dtype=np.int32)
-        split1_mode_len = len(self.impedance["leg_one"])
 
         util_parts_one = {}
-        for mode in self.impedance["leg_one"]:
+        for mode in self.leg1_modes:
             cost_mtx = self.impedance["leg_one"][mode]["cost"]
             util_one = self.impedance_coeff["leg_one_cost"] * cost_mtx[origin_indices, :]
             util_parts_one[mode] = util_one
@@ -165,12 +166,15 @@ class TradeRouteModule(FreightDetourInference):
                 freq_mtx = item["frequency"]
                 freq_mtx[freq_mtx == np.inf] = -np.inf
                 util_two += self.impedance_coeff["leg_two_frequency"] * freq_mtx
-            util_parts_two[mode] = np.repeat(util_two, repeats=split1_mode_len, axis=0)
+            util_parts_two[mode] = np.repeat(util_two, repeats=len(self.leg1_modes), axis=0)
         util_two = np.concatenate(list(util_parts_two.values()), axis=1)
 
-        truck_leg_three_mtx = self.impedance["leg_three"]["truck"]["cost"][:, dest_indices]
-        util_three = (self.impedance_coeff["leg_three_cost"] * truck_leg_three_mtx).T
-        util_three = np.concatenate([util_three] * len(self.leg2_modes), axis=1)
+        util_parts_three = {}
+        for mode in self.leg3_modes:
+            cost_mtx = self.impedance["leg_three"]["truck"]["cost"]
+            util_three = (self.impedance_coeff["leg_three_cost"] * cost_mtx[:, dest_indices]).T
+            util_parts_three[mode] = util_three
+        util_three = np.concatenate(list(util_parts_three.values()) * len(self.leg2_modes), axis=1)
         return util_one, util_two, util_three
 
     def add_constants(self, mode, util_two_shape) -> np.ndarray:
@@ -214,7 +218,7 @@ class TradeRouteModule(FreightDetourInference):
 
         n_origin, n_orig_alt = util_one.shape
         n_dest_bcp_alt = util_two.shape[1]
-        util_two = util_two.reshape(len(self.impedance["leg_one"]), n_orig_bcp, n_dest_bcp_alt)
+        util_two = util_two.reshape(len(self.leg1_modes), n_orig_bcp, n_dest_bcp_alt)
         # swap axes 0 and 1 to get (n_orig_bcp, leg1_modes, n_dest_bcp_alt)
         util_two = np.moveaxis(util_two, 0, 1)
         # flatten to (n_top_alts, n_dest_bcp_alt) where n_top_alts == leg1_modes * n_orig_bcp
@@ -355,12 +359,10 @@ def run_trade_model(model: TradeRouteModule, demand: np.ndarray):
     n_origin, n_dest = demand.shape
     n_orig_bcp = model.impedance["leg_one"]["truck"]["cost"].shape[1]
     n_dest_bcp = model.impedance["leg_three"]["truck"]["cost"].shape[0]
-    leg1_modes = list(model.impedance["leg_one"])
-    leg3_modes = list(model.impedance["leg_three"])
     
-    flow_leg1 = np.zeros((n_origin, n_orig_bcp * len(leg1_modes)), dtype=np.float32)
+    flow_leg1 = np.zeros((n_origin, n_orig_bcp * len(model.leg1_modes)), dtype=np.float32)
     flow_leg2 = np.zeros((n_orig_bcp, n_dest_bcp * len(model.leg2_modes)), dtype=np.float32)
-    flow_leg3 = np.zeros((n_dest_bcp * len(leg3_modes), n_dest), dtype=np.float32)
+    flow_leg3 = np.zeros((n_dest_bcp * len(model.leg3_modes), n_dest), dtype=np.float32)
     lock = Lock()
     
     batch_args = [
@@ -372,15 +374,10 @@ def run_trade_model(model: TradeRouteModule, demand: np.ndarray):
         futures = [executor.submit(model.process_batch, *args) for args in batch_args]
         _ = [f.result() for f in futures]
 
-    flow_leg1_matrices = {}
-    for i, mode in enumerate(leg1_modes):
-        col = slice(i * n_orig_bcp, (i + 1) * n_orig_bcp)
-        flow_leg1_matrices[mode] = flow_leg1[:, col]
-
+    flow_leg1_matrices = {"truck": flow_leg1}
+    flow_leg3_matrices = {"truck": flow_leg3}
     flow_leg2_matrices = {}
     for i, mode in enumerate(model.leg2_modes):
         col = slice(i * n_dest_bcp, (i + 1) * n_dest_bcp)
         flow_leg2_matrices[mode] = flow_leg2[:, col]
-    
-    flow_leg3_matrices = {"truck": flow_leg3}
     return flow_leg1_matrices, flow_leg2_matrices, flow_leg3_matrices
