@@ -115,5 +115,6 @@ class DemandModel:
         for key in prob:
             for nr in prob[key]:
                 result[f"{key}*car{nr}"] = prob[key][nr]
-        self.resultdata.print_data(result, "zone_car_ownership_by_segment.txt")
+        result_df = pandas.DataFrame(result, index=self.zone_data.zone_numbers)
+        self.resultdata.print_data(result_df, "zone_car_ownership_by_segment.txt")
         log.info("Segmented car-ownership values calculated.")
