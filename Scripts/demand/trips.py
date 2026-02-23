@@ -96,5 +96,7 @@ class DemandModel:
                         f"{hh_type},cars{n_cars},{national_share}", "car_ownership")
                     result[f"sh_cars{n_cars}"] += (prob[hh_type][str(n_cars)]
                                                    * zd[f"sh_{hh_type}"])
+        # Add non-license households to zero-car share
+        result[f"sh_cars0"] += 1 - sum(zd[f"sh_{hh_type}"] for hh_type in prob)
         self.resultdata.print_data(result, "zone_car_ownership.txt")
         log.info("New car-ownership values calculated.")
