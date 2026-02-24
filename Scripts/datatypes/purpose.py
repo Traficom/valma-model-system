@@ -760,8 +760,8 @@ class FreightPurpose(Purpose):
 
         masks = (fin_zones, fin_borders, cluster_borders, cluster_zones)
         leg_modes = (
-            ("truck",),  # finland domestic leg
-            ("truck",),  # international land leg
+            ("truck", "freight_train"),  # finland domestic leg
+            ("truck", "freight_train"),  # international land leg
             ("truck",)  # foreign domestic leg
         )
         if not self.is_export:

@@ -53,6 +53,7 @@ def main(args):
     impedance = ass_model.freight_network.assign()
     
     log.info("Read marine ship impedances from network")
+    trade_demand = {}
     marine_export = ass_model.freight_network.read_ship_impedances(True)
     marine_import = ass_model.freight_network.read_ship_impedances(False)
     for purpose in purposes.values():
@@ -63,6 +64,7 @@ def main(args):
         else:
             demand = purpose.run_trade_route_module(impedance, *marine_import,
                                                     trade_demand_path)
+        trade_demand[purpose.name] = demand
     marine_export, marine_import = None, None
 
     # prepare domestic model by splicing impedances and initializing final demand matrix 
