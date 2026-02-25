@@ -20,7 +20,6 @@ class ResultsData:
         self.path.mkdir(parents=True, exist_ok=True)
         self._line_buffer: Dict[str, Any] = {}
         self._df_buffer: Dict[str, Any] = {}
-        self._xlsx_buffer: Dict[str, Any] = {}
 
     def flush(self):
         """Save to files and empty buffers."""
@@ -32,9 +31,6 @@ class ResultsData:
                 self.path / filename, sep='\t', float_format="%1.5f",
                 header=True)
         self._df_buffer = {}
-        for filename in self._xlsx_buffer:
-            self._xlsx_buffer[filename].close()
-        self._xlsx_buffer = {}
 
     def print_data(self,
                    data: Union[pandas.Series, pandas.DataFrame],
@@ -106,20 +102,6 @@ class ResultsData:
         description : str
             Description of data
         """
-        try:
-            # Get/create new workbook
-            if filename not in self._xlsx_buffer:
-                self._xlsx_buffer[filename] = pandas.ExcelWriter(
-                    self.path / f"{filename}.xlsx")
-        except ModuleNotFoundError:
-            # Do not save data if no openpyxl package available
-            pass
-        else:
-            for key, df in data.items():
-                df.to_excel(
-                    self._xlsx_buffer[filename],
-                    sheet_name=f"{description}_{key}")
-        # Create text file
         stacked_matrices = pandas.concat(
              {(description, key): df.stack() for key, df in data.items()},
             names=["purpose", "mode", "orig", "dest"])
