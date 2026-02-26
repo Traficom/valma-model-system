@@ -67,24 +67,36 @@ class DemandModel:
         zd = self.zone_data
         prob = {hh_size: model.calc_prob()
             for hh_size, model in self.car_ownership_models.items()}
-        zd.share["sh_cars1_hh1"] = zd["sh_pop_hh1"]*prob["hh1"]["1"]
-        zd.share["sh_cars1_hh2"] = (zd["sh_pop_hh2"]*prob["hh2"]["1"]
-                                    + zd["sh_pop_hh3"]*prob["hh3"]["1"])
-        zd.share["sh_cars2_hh2"] = (zd["sh_pop_hh2"]*prob["hh2"]["2"]
-                                    + zd["sh_pop_hh3"]*prob["hh3"]["2"])
+        # The following shares of the population have own dummies in
+        # mode-choice models.
+        # They represent shares of the population living
+        # in households with given number of cars and *persons*.
+        # TODO: Re-estimate mode and destination choice models with
+        # household shares based on number of *adults*.
+        hh_cars1_adult1 = zd["sh_pop_hh1_lic1"] * prob["hh1_lic1"]["1"]
+        zd.share["sh_cars1_hh1"] = (zd["sh_hh_1_adult_no_children"]
+                                    * hh_cars1_adult1)
+        zd.share["sh_cars1_hh2"] = (zd["sh_hh_1_adult_children"]*hh_cars1_adult1
+                                    + zd["sh_pop_hh2_lic1"]*prob["hh2_lic1"]["1"]
+                                    + zd["sh_pop_hh2_lic2"]*prob["hh2_lic2"]["1"])
+        zd.share["sh_cars2_hh2"] = zd["sh_pop_hh2_lic2"]*prob["hh2_lic2"]["2"]
         zd.share["sh_car"] = (zd["sh_cars1_hh1"]
                               + zd["sh_cars1_hh2"]
                               + zd["sh_cars2_hh2"])
         result = {"cars": numpy.zeros_like(zd["population"])}
         for n_cars in range(3):
             result[f"sh_cars{n_cars}"] = numpy.zeros_like(zd["population"])
-            for hh_size in prob:
-                if str(n_cars) in prob[hh_size]:
-                    hh_car = prob[hh_size][str(n_cars)] * zd[hh_size]
+            for hh_type in prob:
+                households = zd[f"sh_{hh_type}"] * zd["households"]
+                if str(n_cars) in prob[hh_type]:
+                    hh_car = prob[hh_type][str(n_cars)] * households
                     result["cars"] += hh_car * n_cars
-                    national_share = sum(hh_car) / sum(zd[hh_size])
+                    national_share = sum(hh_car) / sum(households)
                     self.resultdata.print_line(
-                        f"{hh_size},cars{n_cars},{national_share}", "car_ownership")
-                    result[f"sh_cars{n_cars}"] += prob[hh_size][str(n_cars)] * zd[f"sh_{hh_size}"]                
+                        f"{hh_type},cars{n_cars},{national_share}", "car_ownership")
+                    result[f"sh_cars{n_cars}"] += (prob[hh_type][str(n_cars)]
+                                                   * zd[f"sh_{hh_type}"])
+        # Add non-license households to zero-car share
+        result[f"sh_cars0"] += 1 - sum(zd[f"sh_{hh_type}"] for hh_type in prob)
         self.resultdata.print_data(result, "zone_car_ownership.txt")
         log.info("New car-ownership values calculated.")

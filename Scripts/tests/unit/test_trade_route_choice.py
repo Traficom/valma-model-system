@@ -30,8 +30,6 @@ class TradeRouteChoiceTest(unittest.TestCase):
         marine_modes = ("container_ship", "roro_vessel")
         origs_exp = {"FIHMN": 19401, "FIHNK": 4102}
         dests_exp = {"EETLL": 50107, "SESTO": 50127}
-        origs_imp = dests_exp.copy()
-        dests_imp = origs_exp.copy()
 
         zonedata = FreightZoneData(TEST_DATA_PATH / "freight_zonedata.gpkg", 
                                    numpy.array(ZONE_NUMBERS), "koko_suomi")
@@ -73,13 +71,9 @@ class TradeRouteChoiceTest(unittest.TestCase):
         ship_imps["roro_vessel"]["dist"][0][0] = 126
         ship_imps["roro_vessel"]["frequency"][0][0] = 162
 
-        marine_export = (ship_imps, origs_exp, dests_exp)
-        marine_import = (ship_imps, origs_imp, dests_imp)
         for purpose in purposes.values():
-            if purpose.is_export:
-                split_impedances = purpose.form_impedance_legs(impedance, *marine_export)
-            else:
-                split_impedances = purpose.form_impedance_legs(impedance, *marine_import)
+            split_impedances = purpose.form_impedance_legs(
+                impedance, ship_imps, origs_exp, dests_exp)
             self._assert_split_impedances(purpose.name, split_impedances, truck_name, 
                                           train_name, marine_modes)
 
