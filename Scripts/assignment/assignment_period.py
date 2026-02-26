@@ -385,9 +385,15 @@ class AssignmentPeriod(Period):
                         link.volume_delay_func = 91
                     else:
                         link.volume_delay_func = roadclass.volume_delay_func
-                link.data1 = roadclass.lane_capacity
-                link.data2 = roadclass.free_flow_speed
-                link[param.free_flow_time_attr] = (60 * link.length
+                if link["#traffic_light"] and roadclass.free_flow_speed < 65:
+                    link.data1 = roadclass.lane_capacity * param.traffic_light_capacity_factor
+                    link.data2 = roadclass.free_flow_speed * param.traffic_light_speed_factor
+                    link[param.free_flow_time_attr] = (60 * link.length
+                                                   / (roadclass.free_flow_speed * param.traffic_light_speed_factor))
+                else:
+                    link.data1 = roadclass.lane_capacity
+                    link.data2 = roadclass.free_flow_speed
+                    link[param.free_flow_time_attr] = (60 * link.length
                                                    / roadclass.free_flow_speed)
             elif linktype in param.custom_roadtypes:
                 # Custom car link
