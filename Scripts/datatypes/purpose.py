@@ -307,8 +307,8 @@ class TourPurpose(Purpose):
                     self, new_spec, self.generation_zone_data, resultdata)
         self.histograms = {mode: TourLengthHistogram(self.name)
             for mode in self.modes}
-        self.orig_mappings = self.generation_zone_data.aggregations.mappings
-        self.dest_mappings = self.attraction_zone_data.aggregations.mappings
+        self.orig_mappings = self.generation_zone_data.result_aggs.mappings
+        self.dest_mappings = self.attraction_zone_data.result_aggs.mappings
         self.aggregates = {name: {} for name in self.dest_mappings}
         self.within_zone_tours = {}
         self.sec_dest_purpose: SecDestPurpose = None
@@ -487,8 +487,8 @@ class TourPurpose(Purpose):
         tours = self.gen_model.get_tours()
         if prob is None:
             prob = self.model.calc_prob_again()
-        orig_agg = self.generation_zone_data.aggregations
-        dest_agg = self.attraction_zone_data.aggregations
+        orig_agg = self.generation_zone_data.result_aggs
+        dest_agg = self.attraction_zone_data.result_aggs
         for mode in self.modes:
             mtx = (prob.pop(mode) * tours).T
             try:
