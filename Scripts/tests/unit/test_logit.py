@@ -32,12 +32,7 @@ class LogitModelTest(unittest.TestCase):
         mtx.shape = (24, 30)
         mtx[numpy.diag_indices(24)] = 0
         impedance = {
-            "car_work": {
-                "time": mtx,
-                "cost": mtx,
-                "dist": mtx,
-            },
-            "car_leisure": {
+            "car_drv": {
                 "time": mtx,
                 "cost": mtx,
                 "dist": mtx,
@@ -47,12 +42,7 @@ class LogitModelTest(unittest.TestCase):
                 "cost": mtx,
                 "dist": mtx,
             },
-            "transit_work": {
-                "time": mtx,
-                "cost": mtx,
-                "dist": mtx,
-            },
-            "transit_leisure": {
+            "transit": {
                 "time": mtx,
                 "cost": mtx,
                 "dist": mtx,
@@ -79,10 +69,10 @@ class LogitModelTest(unittest.TestCase):
                     else ModeDestModel(*args))
                 prob = model.calc_prob(impedance)
                 if parameters["dest"] in ("work"):
-                    for mode in ("car_work", "transit_work", "bike", "walk"):
+                    for mode in ("car_drv", "transit", "bike", "walk"):
                         self._validate(prob[mode])
                 else:
-                    for mode in ("car_leisure", "transit_leisure", "bike", "walk"):
+                    for mode in ("car_drv", "transit", "bike", "walk"):
                         self._validate(prob[mode])
 
     def _validate(self, prob):

@@ -17,7 +17,7 @@
         "hb_visit": 0.0544
     },
     "impedance_share": {
-        "car_leisure": {
+        "car_drv": {
             "aht": [
                 0.0171,
                 0.0048
@@ -45,7 +45,7 @@
                 0.3497
             ]
         },
-        "transit_leisure": {
+        "transit": {
             "aht": [
                 0.0171,
                 0.0048
@@ -77,7 +77,7 @@
         }
     },
     "distance_boundaries": {
-        "car_leisure": [
+        "car_drv": [
             0,
             100
         ],
@@ -85,7 +85,7 @@
             0,
             100
         ],
-        "transit_leisure": [
+        "transit": [
             0,
             100
         ],
@@ -99,7 +99,7 @@
         ]
     },
     "destination_choice": {
-        "car_leisure": {
+        "car_drv": {
             "attraction": {
                 "time*within_zone": -0.1035
             },
@@ -131,7 +131,7 @@
                 "wrk_hospitality": 1.1853
             }
         },
-        "transit_leisure": {
+        "transit": {
             "attraction": {
                 "within_zone_inf": -1
             },
@@ -181,7 +181,7 @@
         }
     },
     "mode_choice": {
-        "car_leisure": {
+        "car_drv": {
             "constant": -4.929,
             "generation": {},
             "attraction": {},
@@ -190,7 +190,7 @@
                 "logsum": 0.2114
             },
             "individual_dummy": {
-                "ob_other_parent_car_leisure_share": 10.57
+                "ob_other_parent_car_drv_share": 10.57
             }
         },
         "car_pax": {
@@ -205,7 +205,7 @@
                 "ob_other_parent_car_pax_share": 5.637
             }
         },
-        "transit_leisure": {
+        "transit": {
             "constant": -9.429,
             "generation": {},
             "attraction": {},
@@ -238,10 +238,10 @@
             "individual_dummy": {}
         },
         "scaling": {
-            "car_leisure": {
+            "car_drv": {
                 "constant": 0.2114,
                 "individual_dummy": {
-                    "ob_other_parent_car_leisure_share": 0.2114
+                    "ob_other_parent_car_drv_share": 0.2114
                 }
             },
             "car_pax": {
@@ -250,7 +250,7 @@
                     "ob_other_parent_car_pax_share": 0.2114
                 }
             },
-            "transit_leisure": {
+            "transit": {
                 "constant": 0.2114
             },
             "bike": {

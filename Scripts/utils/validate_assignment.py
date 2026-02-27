@@ -34,7 +34,7 @@ def output_od_los(los_mtx: numpy.ndarray,
     mtx_type : str
         Type (time/cost/dist/...)
     mode : str
-        Assignment class (car_work/transit_leisure/...)
+        Assignment class (car/transit/...)
     """
     los = int(los_mtx[mapping[202], mapping[17278]])
     los = f"{los//60}h {los%60}min" if "time" in mtx_type else los

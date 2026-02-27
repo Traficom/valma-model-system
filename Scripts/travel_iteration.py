@@ -103,7 +103,7 @@ class ModelSystem:
                 zone_data_path, self.zone_numbers, submodel,
                 model_area=model_area, municipality_calibration=municip_calib,
                 extra_dummies=extra_dummies,
-                car_dist_cost=self.car_dist_cost["car_work"]
+                car_dist_cost=self.car_dist_cost["car"]
             ) for model_area in ["domestic"]}
 
         # Output data
@@ -159,6 +159,12 @@ class ModelSystem:
             + sec_dest_purposes)
         self.travel_modes = {mode: True for purpose in self.dm.tour_purposes
             for mode in purpose.modes}  # Dict instead of set, to preserve order
+        self.ass_classes = set()
+        for key in self.travel_modes.keys():
+            if key in ["car_drv", "car_pax"]:
+                self.ass_classes.add("car")
+            else: 
+                self.ass_classes.add(key)
         self.external_purpose = ExternalPurpose(numpy.array(self.zone_numbers))
         self.mode_share: List[Dict[str,Any]] = []
         self.convergence = []
@@ -182,7 +188,7 @@ class ModelSystem:
                     Impedance type (time/cost/dist)
                 value : dict
                     key : str
-                        Assignment class (car_work/transit/...)
+                        Assignment class (car_drv/transit/...)
                     value : numpy.ndarray
                         Impedance (float 2-d matrix)
         is_last_iteration : bool (optional)
@@ -201,13 +207,8 @@ class ModelSystem:
                             purpose, mode, purpose_impedance)
                 else:
                     self._distribute_sec_dests(
-                        purpose, "car_leisure", purpose_impedance)
+                        purpose, "car_drv", purpose_impedance)
             else:
-                if param.assignment_classes[purpose.name] == "leisure":
-                    for tp_imp in previous_iter_impedance.values():
-                        for imp in tp_imp.values():
-                            for mode in ("car_work", "transit_work"):
-                                imp.pop(mode, None)
                 for mode_demand in purpose.calc_demand(
                         previous_iter_impedance, is_last_iteration):
                     self.dtm.add_demand(mode_demand)
@@ -313,7 +314,7 @@ class ModelSystem:
             ap.assign_trucks_init()
             impedance[tp] = (ap.end_assign(not is_car_end_assignment)
                              if is_end_assignment
-                             else ap.assign(self.travel_modes))
+                             else ap.assign(self.ass_classes))
             if is_end_assignment:
                 if not isinstance(self.ass_model, MockAssignmentModel):
                     self._save_to_omx(impedance[tp], tp)
@@ -406,7 +407,7 @@ class ModelSystem:
             tp = ap.name
             log.info(f"--- ASSIGNING PERIOD {tp.upper()} ---")
             impedance[tp] = (ap.end_assign() if iteration=="last"
-                             else ap.assign(self.travel_modes))
+                             else ap.assign(self.ass_classes))
             if iteration=="last":
                 if not isinstance(self.ass_model, MockAssignmentModel):
                     self._save_to_omx(impedance[tp], tp)

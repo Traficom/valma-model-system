@@ -102,7 +102,7 @@ class Purpose:
                     Impedance type (time/cost/dist)
                 value : dict
                     key : str
-                        Assignment class (car_work/transit/...)
+                        Assignment class (car/transit/...)
                     value : numpy.ndarray
                         Impedance (float 2-d matrix)
 
@@ -122,7 +122,10 @@ class Purpose:
         day_imp = defaultdict(lambda: defaultdict(float))
         for mode in self.impedance_share:
             share_sum = 0
-            ass_class = mode.replace("pax", assignment_classes[self.name])
+            if mode in ["car_drv", "car_pax"]:
+                ass_class = "car"
+            else:
+                ass_class = mode
             for time_period in self.impedance_share[mode]:
                 for mtx_type in impedance[time_period]:
                     if ass_class in impedance[time_period][mtx_type]:
@@ -171,7 +174,7 @@ class Purpose:
                                                     self.attraction_zone_data["avg_park_cost"].values)
                     except KeyError:
                         pass
-                if mtx_type == "cost" and mode in ["car_work", "car_leisure"]:
+                if mtx_type == "cost" and mode == "car_drv":
                     try:
                         day_imp[mode][mtx_type] *= (1 - cost.sharing_factor[self.name] *
                                                     (cost.car_drv_occupancy[self.name] - 1) /
