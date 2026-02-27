@@ -377,15 +377,6 @@ effective_headway_ld = {
 }
 
 ### ASSIGNMENT REFERENCES ###
-asymmetric_demand = {
-    "pt_car_acc": "pt_car_egr",
-    "pt_taxi_acc": "pt_taxi_egr",
-    "airpl_car_acc": "airpl_car_egr",
-    "pt_car_egr": "pt_car_acc",
-    "pt_taxi_egr": "pt_taxi_acc",
-    "airpl_car_egr": "airpl_car_acc"
-}
-
 time_periods = {
     "aht": "AssignmentPeriod",
     "pt": "OffPeakPeriod",
@@ -599,4 +590,36 @@ roadtypes = {
     5: "single-lane",
     11: "ferry",
     99: "connector",
+}
+# modes in choice model : impedance
+mode_impedance = {
+    "car_drv": "car", 
+    "car_pax": "car",
+    "transit": "transit",
+    "airplane": "airplane",
+    "bike": "bike",
+    "walk": "walk",
+    "pt_car_acc": "pt_car_acc",
+    "pt_taxi_acc": "pt_taxi_acc",
+    "airpl_car_acc": "airpl_car_acc",
+    "pt_car_egr": "pt_car_egr",
+    "pt_taxi_egr": "pt_taxi_egr",
+    "airpl_car_egr": "airpl_car_egr"
+
+}
+# modes in choice model : [assignment classes]
+mode_assignment_classes = {
+    "car_drv": ["car"], 
+    "car_pax": [],
+    "car": ["car"],
+    "transit": ["transit"],
+    "airplane": ["airplane"],
+    "bike": ["bike"],
+    "walk": ["walk"],
+    "pt_car_acc": ["pt_car_acc", "pt_car_egr"],
+    "pt_taxi_acc": ["pt_taxi_acc", "pt_taxi_egr"],
+    "airpl_car_acc": ["airpl_car_acc", "airpl_car_egr"],
+    "pt_car_egr": ["pt_car_egr", "pt_car_acc"],
+    "pt_taxi_egr": ["pt_taxi_egr", "pt_taxi_acc"],
+    "airpl_car_egr": ["airpl_car_egr", "airpl_car_acc"]
 }
