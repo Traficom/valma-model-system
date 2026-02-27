@@ -90,24 +90,28 @@ class DepartureTimeModel:
             Travel demand matrix or number of travellers
         """
         position: Sequence[int] = demand.position
+        if demand.mode == "car_drv":
+            ass_class = "car"
+        else: 
+            ass_class = demand.mode
         if len(position) == 2:
             share: Dict[str, Any] = demand.purpose.demand_share[demand.mode]
             for ap in self.assignment_periods:
-                if demand.mode in ap.assignment_modes:
+                if ass_class in ap.assignment_modes:
                     self._add_2d_demand(
-                        share[ap.name], demand.mode, ap.name,
+                        share[ap.name], ass_class, ap.name,
                         demand.matrix, position)
-            if demand.mode in asymmetric_demand:
-                mode = asymmetric_demand[demand.mode]
+            if ass_class in asymmetric_demand:
+                mode = asymmetric_demand[ass_class]
                 share: Dict[str, Any] = demand.purpose.demand_share[mode]
                 for ap in self.assignment_periods:
-                    if demand.mode in ap.assignment_modes:
+                    if ass_class in ap.assignment_modes:
                         self._add_2d_demand(
                             share[ap.name], mode, ap.name,
                             demand.matrix, position)
         elif len(position) == 3:
             for ap in self.assignment_periods:
-                if demand.mode in ap.assignment_modes:
+                if ass_class in ap.assignment_modes:
                     self._add_3d_demand(demand, demand.mode, ap.name)
         else:
             raise IndexError("Tuple position has wrong dimensions.")
