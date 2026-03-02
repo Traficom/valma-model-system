@@ -29,7 +29,7 @@
                 1.0
               ]
             },
-        "car_leisure": {
+        "car_drv": {
             "vrk": [
                 1.0,
                 1.0
@@ -47,7 +47,7 @@
                 1.0
               ]
             },
-        "transit_leisure": {
+        "transit": {
             "vrk": [
                 1.0,
                 1.0
@@ -89,7 +89,7 @@
             0,
             30
         ],
-        "car_leisure": [
+        "car_drv": [
             0,
             9999
         ],
@@ -113,7 +113,7 @@
             0,
             9999
         ],
-        "transit_leisure": [
+        "transit": [
             0,
             9999
         ],
@@ -146,7 +146,7 @@
         }
     },
     "mode_choice": {
-        "car_leisure": {
+        "car_drv": {
             "constant": -4.606,
             "generation": {},
             "transform": {
@@ -197,7 +197,7 @@
                 "sh_cars2_hh2": 1.534
             }
         },
-        "transit_leisure": {
+        "transit": {
             "constant": -2.349,
             "generation": {},
             "attraction": {
@@ -240,13 +240,13 @@
             "individual_dummy": {}
         },
         "calibration": {
-            "car_leisure": {
+            "car_drv": {
                 "constant": 0.049
             },
             "car_pax": {
                 "constant": -0.131
             },
-            "transit_leisure": {
+            "transit": {
                 "constant": 0.027
             },
             "airplane": {
@@ -339,8 +339,8 @@
                 "individual_dummy": {}
             }
         },
-        "transit_leisure": {
-            "transit_leisure": {
+        "transit": {
+            "transit": {
                 "constant": 0,
                 "generation": {},
                 "attraction": {},
@@ -428,7 +428,7 @@
                 1.0
               ]
         },
-        "car_leisure": {
+        "car_drv": {
             "vrk": [
                 1.0,
                 1.0
@@ -446,7 +446,7 @@
                 1.0
               ]
         },
-        "transit_leisure": {
+        "transit": {
             "vrk": [
                 1.0,
                 1.0

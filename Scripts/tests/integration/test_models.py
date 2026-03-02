@@ -56,8 +56,8 @@ class ModelTest(unittest.TestCase):
 
         # Check that model result does not change
         self.assertAlmostEquals(
-            model.mode_share[0]["car_work"] + model.mode_share[0]["car_leisure"],
-            0.33053171874722403)
+            model.mode_share[0]["car_drv"],
+            0.36184843739214073)
         
         print("Model system test done")
 
@@ -76,8 +76,8 @@ class ModelTest(unittest.TestCase):
 
         # Check that model result does not change
         self.assertAlmostEquals(
-            model.mode_share[0]["car_work"] + model.mode_share[0]["car_leisure"],
-            0.6362261891983951)
+            model.mode_share[0]["car_drv"],
+            0.6362125454172324)
 
     def _validate_impedances(self, impedances):
         self.assertIsNotNone(impedances)
@@ -87,11 +87,11 @@ class ModelTest(unittest.TestCase):
         self.assertIsNotNone(impedances["cost"])
         self.assertIsNotNone(impedances["dist"])
         self.assertIs(type(impedances["time"]), dict)
-        self.assertEquals(len(impedances["time"]), 6)
-        self.assertIsNotNone(impedances["time"]["transit_work"])
-        self.assertIs(type(impedances["time"]["transit_work"]), numpy.ndarray)
-        self.assertEquals(impedances["time"]["transit_work"].ndim, 2)
-        self.assertEquals(len(impedances["time"]["transit_work"]), 34)
+        self.assertEquals(len(impedances["time"]), 4)
+        self.assertIsNotNone(impedances["time"]["transit"])
+        self.assertIs(type(impedances["time"]["transit"]), numpy.ndarray)
+        self.assertEquals(impedances["time"]["transit"].ndim, 2)
+        self.assertEquals(len(impedances["time"]["transit"]), 34)
 
     def _validate_off_peak_impedances(self, impedances):
         self.assertIsNotNone(impedances)
@@ -99,10 +99,10 @@ class ModelTest(unittest.TestCase):
         self.assertIsNotNone(impedances["time"])
         self.assertIsNotNone(impedances["cost"])
         self.assertIs(type(impedances["time"]), dict)
-        self.assertIsNotNone(impedances["time"]["transit_work"])
-        self.assertIs(type(impedances["time"]["transit_work"]), numpy.ndarray)
-        self.assertEquals(impedances["time"]["transit_work"].ndim, 2)
-        self.assertEquals(len(impedances["time"]["transit_work"]), 34)
+        self.assertIsNotNone(impedances["time"]["transit"])
+        self.assertIs(type(impedances["time"]["transit"]), numpy.ndarray)
+        self.assertEquals(impedances["time"]["transit"].ndim, 2)
+        self.assertEquals(len(impedances["time"]["transit"]), 34)
 
     def _validate_demand(self, demand):
         self.assertIsNotNone(demand)

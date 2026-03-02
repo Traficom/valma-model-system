@@ -121,7 +121,7 @@ class MockPeriod(Period):
         -------
         dict
             Type (time/cost/dist) : dict
-                Assignment class (car_work/transit_leisure/...) : numpy 2-d matrix
+                Assignment class (car/transit/...) : numpy 2-d matrix
         """
         mtxs = self._get_impedances(modes)
         for ass_cl in param.car_classes + param.transit_classes:
@@ -139,7 +139,7 @@ class MockPeriod(Period):
         -------
         dict
             Type (time/cost/dist) : dict
-                Assignment class (car_work/transit_leisure/...) : numpy 2-d matrix
+                Assignment class (car/transit/...) : numpy 2-d matrix
         """
         return self._get_impedances(self._end_assignment_classes)
 
@@ -178,7 +178,7 @@ class MockPeriod(Period):
         Return
         ------
         dict
-            Subtype (car_work/truck/inv_time/...) : numpy 2-d matrix
+            Subtype (car/truck/inv_time/...) : numpy 2-d matrix
                 Matrix of the specified type
         """
         with self.matrices.open(
@@ -223,7 +223,7 @@ class WholeDayPeriod(MockPeriod):
         -------
         dict
             Type (time/cost/dist) : dict
-                Assignment class (car_work/transit_leisure/...) : numpy 2-d matrix
+                Assignment class (car/transit/...) : numpy 2-d matrix
         """
         return self._get_impedances(self.assignment_modes)
 
@@ -243,7 +243,7 @@ class OffPeakPeriod(MockPeriod):
         -------
         dict
             Type (time/cost/dist) : dict
-                Assignment class (car_work/transit_leisure/...) : numpy 2-d matrix
+                Assignment class (car/transit/...) : numpy 2-d matrix
         """
         self._end_assignment_classes.add("walk")
         return self._get_impedances(self._end_assignment_classes)
@@ -263,7 +263,7 @@ class TransitAssignmentPeriod(OffPeakPeriod):
         -------
         dict
             Type (time/cost/dist) : dict
-                Assignment class (transit_work/transit_leisure) : numpy 2-d matrix
+                Assignment class (transit) : numpy 2-d matrix
         """
         mtxs = self._get_impedances(param.local_transit_classes)
         del mtxs["dist"]

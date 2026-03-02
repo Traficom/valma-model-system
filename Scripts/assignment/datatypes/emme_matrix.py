@@ -27,7 +27,7 @@ class EmmeMatrix:
         name : str
             Short name (e.g., "time")
         description : str
-            Long name used in EMME (e.g., "time_transit_work_aht")
+            Long name used in EMME (e.g., "time_transit_aht")
         emme_project : assignment.emme_bindings.emme_project.EmmeProject
             Emme project connected to this assignment
         scenario_id : int

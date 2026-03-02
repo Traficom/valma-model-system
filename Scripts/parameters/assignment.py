@@ -30,7 +30,7 @@ roadclasses = {
     18: RoadClass("arterial", "any", 3, 1400, 97, 0.309),
     19: RoadClass("arterial", "any", 3, 1400, 90, 0.309),
     20: RoadClass("arterial", "any", 3, 1350, 81, 0.370),
-    21: RoadClass("arterial", "any", 3, 1450, 61, 0.492),
+    21: RoadClass("arterial", "any", 3, 1200, 58, 0.492),
     22: RoadClass("arterial", "any", 3, 1100, 73, 0.492),
     23: RoadClass("arterial", "any", 3, 1250, 54, 0.556),
     24: RoadClass("arterial", "any", 3, 1100, 63, 0.492),
@@ -43,16 +43,18 @@ roadclasses = {
     31: RoadClass("collector", "any", 5, 900, 41, 0.732),
     32: RoadClass("collector", "any", 5, 900, 36, 0.833),
     33: RoadClass("collector", "any", 5, 750, 36, 0.833),
-    34: RoadClass("collector", "any", 5, 700, 41, 0.732),
+    34: RoadClass("collector", "any", 5, 600, 36, 0.732),
     35: RoadClass("local", "any", 5, 700, 30, 1.000),
-    36: RoadClass("local", "any", 5, 600, 30, 1.000),
-    37: RoadClass("local", "any", 5, 500, 30, 1.000),
-    38: RoadClass("local", "any", 5, 500, 23, 1.304),
+    36: RoadClass("local", "any", 5, 600, 25, 1.000),
+    37: RoadClass("local", "any", 5, 550, 20, 1.000),
+    38: RoadClass("local", "any", 5, 500, 18, 1.304),
     39: RoadClass("local", "any", 5, 700, 20, 1.304),
-    40: RoadClass("local", "any", 5, 600, 20, 1.304),
-    41: RoadClass("local", "any", 5, 500, 20, 1.304),
+    40: RoadClass("local", "any", 5, 600, 15, 1.304),
+    41: RoadClass("local", "any", 5, 500, 12, 1.304),
     44: RoadClass("ferry", "any", 11, 500, 20, 1.000),
 }
+traffic_light_capacity_factor = 0.9
+traffic_light_speed_factor = 0.85
 connector_link_types = (84, 85, 86, 87, 88, 98, 99)
 connector = RoadClass("connector", "any", 99, 0, 50, 0)
 roadclasses.update({linktype: connector for linktype in connector_link_types})
@@ -147,6 +149,7 @@ performance_settings = {
 }
 # Inversed value of time [min/eur]
 vot_inv = {
+    "all": 8.721, # 1 / ((6.88 eur/h) / (60 min/h)) = 7.576 min/eur
     "work": 7.576, # 1 / ((7.92 eur/h) / (60 min/h)) = 7.576 min/eur
     "business": 2.439, # 1 / ((24.60 eur/h) / (60 min/h)) = 2.439 min/eur
     "leisure": 11.173, # 1 / ((5.37 eur/h) / (60 min/h)) = 11.173 min/eur
@@ -243,8 +246,6 @@ trass_stop = {
 }
 # Specification for the transit assignment
 transfer_penalty = {
-    "transit_work": 3,
-    "transit_leisure": 5,
     "transit": 5,
     "airplane": 5,
     "pt_car_acc": 5,
@@ -275,39 +276,11 @@ volume_factors = {
         "it": 0.3,
         "vrk": 1.0,
     },
-    "car_work": {
-        "aht": 0.436,
-        "pt": 0.100,
-        "iht": 0.481,
-        "it": 0.3,
-        "vrk": 1.0,
-    },
-    "car_leisure": {
-        "aht": 0.449,
-        "pt": 0.098,
-        "iht": 0.310,
-        "it": 0.3,
-        "vrk": 1.0,
-    },
     "transit": {
         "aht": 0.517,
         "pt": 0.167,
         "iht": 0.414,
         "it": 0.238,
-        "vrk": 1.0,
-    },
-    "transit_work": {
-        "aht": 0.521,
-        "pt": 0.167,
-        "iht": 0.444,
-        "it": 0.222,
-        "vrk": 1.0,
-    },
-    "transit_leisure": {
-        "aht": 0.417,
-        "pt": 0.167,
-        "iht": 0.345,
-        "it": 0.248,
         "vrk": 1.0,
     },
     "airplane": {
@@ -321,20 +294,6 @@ volume_factors = {
         "aht": 0.547,
         "pt": 0.110,
         "iht": 0.364,
-        "it": 0.3,
-        "vrk": 1.0,
-    },
-    "bike_work": {
-        "aht": 0.556,
-        "pt": 0.134,
-        "iht": 0.414,
-        "it": 0.3,
-        "vrk": 1.0,
-    },
-    "bike_leisure": {
-        "aht": 0.423,
-        "pt": 0.096,
-        "iht": 0.322,
         "it": 0.3,
         "vrk": 1.0,
     },
@@ -434,8 +393,7 @@ time_periods = {
     "it": "TransitAssignmentPeriod",
 }
 car_classes = (
-    "car_work",
-    "car_leisure",
+    "car",
 )
 car_and_van_classes = car_classes + ("van",)
 private_classes = car_and_van_classes + ("bike",)
@@ -456,8 +414,7 @@ long_dist_simple_classes = (
 long_distance_transit_classes = (mixed_mode_classes
                                  + long_dist_simple_classes)
 local_transit_classes = (
-    "transit_work",
-    "transit_leisure",
+    "transit",
 )
 simple_transit_classes = local_transit_classes + long_dist_simple_classes
 transit_classes = simple_transit_classes + mixed_mode_classes
@@ -471,8 +428,7 @@ simple_transport_classes = (private_classes
                             + truck_classes)
 transport_classes = simple_transport_classes + mixed_mode_classes
 intermodals = {
-    "transit_leisure": ["pt_car_acc", "pt_taxi_acc", "pt_taxi_egr"],
-    "transit_work": ["pt_car_acc", "pt_taxi_acc", "pt_taxi_egr"],
+    "transit": ["pt_car_acc", "pt_taxi_acc", "pt_taxi_egr"],
     "airplane": ["airpl_car_acc", "airpl_car_egr"],
 }
 assignment_classes = {
@@ -495,29 +451,26 @@ assignment_classes = {
 main_mode = 'h'
 bike_mode = 'f'
 assignment_modes = {
-    "car_work": 'c',
-    "car_leisure": 'c',
+    "car": 'c',
     "trailer_truck": 'y',
     "semi_trailer": 'y',
     "truck": 'k',
     "van": 'v',
 }
 vot_classes = {
-    "car_work": "work",
-    "car_leisure": "leisure",
+    "car": "all",
     "trailer_truck": "trailer_truck",
     "semi_trailer": "semi_trailer",
     "truck": "truck",
     "van": "business",
-    "transit_work": "work",
-    "transit_leisure": "leisure",
-    "airplane": "work",
-    "pt_car_acc": "work",
-    "pt_taxi_acc": "work",
-    "airpl_car_acc": "work",
-    "pt_car_egr": "work",
-    "pt_taxi_egr": "work",
-    "airpl_car_egr": "work",
+    "transit": "all",
+    "airplane": "all",
+    "pt_car_acc": "all",
+    "pt_taxi_acc": "all",
+    "airpl_car_acc": "all",
+    "pt_car_egr": "all",
+    "pt_taxi_egr": "all",
+    "airpl_car_egr": "all",
 }
 local_transit_modes = [
     'b',
@@ -530,8 +483,7 @@ local_transit_modes = [
     'e',
 ]
 long_dist_transit_modes = {
-    "transit_work": ['e', 'j'],
-    "transit_leisure": ['e', 'j'],
+    "transit": ['e', 'j'],
     "airplane": ['l'],
     "pt_car_acc": ['j'],
     "pt_taxi_acc": ['e', 'j'],
@@ -574,8 +526,8 @@ freight_marine_modes = {
     }
 }
 external_modes = [
-    "car_leisure",
-    "transit_leisure",
+    "car_drv",
+    "transit",
     "truck",
     "trailer_truck",
 ]

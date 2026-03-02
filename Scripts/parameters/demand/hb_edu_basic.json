@@ -37,7 +37,7 @@
                 0.306
             ]
         },
-        "transit_work": {
+        "transit": {
             "aht": [
                 0.827,
                 0.0071
@@ -73,7 +73,7 @@
             0,
             100
         ],
-        "transit_work": [
+        "transit": [
             0,
             100
         ],
@@ -102,7 +102,7 @@
                 "students_comprehensive*outside_municipality": 0.09461
             }
         },
-        "transit_work": {
+        "transit": {
             "attraction": {
                 "within_zone_inf": -1
             },
@@ -162,7 +162,7 @@
                 "sh_cars2_hh2": 3.155
             }
         },
-        "transit_work": {
+        "transit": {
             "constant": -4.529,
             "generation": {},
             "attraction": {},
@@ -200,7 +200,7 @@
                     "sh_cars2_hh2": 0.4605
                 }
             },
-            "transit_work": {
+            "transit": {
                 "constant": 0.4605
             },
             "bike": {

@@ -25,13 +25,13 @@ demand_share: Dict[str,Dict[str,Any]] = {
         },
     },
     "external": {
-        "car_work": {
+        "car": {
             "aht": (0.321, 0.0),
             "pt": (0.403, 0.0),
             "iht": (0.277, 0.0),
             "it": (0.0, 0.0),
         },
-        "car_leisure": {
+        "car_drv": {
             "aht": (0.0601, 0.0),
             "pt": (0.691, 0.0),
             "iht": (0.249, 0.0),
@@ -43,13 +43,7 @@ demand_share: Dict[str,Dict[str,Any]] = {
             "iht": (0.270, 0.0),
             "it": (0.203, 0.0),
         },
-        "transit_work": {
-            "aht": (0.200, 0.0),
-            "pt": (0.327, 0.0),
-            "iht": (0.270, 0.0),
-            "it": (0.203, 0.0),
-        },
-        "transit_leisure": {
+        "transit": {
             "aht": (0.200, 0.0),
             "pt": (0.327, 0.0),
             "iht": (0.270, 0.0),

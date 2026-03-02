@@ -19,8 +19,7 @@ class EmmeAssignmentTest(unittest.TestCase):
         self.scenario_id = 19
         self.context.import_scenario(scenario_dir, self.scenario_id, "test")
         self.dist_cost = {
-            "car_work": 0.12,
-            "car_leisure": 0.12,
+            "car": 0.12,
             "trailer_truck": 0.5,
             "semi_trailer": 0.4,
             "truck": 0.3,
@@ -45,10 +44,8 @@ class EmmeAssignmentTest(unittest.TestCase):
         nr_zones = ass_model.nr_zones
         car_matrix = numpy.arange(nr_zones**2).reshape(nr_zones, nr_zones)
         demand = [
-            "car_work",
-            "car_leisure",
-            "transit_work",
-            "transit_leisure",
+            "car",
+            "transit",
             "bike",
             "trailer_truck",
             "semi_trailer",
@@ -62,7 +59,7 @@ class EmmeAssignmentTest(unittest.TestCase):
                 if ass_class in ap.assignment_modes:
                     ap.set_matrix(ass_class, car_matrix)
             ap.assign_trucks_init()
-            imp = ap.assign(demand + ["car_pax"])
+            imp = ap.assign(demand)
             for mtx_type in imp:
                 for ass_class in imp[mtx_type]:
                     self.assertEqual(
@@ -80,10 +77,8 @@ class EmmeAssignmentTest(unittest.TestCase):
         nr_zones = ass_model.nr_zones
         car_matrix = numpy.arange(nr_zones**2).reshape(nr_zones, nr_zones)
         demand = [
-            "car_work",
-            "car_leisure",
-            "transit_work",
-            "transit_leisure",
+            "car",
+            "transit",
             "airplane",
             "pt_car_acc",
             "pt_taxi_acc",
@@ -94,7 +89,7 @@ class EmmeAssignmentTest(unittest.TestCase):
                 ap.set_matrix(
                     ass_class, car_matrix)
             ap.assign_trucks_init()
-            ap.assign(demand + ["car_pax"])
+            ap.assign(demand)
             ap.end_assign()
         ass_model.aggregate_results(self.resultdata)
 
