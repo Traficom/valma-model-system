@@ -57,7 +57,7 @@ def main(args):
     marine_export = ass_model.freight_network.read_ship_impedances(True)
     marine_import = ass_model.freight_network.read_ship_impedances(False)
     for purpose in purposes.values():
-        log.info(f"Calculating trade routes for foreign purpose: {purpose.name}")
+        log.info(f"Calculating trade route for purpose: {purpose.name}")
         if purpose.is_export:
             demand = purpose.run_trade_route_module(impedance, *marine_export,
                                                     trade_demand_path)
@@ -78,7 +78,7 @@ def main(args):
                                resultdata, costdata["freight"])
     # Run domestic demand calculation
     for purpose in purposes.values():
-        log.info(f"Calculating demand for domestic purpose: {purpose.name}")
+        log.info(f"Calculating demand for purpose: {purpose.name}")
         demand = purpose.calc_traffic(impedance)
         if purpose.route_params and args.logistics_iterations > 0:
             demand["truck"], _ = purpose.run_logistics_module(demand["truck"], impedance, 

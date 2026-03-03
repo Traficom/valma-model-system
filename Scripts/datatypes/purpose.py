@@ -760,8 +760,8 @@ class FreightPurpose(Purpose):
 
         masks = (fin_zones, fin_borders, cluster_borders, cluster_zones)
         leg_modes = (
-            ("truck", "freight_train"),  # finland domestic leg
-            ("truck", "freight_train"),  # international land leg
+            ("truck",),  # finland domestic leg
+            ("truck",),  # international land leg
             ("truck",)  # foreign domestic leg
         )
         if not self.is_export:
@@ -881,8 +881,9 @@ class FreightPurpose(Purpose):
 
         Returns
         -------
-        __type__
-            _description_
+        dict
+            Leg name (one/two/three) : Mode
+                Name (truck/container_ship...) : numpy 2d array
         """
         impedance_legs = self.form_impedance_legs(
             impedance, ship_imps, fin_border_ids, cluster_border_ids)

@@ -1,10 +1,10 @@
 {
-    "name": "kemlaa_import",
+    "name": "kummuo_export",
     "orig": "null",
     "dest": "null",
-    "generation_area": "foreign",
-    "attraction_area": "domestic",
-    "struct": "import",
+    "generation_area": "domestic",
+    "attraction_area": "foreign",
+    "struct": "export",
     "impedance_share": {},
     "distance_boundaries": {
         "truck": [
@@ -29,63 +29,55 @@
     "route_choice": {
 		"constant": {
             "truck": {
-                "east": [
-                    6.704, 
-                    ["FIVAI", "FIVAL", "FIVAR"]
-                ],
                 "west": [
-                    6.365, 
+                    1.459, 
                     ["FIKIL", "FITOR"]
                 ]
             },
             "container_ship": {
                 "first_class": [
-                    -2.102,
+                    1.634,
                     ["FIRAU", "FIHMN", "FIHEL"]
                 ],
                 "second_class": [
-                    -6.95,
+                    -0.07566,
                     ["FIOUL", "FIKEM"]
                 ]
             },
             "general_cargo": {
                 "first_class": [
-                    0.9581,
+                    1.136,
                     ["FIRAA", "FIKOK", "FIKEM", "FIRAU", "FIHMN"]
                 ],
                 "second_class": [
-                    0.4468,
+                    1.804,
                     ["FIUKI", "FITKU", "FIPOR", "FIKAS", "FIINK", "FIHEL"]
                 ]
             },
             "roro_vessel": {
                 "first_class": [
-                    1.912,
+                    0.7105,
                     ["FIHKO", "FIHEL"]
                 ],
                 "second_class": [
-                    1.279,
+                    0.3797,
                     ["FIVAA", "FIUKI", "FITKU", "FIRAU", "FIHMN"]
                 ]
             },
             "product_tanker": {
                 "first_class": [
-                    4.649,
+                    4.441,
                     ["FISKV"]
                 ],
                 "second_class": [
-                    1.685, 
+                    0.4698, 
                     ["FITKU", "FIPOR", "FIHMN"]
                 ]
             }
 		},
 		"impedance": {
-            "leg_cost": {
-                "leg_one": -0.006002,
-                "leg_two": -0.006002,
-                "leg_three": -0.04101
-            },
-            "leg_two_frequency": 0.0002915
+            "general_cost": -0.000000001157, 
+            "leg_two_frequency": 0.0001383
 		}
     }
 }

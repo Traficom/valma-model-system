@@ -1,0 +1,62 @@
+{
+    "name": "kalevi_export",
+    "orig": "null",
+    "dest": "null",
+    "generation_area": "domestic",
+    "attraction_area": "foreign",
+    "struct": "export",
+    "impedance_share": {},
+    "distance_boundaries": {
+        "truck": [
+            0,
+            9999
+        ],
+        "freight_train": [
+            0,
+            9999
+        ],
+        "ship": [
+            0,
+            9999
+        ]
+    },
+    "destination_choice": {},
+    "mode_choice": {
+		"truck": {},
+		"freight_train": {}
+	},
+	"demand_share": {},
+    "route_choice": {
+		"constant": {
+            "truck": {
+                "west": [
+                    3.669,
+                    ["FIKIL", "FITOR"]
+                ]
+            },
+            "container_ship": {
+                "base_class": [
+                    -1.933,
+                    ["FIOUL", "FIKEM", "FIRAU", "FIHMN", "FIHEL"]
+                ]
+            },
+            "general_cargo": {
+                "base_class": [
+                    1.991,
+                    ["FIUKI", "FITKU", "FIRAA", "FIPOR", "FIKOK", "FIKEM", "FIKAS",
+                     "FIINK", "FIRAU", "FIHMN", "FIHEL"]
+                ]
+            },
+            "roro_vessel": {
+                "base_class": [
+                    -2.048,
+                    ["FIVAA", "FIUKI", "FITKU", "FIHKO", "FIRAU", "FIHMN", "FIHEL"]
+                ]
+            }
+		},
+		"impedance": {
+            "general_cost": -0.001952,
+            "leg_two_frequency": 0.0003845
+		}
+    }
+}

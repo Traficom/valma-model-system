@@ -1,5 +1,5 @@
 {
-    "name": "kemlaa_import",
+    "name": "elint_import",
     "orig": "null",
     "dest": "null",
     "generation_area": "foreign",
@@ -29,63 +29,57 @@
     "route_choice": {
 		"constant": {
             "truck": {
-                "east": [
-                    6.704, 
-                    ["FIVAI", "FIVAL", "FIVAR"]
-                ],
                 "west": [
-                    6.365, 
+                    55.43,
                     ["FIKIL", "FITOR"]
                 ]
             },
             "container_ship": {
                 "first_class": [
-                    -2.102,
+                    1.98,
                     ["FIRAU", "FIHMN", "FIHEL"]
-                ],
-                "second_class": [
-                    -6.95,
-                    ["FIOUL", "FIKEM"]
                 ]
             },
             "general_cargo": {
                 "first_class": [
-                    0.9581,
+                    0.773,
                     ["FIRAA", "FIKOK", "FIKEM", "FIRAU", "FIHMN"]
                 ],
                 "second_class": [
-                    0.4468,
+                    1.562,
                     ["FIUKI", "FITKU", "FIPOR", "FIKAS", "FIINK", "FIHEL"]
                 ]
             },
             "roro_vessel": {
                 "first_class": [
-                    1.912,
+                    2.795,
                     ["FIHKO", "FIHEL"]
                 ],
                 "second_class": [
-                    1.279,
+                    1.06,
                     ["FIVAA", "FIUKI", "FITKU", "FIRAU", "FIHMN"]
                 ]
             },
             "product_tanker": {
                 "first_class": [
-                    4.649,
+                    1.22,
                     ["FISKV"]
                 ],
                 "second_class": [
-                    1.685, 
+                    -1.621, 
                     ["FITKU", "FIPOR", "FIHMN"]
                 ]
             }
 		},
 		"impedance": {
-            "leg_cost": {
-                "leg_one": -0.006002,
-                "leg_two": -0.006002,
-                "leg_three": -0.04101
+			"general_cost": {
+                "truck": -0.1595,
+                "container_ship": -0.0000000412,
+                "roro_vessel": -0.00000000473,
+                "general_cargo": -0.00000003743,
+                "product_tanker": -0.00000002023
             },
-            "leg_two_frequency": 0.0002915
+            "leg_two_frequency": 0.00003736
 		}
     }
 }

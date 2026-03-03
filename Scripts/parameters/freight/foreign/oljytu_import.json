@@ -1,0 +1,65 @@
+{
+    "name": "elint_import",
+    "orig": "null",
+    "dest": "null",
+    "generation_area": "foreign",
+    "attraction_area": "domestic",
+    "struct": "import",
+    "impedance_share": {},
+    "distance_boundaries": {
+        "truck": [
+            0,
+            9999
+        ],
+        "freight_train": [
+            0,
+            9999
+        ],
+        "ship": [
+            0,
+            9999
+        ]
+    },
+    "destination_choice": {},
+    "mode_choice": {
+		"truck": {},
+		"freight_train": {}
+	},
+	"demand_share": {},
+    "route_choice": {
+		"constant": {
+            "truck": {
+                "east": [
+                    1.272,
+                    ["FIVAI", "FIVAL", "FIVAR"]
+                ],
+                "west": [
+                    -1.374,
+                    ["FIKIL", "FITOR"]
+                ]
+            },
+            "container_ship": {
+                "base_class": [
+                    -3.229,
+                    ["FIOUL", "FIKEM", "FIRAU", "FIHMN", "FIHEL"]
+                ]
+            },
+            "roro_vessel": {
+                "base_class": [
+                    -4.355,
+                    ["FIVAA", "FIUKI", "FITKU", "FIHKO", "FIRAU", "FIHMN", "FIHEL"]
+                ]
+            },
+            "product_tanker": {
+                "base_class": [
+                    2.342,
+                    ["FITKU", "FISKV", "FIPOR", "FIHMN"]
+                ]
+            }
+		},
+		"impedance": {
+			"general_cost": -0.01482,
+            "leg_two_frequency": 0.001437
+		}
+    }
+}

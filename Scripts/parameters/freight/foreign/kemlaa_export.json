@@ -28,10 +28,12 @@
 	"demand_share": {},
     "route_choice": {
 		"constant": {
-            "land_border": [
-                1.459, 
-                ["FIKIL", "FITOR"]
-            ],
+            "truck": {
+                "west": [
+                    1.459, 
+                    ["FIKIL", "FITOR"]
+                ]
+            },
             "container_ship": {
                 "first_class": [
                     1.634,
@@ -74,9 +76,7 @@
             }
 		},
 		"impedance": {
-			"leg_one_cost": -0.000000001157,
-			"leg_two_cost": -0.000000001157,
-			"leg_three_cost": -0.000000001157,
+            "general_cost": -0.000000001157, 
             "leg_two_frequency": 0.0001383
 		}
     }
