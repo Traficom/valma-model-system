@@ -13,7 +13,9 @@ import models.logit as logit
 from parameters.assignment import (
     assignment_classes,
     intermodals,
-    mixed_mode_classes)
+    mixed_mode_classes,
+    mode_impedance
+)
 import parameters.cost as cost
 import models.generation as generation
 from datatypes.demand import Demand
@@ -122,10 +124,7 @@ class Purpose:
         day_imp = defaultdict(lambda: defaultdict(float))
         for mode in self.impedance_share:
             share_sum = 0
-            if mode in ["car_drv", "car_pax"]:
-                ass_class = "car"
-            else:
-                ass_class = mode
+            ass_class = mode_impedance[mode]
             for time_period in self.impedance_share[mode]:
                 for mtx_type in impedance[time_period]:
                     if ass_class in impedance[time_period][mtx_type]:

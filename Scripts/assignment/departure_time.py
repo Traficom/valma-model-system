@@ -6,7 +6,11 @@ from datatypes.demand import Demand
 import utils.log as log
 from assignment.abstract_assignment import AssignmentModel, Period
 import parameters.departure_time as param
-from parameters.assignment import transport_classes, volume_factors, asymmetric_demand
+from parameters.assignment import (
+    transport_classes, 
+    volume_factors, 
+    mode_assignment_classes
+)
 
 
 class DepartureTimeModel:
@@ -90,31 +94,21 @@ class DepartureTimeModel:
             Travel demand matrix or number of travellers
         """
         position: Sequence[int] = demand.position
-        if demand.mode == "car_drv":
-            ass_class = "car"
-        else: 
-            ass_class = demand.mode
-        if len(position) == 2:
-            share: Dict[str, Any] = demand.purpose.demand_share[demand.mode]
-            for ap in self.assignment_periods:
-                if ass_class in ap.assignment_modes:
-                    self._add_2d_demand(
-                        share[ap.name], ass_class, ap.name,
-                        demand.matrix, position)
-            if ass_class in asymmetric_demand:
-                mode = asymmetric_demand[ass_class]
-                share: Dict[str, Any] = demand.purpose.demand_share[mode]
+        ass_classes = mode_assignment_classes[demand.mode]
+        for ass_class in ass_classes:
+            if len(position) == 2:
+                share: Dict[str, Any] = demand.purpose.demand_share[demand.mode]
                 for ap in self.assignment_periods:
                     if ass_class in ap.assignment_modes:
                         self._add_2d_demand(
-                            share[ap.name], mode, ap.name,
+                            share[ap.name], ass_class, ap.name,
                             demand.matrix, position)
-        elif len(position) == 3:
-            for ap in self.assignment_periods:
-                if ass_class in ap.assignment_modes:
-                    self._add_3d_demand(demand, demand.mode, ap.name)
-        else:
-            raise IndexError("Tuple position has wrong dimensions.")
+            elif len(position) == 3:
+                for ap in self.assignment_periods:
+                    if ass_class in ap.assignment_modes:
+                        self._add_3d_demand(demand, ass_class, ap.name)
+            else:
+                raise IndexError("Tuple position has wrong dimensions.")
 
     def _add_2d_demand(self,
                        demand_share: Any,
