@@ -1,7 +1,6 @@
 {
     "vehicle_km_cost": {
-        "car_work": 0.12,
-        "car_leisure": 0.12,
+        "car": 0.12,
         "car_electric": 0.04,
         "van": 0.20,
         "truck": 0.23,
@@ -42,7 +41,7 @@
     },
     "cost_changes": {
         "cost": {
-            "car_work": 1.0,
+            "car_drv": 1.0,
             "car_pax": 1.0
         }
     },

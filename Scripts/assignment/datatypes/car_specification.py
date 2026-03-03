@@ -13,7 +13,7 @@ class CarSpecification:
         ----------
         modes : dict
             key : str
-                    Assignment class (car_work/transit_leisure/...)
+                    Assignment class (car/transit/...)
             value : CarMode
                 Assignment mode to add to specification
         """

@@ -95,7 +95,7 @@ class EmmeAssignmentModel(AssignmentModel):
         ----------
         dist_unit_cost : dict
             key : str
-                Assignment class (car_work/truck/...)
+                Assignment class (car/truck/...)
             value : float
                 Car cost per km in euros
         time_unit_cost : dict
@@ -171,7 +171,7 @@ class EmmeAssignmentModel(AssignmentModel):
         ----------
         dist_unit_cost : dict
             key : str
-                Assignment class (car_work/truck/...)
+                Assignment class (car/truck/...)
             value : float
                 Car cost per km in euros
         time_unit_cost : dict

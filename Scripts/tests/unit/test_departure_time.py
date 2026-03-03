@@ -11,11 +11,11 @@ class DepartureTimeTest(unittest.TestCase):
             def __init__(self, name):
                 self.name = name
                 self.assignment_modes = [
-                    "car_work", "car_leisure", "transit_leisure", "bike"]
+                    "car", "transit", "bike"]
         assignment_periods = [
             Period(name) for name in ("aht", "pt", "iht")]
         it = Period("it")
-        it.assignment_modes = ["transit_leisure"]
+        it.assignment_modes = ["transit"]
         assignment_periods.append(it)
         dtm = DepartureTimeModel(8, assignment_periods)
         mtx = numpy.arange(9)
@@ -30,7 +30,7 @@ class DepartureTimeTest(unittest.TestCase):
 
         dem.purpose.name = "wb_other"
         dem.purpose.demand_share = {
-            "car_leisure": {
+            "car": {
                 "aht":[
                     [0.0113538534294527, 0.0483356330299955],
                     [0.000783876140666748, 0.0782437896466509]
@@ -44,7 +44,7 @@ class DepartureTimeTest(unittest.TestCase):
                     [0.103874241247952, 0.0253360698120264]
                 ]
             },
-            "transit_leisure": {
+            "transit": {
                 "aht": [
                     [0.007848433131924, 0.0318369625680414],
                     [0.00148575955291745, 0.0800841531842564]
@@ -63,7 +63,7 @@ class DepartureTimeTest(unittest.TestCase):
                 ],
             },
         }
-        dem.mode = "car_leisure"
+        dem.mode = "car"
         dem.matrix = mtx
         dem.orig = 1
         dem.dest = None
@@ -73,7 +73,7 @@ class DepartureTimeTest(unittest.TestCase):
         dem.purpose = Purpose()
         dem.purpose.name = "hb_work"
         dem.purpose.demand_share = {
-            "transit_work": {
+            "transit": {
                 "aht": [0.168710422485735, 0.0387468664988151],
                 "pt": [0.0716348116654068, 0.0679842570835241],
                 "iht": [0.0437554897467228, 0.108924099422715]
@@ -93,7 +93,7 @@ class DepartureTimeTest(unittest.TestCase):
         dem.purpose = Purpose()
         dem.purpose.name = "hb_leisure"
         dem.purpose.demand_share = {
-            "transit_leisure": {
+            "transit": {
                 "aht": [0.168710422485735, 0.0387468664988151],
                 "pt": [0.0716348116654068, 0.0679842570835241],
                 "iht": [0.0437554897467228, 0.108924099422715],
@@ -106,13 +106,13 @@ class DepartureTimeTest(unittest.TestCase):
                 },
         }
         dem.purpose.sec_dest_purpose = pur1
-        dem.mode = "transit_leisure"
+        dem.mode = "transit"
         dem.matrix = numpy.array([[3]])
         dem.position = (1, 2, 0)
         dtm.add_demand(dem)
 
         self.assertIsNotNone(dtm.demand)
-        self.assertIs(type(dtm.demand["iht"]["car_leisure"]), numpy.ndarray)
-        self.assertEquals(dtm.demand["pt"]["car_leisure"].ndim, 2)
+        self.assertIs(type(dtm.demand["iht"]["car"]), numpy.ndarray)
+        self.assertEquals(dtm.demand["pt"]["car"].ndim, 2)
         self.assertEquals(dtm.demand["aht"]["bike"].shape[1], 8)
-        self.assertNotEquals(dtm.demand["iht"]["car_leisure"][0, 1], 0)
+        self.assertNotEquals(dtm.demand["iht"]["car"][0, 1], 0)

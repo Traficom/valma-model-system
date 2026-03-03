@@ -44,7 +44,7 @@ class JourneyLevel:
         4 - boarded local service at destination,
         5 - left transit system, 6 - forbidden (virtual level)
     transit_class : str
-        Name of transit class (transit_work/transit_leisure/...)
+        Name of transit class (transit/...)
     park_and_ride : str or False (optional)
         Extra attribute name for park-and-ride aux volume if
         this is park-and-ride assignment, else False
