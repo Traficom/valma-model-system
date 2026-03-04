@@ -55,20 +55,15 @@ class LogisticsModule(FreightDetourInference):
 
         # utilities for direct routes
         direct_utilities = ((self.impedance_coeff["orig_dest_direct"]
-                            * truck_cost[origin_indices, destination_indices])
+                            * truck_cost[o_idx_exp, d_idx_exp])
                             + self.constant["direct"])
         # combine detour and direct
-        return np.concatenate([detour_utilities, 
-                               np.expand_dims(direct_utilities, axis=1)], axis=1)
+        return np.concatenate([detour_utilities, direct_utilities], axis=1)
     
-    def forward(self, probs_indices: np.ndarray) -> np.ndarray:
-        # compute only for origins with data
-        origin_set = probs_indices[:,0]
-        # compute only for destination with data
-        destination_set = probs_indices[:,1]
-        weighted = self.compute_utilities(origin_indices=origin_set, 
-                                          destination_indices=destination_set)
-        
+    def forward(self, origin_indices: np.ndarray, 
+                destination_indices: np.ndarray) -> np.ndarray:
+        weighted = self.compute_utilities(origin_indices, destination_indices)
+
         # Now you have 2 top-level utilities: direct_util vs. detour_util_top
         detour_util = weighted[:, :-1] / self.scale
         exp_x_detour, detour_util_sum_exp, logsum_exp = self.sumexp(detour_util, axis=1)
@@ -93,10 +88,11 @@ class LogisticsModule(FreightDetourInference):
                                    + current_batch_size, dtype=np.int32)
         dest_indices = np.arange(n, dtype=np.int32)
         o_grid, d_grid = np.meshgrid(origin_indices, dest_indices, indexing='ij')
-        eval_indices = np.stack([o_grid.ravel(), d_grid.ravel()], axis=1)
+        origin_indices = o_grid.ravel()
+        destination_indices = d_grid.ravel()
 
         # Get probabilities and reshape
-        probs_batch_flat = self.forward(probs_indices=eval_indices)
+        probs_batch_flat = self.forward(origin_indices, destination_indices)
         probs_batch = probs_batch_flat.reshape(current_batch_size, n, k_plus1)
         
         # Get demand batch and expand dimensions
