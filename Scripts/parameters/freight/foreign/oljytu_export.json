@@ -1,10 +1,10 @@
 {
-    "name": "oljytu_import",
+    "name": "oljytu_export",
     "orig": "null",
     "dest": "null",
-    "generation_area": "foreign",
-    "attraction_area": "domestic",
-    "struct": "import",
+    "generation_area": "domestic",
+    "attraction_area": "foreign",
+    "struct": "export",
     "impedance_share": {},
     "distance_boundaries": {
         "truck": [
@@ -34,7 +34,7 @@
                     ["FIVAI", "FIVAL", "FIVAR"]
                 ],
                 "west": [
-                    -1.374,
+                    -1.374, 
                     ["FIKIL", "FITOR"]
                 ]
             },
@@ -58,7 +58,7 @@
             }
 		},
 		"impedance": {
-			"general_cost": -0.01482,
+            "general_cost": -0.01482,
             "leg_two_frequency": 0.001437
 		}
     }

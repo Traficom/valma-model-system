@@ -1,5 +1,5 @@
 {
-    "name": "oljytu_import",
+    "name": "metsat_import",
     "orig": "null",
     "dest": "null",
     "generation_area": "foreign",
@@ -30,36 +30,31 @@
 		"constant": {
             "truck": {
                 "east": [
-                    1.272,
+                    5.323,
                     ["FIVAI", "FIVAL", "FIVAR"]
                 ],
                 "west": [
-                    -1.374,
+                    9.206,
                     ["FIKIL", "FITOR"]
                 ]
             },
-            "container_ship": {
-                "base_class": [
-                    -3.229,
-                    ["FIOUL", "FIKEM", "FIRAU", "FIHMN", "FIHEL"]
-                ]
-            },
-            "roro_vessel": {
-                "base_class": [
-                    -4.355,
-                    ["FIVAA", "FIUKI", "FITKU", "FIHKO", "FIRAU", "FIHMN", "FIHEL"]
-                ]
-            },
-            "product_tanker": {
-                "base_class": [
-                    2.342,
-                    ["FITKU", "FISKV", "FIPOR", "FIHMN"]
+            "general_cargo": {
+                "first_class": [
+                    5.219,
+                    ["FIRAU", "FIHMN", "FILPP"]
+                ],
+                "second_class": [
+                    2.499,
+                    ["FIKOK", "FIKAS", "FIINK", "FITKU"]
                 ]
             }
 		},
 		"impedance": {
-			"general_cost": -0.01482,
-            "leg_two_frequency": 0.001437
+            "leg_cost": {
+                "leg_one": -0.02911,
+                "leg_two": -0.02911,
+                "leg_three": -0.02339
+            }
 		}
     }
 }

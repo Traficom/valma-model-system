@@ -1,5 +1,5 @@
 {
-    "name": "oljytu_import",
+    "name": "rkoljy_import",
     "orig": "null",
     "dest": "null",
     "generation_area": "foreign",
@@ -30,36 +30,19 @@
 		"constant": {
             "truck": {
                 "east": [
-                    1.272,
+                    -1.553,
                     ["FIVAI", "FIVAL", "FIVAR"]
-                ],
-                "west": [
-                    -1.374,
-                    ["FIKIL", "FITOR"]
-                ]
-            },
-            "container_ship": {
-                "base_class": [
-                    -3.229,
-                    ["FIOUL", "FIKEM", "FIRAU", "FIHMN", "FIHEL"]
-                ]
-            },
-            "roro_vessel": {
-                "base_class": [
-                    -4.355,
-                    ["FIVAA", "FIUKI", "FITKU", "FIHKO", "FIRAU", "FIHMN", "FIHEL"]
                 ]
             },
             "product_tanker": {
-                "base_class": [
-                    2.342,
-                    ["FITKU", "FISKV", "FIPOR", "FIHMN"]
+                "first_class": [
+                    4.598,
+                    ["FISKV"]
                 ]
             }
 		},
 		"impedance": {
-			"general_cost": -0.01482,
-            "leg_two_frequency": 0.001437
+            "general_cost": -0.01568
 		}
     }
 }
