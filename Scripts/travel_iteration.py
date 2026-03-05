@@ -161,11 +161,8 @@ class ModelSystem:
         self.travel_modes = {mode: True for purpose in self.dm.tour_purposes
             for mode in purpose.modes}  # Dict instead of set, to preserve order
         self.ass_classes = set()
-        for key in self.travel_modes.keys():
-            if key in ["car_drv", "car_pax"]:
-                self.ass_classes.add("car")
-            else: 
-                self.ass_classes.add(key)
+        for mode in self.travel_modes.keys():
+            self.ass_classes.add(param.mode_impedance[mode])
         self.external_purpose = ExternalPurpose(numpy.array(self.zone_numbers))
         self.mode_share: List[Dict[str,Any]] = []
         self.convergence = []
