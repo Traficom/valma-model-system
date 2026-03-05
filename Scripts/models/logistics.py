@@ -130,48 +130,30 @@ class TradeRouteModule(FreightDetourInference):
         self.leg2_modes = list(impedance["leg_two"])
         self.leg3_modes = list(impedance["leg_three"])
 
-    def compute_utilities(self) -> Tuple[np.ndarray]:
-        """Compute utility components for the three legs used in trade route choice
-        origin - origin BCP - destination BCP - destination
+    def compute_utilities(self, leg_modes: list, leg_name: str, 
+                          add_constant: bool) -> dict:
+        """Compute utility components for a given leg
         
         Returns
         -------
-        Tuple[np.ndarray]
-            leg one: origin -> origin BCP
-            leg two: origin BCP -> dest BCP
-            leg three: dest BCP -> destinations
+        dict
+            Mode (truck/container_ship...) : numpy 2d array
         """
-        util_parts_one = {}
-        for mode in self.leg1_modes:
-            cost_mtx = self.impedance["leg_one"][mode]["cost"]
-            beta = self.get_impedance_beta(mode)
-            util_parts_one[mode] = beta * cost_mtx
-        util_one = np.concatenate(list(util_parts_one.values()), axis=1)
-        
-        util_parts_two = {}
-        for mode in self.leg2_modes:
-            item = self.impedance["leg_two"][mode]
-            beta = self.get_impedance_beta(mode)
-            util_two = beta * item["cost"]
-            util_two += self.add_constants(mode, util_two.shape)
+        utility_parts = {}
+        for mode in leg_modes:
+            item = self.impedance[leg_name][mode]
+            beta = self.get_impedance_beta(mode, leg_name)
+            utility = beta * item["cost"]
+            if add_constant:
+                utility += self.add_constants(mode, utility.shape)
             if "frequency" in item and self.impedance_coeff.get("leg_two_frequency"):
                 freq_mtx = item["frequency"]
                 freq_mtx[freq_mtx == np.inf] = -np.inf
-                util_two += self.impedance_coeff["leg_two_frequency"] * freq_mtx
-            util_parts_two[mode] = util_two
-        util_two = np.concatenate(list(util_parts_two.values()), axis=1)
-
-        util_parts_three = {}
-        for mode in self.leg3_modes:
-            cost_mtx = self.impedance["leg_three"][mode]["cost"]
-            beta = self.get_impedance_beta(mode)
-            util_three = beta * cost_mtx
-            util_parts_three[mode] = util_three
-        util_three = np.concatenate(list(
-            util_parts_three.values()) * len(self.leg2_modes), axis=0)
-        return util_one, util_two, util_three
+                utility += self.impedance_coeff["leg_two_frequency"] * freq_mtx
+            utility_parts[mode] = utility
+        return utility_parts
     
-    def get_impedance_beta(self, mode: str) -> float:
+    def get_impedance_beta(self, mode: str, leg_name: str) -> float:
         """Fetch mode specific coefficient from model specification
         
         Returns
@@ -179,28 +161,30 @@ class TradeRouteModule(FreightDetourInference):
         float
             estimated coefficient
         """
-        coeffs = self.impedance_coeff.get("general_cost")
-        coeffs = self.impedance_coeff.get("leg_cost") if not coeffs else coeffs
+        try:
+            coeffs = self.impedance_coeff["general_cost"]
+        except KeyError:
+            coeffs = self.impedance_coeff["leg_cost"]
         if isinstance(coeffs, float):
             beta = coeffs
         else:
             if mode in coeffs:
                 beta = coeffs[mode]
-            elif isinstance(coeffs["leg_one"], float):
-                beta = coeffs["leg_one"]
+            elif isinstance(coeffs[leg_name], float):
+                beta = coeffs[leg_name]
             else:
-                beta = coeffs["leg_one"][mode]
+                beta = coeffs[leg_name][mode]
         return beta
 
-    def add_constants(self, mode, util_two_shape) -> np.ndarray:
-        """Sums second leg specific mode-border constants
+    def add_constants(self, mode: str, utility_shape: tuple) -> np.ndarray:
+        """Sums leg specific mode-border constants
         
         Returns
         -------
         numpy.ndarray
             constant matrix
         """
-        constants_mtx = np.zeros(util_two_shape, dtype="float32")
+        constants_mtx = np.zeros(utility_shape, dtype="float32")
         border_constants = {}
         if mode in self.constant:
             for class_items in self.constant[mode].values():
@@ -220,10 +204,17 @@ class TradeRouteModule(FreightDetourInference):
         Returns
         -------
         Tuple[np.ndarray]
-            probability of choosing upper alternative i
-            probability of choosing lower alternative j given choice of i
+            probability of choosing origin bcp i
+            probability of choosing leg2 bcp j given choice of i
         """
-        util_one, util_two, util_three = self.compute_utilities()
+        util_one = self.compute_utilities(self.leg1_modes, "leg_one", False)
+        util_two = self.compute_utilities(self.leg2_modes, "leg_two", True)
+        util_three = self.compute_utilities(self.leg3_modes, "leg_three", False)
+        
+        util_one = np.concatenate(list(util_one.values()), axis=1)
+        util_two = np.concatenate(list(util_two.values()), axis=1)
+        util_three = np.concatenate(list(
+            util_three.values()) * len(self.leg2_modes), axis=0)
 
         # origins, origin bcp, dest bcp * leg2 modes, destinations
         util1_util2 = util_one[:, :, None] + util_two[None, :, :]
@@ -238,13 +229,15 @@ class TradeRouteModule(FreightDetourInference):
         route_probs = route_probs_flat.reshape(n_origin, n_orig_alt, n_dest_bcp_alt, n_dest)
         
         prob_origin_bcp = np.sum(route_probs, axis=2)
-        denom = prob_origin_bcp[:, :, None]
+        prob_origin_bcp_marginal = prob_origin_bcp[:, :, None]
         prob_leg2_given_bcp = np.zeros_like(route_probs)
-        np.divide(route_probs, denom, out=prob_leg2_given_bcp, where=denom > 0.0)
+        np.divide(route_probs, prob_origin_bcp_marginal, 
+                  out=prob_leg2_given_bcp,
+                  where=prob_origin_bcp_marginal > 0.0)
         return prob_origin_bcp, prob_leg2_given_bcp
 
     def process_batch(self, origin_offset: int, n_origin: int, n_dest: int, 
-                      n_orig_bcp: int, n_dest_bcp: int, demand: np.ndarray, 
+                      n_dest_bcp: int, demand: np.ndarray, 
                       flow_leg1: np.ndarray, flow_leg2: np.ndarray, 
                       flow_leg3: np.ndarray, lock: Lock) -> None:
         """Distribute demand across logit route alternatives and aggregate flows"""
@@ -256,7 +249,8 @@ class TradeRouteModule(FreightDetourInference):
         prob_d_bcp_batch = prob_d_bcp[origin_offset:offset_batch]
         # (batch, n_orig_alt, n_dest) → (batch, n_dest, n_orig_alt)
         prob_o_bcp_batch = np.moveaxis(prob_o_bcp_batch, 2, 1)
-        # (batch, n_orig_alt, n_dest_bcp_alt, n_dest) → (batch, n_dest, n_orig_alt, n_dest_bcp_alt)
+        # (batch, n_orig_alt, n_dest_bcp_alt, n_dest) 
+        # → (batch, n_dest, n_orig_alt, n_dest_bcp_alt)
         prob_d_bcp_batch = np.moveaxis(prob_d_bcp_batch, 3, 1)
 
         demand_batch = demand[origin_offset:offset_batch, :]
@@ -267,24 +261,17 @@ class TradeRouteModule(FreightDetourInference):
         )
         
         # for batches, sum over origins and destinations
-        flow_leg1_batch = np.sum(demand_batch[:, :, None] * prob_o_bcp_batch, axis=1)
-
+        flow_leg1_batch = np.sum(demand_routed, axis=(1, 3))
         flow_leg2_batch = np.sum(demand_routed, axis=(0, 1))
-        flow_leg2_batch = flow_leg2_batch.reshape(
-            len(self.leg1_modes), n_orig_bcp,
-            len(self.leg2_modes), len(self.leg3_modes), n_dest_bcp
-        ).sum(axis=(0, 3))
-        flow_leg2_batch = flow_leg2_batch.reshape(n_orig_bcp, -1)
-
-        dest_flow = np.sum(demand_routed, axis=(0, 2))
-        dest_flow = dest_flow.reshape(
-            n_dest, len(self.leg2_modes), len(self.leg3_modes), n_dest_bcp
-        ).sum(axis=1)
-        dest_flow = dest_flow.transpose(2, 1, 0)
-        flow_leg3_batch = dest_flow.reshape(n_dest_bcp, -1)
+        flow_leg3_batch = np.sum(demand_routed, axis=(0, 2))
+        # leg3 still has leg2 mode alternatives. Collapse and sum dest bcp inflow 
+        flow_leg3_batch = flow_leg3_batch.reshape(
+            n_dest, len(self.leg2_modes), n_dest_bcp
+        )
+        flow_leg3_batch = np.sum(flow_leg3_batch, axis=1).T
 
         with lock:
-            flow_leg1[origin_offset:origin_offset + current_batch_size, :] += flow_leg1_batch
+            flow_leg1[origin_offset:offset_batch, :] += flow_leg1_batch
             flow_leg2[:, :] += flow_leg2_batch
             flow_leg3[:, :] += flow_leg3_batch
 
@@ -371,7 +358,7 @@ def run_trade_model(model: TradeRouteModule, demand: np.ndarray):
     lock = Lock()
     
     batch_args = [
-        (offset, n_origin, n_dest, n_orig_bcp, n_dest_bcp, demand, 
+        (offset, n_origin, n_dest, n_dest_bcp, demand, 
          flow_leg1, flow_leg2, flow_leg3, lock)
         for offset in range(0, n_origin, model.batch_size)
     ]
