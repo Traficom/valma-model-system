@@ -33,7 +33,7 @@ def create_emme_project(args):
             "regular_nodes": 55000,
             "links": 150000,
             "transit_lines": 3300,
-            "transit_segments": 300000,
+            "transit_segments": 320000,
         },
         "koko_suomi": {
             "centroids": 10000,
@@ -133,3 +133,4 @@ if __name__ == "__main__":
     log.debug(utils.config.dump(vars(args)))
 
     create_emme_project(args)
+

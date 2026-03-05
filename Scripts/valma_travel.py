@@ -8,7 +8,7 @@ import utils.log as log
 from assignment.emme_assignment import EmmeAssignmentModel
 from assignment.mock_assignment import MockAssignmentModel
 from assignment.assignment_period import AssignmentPeriod
-from travel_iteration import ModelSystem, AgentModelSystem
+from travel_iteration import ModelSystem
 from datahandling.matrixdata import MatrixData
 
 
@@ -105,8 +105,7 @@ def main(args):
                   base_matrices_path, result_data_folder, ass_model, args.submodel,
                   mode_dest_calibration_file, municipality_calibration_file,
                   long_dist_matrices_path, freight_matrices_path)
-    model = (AgentModelSystem(*model_args) if args.is_agent_model
-             else ModelSystem(*model_args))
+    model = ModelSystem(*model_args)
     log_extra["status"]["results"] = model.mode_share
 
     # Run traffic assignment simulation for N iterations,

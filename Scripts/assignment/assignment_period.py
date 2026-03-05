@@ -115,7 +115,7 @@ class AssignmentPeriod(Period):
         ----------
         dist_unit_cost : dict
             key : str
-                Assignment class (car_work/truck/...)
+                Assignment class (car/truck/...)
             value : float
                 Length multiplier to calculate link cost
         day_scenario : int
@@ -206,7 +206,7 @@ class AssignmentPeriod(Period):
         -------
         dict
             Type (time/cost/dist) : dict
-                Assignment class (car_work/transit/...) : numpy 2-d matrix
+                Assignment class (car/transit/...) : numpy 2-d matrix
         """
         if not self._separate_emme_scenarios:
             self._calc_background_traffic(include_trucks=True)
@@ -235,7 +235,7 @@ class AssignmentPeriod(Period):
         -------
         dict
             Type (time/cost/dist) : dict
-                Assignment class (car_work/transit/...) : numpy 2-d matrix
+                Assignment class (car/transit/...) : numpy 2-d matrix
         """
         self._set_bike_vdfs()
         self._assign_bikes()
@@ -260,7 +260,7 @@ class AssignmentPeriod(Period):
 
     def _get_impedances(self, assignment_classes: Iterable[str]):
         mtxs = {tc: self.assignment_modes[tc].get_matrices()
-            for tc in assignment_classes if tc != "car_pax"}
+            for tc in assignment_classes}
         for mode in mtxs:
             try:
                 divide_matrices(
@@ -357,7 +357,7 @@ class AssignmentPeriod(Period):
         network = self.emme_scenario.get_network()
         return {(link.i_node.id, link.j_node.id): link[time_attr]
             for link in network.links()
-            if link.i_node[param.subarea_attr] == 2 and link[time_attr] > 0}
+            if link.i_node[param.submodel_attr] == 2 and link[time_attr] > 0}
 
     def _set_car_vdfs(self, use_free_flow_speeds: bool = False):
         log.info("Sets car functions for scenario {}".format(
@@ -369,7 +369,7 @@ class AssignmentPeriod(Period):
         car_time_attr = self.netfield("car_time")
         main_mode = network.mode(param.main_mode)
         car_modes = {
-            network.mode(param.assignment_modes["car_work"]),
+            network.mode(param.assignment_modes["car"]),
             network.mode(param.assignment_modes["truck"])
         }
         park_and_ride_mode = network.mode(param.park_and_ride_mode)
@@ -385,9 +385,15 @@ class AssignmentPeriod(Period):
                         link.volume_delay_func = 91
                     else:
                         link.volume_delay_func = roadclass.volume_delay_func
-                link.data1 = roadclass.lane_capacity
-                link.data2 = roadclass.free_flow_speed
-                link[param.free_flow_time_attr] = (60 * link.length
+                if link["#traffic_light"] and roadclass.free_flow_speed < 65:
+                    link.data1 = roadclass.lane_capacity * param.traffic_light_capacity_factor
+                    link.data2 = roadclass.free_flow_speed * param.traffic_light_speed_factor
+                    link[param.free_flow_time_attr] = (60 * link.length
+                                                   / (roadclass.free_flow_speed * param.traffic_light_speed_factor))
+                else:
+                    link.data1 = roadclass.lane_capacity
+                    link.data2 = roadclass.free_flow_speed
+                    link[param.free_flow_time_attr] = (60 * link.length
                                                    / roadclass.free_flow_speed)
             elif linktype in param.custom_roadtypes:
                 # Custom car link
@@ -513,11 +519,11 @@ class AssignmentPeriod(Period):
         self.assignment_modes[ass_class].demand.set(matrix)
 
     def get_matrix(self, ass_class: str) -> numpy.ndarray:
-        """Get demand matrix with type pair (e.g., demand, car_work).
+        """Get demand matrix with type pair (e.g., demand, car).
         Parameters
         ----------
         ass_class : str
-            Assignment class (car_work/transit_leisure/truck/...)
+            Assignment class (car/transit/truck/...)
 
         Return
         ------
@@ -585,7 +591,12 @@ class AssignmentPeriod(Period):
         network = self.emme_scenario.get_network()
         missing_penalties = set()
         penalty_attr = param.boarding_penalty_attr
+        weight_attr = param.in_vehice_weight_attr.replace("ut", "data")
         for line in network.transit_lines():
+            try:
+                line[weight_attr] = param.in_vehicle_weight[line.mode.id]
+            except KeyError:
+                line[weight_attr] = 1.0
             try:
                 penalty = self.boarding_penalty[line.mode.id] + extra_penalty
             except KeyError:
@@ -604,7 +615,7 @@ class AssignmentPeriod(Period):
 
     def _assign_cars(self, 
                      stopping_criteria: Dict[str, Union[int, float]]):
-        """Perform car_work traffic assignment for one scenario."""
+        """Perform car traffic assignment for one scenario."""
         log.info("Car assignment started...")
         if self.use_stored_speeds:
             for car_spec in self._car_spec.separate_light_specs():

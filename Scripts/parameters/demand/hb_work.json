@@ -23,7 +23,7 @@
         }
     },
     "impedance_share": {
-        "car_work": {
+        "car_drv": {
             "aht": [
                 0.7237,
                 0.0213
@@ -51,7 +51,7 @@
                 0.6292
             ]
         },
-        "transit_work": {
+        "transit": {
             "aht": [
                 0.7237,
                 0.0213
@@ -83,7 +83,7 @@
         }
     },
     "distance_boundaries": {
-        "car_work": [
+        "car_drv": [
             0,
             300
         ],
@@ -91,7 +91,7 @@
             0,
             300
         ],
-        "transit_work": [
+        "transit": [
             0,
             300
         ],
@@ -118,7 +118,7 @@
         }
     },
     "mode_choice": {
-        "car_work": {
+        "car_drv": {
             "constant": -3.772,
             "generation": {},
             "transform": {
@@ -173,7 +173,7 @@
                 "sh_cars2_hh2": 0.9788
             }
         },
-        "transit_work": {
+        "transit": {
             "constant": -1.481,
             "generation": {},
             "attraction": {

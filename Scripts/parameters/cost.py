@@ -2,7 +2,7 @@
 
 cost_discount = {
     "hb_edu_student": {
-        "transit_work": 0.5
+        "transit": 0.5
     }
 }
 
@@ -71,45 +71,64 @@ car_pax_occupancy = {
     "hb_escort": 2.89
 }
 
+vot = {
+    "hb_leisure_overnight": {
+        "airplane": 11.4,
+        "airpl_car_acc": 11.4,
+        "airpl_taxi_acc": 11.4,
+        "airpl_car_egr": 11.4,
+        "transit": 7.7,
+        "pt_car_acc": 7.7,
+        "pt_taxi_acc": 7.7,
+        "pt_car_egr": 7.7,
+        "pt_taxi_egr": 7.7,
+        "car_drv": 11.4,
+        "car_pax": 11.4,
+    },
+    "hb_business": {
+        "airplane": 11.4,
+        "airpl_car_acc": 11.4,
+        "airpl_taxi_acc": 11.4,
+        "airpl_car_egr": 11.4,
+        "transit": 7.7,
+        "pt_car_acc": 7.7,
+        "pt_taxi_acc": 7.7,
+        "pt_car_egr": 7.7,
+        "pt_taxi_egr": 7.7,
+        "car_drv": 11.4,
+        "car_pax": 11.4,
+    }
+}
+
 tour_duration = {
-    "train_car_acc": {
+    "pt_car_acc": {
         "avg": 2.18,
         "hb_business": 1.12,
         "hb_leisure_overnight": 9,
     },
-    "train_taxi_acc": {
+    "pt_taxi_acc": {
         "avg": 2.18,
         "hb_business": 1.12,
         "hb_leisure_overnight": 9,
-    },
-    "coach_car_acc": {
-        "avg": 2.62,
-        "hb_business": 2.43,
-        "hb_leisure_overnight": 14,
     },
     "airpl_car_acc": {
         "avg": 2.39,
         "hb_business": 2.01,
         "hb_leisure_overnight": 9,
     },
-    "train_car_egr": {
+    "pt_car_egr": {
         "avg": 2.18,
         "hb_business": 1.12,
         "hb_leisure_overnight": 9,
     },
-    "train_taxi_egr": {
+    "pt_taxi_egr": {
         "avg": 2.18,
         "hb_business": 1.12,
         "hb_leisure_overnight": 9,
-    },
-    "coach_car_egr": {
-        "avg": 2.62,
-        "hb_business": 2.43,
-        "hb_leisure_overnight": 14,
     },
     "airpl_car_egr": {
         "avg": 2.39,
         "hb_business": 2.01,
         "hb_leisure_overnight": 9,
-    },
+    }
 }

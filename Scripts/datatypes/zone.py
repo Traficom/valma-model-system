@@ -17,8 +17,6 @@ class ZoneAggregations:
             Zone numbers as index and different zone mappings as columns
         """
         self.mappings = mappings
-        self.municipality_mapping = mappings.groupby(
-            "municipality").agg("first")["county"]
 
     def averages(self,
                  array: pandas.Series,
