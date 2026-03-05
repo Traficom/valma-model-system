@@ -10,7 +10,6 @@ from datahandling.resultdata import ResultsData
 from parameters.commodity import commodity_conversion
 from datahandling.matrixdata import MatrixData
 from assignment.freight_assignment import FreightAssignmentPeriod
-    
 
 def create_purposes(parameters_path: Path, zonedata: FreightZoneData, 
                     resultdata: ResultsData, costdata: Dict[str, dict]) -> dict:
@@ -40,15 +39,18 @@ def create_purposes(parameters_path: Path, zonedata: FreightZoneData,
     purposes = {}
     for file in parameters_path.rglob("*.json"):
         commodity_params = json.loads(file.read_text("utf-8"))
-        commodity = commodity_params["name"]
+        commodity = commodity_params["name"].split("_")[0]
         purpose_cost = costdata.get(commodity_conversion[commodity])
         if not purpose_cost:
             log.warn(f"Aggregated commodity class '{commodity_conversion[commodity]}' "
                      f"for commodity '{commodity}' not found in costs json")
             continue
-        purposes[commodity] = FreightPurpose(commodity_params, 
-                                             {parameters_path.stem: zonedata},
-                                             resultdata, purpose_cost)
+        zone_data = {parameters_path.stem: zonedata}
+        if parameters_path.stem == "foreign":
+            zone_data["domestic"] = zonedata
+        purposes[commodity_params["name"]] = FreightPurpose(commodity_params, 
+                                                            zone_data, resultdata,
+                                                            purpose_cost)
     return purposes
 
 class StoreDemand():

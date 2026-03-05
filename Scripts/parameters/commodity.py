@@ -27,3 +27,5 @@ commodity_conversion = {
 	"huonek": "metkot",
 	"jate": "jate"
 }
+
+vector_calibration_threshold = 5

@@ -1,32 +1,34 @@
 from __future__ import annotations
-from typing import Dict, Tuple, Iterator, Optional, cast
+from typing import Dict, Tuple, List, Iterator, Optional, cast
 from copy import copy
 from collections import defaultdict
 import numpy # type: ignore
 import pandas
 from datahandling.resultdata import ResultsData
 from datahandling.zonedata import ZoneData
-from datahandling.matrixdata import MatrixData
+from datahandling.matrixdata import MatrixData, read_omx_item
 import utils.log as log
 import parameters.zone as param
 import models.logit as logit
 from parameters.assignment import (
     assignment_classes,
     intermodals,
-    tour_duration,
     mixed_mode_classes,
     car_classes,
     ec_modes,
     cp_mode,
     ecp_modes,
-    pax_modes)
+    pax_modes,
+    mode_impedance
+)
 import parameters.cost as cost
 import models.generation as generation
 from datatypes.demand import Demand
 from datatypes.histogram import TourLengthHistogram
-from utils.freight_costs import calc_cost
-from models.logistics import DDMParameters
+from utils.freight_costs import calc_cost, get_foreign_ship_cost
 from utils.calibrate import attempt_calibration
+from models.logistics import (LogisticsModule, TradeRouteModule,
+                              run_logistics_model, run_trade_model)
 
 
 class Purpose:
@@ -118,7 +120,7 @@ class Purpose:
                     Impedance type (time/cost/dist)
                 value : dict
                     key : str
-                        Assignment class (car_work/transit/...)
+                        Assignment class (car/transit/...)
                     value : numpy.ndarray
                         Impedance (float 2-d matrix)
 
@@ -138,10 +140,7 @@ class Purpose:
         day_imp = defaultdict(lambda: defaultdict(float))
         for mode in self.impedance_share:
             share_sum = 0
-            if mode in ecp_modes:
-                ass_class = mode.replace("_pax", "")
-            else:
-                ass_class = mode.replace("pax", assignment_classes[self.name])
+            ass_class = mode_impedance[mode]
             for time_period in self.impedance_share[mode]:
                 for mtx_type in impedance[time_period]:
                     if ass_class in impedance[time_period][mtx_type]:
@@ -203,6 +202,22 @@ class Purpose:
                                                     cost.car_pax_occupancy[self.name])
                     except KeyError:
                         pass
+                airpl_access_modes = ["airpl_car_acc", "airpl_taxi_acc", "airpl_car_egr"]
+                transit_access_modes = ["pt_car_acc", "pt_taxi_acc", "pt_taxi_egr"]
+                if mtx_type == "time" and mode in airpl_access_modes:
+                    day_imp[mode][mtx_type] -= day_imp[mode]["car_time"] * 1.5
+                if mtx_type == "time" and mode in transit_access_modes:
+                    day_imp[mode][mtx_type] -= day_imp[mode]["car_time"] * 6.5
+            try:
+                vot = cost.vot[self.name][mode]
+                day_imp[mode]["gen_cost"] = day_imp[mode]["cost"] + (day_imp[mode]["time"]/60) * vot
+                log.info(f"Generalized cost calculated for {self.name} {mode}.")
+            except KeyError:
+                pass
+            if mode in mixed_mode_classes:
+                day_imp[mode]["park_cost"] = (day_imp[mode]["park_cost"]
+                                              * cost.tour_duration[mode][self.name]
+                                              / cost.tour_duration[mode]["avg"])
         return day_imp
 
 def new_tour_purpose(*args):
@@ -289,12 +304,12 @@ class TourPurpose(Purpose):
         else:
             log.error(f"Tour generation model not defined for {self.name}")
         args = (self, specification, self.attraction_zone_data, resultdata)
-        if self.name == "sop":
-            self.model = logit.OriginModel(*args)
+        if specification["struct"] == "mode>dest":
+            self.model = logit.ModeDestModel(*args)
         elif specification["struct"] == "dest>mode":
             self.model = logit.DestModeModel(*args)
         else:
-            self.model = logit.ModeDestModel(*args)
+            log.error(f"Unknown struct in {self.name} parameters.")
         for mode in self.impedance_share:
             if mode not in self.demand_share:
                 self.demand_share[mode] = self.impedance_share[mode]
@@ -303,8 +318,9 @@ class TourPurpose(Purpose):
                 for electric_mode in electric_modes:
                     self.demand_share[electric_mode] = self.demand_share[mode]
         self.modes = list(self.impedance_share)
+        self.intermodals = {key: intermodals[key] for key in self.modes if key in intermodals}
         self.connection_models: Dict[str, logit.LogitModel] = {}
-        for mode in intermodals:
+        for mode in self.intermodals:
             if mode in self.modes:
                 new_spec = copy(specification)
                 new_spec["mode_choice"] = new_spec["access_mode_choice"][mode]
@@ -312,8 +328,8 @@ class TourPurpose(Purpose):
                     self, new_spec, self.generation_zone_data, resultdata)
         self.histograms = {mode: TourLengthHistogram(self.name)
             for mode in self.modes}
-        self.orig_mappings = self.generation_zone_data.aggregations.mappings
-        self.dest_mappings = self.attraction_zone_data.aggregations.mappings
+        self.orig_mappings = self.generation_zone_data.result_aggs.mappings
+        self.dest_mappings = self.attraction_zone_data.result_aggs.mappings
         self.aggregates = {name: {} for name in self.dest_mappings}
         self.within_zone_tours = {}
         self.sec_dest_purpose: SecDestPurpose = None
@@ -411,11 +427,11 @@ class TourPurpose(Purpose):
             with matrixdata.open(
                     f"logsum_{self.name}", "vrk", list(self.orig_zone_numbers), m='w'
                     ) as mtx:
-                for main_mode, acc_modes in intermodals.items():
+                for main_mode, acc_modes in self.intermodals.items():
                     mode_impedance = {mode: purpose_impedance.pop(mode)
                         for mode in [main_mode] + acc_modes}
                     acc_splits[main_mode], logsum = self.split_connection_mode(
-                        mode_impedance, main_mode, acc_modes)
+                        mode_impedance, main_mode)
                     purpose_impedance[main_mode] = {"logsum": logsum}
                     mtx[main_mode] = logsum
 
@@ -433,24 +449,15 @@ class TourPurpose(Purpose):
                     prob[acc_mode] = split[acc_mode] * main_prob
         return prob
 
-    def split_connection_mode(self, impedance, pt_mode, car_acc_modes):
-        access_modes = car_acc_modes + [pt_mode]
+    def split_connection_mode(self, impedance, pt_mode):
         if pt_mode == "airplane":
-            access_modes.append("airpl_taxi_acc")
             impedance["airpl_taxi_acc"] = impedance["airpl_car_acc"]
-        for mode in access_modes:
-            if mode in mixed_mode_classes:
-                self.reweight_parking_cost(impedance[mode], tour_duration[mode])
         model = self.connection_models[pt_mode]
         prob, logsum = model.calc_mode_prob(impedance)
         if "airpl_taxi_acc" in prob:
             prob["airpl_car_acc"] += prob.pop("airpl_taxi_acc")
         return prob, logsum
 
-    def reweight_parking_cost(self, impedance, duration):
-        impedance["park_cost"] = (impedance["park_cost"]
-                                  * duration[self.name]
-                                  / duration["avg"])
 
     def calc_basic_prob(self, impedance, is_last_iteration):
         """Calculate mode and destination probabilities.
@@ -501,8 +508,8 @@ class TourPurpose(Purpose):
         tours = self.gen_model.get_tours()
         if prob is None:
             prob = self.model.calc_prob_again()
-        orig_agg = self.generation_zone_data.aggregations
-        dest_agg = self.attraction_zone_data.aggregations
+        orig_agg = self.generation_zone_data.result_aggs
+        dest_agg = self.attraction_zone_data.result_aggs
         for mode in self.modes:
             mtx = (prob.pop(mode) * tours).T
             try:
@@ -686,25 +693,31 @@ class FreightPurpose(Purpose):
         Purpose.__init__(self, specification, zone_data, resultdata)
         self.costdata = costdata
         self.model_category = list(zone_data)[0]
+        self.modes: List[str] = list(specification["mode_choice"])
 
         if specification["struct"] == "dest>mode":
             self.model = logit.DestModeModel(self, specification, zone_data[self.model_category], 
                                              resultdata)
-        else:
+        elif specification["struct"] == "mode>dest":
             self.model = logit.ModeDestModel(self, specification, zone_data[self.model_category], 
                                              resultdata)
-        self.modes = list(self.model.mode_choice_param)
+        else:
+            self.model = None
+        self.route_params = specification.get("route_choice", None)
+        self.is_export = {"export": True, "import": False}.get(specification["struct"])
 
-        if specification.get("logistics_module"):
-            self.logistics_module = specification["logistics_module"]
-            self.logistics_params = DDMParameters(orig_lc_detour=self.logistics_module["orig_lc_detour"],
-                                                  lc_dest_detour=self.logistics_module["lc_dest_detour"],
-                                                  constant_detour=self.logistics_module["constant_detour"],
-                                                  orig_dest_direct=self.logistics_module["orig_dest_direct"],
-                                                  constant_direct=self.logistics_module["constant_direct"],
-                                                  size_factor=self.logistics_module["size_factor"])
+        if (self.model is None and self.model_category == "domestic"
+            or self.is_export is None and self.model_category == "foreign"):
+            msg = f"Purpose {self.name} has invalid struct in specification"
+            log.error(msg)
+            raise ValueError(msg)
+        
+        elif self.route_params is None and self.model_category == "foreign":
+            msg = f"Purpose {self.name} is missing route choice specification"
+            log.error(msg)
+            raise ValueError(msg)
 
-    def calc_traffic(self, impedance: dict):
+    def calc_traffic(self, impedance: dict):                                                                                    
         """Calculate freight traffic matrix.
 
         Parameters
@@ -726,25 +739,69 @@ class FreightPurpose(Purpose):
         demand = {mode: (probs.pop(mode) * generation).T for mode in self.modes}
         return demand
 
-    def calc_route(self, impedance: dict, origs: dict, dests: dict):
-        """Calculates route choice for foreign freight trade. 
-        
+    def form_impedance_legs(self, impedance: dict,
+                            ship_imps: dict,
+                            fin_border_ids: dict,
+                            cluster_border_ids: dict) -> dict:
+        """Forms impedance matrices for the three legs of foreign trade 
+        route choice model. 
+
         Parameters
         ----------
         impedance : dict
             Mode (truck/train/...) : dict
                 Type (time/dist/toll_cost/canal_cost) : numpy 2d matrix
-        origs : dict
-            Origin border id (FIHEL/SESTO...) : str
+        ship_imps : dict
+            Mode (container_ship/general_cargo...) : attribute
+                Type (dist/frequency) : numpy.ndarray
+        fin_border_ids : dict
+            Finland border id (FIHEL/FISKV...) : str
                 Centroid id : int
-        dests : dict
-            Destination border id (FIHEL/SESTO...) : str
+        cluster_border_ids : dict
+            Foreign border id (AEJEA/SESTO...) : str
                 Centroid id : int
-        
-        """
-        costs = self.get_costs(impedance, origs, dests)
 
-    def get_costs(self, impedance: dict, origs: dict = None, dests: dict = None):
+        Returns
+        -------
+        dict
+            Name of a leg (leg_one/...) : dict
+                Mode (truck/train/marine ships) : dict
+                    Type (cost/frequency/draught) : mask indexed numpy 2d matrix
+        """
+        fin_port_zones = numpy.array(
+            list(fin_border_ids.values()), dtype=numpy.int32)
+        cluster_port_zones = numpy.array(
+            list(cluster_border_ids.values()), dtype=numpy.int32)
+        all_zones = self.generation_zone_data.all_zone_numbers
+        fin_borders = numpy.isin(all_zones, fin_port_zones)
+        cluster_borders = numpy.isin(all_zones, cluster_port_zones)
+        fin_zones = numpy.isin(all_zones, numpy.union1d(self.orig_zone_numbers, 
+                                                        fin_port_zones))
+        cluster_zones = ~fin_zones & ~cluster_borders
+
+        masks = (fin_zones, fin_borders, cluster_borders, cluster_zones)
+        leg_modes = (
+            ("truck", "freight_train"),  # finland domestic leg
+            ("truck", "freight_train"),  # international land leg
+            ("truck",)  # foreign domestic leg
+        )
+        if not self.is_export:
+            masks = masks[::-1]
+            leg_modes = leg_modes[::-1]
+
+        costs = self.get_costs(impedance)
+        impedance_legs = {l: {} for l in ["leg_one", "leg_two", "leg_three"]}
+        for i, imp_leg in enumerate(impedance_legs.values()):
+            for mode in leg_modes[i]:
+                imp_leg[mode] = {imp_type: mtx[numpy.ix_(masks[i], masks[i+1])]
+                                 for imp_type, mtx in costs[mode].items()}
+        ship_costs = get_foreign_ship_cost(
+            self.costdata, ship_imps, self.model_category, fin_border_ids,
+            self.is_export)
+        impedance_legs["leg_two"].update(ship_costs)
+        return impedance_legs
+
+    def get_costs(self, impedance: dict):
         """Fetches calculated costs for each mode in model's mode choice.
 
         Parameters
@@ -752,12 +809,6 @@ class FreightPurpose(Purpose):
         impedance : dict 
             Mode (truck/train/...) : dict
                 Type (time/dist/toll_cost/canal_cost) : numpy 2d matrix
-        origs : dict
-            Origin border id (FIHEL/SESTO...) : str
-                Centroid id : int
-        dests : dict
-            Destination border id (FIHEL/SESTO...) : str
-                Centroid id : int
 
         Returns
         -------
@@ -765,7 +816,7 @@ class FreightPurpose(Purpose):
             Mode (truck/freight_train/...) : cost : numpy.ndarray
         """
         return {mode: {"cost": calc_cost(mode, self.costdata, impedance[mode],
-                                         self.model_category, origs, dests)}
+                                         self.model_category)}
                 for mode in self.modes}
 
     def calc_vehicles(self, matrix: numpy.ndarray, ass_class: str):
@@ -789,3 +840,83 @@ class FreightPurpose(Purpose):
                     / costdata["avg_load"] / 365)
         vehicles += vehicles.T * costdata["empty_share"]
         return vehicles
+
+    def run_logistics_module(self, demand_truck: numpy.ndarray, impedance: numpy.ndarray, 
+                             zone_index_map: dict, iterations: int) -> tuple:
+        """Entry point for running logistics module for truck demand within Finland
+
+        Parameters
+        ----------
+        demand_truck : numpy.ndarray
+            Modelled truck demand for purpose
+        impedance : dict
+            Mode (truck/train/...) : dict
+                Type (time/dist/toll_cost/canal_cost) : numpy 2d matrix
+        zone_index_map : dict 
+            zone id number : index
+        iterations : int
+            Number of times logistics module is run
+
+        Returns
+        -------
+        Tuple[np.ndarray]
+            Routed truck demand, and totals for detoured and direct demand
+        """
+        try:
+            lcs_areas = self.generation_zone_data[f"lc_area_{self.name}"]
+        except KeyError:
+            lcs_areas = self.generation_zone_data["lc_area"]
+        lc_sizes = lcs_areas[lcs_areas > 0]
+        lc_indices = numpy.array([zone_index_map.get(id, None) 
+                                for id in list(lc_sizes.index)])
+        lc_sizes = lc_sizes.to_numpy()
+        cost = self.get_costs(impedance)
+        model = LogisticsModule(cost, self.route_params, lc_indices, lc_sizes)
+        for i in range(1, iterations + 1):
+            demand_truck, per_route = run_logistics_model(model, demand_truck, i)
+        return demand_truck, per_route
+
+    def run_trade_route_module(self, impedance: dict,
+                               ship_imps: dict,
+                               fin_border_ids: dict,
+                               cluster_border_ids: dict,
+                               trade_demand_path):
+        """Entry point for running foreign trade route choice module. 
+        
+        Parameters
+        ----------
+        impedance : dict
+            Mode (truck/train/...) : dict
+                Type (time/dist/toll_cost/canal_cost) : numpy 2d matrix
+        ship_imps : dict
+            Mode (container_ship/general_cargo...) : attribute
+                Type (dist/frequency) : numpy.ndarray
+        fin_border_ids : dict
+            Finland border id (FIHEL/FISKV...) : str
+                Centroid id : int
+        cluster_border_ids : dict
+            Foreign border id (AEJEA/SESTO...) : str
+                Centroid id : int
+        trade_demand_path : Path
+            argument path to trade demand omx-file
+
+        Returns
+        -------
+        __type__
+            _description_
+        """
+        impedance_legs = self.form_impedance_legs(
+            impedance, ship_imps, fin_border_ids, cluster_border_ids)
+        demand, trade_mappings = read_omx_item(trade_demand_path, self.name)
+
+        mapping_name = (self.generation_zone_data.mapping.name if self.is_export 
+                        else self.attraction_zone_data.mapping.name)
+        if mapping_name == "municipality_center":
+            df = pandas.DataFrame(demand, trade_mappings["finland_zone_number"])
+            demand = df.groupby(self.generation_zone_data.mapping).sum().to_numpy()
+
+        port_indices = numpy.arange(len(fin_border_ids))
+
+        route_model = TradeRouteModule(impedance_legs, self.route_params, port_indices)
+        trade_demand = run_trade_model(route_model, demand)
+        return trade_demand

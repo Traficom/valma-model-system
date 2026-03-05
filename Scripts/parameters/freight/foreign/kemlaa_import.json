@@ -1,0 +1,34 @@
+{
+    "name": "kemlaa_import",
+    "orig": "null",
+    "dest": "null",
+    "generation_area": "foreign",
+    "attraction_area": "domestic",
+    "struct": "import",
+    "impedance_share": {},
+    "distance_boundaries": {
+        "truck": [
+            0,
+            9999
+        ],
+        "freight_train": [
+            0,
+            9999
+        ],
+        "ship": [
+            0,
+            9999
+        ]
+    },
+    "destination_choice": {},
+    "mode_choice": {
+		"truck": {},
+		"freight_train": {}
+	},
+	"demand_share": {},
+    "route_choice": {
+        "size": 1.0,
+        "constant": {},
+        "impedance": {}
+    }
+}

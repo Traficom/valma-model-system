@@ -22,7 +22,8 @@
                     "sh_cars1_hh2",
                     "sh_cars1_hh3",
                     "sh_cars2_hh2",
-                    "sh_cars2_hh3"
+                    "sh_cars2_hh3",
+                    "sh_adult_license"
                 ]
             },
             {
@@ -52,10 +53,10 @@
             "sh_row_or_detached"
         ],
         "first": [
-            "aggregate_results_municipality",
-            "aggregate_results_county",
-            "aggregate_results_subarea",
-            "aggregate_results_submodel"
+            "municipality",
+            "county",
+            "submodel",
+            "calibration_area"
         ]
     },
     "freight": {
@@ -112,10 +113,10 @@
             "lc_area_elint"
         ],
         "first": [
-            "aggregate_results_municipality",
-            "aggregate_results_county",
-            "aggregate_results_subarea",
-            "aggregate_results_submodel"
+            "municipality",
+            "county",
+            "submodel",
+            "calibration_area"
         ]
     }
 }

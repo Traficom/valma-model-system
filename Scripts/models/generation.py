@@ -66,7 +66,7 @@ class GenerationModel:
         return self.tours.values
 
 class LogitTourGeneration(GenerationModel):
-    """For this sub-class, tours are created in `model.logit.TourCombinationModel`."""
+    """Tours are created in `model.logit.GenerationLogit."""
 
     def __init__(self, 
                  purpose: Purpose,
@@ -99,13 +99,6 @@ class LogitTourGeneration(GenerationModel):
             nr_tours: pandas.Series = (nr * prob[str(nr)] * 
                                        self.zone_data["population"])
             self.tours += nr_tours
-
-class TourCombinationGeneration(GenerationModel):
-    """For this sub-class, tours are created in `model.logit.TourCombinationModel`."""
-
-    def add_tours(self):
-        pass
-
 
 class NonHomeGeneration(GenerationModel):
     """For calculating numbers of non-home tours starting in each zone."""

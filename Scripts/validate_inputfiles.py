@@ -130,7 +130,7 @@ def main(args):
                     log.warn("Scenarios with different zones found in EMME bank!")
             attrs = {
                 "NODE": (list(param.stop_codes.values())
-                         + [param.subarea_attr, param.municipality_attr]),
+                         + [param.submodel_attr]),
                 "LINK": ["#buslane"],
                 "TRANSIT_LINE": [param.keep_stops_attr],
             }
@@ -222,9 +222,9 @@ def main(args):
                 Path(args.results_path, name, "Matrices", "koko_suomi"))
     model_types = (args.model_types if args.model_types
                    else ["passenger_transport" for _ in forecast_zonedata_paths])
-    for model_type, data_path, submodel, long_dist_forecast, freight_path in zip(
+    for i, (model_type, data_path, submodel, long_dist_forecast, freight_path) in enumerate(zip(
             model_types, forecast_zonedata_paths, args.submodel,
-            args.long_dist_demand_forecast, args.freight_matrix_paths):
+            args.long_dist_demand_forecast, args.freight_matrix_paths)):
         # Check forecasted zonedata
         if not os.path.exists(data_path):
             msg = "Forecast data file '{}' does not exist.".format(
@@ -241,14 +241,15 @@ def main(args):
             long_dist_classes = (param.car_classes
                                  + param.long_dist_simple_classes)
             long_dist_path = Path(long_dist_forecast)
-            if long_dist_path not in long_dist_result_paths:
+            # Do not iterrupt if long distance run is set to be done now
+            # However long dist path must appear before it is used as base data
+            if long_dist_path not in long_dist_result_paths[:i]:
                 long_dist_matrices = MatrixData(long_dist_path)
                 with long_dist_matrices.open(
                         "demand", "vrk", zone_numbers[submodel],
                         forecast_zonedata.mapping, long_dist_classes) as mtx:
                     for ass_class in long_dist_classes:
                         a = mtx[ass_class]
-
         # Check freight matrices
         if freight_path != "none":
             freight_matrices = MatrixData(Path(freight_path))

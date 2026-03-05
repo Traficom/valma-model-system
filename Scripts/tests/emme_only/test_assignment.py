@@ -82,8 +82,7 @@ class EmmeAssignmentTest:
             emme_context, scenario_num, "koko_suomi",
             use_free_flow_speeds=True, time_periods={"vrk": "WholeDayPeriod"})
         self.dist_cost = {
-            "car_work": 0.12,
-            "car_leisure": 0.12,
+            "car": 0.12,
             "car_electric": 0.04,
             "trailer_truck": 0.5,
             "semi_trailer": 0.4,
@@ -97,10 +96,8 @@ class EmmeAssignmentTest:
         nr_zones = self.ass_model.nr_zones
         car_matrix = numpy.full((nr_zones, nr_zones), 10.0)
         demand = {
-            "car_work": car_matrix,
-            "car_leisure": car_matrix,
-            "transit_work": car_matrix,
-            "transit_leisure": car_matrix,
+            "car": car_matrix,
+            "transit": car_matrix,
             "bike": car_matrix,
             "trailer_truck": car_matrix,
             "semi_trailer": car_matrix,
@@ -115,22 +112,7 @@ class EmmeAssignmentTest:
                 if ass_class in ap.assignment_modes:
                     ap.set_matrix(ass_class, car_matrix)
             travel_cost[ap.name] = ap.end_assign()
-        mapping = pandas.Series({
-            "Helsinki": "Uusimaa",
-            "Espoo": "Uusimaa",
-            "Vantaa": "Uusimaa",
-            "Kauniainen": "Uusimaa",
-            "Hyvinkaa": "Uusimaa",
-            "Lohja": "Uusimaa",
-            "Hameenlinna": "Kanta-Hame",
-            "Tampere": "Pirkanmaa",
-            "Turku": "Varsinais-Suomi",
-            "Jyvaskyla": "Keski-Suomi",
-            "Kotka": "Kymenlaakso",
-            "Lahti": "Paijat-Hame"
-        })
-        self.ass_model.aggregate_results(self.resultdata, mapping)
-        self.ass_model.calc_noise(mapping)
+        self.ass_model.aggregate_results(self.resultdata)
         self.resultdata.flush()
         costs_files = MatrixData(
             TEST_DATA_PATH / "Results" / "assignment" / "Matrices")
@@ -147,18 +129,14 @@ class EmmeAssignmentTest:
         nr_zones = self.ass_model.nr_zones
         car_matrix = numpy.full((nr_zones, nr_zones), 10.0)
         ass_classes = [
-            "car_work",
-            "car_leisure",
-            "train",
-            "coach",
+            "car",
+            "transit",
             "airplane",
-            "train_car_acc",
-            "train_taxi_acc",
-            "coach_car_acc",
+            "pt_car_acc",
+            "pt_taxi_acc",
             "airpl_car_acc",
-            "train_car_egr",
-            "train_taxi_egr",
-            "coach_car_egr",
+            "pt_car_egr",
+            "pt_taxi_egr",
             "airpl_car_egr",
         ]
         demand = {ass_class: car_matrix for ass_class in ass_classes}

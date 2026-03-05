@@ -94,7 +94,7 @@ class EmmeAssignmentModel(AssignmentModel):
         ----------
         dist_unit_cost : dict
             key : str
-                Assignment class (car_work/truck/...)
+                Assignment class (car/truck/...)
             value : float
                 Car cost per km in euros
         car_time_files : list (optional)
@@ -136,7 +136,7 @@ class EmmeAssignmentModel(AssignmentModel):
                 use_stored_speeds=(car_time_files is not None),
                 delete_extra_matrices=self.delete_extra_matrices,
                 delete_strat_files=self._delete_strat_files))
-        ass_classes = (param.car_classes + param.long_distance_transit_classes
+        ass_classes = (param.car_classes + param.transit_classes + ("bike",)
             if self.use_free_flow_speeds else param.simple_transport_classes)
         ass_classes += ("bus",)
         self._create_attributes(
@@ -163,7 +163,7 @@ class EmmeAssignmentModel(AssignmentModel):
         ----------
         dist_unit_cost : dict
             key : str
-                Assignment class (car_work/truck/...)
+                Assignment class (car/truck/...)
             value : float
                 Car cost per km in euros
         commodity_classes : list of str
@@ -248,9 +248,7 @@ class EmmeAssignmentModel(AssignmentModel):
         return numpy.sqrt(
             sum((xy[:, axis] - xy[:, axis, None])**2 for axis in (0, 1)))
 
-    def aggregate_results(self,
-                          resultdata: ResultsData,
-                          mapping: pandas.Series):
+    def aggregate_results(self, resultdata: ResultsData):
         """Aggregate results to 24h and print vehicle kms.
 
         Parameters
@@ -315,18 +313,12 @@ class EmmeAssignmentModel(AssignmentModel):
             {ass_class: pandas.Series(0.0, vdfs, name="veh_km")
                 for ass_class in ass_classes},
             names=["class", "v/d-func"])
-        areas = mapping.drop_duplicates()
-        area_kms = {ass_class: pandas.Series(0.0, areas)
-            for ass_class in ass_classes}
-        vdf_area_kms = {vdf: pandas.Series(0.0, areas) for vdf in vdfs}
         #The following line only works well in Python 3.7+
         linktypes = (list(dict.fromkeys(param.roadtypes.values()))
                      + list(dict.fromkeys(param.railtypes.values())))
         linklengths = pandas.Series(0.0, linktypes, name="length")
-        soft_modes = param.transit_classes + ("bike",)
-        faulty_kela_code_nodes = set()
         for link in network.links():
-            if link.i_node[param.subarea_attr] == 2:
+            if link.i_node[param.submodel_attr] == 2:
                 linktype = link.type % 100
                 if linktype in param.roadclasses:
                     vdf = param.roadclasses[linktype].volume_delay_func
@@ -334,12 +326,6 @@ class EmmeAssignmentModel(AssignmentModel):
                     vdf = linktype - 90
                 else:
                     vdf = 0
-                municipality = link.i_node[param.municipality_attr]
-                try:
-                    area = mapping[municipality]
-                except KeyError:
-                    faulty_kela_code_nodes.add(municipality)
-                    area = None
                 for ass_class in ass_classes:
                     veh_kms = link[self._extra(ass_class)] * link.length
                     kms[ass_class] += veh_kms
@@ -347,56 +333,17 @@ class EmmeAssignmentModel(AssignmentModel):
                         vdf_kms[ass_class][vdf] += veh_kms
                     except KeyError:
                         pass
-                    try:
-                        area_kms[ass_class][area] += veh_kms
-                    except KeyError:
-                        pass
-                    if ass_class not in soft_modes:
-                        try:
-                            vdf_area_kms[vdf][area] += veh_kms
-                        except KeyError:
-                            pass
                 if vdf == 0 and linktype in param.railtypes:
                     linklengths[param.railtypes[linktype]] += link.length
                 else:
                     linklengths[param.roadtypes[vdf]] += link.length / 2
-        if faulty_kela_code_nodes:
-            s = ("County not found for #municipality when aggregating link data: "
-                 + ", ".join(faulty_kela_code_nodes))
-            log.warn(s)
         resultdata.print_line("\nVehicle kilometres", "result_summary")
         resultdata.print_concat(vdf_kms, "vehicle_kms_vdfs.txt")
         for ass_class in ass_classes:
             resultdata.print_line(
                 "{}:\t{:1.0f}".format(ass_class, kms[ass_class]),
                 "result_summary")
-        resultdata.print_data(area_kms, "vehicle_kms_county.txt")
-        resultdata.print_data(vdf_area_kms, "vehicle_kms_vdfs_county.txt")
         resultdata.print_data(linklengths, "link_lengths.txt")
-
-        # Print mode boardings per municipality
-        boardings = defaultdict(lambda: defaultdict(float))
-        modes = self.assignment_periods[0].assignment_modes
-        attrs = [modes[transit_class].segment_results["total_boardings"]
-            for transit_class in self.transit_classes]
-        for line in network.transit_lines():
-            mode = line.mode.id
-            for seg in line.segments():
-                municipality = seg.i_node[param.municipality_attr]
-                for tc in attrs:
-                    boardings[mode][municipality] += seg[tc]
-        resultdata.print_data(
-            pandas.DataFrame.from_dict(boardings), "municipality_boardings.txt")
-
-        # Aggregate and print numbers of stations
-        stations = pandas.Series(0, param.station_ids, name="number")
-        for node in network.regular_nodes():
-            for mode in param.station_ids:
-                if (node.data2 == param.station_ids[mode]
-                        and node[self._extra("transit_won_boa")] > 0):
-                    stations[mode] += 1
-                    break
-        resultdata.print_data(stations, "transit_stations.txt")
 
         # Export link, node and segnment extra attributes to GeoPackage file
         fname = "assignment_results.gpkg"
@@ -570,90 +517,6 @@ class EmmeAssignmentModel(AssignmentModel):
         self.emme_project.create_extra_attribute(
             "LINK", param.park_ride_vol_attr, "park-and-ride car volume",
             overwrite=True, scenario=scenario)
-
-    def calc_noise(self, mapping: pandas.Series) -> pandas.Series:
-        """Calculate noise according to Road Traffic Noise Nordic 1996.
-
-        Parameters
-        ----------
-        mapping : pandas.Series
-            Mapping between municipality and county
-
-        Returns
-        -------
-        pandas.Series
-            Area (km2) of noise polluted zone, aggregated to area level
-        """
-        noise_areas = pandas.Series(
-            0.0, mapping.drop_duplicates(), name="county")
-        network = self.day_scenario.get_network()
-        morning_network = self.assignment_periods[0].emme_scenario.get_network()
-        for link in network.links():
-            # Aggregate traffic
-            light_modes = (
-                self._extra("car_work"),
-                self._extra("car_leisure"),
-                self._extra("van"),
-            )
-            traffic = sum([link[mode] for mode in light_modes])
-            rlink = link.reverse_link
-            if rlink is None:
-                reverse_traffic = 0
-            else:
-                reverse_traffic = sum([rlink[mode] for mode in light_modes])
-            cross_traffic = (param.years_average_day_factor
-                             * param.share_7_22_of_day
-                             * (traffic+reverse_traffic))
-            heavy = (link[self._extra("truck")]
-                     + link[self._extra("trailer_truck")])
-            traffic = max(traffic, 0.01)
-            heavy_share = heavy / (traffic+heavy)
-
-            # Calculate speed
-            link = morning_network.link(link.i_node, link.j_node)
-            car_time_attr = self.assignment_periods[0].netfield("car_time")
-            rlink = link.reverse_link
-            if reverse_traffic > 0:
-                speed = (60 * 2 * link.length
-                         / (link[car_time_attr]+rlink[car_time_attr]))
-            else:
-                try:
-                    speed = (0.3*(60*link.length/link[car_time_attr])
-                             + 0.7*link.data2)
-                except ZeroDivisionError:
-                    speed = link.data2
-            speed = max(speed, 50.0)
-
-            # Calculate start noise
-            if speed <= 90:
-                heavy_correction = (10*log10((1-heavy_share)
-                                    + 500*heavy_share/speed))
-            else:
-                heavy_correction = (10*log10((1-heavy_share)
-                                    + 5.6*heavy_share*(90/speed)**3))
-            start_noise = ((68 + 30*log10(speed/50)
-                           + 10*log10(cross_traffic/15/1000)
-                           + heavy_correction)
-                if cross_traffic > 0 else 0)
-            if start_noise < 0:
-                log.warn(f"Negative noise level for link {link.id}")
-                start_noise = 0
-
-            # Calculate noise zone width
-            func = param.noise_zone_width
-            for interval in func:
-                if interval[0] <= start_noise < interval[1]:
-                    zone_width = func[interval](start_noise - interval[0])
-                    break
-
-            # Calculate noise zone area and aggregate to area level
-            try:
-                area = mapping[link.i_node[param.municipality_attr]]
-            except KeyError:
-                area = None
-            if area in noise_areas:
-                noise_areas[area] += 0.001 * zone_width * link.length
-        return noise_areas
 
     def _link_24h(self, network: Network, networks: Dict[str, Network],
                   attrs: Iterable[str]):
