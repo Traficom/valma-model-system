@@ -1,6 +1,7 @@
 from __future__ import annotations
 from typing import Any, Dict, Union
 import parameters.assignment as param
+from parameters.cost import value_of_time
 
 
 (
@@ -107,7 +108,7 @@ class JourneyLevel:
                 "at_nodes": None,
                 "on_lines": {
                     "penalty": param.board_fare_attr,
-                    "perception_factor": 60 / param.value_of_time[transit_class],
+                    "perception_factor": 60 / value_of_time[transit_class],
                 },
                 "on_segments": None,
             },

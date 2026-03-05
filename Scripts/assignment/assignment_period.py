@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING, Dict, Union, Iterable, Optional
 import utils.log as log
 from utils.validate_assignment import divide_matrices, output_od_los
 import parameters.assignment as param
+from parameters.cost import value_of_time
 from assignment.datatypes.assignment_mode import AssignmentMode, BikeMode, WalkMode
 from assignment.datatypes.car import CarMode, TruckMode
 from assignment.datatypes.car_specification import CarSpecification
@@ -141,7 +142,7 @@ class AssignmentPeriod(Period):
         include_toll_cost = self.emme_scenario.network_field(
             "LINK", self.netfield("hinta")) is not None
         car_modes = {mode: CarMode(
-                mode, self, dist_unit_cost[mode], param.value_of_time[mode],
+                mode, self, dist_unit_cost[mode], value_of_time[mode],
                 include_toll_cost, save_matrices)
             for mode in car_classes}
         truck_modes = {mode: TruckMode(

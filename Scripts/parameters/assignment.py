@@ -147,19 +147,6 @@ performance_settings = {
     "network_acceleration": True,
     "u_turns_allowed": True,
 }
-# Value of time [eur/hour]
-value_of_time = {
-    "car": 9.18,
-    "transit": 7.3,
-    "airplane": 11.4,
-    "pt_car_acc": 7.7,
-    "pt_taxi_acc": 7.7,
-    "airpl_car_acc": 11.4,
-    "pt_car_egr": 7.7,
-    "pt_taxi_egr": 7.7,
-    "airpl_car_egr": 11.4,
-    "van": 29.02,
-}
 congested_time_weight = 1.5
 freight_terminal_cost = {
     'D': 0,
