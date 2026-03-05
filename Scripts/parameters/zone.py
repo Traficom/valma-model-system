@@ -18,7 +18,7 @@ tour_length_intervals = (0, 3, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100,
 finland_border_points = {
     "FIHEL": {"name": "Vuosaari", "id": 524},
     "FISKV": {"name": "Skoljdvik", "id": 3607},
-    "FIHNK": {"name": "Hanko", "id": 4102},
+    "FIHKO": {"name": "Hanko", "id": 4102},
     "FIINK": {"name": "Inkoo", "id": 4201},
     "FIPOR": {"name": "Pori", "id": 10411},
     "FIRAU": {"name": "Rauma", "id": 11233},

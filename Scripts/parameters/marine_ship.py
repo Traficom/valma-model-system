@@ -5,7 +5,7 @@ port_draught_limit = {
     "container_ship": {
         "FIHEL": 12,
         "FISKV": 12,
-        "FIHNK": 12,
+        "FIHKO": 12,
         "FIINK": 12,
         "FIPOR": 12,
         "FIRAU": 12,
@@ -28,7 +28,7 @@ port_draught_limit = {
     "general_cargo": {
         "FIHEL": 12,
         "FISKV": 12,
-        "FIHNK": 12,
+        "FIHKO": 12,
         "FIINK": 12,
         "FIPOR": 15,
         "FIRAU": 12,
@@ -51,7 +51,7 @@ port_draught_limit = {
     "lng_carrier": {
         "FIHEL": 12,
         "FISKV": 12,
-        "FIHNK": 12,
+        "FIHKO": 12,
         "FIINK": 12,
         "FIPOR": 12,
         "FIRAU": 12,
@@ -74,7 +74,7 @@ port_draught_limit = {
     "oil_tanker": {
         "FIHEL": 12,
         "FISKV": 15,
-        "FIHNK": 12,
+        "FIHKO": 12,
         "FIINK": 12,
         "FIPOR": 12,
         "FIRAU": 12,
@@ -97,7 +97,7 @@ port_draught_limit = {
     "product_tanker": {
         "FIHEL": 12,
         "FISKV": 15,
-        "FIHNK": 12,
+        "FIHKO": 12,
         "FIINK": 12,
         "FIPOR": 12,
         "FIRAU": 12,
@@ -120,7 +120,7 @@ port_draught_limit = {
     "roro_vessel": {
         "FIHEL": 8,
         "FISKV": 8,
-        "FIHNK": 8,
+        "FIHKO": 8,
         "FIINK": 8,
         "FIPOR": 8,
         "FIRAU": 8,

@@ -905,7 +905,10 @@ class FreightPurpose(Purpose):
             demand = demand[numpy.ix_(idx[0], idx[1])]
         demand = demand.T if not self.is_export else demand
 
-        port_indices = dict(zip(fin_border_ids.keys(), range(len(fin_border_ids))))
+        port_indices = {
+            key: idx for idx, key in enumerate(
+                sorted(fin_border_ids, key=fin_border_ids.get))
+        }
         route_model = TradeRouteModule(impedance_legs, self.route_params, 
                                        port_indices, self.is_export)
         trade_demand = run_trade_model(route_model, demand)
