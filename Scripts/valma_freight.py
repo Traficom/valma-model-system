@@ -27,7 +27,7 @@ def main(args):
     result_data_folder = Path(args.result_data_folder, args.scenario_name)
     emme_project_path = Path(args.emme_project_file)
     parameters_path = Path(__file__).parent / "parameters" / "freight"
-    trade_demand_path = Path(args.trade_demand_data_path)
+    trade_demand_file = Path(args.trade_demand_file)
     save_matrices = True if args.specify_commodity_names else False
     ep = EmmeProject(emme_project_path)
     ep.try_open_db("koko_suomi")
@@ -59,10 +59,10 @@ def main(args):
         log.info(f"Calculating trade routes for foreign purpose: {purpose.name}")
         if purpose.is_export:
             demand = purpose.run_trade_route_module(impedance, *marine_export,
-                                                    trade_demand_path)
+                                                    trade_demand_file)
         else:
             demand = purpose.run_trade_route_module(impedance, *marine_import,
-                                                    trade_demand_path)
+                                                    trade_demand_file)
     marine_export, marine_import = None, None
 
     # prepare domestic model by splicing impedances and initializing final demand matrix 
@@ -206,9 +206,9 @@ if __name__ == "__main__":
         "--specify-commodity-names",
         nargs="*",
         choices=commodity_conversion,
-        help="Commodity names in 29 classification. Assigned and saved as mtx.")
+        help="Specify commodity names to be assigned and saved as matrix.")
     parser.add_argument(
-        "--trade-demand-data-path",
+        "--trade-demand-file",
         type=str,
         help="Path to .omx file containing freight foreign trade demand.")
 
