@@ -241,29 +241,29 @@ class TradeRouteModule(FreightDetourInference):
                       flow_leg1: np.ndarray, flow_leg2: np.ndarray, 
                       flow_leg3: np.ndarray, lock: Lock) -> None:
         """Distribute demand across logit route alternatives and aggregate flows"""
-        current_batch_size = min(self.batch_size, n_origin - origin_offset)
         prob_o_bcp, prob_d_bcp = self.forward()
         
+        current_batch_size = min(self.batch_size, n_origin - origin_offset)
         offset_batch = origin_offset + current_batch_size
         prob_o_bcp_batch = prob_o_bcp[origin_offset:offset_batch]
         prob_d_bcp_batch = prob_d_bcp[origin_offset:offset_batch]
-        # (batch, n_orig_alt, n_dest) → (batch, n_dest, n_orig_alt)
-        prob_o_bcp_batch = np.moveaxis(prob_o_bcp_batch, 2, 1)
-        # (batch, n_orig_alt, n_dest_bcp_alt, n_dest) 
-        # → (batch, n_dest, n_orig_alt, n_dest_bcp_alt)
-        prob_d_bcp_batch = np.moveaxis(prob_d_bcp_batch, 3, 1)
-
         demand_batch = demand[origin_offset:offset_batch, :]
+
+        # swap destinations to axis 1 for demand multiplication
+        prob_o_bcp_batch = np.moveaxis(prob_o_bcp_batch, 2, 1)
+        prob_d_bcp_batch = np.moveaxis(prob_d_bcp_batch, 3, 1)
         demand_routed = (
             demand_batch[:, :, None, None]
             * prob_o_bcp_batch[:, :, :, None]
             * prob_d_bcp_batch
         )
         
-        # for batches, sum over origins and destinations
+        # axes now = (n_orig (batched), n_dest, n_orig_alt, n_dest_bcp_alt)
+        # keep axes defining each leg segment, sum out the rest
         flow_leg1_batch = np.sum(demand_routed, axis=(1, 3))
         flow_leg2_batch = np.sum(demand_routed, axis=(0, 1))
         flow_leg3_batch = np.sum(demand_routed, axis=(0, 2))
+        
         # leg3 still has leg2 mode alternatives. Collapse and sum dest bcp inflow 
         flow_leg3_batch = flow_leg3_batch.reshape(
             n_dest, len(self.leg2_modes), n_dest_bcp

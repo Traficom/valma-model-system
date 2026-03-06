@@ -757,23 +757,16 @@ class FreightPurpose(Purpose):
         fin_zones = numpy.isin(all_zones, numpy.union1d(self.orig_zone_numbers, 
                                                         fin_port_zones))
         cluster_zones = ~fin_zones & ~cluster_borders
-
+        
         masks = (fin_zones, fin_borders, cluster_borders, cluster_zones)
-        leg_modes = (
-            ("truck",),  # finland domestic leg
-            ("truck",),  # international land leg
-            ("truck",)  # foreign domestic leg
-        )
         if not self.is_export:
             masks = masks[::-1]
-            leg_modes = leg_modes[::-1]
 
         costs = self.get_costs(impedance)
         impedance_legs = {l: {} for l in ["leg_one", "leg_two", "leg_three"]}
         for i, imp_leg in enumerate(impedance_legs.values()):
-            for mode in leg_modes[i]:
-                imp_leg[mode] = {imp_type: mtx[numpy.ix_(masks[i], masks[i+1])]
-                                 for imp_type, mtx in costs[mode].items()}
+            imp_leg["truck"] = {imp_type: mtx[numpy.ix_(masks[i], masks[i+1])]
+                                for imp_type, mtx in costs["truck"].items()}
         ship_costs = get_foreign_ship_cost(
             self.costdata, ship_imps, self.model_category, fin_border_ids,
             self.is_export)

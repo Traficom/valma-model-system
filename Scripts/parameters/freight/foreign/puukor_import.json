@@ -50,12 +50,6 @@
                     0.08042,
                     ["FIVAA", "FIUKI", "FITKU", "FIRAU", "FIHMN"]
                 ]
-            },
-            "product_tanker": {
-                "second_class": [
-                    0.08042,
-                    ["FITKU", "FIPOR", "FIHMN"]
-                ]
             }
 		},
 		"impedance": {
