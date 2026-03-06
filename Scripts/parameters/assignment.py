@@ -164,7 +164,7 @@ freight_terminal_cost = {
     'W': 0
 }
 in_vehicle_weight = {
-    'j': 0.6,
+    'j': 0.8,
 }
 # Boarding penalties for different transit modes
 boarding_penalty = {
