@@ -181,6 +181,13 @@ class MockPeriod(Period):
             Subtype (car/truck/inv_time/...) : numpy 2-d matrix
                 Matrix of the specified type
         """
+        try:
+            assignment_classes.add("car")
+        except AttributeError:
+            try:
+                assignment_classes.append("car")
+            except AttributeError:
+                assignment_classes += ("car",)
         with self.matrices.open(
                 mtx_type, self.name, transport_classes=[]) as mtx:
             matrix_list = set(assignment_classes) & set(mtx.matrix_list)
@@ -193,7 +200,8 @@ class MockPeriod(Period):
             # Quickfix, need to be changed!!
             mtx = matrices[mode][idx[:, None], idx]
             matrices[mode] = mtx
-            if mode == "car_work":
+            if mode == "car":
+                matrices["icev"] = mtx
                 matrices["bev"] = mtx
                 matrices["phev"] = mtx
         return matrices

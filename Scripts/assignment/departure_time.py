@@ -9,7 +9,8 @@ import parameters.departure_time as param
 from parameters.assignment import (
     transport_classes, 
     volume_factors, 
-    mode_assignment_classes
+    mode_assignment_classes,
+    car_classes
 )
 
 
@@ -49,7 +50,7 @@ class DepartureTimeModel:
             max_gap : float
                 Maximum gap for OD pair in car work demand matrix
         """
-        car_demand = next(iter(self.demand.values()))["car"]
+        car_demand = next(iter(self.demand.values()))["icev"]
         max_gap = numpy.abs(car_demand - self.old_car_demand).max()
         try:
             old_sum = self.old_car_demand.sum()
@@ -75,7 +76,7 @@ class DepartureTimeModel:
             Default is all assignment classes.
         """
         try:
-            self.old_car_demand = next(iter(self.demand.values()))["car"]
+            self.old_car_demand = next(iter(self.demand.values()))["icev"]
         except FileNotFoundError:
             pass
         n = self.nr_zones
@@ -162,7 +163,8 @@ class DepartureTimeModel:
         if time_period in param.demand_share["freight"]["van"]:
             n = nr_zones
             mtx = self.demand[time_period]
-            car_demand = mtx["car"][0:n, 0:n]
+            car_demand = sum(
+                mtx[ass_class][0:n, 0:n] for ass_class in car_classes)
             share = param.demand_share["freight"]["van"][time_period]
             self._add_2d_demand(share, "van", time_period, car_demand, (0, 0))
             self._add_2d_demand(

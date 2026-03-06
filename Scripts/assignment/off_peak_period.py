@@ -141,9 +141,9 @@ class TransitAssignmentPeriod(OffPeakPeriod):
             Whether matrices will be saved in Emme format for all time periods.
         """
         self._prepare_cars(
-            dist_unit_cost, save_matrices=False, car_classes=["car"],
+            dist_unit_cost, save_matrices=False, car_classes=["icev"],
             truck_classes=[])
-        self.car_mode = self.assignment_modes.pop("car")
+        self.car_mode = self.assignment_modes.pop("icev")
         self._prepare_other(day_scenario, save_matrices)
 
     def init_assign(self):

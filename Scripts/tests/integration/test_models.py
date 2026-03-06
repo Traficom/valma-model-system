@@ -87,7 +87,7 @@ class ModelTest(unittest.TestCase):
         self.assertIsNotNone(impedances["cost"])
         self.assertIsNotNone(impedances["dist"])
         self.assertIs(type(impedances["time"]), dict)
-        self.assertEquals(len(impedances["time"]), 8)
+        self.assertEquals(len(impedances["time"]), 7)
         self.assertIsNotNone(impedances["time"]["transit"])
         self.assertIs(type(impedances["time"]["transit"]), numpy.ndarray)
         self.assertEquals(impedances["time"]["transit"].ndim, 2)

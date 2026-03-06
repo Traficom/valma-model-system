@@ -75,9 +75,8 @@ class Purpose:
         self.car_modes: Dict[str, Tuple[str, str]] = {}
         if self.name in assignment_classes:
             self.car_modes[cp_mode] = ecp_modes
-            car_mode = "car_" + assignment_classes[self.name]
-            if car_mode in self.impedance_share:
-                self.car_modes[car_mode] = ec_modes
+            if "car_drv" in self.impedance_share:
+                self.car_modes["car_drv"] = [mode + "_drv" for mode in ec_modes]
         for mode, electric_modes in self.car_modes.items():
             if mode in self.impedance_share:
                 car_imp_share = self.impedance_share[mode]
@@ -320,8 +319,9 @@ class TourPurpose(Purpose):
         self.modes = list(self.impedance_share)
         self.intermodals = {key: intermodals[key] for key in self.modes if key in intermodals}
         self.connection_models: Dict[str, logit.LogitModel] = {}
-        for mode in self.intermodals:
-            if mode in self.modes:
+        if "access_mode_choice" in specification:
+            for mode in self.intermodals:
+                self.modes += self.intermodals[mode]
                 new_spec = copy(specification)
                 new_spec["mode_choice"] = new_spec["access_mode_choice"][mode]
                 self.connection_models[mode] = logit.LogitModel(

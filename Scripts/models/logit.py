@@ -219,10 +219,8 @@ class LogitModel:
                         "sh_" + vehicle_type, self.bounds, generation=True)
                     if vehicle_type == "icev":
                         new_mode = mode
-                    elif mode == "car_pax":
-                        new_mode = vehicle_type + "_pax"
                     else:
-                        new_mode = vehicle_type
+                        new_mode = f"{vehicle_type}_{mode.split('_')[1]}"
                     probs[new_mode] = vehicle_share * ec_probs[vehicle_type][mode]
             else:
                 probs[mode] = 0
@@ -413,8 +411,7 @@ class ModeDestModel(LogitModel):
                 mode_exps, sum(mode_exps.values()))
             for mode in self.purpose.car_modes:
                 for array_dict in (ec_dest_exps, ec_dest_expsums):
-                    new_mode = (vehicle_type + "_pax" if mode == "car_pax"
-                                else vehicle_type)
+                    new_mode = f"{vehicle_type}_{mode.split('_')[1]}"
                     array_dict[new_mode] = array_dict.pop(mode)
             dest_exps.update(ec_dest_exps)
             dest_expsums.update(ec_dest_expsums)
@@ -612,7 +609,7 @@ class DestModeModel(LogitModel):
             for e_mode, mode in mode_pairs.items():
                 impedance[mode] = impedance[e_mode]
             if mode_pairs:
-                ec_probs[e_mode] = self._calc_dummy_prob(impedance)
+                ec_probs[e_mode.split("_")[0]] = self._calc_dummy_prob(impedance)
         if electric_modes[0]:
             prob = self._calc_electric_car_shares(ec_probs)
 

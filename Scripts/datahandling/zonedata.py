@@ -84,7 +84,7 @@ class ZoneData:
                              car_dist_cost: float,
                              electric_car_share: Dict):
         car_shares = pandas.DataFrame(electric_car_share).T.reindex(
-            index=self.aggregations.mappings["county"].values).fillna(
+            index=self.demand_aggs.mappings["county"].values).fillna(
                 electric_car_share["default"])
         car_shares.index = self.zone_numbers
         self.share["sh_bev"] = car_shares["bev"]

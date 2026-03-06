@@ -39,6 +39,16 @@ class LogitModelTest(unittest.TestCase):
                 "cost": mtx,
                 "dist": mtx,
             },
+            "bev": {
+                "time": mtx,
+                "cost": mtx,
+                "dist": mtx,
+            },
+            "phev": {
+                "time": mtx,
+                "cost": mtx,
+                "dist": mtx,
+            },
             "car_pax": {
                 "time": mtx,
                 "cost": mtx,
@@ -60,8 +70,7 @@ class LogitModelTest(unittest.TestCase):
         pur.orig_zone_numbers = INTERNAL_ZONES
         pur.dist = mtx
         pur.car_modes = {
-            "car_work": ["bev", "phev"],
-            "car_leisure": ["bev", "phev"],
+            "car_drv": ["bev", "phev"],
         }
         parameters_path = Path(__file__).parents[2] / "parameters" / "demand"
         for file in parameters_path.rglob("*.json"):
