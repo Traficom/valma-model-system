@@ -167,8 +167,8 @@ class ModelSystem:
         self.mode_share: List[Dict[str,Any]] = []
         self.convergence = []
         self.fem = ForeignExternalModel(
-            self._zone_datas["foreign"], self._zone_datas["foreign"], self.basematrices)
-        # TODO: Näihin eri zonedatat sitten ku on tai yhdistä yhteen zonedatatiedostoon forecast-tieto
+            self._zone_datas["domestic"], self._zone_datas["domestic"], self.basematrices)
+        # TODO: Näihin eri zonedatat sitten ku on tai yhdistä yhteen zonedatatiedostoon forecast-tieto ja nimelle "foreign"
 
     def _init_demand_model(self, tour_purposes: List[TourPurpose]):
         return DemandModel(
