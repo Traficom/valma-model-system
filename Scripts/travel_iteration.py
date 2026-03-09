@@ -19,6 +19,7 @@ from datahandling.zonedata import ZoneData
 from datahandling.matrixdata import MatrixData
 from demand.trips import DemandModel
 from demand.external import ExternalPurpose
+from demand.foreign_external import ForeignExternalModel
 from datatypes.purpose import new_tour_purpose
 from datatypes.purpose import Purpose, TourPurpose, SecDestPurpose
 from datatypes.demand import Demand
@@ -165,6 +166,9 @@ class ModelSystem:
         self.external_purpose = ExternalPurpose(numpy.array(self.zone_numbers))
         self.mode_share: List[Dict[str,Any]] = []
         self.convergence = []
+        self.fem = ForeignExternalModel(
+            self._zone_datas["foreign"], self._zone_datas["foreign"], self.basematrices)
+        # TODO: Näihin eri zonedatat sitten ku on tai yhdistä yhteen zonedatatiedostoon forecast-tieto
 
     def _init_demand_model(self, tour_purposes: List[TourPurpose]):
         return DemandModel(
@@ -296,6 +300,12 @@ class ModelSystem:
             self.dtm.init_demand(param.truck_classes)
             self._add_external_demand(
                 self.freight_matrices, param.truck_classes)
+        
+        # Calculate and add foreign external passenger demand
+        self.foreign_ext_ship = self.fem.calc_foreign_external_traffic("ship")
+        self.foreign_ext_airplane = self.fem.calc_foreign_external_traffic("airplane")
+        self.dtm.add_demand(self.foreign_ext_ship)
+        self.dtm.add_demand(self.foreign_ext_airplane)
 
         # Add beeline distance dummy
         zd = self._zone_datas["domestic"]

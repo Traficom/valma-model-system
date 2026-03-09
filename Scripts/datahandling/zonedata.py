@@ -263,6 +263,20 @@ class ZoneData:
             Index of zone number
         """
         return self.zones[zone_number].index
+    
+    def get_foreign_external_data(self) -> pandas.DataFrame:
+        """Get zone data for foreign external passenger traffic calculation.
+
+        Returns
+        -------
+        pandas DataFrame
+            Zone data for foreign external passenger traffic calculation
+        """
+        variables = (
+            "population", # TODO: Tähän lisää muuttujia kun saadaan se koko malli speksattua.
+        )
+        data = {k: self._values[k] for k in variables}
+        return pandas.DataFrame(data)
 
     def get_data(self, key: str, bounds: slice, generation: bool=False) -> Union[pandas.Series, numpy.ndarray]:
         """Get data of correct shape for zones included in purpose.
