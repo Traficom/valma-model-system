@@ -33,7 +33,7 @@ class ForeignExternalModel:
         self.zdata_b = zone_data_base["domestic"]
         self.zdata_f = zone_data_forecast["domestic"]
         self.base_demand = base_demand
-        spec = { # TODO: Nää pitää ehkä speksata jostain kunnolla, että toimii oikein.
+        spec = {
             "name": "foreign_external",
             "orig": None,
             "dest": None,
@@ -57,6 +57,11 @@ class ForeignExternalModel:
         production_base: numpy.ndarray = self._generate_trips(zone_data_base, mode)
         production_forecast: numpy.ndarray = self._generate_trips(zone_data_forecast, mode)
         zone_numbers = self.zdata_b.zone_numbers
+
+        # TODO: Tästä funkiosta ulos saatava Demand-objekti tulee olla sellainen, että sen 'mode' tulee olla assignment mode
+        # (eli esim. 'car' eikä 'ship')
+        # Eli tämän funktion input mode tulee olla foreign_external mode (niinkuin se nyt onkin), mutta output mode on assignment mode.
+
         # NOTE: Tässä oletetaaan, että base_demand -matriisi on symmetrinen, muuten fratar ei toimi oikein.
         with self.base_demand.open("ext_foreign_passenger", "vrk", list(zone_numbers)) as mtx:
             # Remove zero values
