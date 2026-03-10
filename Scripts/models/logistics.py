@@ -3,6 +3,7 @@ from typing import Dict, Tuple
 from concurrent.futures import ThreadPoolExecutor
 from threading import Lock
 
+from parameters.marine_ship import leg_names
 import utils.log as log
 
 class FreightDetourInference:
@@ -126,12 +127,9 @@ class TradeRouteModule(FreightDetourInference):
         FreightDetourInference.__init__(self, impedance, model_parameters)
         self.fin_borders = fin_borders
         self.is_export = is_export
-        self.leg1_modes = list(impedance["leg_one"])
-        self.leg2_modes = list(impedance["leg_two"])
-        self.leg3_modes = list(impedance["leg_three"])
+        self.len_leg_two = len(impedance.get("leg_two"))
 
-    def compute_utilities(self, leg_modes: list, leg_name: str, 
-                          add_constant: bool) -> dict:
+    def compute_utilities(self, leg_name: str, add_constant: bool) -> dict:
         """Compute utility components for a given leg
         
         Returns
@@ -140,18 +138,19 @@ class TradeRouteModule(FreightDetourInference):
             Mode (truck/container_ship...) : numpy 2d array
         """
         utility_parts = {}
-        for mode in leg_modes:
+        for mode in self.impedance[leg_name]:
             item = self.impedance[leg_name][mode]
-            beta = self.get_impedance_beta(mode, leg_name)
-            utility = beta * item["cost"]
+            b = self.get_impedance_beta(mode, leg_name)
+            utility = b * item["cost"]
             if add_constant:
                 utility += self.add_constants(mode, utility.shape)
-            if "frequency" in item and self.impedance_coeff.get("leg_two_frequency"):
+            if "frequency" in item and self.impedance_coeff.get("frequency"):
                 freq_mtx = item["frequency"]
                 freq_mtx[freq_mtx == np.inf] = -np.inf
-                utility += self.impedance_coeff["leg_two_frequency"] * freq_mtx
+                utility += self.impedance_coeff["frequency"] * freq_mtx
             utility_parts[mode] = utility
-        return utility_parts
+        utility = np.concatenate(list(utility_parts.values()), axis=1)
+        return utility
     
     def get_impedance_beta(self, mode: str, leg_name: str) -> float:
         """Fetch mode specific coefficient from model specification
@@ -161,20 +160,15 @@ class TradeRouteModule(FreightDetourInference):
         float
             estimated coefficient
         """
-        try:
-            coeffs = self.impedance_coeff["general_cost"]
-        except KeyError:
-            coeffs = self.impedance_coeff["leg_cost"]
-        if isinstance(coeffs, float):
-            beta = coeffs
-        else:
-            if mode in coeffs:
-                beta = coeffs[mode]
-            elif isinstance(coeffs[leg_name], float):
-                beta = coeffs[leg_name]
+        b = self.impedance_coeff["cost"]
+        if not isinstance(b, float):
+            if mode in b:
+                b = b[mode]
+            elif isinstance(b[leg_name], float):
+                b = b[leg_name]
             else:
-                beta = coeffs[leg_name][mode]
-        return beta
+                b = b[leg_name][mode]
+        return b
 
     def add_constants(self, mode: str, utility_shape: tuple) -> np.ndarray:
         """Sums leg specific mode-border constants
@@ -184,18 +178,16 @@ class TradeRouteModule(FreightDetourInference):
         numpy.ndarray
             constant matrix
         """
-        constants_mtx = np.zeros(utility_shape, dtype="float32")
-        border_constants = {}
+        constants_mtx = np.zeros(utility_shape, dtype=np.float32)
         if mode in self.constant:
             for class_items in self.constant[mode].values():
-                borders = set(self.fin_borders) & set(class_items[1])
-                border_constants.update({border: class_items[0] for border in borders})
-        for border, constant in border_constants.items():
-            idx = self.fin_borders[border]
-            if self.is_export:
-                constants_mtx[idx, :] += constant
-            else:
-                constants_mtx[:, idx] += constant
+                borders = set(self.fin_borders) & set(class_items["border_points"])
+                for border in borders:
+                    idx = self.fin_borders[border]
+                    if self.is_export:
+                        constants_mtx[idx, :] += class_items["dummy"]
+                    else:
+                        constants_mtx[:, idx] += class_items["dummy"]
         return constants_mtx
 
     def forward(self) -> Tuple[np.ndarray]:
@@ -207,23 +199,19 @@ class TradeRouteModule(FreightDetourInference):
             probability of choosing origin bcp i
             probability of choosing leg2 bcp j given choice of i
         """
-        util_one = self.compute_utilities(self.leg1_modes, "leg_one", False)
-        util_two = self.compute_utilities(self.leg2_modes, "leg_two", True)
-        util_three = self.compute_utilities(self.leg3_modes, "leg_three", False)
-        
-        util_one = np.concatenate(list(util_one.values()), axis=1)
-        util_two = np.concatenate(list(util_two.values()), axis=1)
-        util_three = np.concatenate(list(
-            util_three.values()) * len(self.leg2_modes), axis=0)
+        add_constant = (False, True, False)
+        utils = [self.compute_utilities(leg_name, add_constant[i])
+                 for i, leg_name in enumerate(leg_names)]
+        utils[2] = np.concatenate([utils[2]] * self.len_leg_two, axis=0)
 
-        # origins, origin bcp, dest bcp * leg2 modes, destinations
-        util1_util2 = util_one[:, :, None] + util_two[None, :, :]
-        route_util = util1_util2[:, :, :, None] + util_three[None, None, :, :]
+        # dimensions = origins, origin bcp, dest bcp * leg2 modes, destinations
+        route_util = (
+            utils[0][:, :, None, None]
+            + utils[1][None, :, :, None]
+            + utils[2][None, None, :, :]
+        )
 
-        n_origin, n_orig_alt = util_one.shape
-        n_dest_bcp_alt = util_two.shape[1]
-        n_dest = util_three.shape[1]
-
+        n_origin, n_orig_alt, n_dest_bcp_alt, n_dest = route_util.shape
         route_flat = route_util.reshape(n_origin, n_orig_alt * n_dest_bcp_alt, n_dest)
         route_probs_flat = self.softmax(route_flat, axis=1)
         route_probs = route_probs_flat.reshape(n_origin, n_orig_alt, n_dest_bcp_alt, n_dest)
@@ -265,9 +253,7 @@ class TradeRouteModule(FreightDetourInference):
         flow_leg3_batch = np.sum(demand_routed, axis=(0, 2))
         
         # leg3 still has leg2 mode alternatives. Collapse and sum dest bcp inflow 
-        flow_leg3_batch = flow_leg3_batch.reshape(
-            n_dest, len(self.leg2_modes), n_dest_bcp
-        )
+        flow_leg3_batch = flow_leg3_batch.reshape(n_dest, self.len_leg_two, n_dest_bcp)
         flow_leg3_batch = np.sum(flow_leg3_batch, axis=1).T
 
         with lock:
@@ -353,7 +339,7 @@ def run_trade_model(model: TradeRouteModule, demand: np.ndarray):
     n_dest_bcp = model.impedance["leg_three"]["truck"]["cost"].shape[0]
     
     flow_leg1 = np.zeros((n_origin, n_orig_bcp), dtype=np.float32)
-    flow_leg2 = np.zeros((n_orig_bcp, n_dest_bcp * len(model.leg2_modes)), dtype=np.float32)
+    flow_leg2 = np.zeros((n_orig_bcp, n_dest_bcp * model.len_leg_two), dtype=np.float32)
     flow_leg3 = np.zeros((n_dest_bcp, n_dest), dtype=np.float32)
     lock = Lock()
     
@@ -366,14 +352,14 @@ def run_trade_model(model: TradeRouteModule, demand: np.ndarray):
         futures = [executor.submit(model.process_batch, *args) for args in batch_args]
         _ = [f.result() for f in futures]
 
+    args = ((flow_leg1, n_orig_bcp), (flow_leg2, n_dest_bcp), (flow_leg3, n_dest))
     trade_demand = {
-        "leg_one": matrix_mode_slicer(flow_leg1, model.leg1_modes, n_orig_bcp),
-        "leg_two": matrix_mode_slicer(flow_leg2, model.leg2_modes, n_dest_bcp),
-        "leg_three": matrix_mode_slicer(flow_leg3, model.leg3_modes, n_dest)
+        leg_name: matrix_mode_slicer(*args[i], list(model.impedance[leg_name]))
+        for i, leg_name in enumerate(leg_names)
     }
     return trade_demand
 
-def matrix_mode_slicer(leg_demand, modes, n_zones):
+def matrix_mode_slicer(leg_demand, n_zones, modes):
     """Slice leg specific demand matrices to leg's modes
     
     Returns

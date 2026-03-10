@@ -1,5 +1,12 @@
 # Freight marine ship attributes
 
+# Leg specific names
+leg_names = [
+    "leg_one",
+    "leg_two",
+    "leg_three"
+]
+
 # Draught limit for marine modes in each Finnish port
 port_draught_limit = {
     "container_ship": {

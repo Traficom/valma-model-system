@@ -22,6 +22,7 @@ from utils.freight_costs import calc_cost, get_foreign_ship_cost
 from utils.calibrate import attempt_calibration
 from models.logistics import (LogisticsModule, TradeRouteModule,
                               run_logistics_model, run_trade_model)
+from parameters.marine_ship import leg_names
 
 
 class Purpose:
@@ -763,7 +764,7 @@ class FreightPurpose(Purpose):
             masks = masks[::-1]
 
         costs = self.get_costs(impedance)
-        impedance_legs = {l: {} for l in ["leg_one", "leg_two", "leg_three"]}
+        impedance_legs = {l: {} for l in leg_names}
         for i, imp_leg in enumerate(impedance_legs.values()):
             imp_leg["truck"] = {imp_type: mtx[numpy.ix_(masks[i], masks[i+1])]
                                 for imp_type, mtx in costs["truck"].items()}

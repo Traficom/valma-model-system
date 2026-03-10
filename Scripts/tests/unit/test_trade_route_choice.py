@@ -9,7 +9,7 @@ import openmatrix as omx
 from datahandling.resultdata import ResultsData
 from datahandling.zonedata import FreightZoneData
 from utils.freight_utils import create_purposes
-
+from parameters.marine_ship import leg_names
 
 TEST_PATH = Path(__file__).parent.parent / "test_data"
 TEST_DATA_PATH = TEST_PATH / "Scenario_input_data"
@@ -85,7 +85,7 @@ class TradeRouteChoiceTest(unittest.TestCase):
 
     def _assert_leg_impedances(self, name, split_impedances, truck_name, marine_modes):
         if name.split("_")[0] == "kemlaa":
-            leg_one, leg_two, leg_three = "leg_one", "leg_two", "leg_three"
+            leg_one, leg_two, leg_three = leg_names
             self.assertEqual(len(split_impedances), 3)
             self.assertEqual([leg_one, leg_two, leg_three], 
                                 list(split_impedances))
@@ -106,13 +106,11 @@ class TradeRouteChoiceTest(unittest.TestCase):
                 self.assertEqual(split_impedances[leg_three][truck_name]["cost"].shape, (2, 30))
 
     def _assert_leg_demand(self, name, demand):
-        leg_one = demand["leg_one"]
-        leg_two = demand["leg_two"]
-        leg_three = demand["leg_three"]
+        leg_one, leg_two, leg_three = [demand[leg_name] for leg_name in leg_names]
+        self.assertEqual(len(leg_one), 1)
+        self.assertEqual(len(leg_two), 3)
+        self.assertEqual(len(leg_three), 1)
         if name == "kemlaa_export":
-            self.assertEqual(len(leg_one), 1)
-            self.assertEqual(len(leg_two), 3)
-            self.assertEqual(len(leg_three), 1)
             truck_leg1_cols = numpy.array((8.169347, 14.315129), dtype=numpy.float32)
             self.assertAlmostEqual(numpy.sum(leg_one["truck"]), 22.484474, places=3)
             numpy.testing.assert_array_almost_equal(
@@ -140,9 +138,6 @@ class TradeRouteChoiceTest(unittest.TestCase):
                 numpy.sum(leg_three["truck"], axis=0), truck_leg3_cols)
             
         elif name == "kemlaa_import":
-            self.assertEqual(len(leg_one), 1)
-            self.assertEqual(len(leg_two), 3)
-            self.assertEqual(len(leg_three), 1)
             truck_leg1_row = numpy.array((203.28798, 231.84685), dtype=numpy.float32)
             self.assertAlmostEqual(numpy.sum(leg_one["truck"]), 435.13483, places=3)
             numpy.testing.assert_array_almost_equal(
