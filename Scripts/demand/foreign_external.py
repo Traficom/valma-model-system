@@ -7,6 +7,7 @@ if TYPE_CHECKING:
     from datahandling.zonedata import ZoneData
 
 import parameters.ext_tour_generation as param
+from parameters.departure_time import demand_share
 from utils.freight import fratar, calibrate
 from datatypes.demand import Demand
 from datatypes.purpose import Purpose
@@ -32,11 +33,13 @@ class ForeignExternalModel:
         self.zdata_b = zone_data_base
         self.zdata_f = zone_data_forecast
         self.base_demand = base_demand
-        spec = { # TODO: Nää pitää speksata tähän jostain, tai sitten vaan jättää ne muut nollaksi matriisissa?
-            "name": "external_foreign_passenger",
+        spec = { # TODO: Nää pitää ehkä speksata jostain kunnolla, että toimii oikein.
+            "name": "foreign_external",
             "orig": None,
             "dest": None,
             "area": "all",
+            "impedance_share": None,
+            "demand_share": demand_share["foreign_external"]
         }
         self.purpose = Purpose(spec, zone_data_base)
 
