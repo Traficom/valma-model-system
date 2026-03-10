@@ -26,7 +26,8 @@ commodity_conversion = {
 	"majon": "metkot",
 	"huonek": "metkot",
 	"jate": "jate",
-    "rkoljy": "rkoljy"
+    "rkoljy": "rkoljy",
+    "kaasu": "kaasu"
 }
 
 vector_calibration_threshold = 5

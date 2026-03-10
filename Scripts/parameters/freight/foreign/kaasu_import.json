@@ -1,5 +1,5 @@
 {
-    "name": "rkoljy_import",
+    "name": "kaasu_import",
     "orig": "null",
     "dest": "null",
     "generation_area": "foreign",
@@ -34,7 +34,7 @@
                     ["FIVAI", "FIVAL", "FIVAR"]
                 ]
             },
-            "oil_tanker": {
+            "lng_carrier": {
                 "first_class": [
                     4.598,
                     ["FISKV"]

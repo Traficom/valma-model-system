@@ -6,7 +6,7 @@ from threading import Lock
 import utils.log as log
 
 class FreightDetourInference:
-    def __init__(self, impedance: Dict[str, np.ndarray], model_parameters: dict, ) -> None:
+    def __init__(self, impedance: Dict[str, np.ndarray], model_parameters: dict) -> None:
         self.impedance = impedance
         self.constant = model_parameters["constant"]
         self.impedance_coeff = model_parameters["impedance"]
@@ -124,7 +124,7 @@ class TradeRouteModule(FreightDetourInference):
     def __init__(self, impedance: Dict[str, np.ndarray], model_parameters: dict, 
                  fin_borders: dict, is_export: bool):
         FreightDetourInference.__init__(self, impedance, model_parameters)
-        self.fin_borders = fin_borders # Finland border - zone index
+        self.fin_borders = fin_borders
         self.is_export = is_export
         self.leg1_modes = list(impedance["leg_one"])
         self.leg2_modes = list(impedance["leg_two"])
@@ -327,9 +327,9 @@ def run_logistics_model(model: LogisticsModule, demand: np.ndarray,
     return final_demand, total_per_route
 
 def run_trade_model(model: TradeRouteModule, demand: np.ndarray):
-    """Using given trade demand, calculates share of demand for mode-route 
-    alternatives between Finnish zones and foreign country clusters
-    through designated border control points.
+    """Using given trade demand between Finnish zones and foreign country clusters,
+    calculates how demand is routed through Finnish and foreign border control 
+    points with leg specific mode alternatives.
     
     Used variable bcp refers to these border control points, as in, pass through
     points within Finland and country clusters.

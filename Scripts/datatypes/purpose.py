@@ -889,11 +889,12 @@ class FreightPurpose(Purpose):
             demand = df.groupby(self.generation_zone_data.mapping).sum().to_numpy()
         demand = demand.T if not self.is_export else demand
 
-        port_indices = {
+        # Finland border control point key - zone index
+        border_indices = {
             key: idx for idx, key in enumerate(
                 sorted(fin_border_ids, key=fin_border_ids.get))
         }
         route_model = TradeRouteModule(impedance_legs, self.route_params, 
-                                       port_indices, self.is_export)
+                                       border_indices, self.is_export)
         trade_demand = run_trade_model(route_model, demand)
         return trade_demand
