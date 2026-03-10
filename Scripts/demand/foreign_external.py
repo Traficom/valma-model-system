@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Dict
 import numpy # type: ignore
 import pandas
 if TYPE_CHECKING:
@@ -27,18 +27,18 @@ class ForeignExternalModel:
     """
 
     def __init__(self, 
-                 zone_data_base: ZoneData, 
-                 zone_data_forecast: ZoneData, 
+                 zone_data_base: Dict[str, ZoneData], 
+                 zone_data_forecast: Dict[str, ZoneData], 
                  base_demand: MatrixData):
-        self.zdata_b = zone_data_base
-        self.zdata_f = zone_data_forecast
+        self.zdata_b = zone_data_base["domestic"]
+        self.zdata_f = zone_data_forecast["domestic"]
         self.base_demand = base_demand
         spec = { # TODO: Nää pitää ehkä speksata jostain kunnolla, että toimii oikein.
             "name": "foreign_external",
             "orig": None,
             "dest": None,
             "generation_area": "domestic",
-            "attraction_area": "foreign",
+            "attraction_area": "domestic",
             "impedance_share": None,
             "demand_share": demand_share["foreign_external"]
         }

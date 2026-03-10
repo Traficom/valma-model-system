@@ -167,7 +167,7 @@ class ModelSystem:
         self.mode_share: List[Dict[str,Any]] = []
         self.convergence = []
         self.fem = ForeignExternalModel(
-            self._zone_datas["domestic"], self._zone_datas["domestic"], self.basematrices)
+            self._zone_datas, self._zone_datas, self.basematrices)
         # TODO: Näihin eri zonedatat sitten ku on tai yhdistä yhteen zonedatatiedostoon forecast-tieto ja nimelle "foreign"
 
     def _init_demand_model(self, tour_purposes: List[TourPurpose]):
@@ -319,6 +319,8 @@ class ModelSystem:
             tp = ap.name
             log.info(f"--- ASSIGNING PERIOD {tp.upper()} ---")
             ap.assign_trucks_init()
+            # TODO: Tällainen vastaava kuin yllä pitää tehdä myös foreign_externalille eli ap.assign_foreign_external_init()
+            # NOTE: Tässä sijoittelussa pitää huomioida vain suomen lentokentille menevä auto/bussiliikenne, ei muuta
             impedance[tp] = (ap.end_assign(not is_car_end_assignment)
                              if is_end_assignment
                              else ap.assign(self.ass_classes))
