@@ -37,7 +37,8 @@ class ForeignExternalModel:
             "name": "foreign_external",
             "orig": None,
             "dest": None,
-            "area": "all",
+            "generation_area": "domestic",
+            "attraction_area": "foreign",
             "impedance_share": None,
             "demand_share": demand_share["foreign_external"]
         }
