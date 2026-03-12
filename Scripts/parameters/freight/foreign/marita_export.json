@@ -22,41 +22,42 @@
     },
     "destination_choice": {},
     "mode_choice": {
-		"truck": {},
-		"freight_train": {}
-	},
-	"demand_share": {},
+        "truck": {},
+        "freight_train": {}
+    },
+    "demand_share": {},
     "route_choice": {
-		"constant": {
+        "constant": {
             "truck": {
-                "west": [
-                    3.669,
-                    ["FIKIL", "FITOR"]
-                ]
+                "west": {
+                    "border_points": ["FIKIL", "FITOR"],
+                    "dummy": 3.669
+                }
             },
             "container_ship": {
-                "base_class": [
-                    -1.933,
-                    ["FIOUL", "FIKEM", "FIRAU", "FIHMN", "FIHEL"]
-                ]
+                "base_class": {
+                    "border_points": ["FIOUL", "FIKEM", "FIRAU", "FIHMN", "FIHEL"],
+                    "dummy": -1.933
+                }
             },
             "general_cargo": {
-                "base_class": [
-                    1.991,
-                    ["FIUKI", "FITKU", "FIRAA", "FIPOR", "FIKOK", "FIKEM", "FIKAS",
-                     "FIINK", "FIRAU", "FIHMN", "FIHEL"]
-                ]
+                "base_class": {
+                    "border_points": ["FIUKI", "FITKU", "FIRAA", "FIPOR", "FIKOK", 
+                                      "FIKEM", "FIKAS", "FIINK", "FIRAU", "FIHMN", "FIHEL"],
+                    "dummy": 1.991
+                }
             },
             "roro_vessel": {
-                "base_class": [
-                    -2.048,
-                    ["FIVAA", "FIUKI", "FITKU", "FIHKO", "FIRAU", "FIHMN", "FIHEL"]
-                ]
+                "base_class": {
+                    "border_points": ["FIVAA", "FIUKI", "FITKU", "FIHKO", "FIRAU", 
+                                      "FIHMN", "FIHEL"],
+                    "dummy": -2.048
+                }
             }
-		},
-		"impedance": {
-            "general_cost": -0.001952,
-            "leg_two_frequency": 0.0003845
-		}
+        },
+        "impedance": {
+            "cost": -0.001952,
+            "frequency": 0.0003845
+        }
     }
 }

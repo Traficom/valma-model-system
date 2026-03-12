@@ -22,47 +22,47 @@
     },
     "destination_choice": {},
     "mode_choice": {
-		"truck": {},
-		"freight_train": {}
-	},
-	"demand_share": {},
+        "truck": {},
+        "freight_train": {}
+    },
+    "demand_share": {},
     "route_choice": {
-		"constant": {
+        "constant": {
             "truck": {
-                "west": [
-                    1.586,
-                    ["FIKIL", "FITOR"]
-                ]
+                "west": {
+                    "border_points": ["FIKIL", "FITOR"],
+                    "dummy": 1.586
+                }
             },
             "container_ship": {
-                "first_class": [
-                    -0.5553,
-                    ["FIRAU", "FIHMN", "FIHEL"]
-                ]
+                "first_class": {
+                    "border_points": ["FIRAU", "FIHMN", "FIHEL"],
+                    "dummy": -0.5553
+                }
             },
             "general_cargo": {
-                "first_class": [
-                    1.687,
-                    ["FIRAA", "FIKOK", "FIKEM", "FIRAU", "FIHMN"]
-                ],
-                "second_class": [
-                    1.795,
-                    ["FIUKI", "FITKU", "FIPOR", "FIKAS", "FIINK", "FIHEL"]
-                ]
+                "first_class": {
+                    "border_points": ["FIRAA", "FIKOK", "FIKEM", "FIRAU", "FIHMN"],
+                    "dummy": 1.687
+                },
+                "second_class": {
+                    "border_points": ["FIUKI", "FITKU", "FIPOR", "FIKAS", "FIINK", "FIHEL"],
+                    "dummy": 1.795
+                }
             },
             "roro_vessel": {
-                "first_class": [
-                    -1.034,
-                    ["FIHKO", "FIHEL"]
-                ]
+                "first_class": {
+                    "border_points": ["FIHKO", "FIHEL"],
+                    "dummy": -1.034
+                }
             }
-		},
-		"impedance": {
-            "leg_cost": {
+        },
+        "impedance": {
+            "cost": {
                 "leg_one": -0.03353,
                 "leg_two": -0.0009202,
                 "leg_three": -0.0009202
             }
-		}
+        }
     }
 }

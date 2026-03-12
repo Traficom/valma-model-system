@@ -229,12 +229,12 @@ class TradeRouteModule(FreightDetourInference):
         prob_orig_bcp, prob_dest_bcp = self.calculate_probabilities(len_leg_two)
         
         # swap destinations to axis 1 for demand multiplication
-        prob_o_bcp = np.moveaxis(prob_orig_bcp, 2, 1)
-        prob_d_bcp = np.moveaxis(prob_dest_bcp, 3, 1)
+        prob_orig_bcp = np.moveaxis(prob_orig_bcp, 2, 1)
+        prob_dest_bcp = np.moveaxis(prob_dest_bcp, 3, 1)
         demand_routed = (
             demand[:, :, None, None]
-            * prob_o_bcp[:, :, :, None]
-            * prob_d_bcp
+            * prob_orig_bcp[:, :, :, None]
+            * prob_dest_bcp
         )
         
         # axes now = (n_orig (batched), n_dest, n_orig_alt, n_dest_bcp_alt)

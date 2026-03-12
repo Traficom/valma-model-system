@@ -22,27 +22,27 @@
     },
     "destination_choice": {},
     "mode_choice": {
-		"truck": {},
-		"freight_train": {}
-	},
-	"demand_share": {},
+        "truck": {},
+        "freight_train": {}
+    },
+    "demand_share": {},
     "route_choice": {
-		"constant": {
+        "constant": {
             "truck": {
-                "east": [
-                    -1.553,
-                    ["FIVAI", "FIVAL", "FIVAR"]
-                ]
+                "east": {
+                    "border_points": ["FIVAI", "FIVAL", "FIVAR"],
+                    "dummy": -1.553
+                }
             },
             "lng_carrier": {
-                "first_class": [
-                    4.598,
-                    ["FISKV"]
-                ]
+                "first_class": {
+                    "border_points": ["FISKV"],
+                    "dummy": 4.598
+                }
             }
-		},
-		"impedance": {
-            "general_cost": -0.01568
-		}
+        },
+        "impedance": {
+            "cost": -0.01568
+        }
     }
 }

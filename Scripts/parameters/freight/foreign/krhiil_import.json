@@ -22,29 +22,29 @@
     },
     "destination_choice": {},
     "mode_choice": {
-		"truck": {},
-		"freight_train": {}
-	},
-	"demand_share": {},
+        "truck": {},
+        "freight_train": {}
+    },
+    "demand_share": {},
     "route_choice": {
-		"constant": {
+        "constant": {
             "general_cargo": {
-                "option_one": [
-                    2.429,
-                    ["FIRAA"]
-                ],
-                "option_two": [
-                    1.915,
-                    ["FIKEM"]
-                ]
+                "option_one": {
+                    "border_points": ["FIRAA"],
+                    "dummy": 2.429
+                },
+                "option_two": {
+                    "border_points": ["FIKEM"],
+                    "dummy": 1.915
+                }
             }
-		},
-		"impedance": {
-            "leg_cost": {
+        },
+        "impedance": {
+            "cost": {
                 "leg_one": -0.002315,
                 "leg_two": -0.002315,
                 "leg_three": -0.02635
             }
-		}
+        }
     }
 }

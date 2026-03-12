@@ -22,64 +22,64 @@
     },
     "destination_choice": {},
     "mode_choice": {
-		"truck": {},
-		"freight_train": {}
-	},
-	"demand_share": {},
+        "truck": {},
+        "freight_train": {}
+    },
+    "demand_share": {},
     "route_choice": {
-		"constant": {
+        "constant": {
             "truck": {
-                "west": [
-                    55.43,
-                    ["FIKIL", "FITOR"]
-                ]
+                "west": {
+                    "border_points": ["FIKIL", "FITOR"],
+                    "dummy": 55.43
+                }
             },
             "container_ship": {
-                "first_class": [
-                    1.98,
-                    ["FIRAU", "FIHMN", "FIHEL"]
-                ]
+                "first_class": {
+                    "border_points": ["FIRAU", "FIHMN", "FIHEL"],
+                    "dummy": 1.98
+                }
             },
             "general_cargo": {
-                "first_class": [
-                    0.773,
-                    ["FIRAA", "FIKOK", "FIKEM", "FIRAU", "FIHMN"]
-                ],
-                "second_class": [
-                    1.562,
-                    ["FIUKI", "FITKU", "FIPOR", "FIKAS", "FIINK", "FIHEL"]
-                ]
+                "first_class": {
+                    "border_points": ["FIRAA", "FIKOK", "FIKEM", "FIRAU", "FIHMN"],
+                    "dummy": 0.773
+                },
+                "second_class": {
+                    "border_points": ["FIUKI", "FITKU", "FIPOR", "FIKAS", "FIINK", "FIHEL"],
+                    "dummy": 1.562
+                }
             },
             "roro_vessel": {
-                "first_class": [
-                    2.795,
-                    ["FIHKO", "FIHEL"]
-                ],
-                "second_class": [
-                    1.06,
-                    ["FIVAA", "FIUKI", "FITKU", "FIRAU", "FIHMN"]
-                ]
+                "first_class": {
+                    "border_points": ["FIHKO", "FIHEL"],
+                    "dummy": 2.795
+                },
+                "second_class": {
+                    "border_points": ["FIVAA", "FIUKI", "FITKU", "FIRAU", "FIHMN"],
+                    "dummy": 1.06
+                }
             },
             "product_tanker": {
-                "first_class": [
-                    1.22,
-                    ["FISKV"]
-                ],
-                "second_class": [
-                    -1.621, 
-                    ["FITKU", "FIPOR", "FIHMN"]
-                ]
+                "first_class": {
+                    "border_points": ["FISKV"],
+                    "dummy": 1.22
+                },
+                "second_class": {
+                    "border_points": ["FITKU", "FIPOR", "FIHMN"],
+                    "dummy": -1.621
+                }
             }
-		},
-		"impedance": {
-			"general_cost": {
+        },
+        "impedance": {
+            "cost": {
                 "truck": -0.1595,
-                "container_ship": -0.0000000412,
-                "roro_vessel": -0.00000000473,
-                "general_cargo": -0.00000003743,
-                "product_tanker": -0.00000002023
+                "container_ship": -4.12e-08,
+                "roro_vessel": -4.73e-09,
+                "general_cargo": -3.743e-08,
+                "product_tanker": -2.023e-08
             },
-            "leg_two_frequency": 0.00003736
-		}
+            "frequency": 3.736e-05
+        }
     }
 }

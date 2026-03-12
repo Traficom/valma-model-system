@@ -22,37 +22,37 @@
     },
     "destination_choice": {},
     "mode_choice": {
-		"truck": {},
-		"freight_train": {}
-	},
-	"demand_share": {},
+        "truck": {},
+        "freight_train": {}
+    },
+    "demand_share": {},
     "route_choice": {
-		"constant": {
+        "constant": {
             "general_cargo": {
-                "option_one": [
-                    0.7582,
-                    ["FIRAU"]
-                ],
-                "option_two": [
-                    2.453,
-                    ["FIKAS"]
-                ],
-                "option_three": [
-                    -5.411,
-                    ["FIINK"]
-                ],
-                "option_four": [
-                    -5.029,
-                    ["FIHEL"]
-                ]
+                "option_one": {
+                    "border_points": ["FIRAU"],
+                    "dummy": 0.7582
+                },
+                "option_two": {
+                    "border_points": ["FIKAS"],
+                    "dummy": 2.453
+                },
+                "option_three": {
+                    "border_points": ["FIINK"],
+                    "dummy": -5.411
+                },
+                "option_four": {
+                    "border_points": ["FIHEL"],
+                    "dummy": -5.029
+                }
             }
-		},
-		"impedance": {
-            "leg_cost": {
+        },
+        "impedance": {
+            "cost": {
                 "leg_one": -0.02488,
                 "leg_two": -0.04027,
                 "leg_three": -0.04027
             }
-		}
+        }
     }
 }

@@ -22,43 +22,43 @@
     },
     "destination_choice": {},
     "mode_choice": {
-		"truck": {},
-		"freight_train": {}
-	},
-	"demand_share": {},
+        "truck": {},
+        "freight_train": {}
+    },
+    "demand_share": {},
     "route_choice": {
-		"constant": {
+        "constant": {
             "truck": {
-                "west": [
-                    13.394, 
-                    ["FIKIL", "FITOR"]
-                ]
+                "west": {
+                    "border_points": ["FIKIL", "FITOR"],
+                    "dummy": 13.394
+                }
             },
             "container_ship": {
-                "first_class": [
-                    2.33,
-                    ["FIRAU", "FIHMN", "FIHEL"]
-                ]
+                "first_class": {
+                    "border_points": ["FIRAU", "FIHMN", "FIHEL"],
+                    "dummy": 2.33
+                }
             },
             "general_cargo": {
-                "first_class": [
-                    1.544,
-                    ["FIRAA", "FIKOK", "FIKEM", "FIRAU", "FIHMN"]
-                ]
+                "first_class": {
+                    "border_points": ["FIRAA", "FIKOK", "FIKEM", "FIRAU", "FIHMN"],
+                    "dummy": 1.544
+                }
             },
             "roro_vessel": {
-                "first_class": [
-                    1.683,
-                    ["FIHKO", "FIHEL"]
-                ],
-                "second_class": [
-                    1.007,
-                    ["FIVAA", "FIUKI", "FITKU", "FIRAU", "FIHMN"]
-                ]
+                "first_class": {
+                    "border_points": ["FIHKO", "FIHEL"],
+                    "dummy": 1.683
+                },
+                "second_class": {
+                    "border_points": ["FIVAA", "FIUKI", "FITKU", "FIRAU", "FIHMN"],
+                    "dummy": 1.007
+                }
             }
-		},
-		"impedance": {
-            "leg_cost": {
+        },
+        "impedance": {
+            "cost": {
                 "leg_one": {
                     "truck": -0.1084,
                     "container_ship": -0.03056,
@@ -68,14 +68,14 @@
                 "leg_two": {
                     "truck": -0.04092,
                     "container_ship": -0.005381,
-                    "general_cargo": -0.00002884,
-                    "roro_vessel": -0.000000002651
+                    "general_cargo": -2.884e-05,
+                    "roro_vessel": -2.651e-09
                 },
                 "leg_three": {
                     "truck": -0.04092,
                     "container_ship": -0.005381,
-                    "general_cargo": -0.00002884,
-                    "roro_vessel": -0.000000002651
+                    "general_cargo": -2.884e-05,
+                    "roro_vessel": -2.651e-09
                 }
             }
         }

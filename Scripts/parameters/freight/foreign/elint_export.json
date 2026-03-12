@@ -22,22 +22,22 @@
     },
     "destination_choice": {},
     "mode_choice": {
-		"truck": {},
-		"freight_train": {}
-	},
-	"demand_share": {},
+        "truck": {},
+        "freight_train": {}
+    },
+    "demand_share": {},
     "route_choice": {
-		"constant": {
+        "constant": {
             "truck": {
-                "all": [
-                    1.533, 
-                    ["FIKIL", "FITOR", "FIVAI", "FIVAL", "FIVAR"]
-                ]
+                "all": {
+                    "border_points": ["FIKIL", "FITOR", "FIVAI", "FIVAL", "FIVAR"],
+                    "dummy": 1.533
+                }
             }
-		},
-		"impedance": {
-            "general_cost": -0.002355,
-            "leg_two_frequency": 0.000744
-		}
+        },
+        "impedance": {
+            "cost": -0.002355,
+            "frequency": 0.000744
+        }
     }
 }

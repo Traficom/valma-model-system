@@ -22,27 +22,27 @@
     },
     "destination_choice": {},
     "mode_choice": {
-		"truck": {},
-		"freight_train": {}
-	},
-	"demand_share": {},
+        "truck": {},
+        "freight_train": {}
+    },
+    "demand_share": {},
     "route_choice": {
-		"constant": {
+        "constant": {
             "truck": {
-                "west": [
-                    45.54,
-                    ["FIKIL", "FITOR"]
-                ]
+                "west": {
+                    "border_points": ["FIKIL", "FITOR"],
+                    "dummy": 45.54
+                }
             }
-		},
-		"impedance": {
-            "general_cost": {
+        },
+        "impedance": {
+            "cost": {
                 "truck": -0.09852,
                 "general_cargo": -0.001948,
                 "container_ship": -0.001966,
                 "roro_vessel": -0.002169
             },
-            "leg_two_frequency": 0.00002163
-		}
+            "frequency": 2.163e-05
+        }
     }
 }

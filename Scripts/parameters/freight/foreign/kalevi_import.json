@@ -22,45 +22,46 @@
     },
     "destination_choice": {},
     "mode_choice": {
-		"truck": {},
-		"freight_train": {}
-	},
-	"demand_share": {},
+        "truck": {},
+        "freight_train": {}
+    },
+    "demand_share": {},
     "route_choice": {
-		"constant": {
+        "constant": {
             "truck": {
-                "west": [
-                    18.73,
-                    ["FIKIL", "FITOR"]
-                ]
+                "west": {
+                    "border_points": ["FIKIL", "FITOR"],
+                    "dummy": 18.73
+                }
             },
             "container_ship": {
-                "base_class": [
-                    2.196,
-                    ["FIOUL", "FIKEM", "FIRAU", "FIHMN", "FIHEL"]
-                ]
+                "base_class": {
+                    "border_points": ["FIOUL", "FIKEM", "FIRAU", "FIHMN", "FIHEL"],
+                    "dummy": 2.196
+                }
             },
             "general_cargo": {
-                "base_class": [
-                    1.228,
-                    ["FIUKI", "FITKU", "FIRAA", "FIPOR", "FIKOK", "FIKEM", "FIKAS", 
-                     "FIRAU", "FIHMN", "FIHEL"]
-                ]
+                "base_class": {
+                    "border_points": ["FIUKI", "FITKU", "FIRAA", "FIPOR", "FIKOK", 
+                                      "FIKEM", "FIKAS", "FIRAU", "FIHMN", "FIHEL"],
+                    "dummy": 1.228
+                }
             },
             "roro_vessel": {
-                "base_class": [
-                    0.2113,
-                    ["FIVAA", "FIUKI", "FITKU", "FIHKO", "FIRAU", "FIHMN", "FIHEL"]
-                ]
+                "base_class": {
+                    "border_points": ["FIVAA", "FIUKI", "FITKU", "FIHKO", "FIRAU", 
+                                      "FIHMN", "FIHEL"],
+                    "dummy": 0.2113
+                }
             }
-		},
-		"impedance": {
-            "leg_cost": {
-                "leg_one": -0.000000001099,
-                "leg_two": -0.000000001099,
+        },
+        "impedance": {
+            "cost": {
+                "leg_one": -1.099e-09,
+                "leg_two": -1.099e-09,
                 "leg_three": -0.02052
             },
-            "leg_two_frequency": 0.0001213
-		}
+            "frequency": 0.0001213
+        }
     }
 }

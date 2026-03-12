@@ -22,42 +22,42 @@
     },
     "destination_choice": {},
     "mode_choice": {
-		"truck": {},
-		"freight_train": {}
-	},
-	"demand_share": {},
+        "truck": {},
+        "freight_train": {}
+    },
+    "demand_share": {},
     "route_choice": {
-		"constant": {
+        "constant": {
             "truck": {
-                "all": [
-                    5.846,
-                    ["FIVAI", "FIVAL", "FIVAR", "FIKIL", "FITOR"]
-                ]
+                "all": {
+                    "border_points": ["FIVAI", "FIVAL", "FIVAR", "FIKIL", "FITOR"],
+                    "dummy": 5.846
+                }
             },
             "general_cargo": {
-                "base_class": [
-                    2.121,
-                    ["FIUKI", "FITKU", "FIRAA", "FIPOR", "FIKOK", "FIKEM", 
-                     "FIKAS", "FIINK", "FIRAU", "FIHMN", "FIHEL"]
-                ]
+                "base_class": {
+                    "border_points": ["FIUKI", "FITKU", "FIRAA", "FIPOR", "FIKOK", 
+                                      "FIKEM", "FIKAS", "FIINK", "FIRAU", "FIHMN", "FIHEL"],
+                    "dummy": 2.121
+                }
             },
             "roro_vessel": {
-                "first_class": [
-                    1.988,
-                    ["FIHKO", "FIHEL"]
-                ],
-                "second_class": [
-                    0.08042,
-                    ["FIVAA", "FIUKI", "FITKU", "FIRAU", "FIHMN"]
-                ]
+                "first_class": {
+                    "border_points": ["FIHKO", "FIHEL"],
+                    "dummy": 1.988
+                },
+                "second_class": {
+                    "border_points": ["FIVAA", "FIUKI", "FITKU", "FIRAU", "FIHMN"],
+                    "dummy": 0.08042
+                }
             }
-		},
-		"impedance": {
-            "leg_cost": {
+        },
+        "impedance": {
+            "cost": {
                 "leg_one": -0.01234,
                 "leg_two": -0.01234,
                 "leg_three": -0.03438
             }
-		}
+        }
     }
 }

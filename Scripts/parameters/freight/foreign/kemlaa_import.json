@@ -22,12 +22,12 @@
     },
     "destination_choice": {},
     "mode_choice": {
-		"truck": {},
-		"freight_train": {}
-	},
-	"demand_share": {},
+        "truck": {},
+        "freight_train": {}
+    },
+    "demand_share": {},
     "route_choice": {
-		"constant": {
+        "constant": {
             "truck": {
                 "east": {
                     "border_points": ["FIVAI", "FIVAL", "FIVAR"],
@@ -78,14 +78,14 @@
                     "dummy": 1.685
                 }
             }
-		},
-		"impedance": {
+        },
+        "impedance": {
             "cost": {
                 "leg_one": -0.006002,
                 "leg_two": -0.006002,
                 "leg_three": -0.04101
             },
             "frequency": 0.0002915
-		}
+        }
     }
 }

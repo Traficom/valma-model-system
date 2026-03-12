@@ -22,12 +22,12 @@
     },
     "destination_choice": {},
     "mode_choice": {
-		"truck": {},
-		"freight_train": {}
-	},
-	"demand_share": {},
+        "truck": {},
+        "freight_train": {}
+    },
+    "demand_share": {},
     "route_choice": {
-		"constant": {
+        "constant": {
             "truck": {
                 "west": {
                     "border_points": ["FIKIL", "FITOR"],
@@ -50,8 +50,7 @@
                     "dummy": 1.136
                 },
                 "second_class": {
-                    "border_points": ["FIUKI", "FITKU", "FIPOR", "FIKAS", 
-                                      "FIINK", "FIHEL"],
+                    "border_points": ["FIUKI", "FITKU", "FIPOR", "FIKAS", "FIINK", "FIHEL"],
                     "dummy": 1.804
                 }
             },
@@ -75,10 +74,10 @@
                     "dummy": 0.4698
                 }
             }
-		},
-		"impedance": {
-            "cost": -0.000000001157,
+        },
+        "impedance": {
+            "cost": -1.157e-09,
             "frequency": 0.0001383
-		}
+        }
     }
 }

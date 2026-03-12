@@ -22,39 +22,39 @@
     },
     "destination_choice": {},
     "mode_choice": {
-		"truck": {},
-		"freight_train": {}
-	},
-	"demand_share": {},
+        "truck": {},
+        "freight_train": {}
+    },
+    "demand_share": {},
     "route_choice": {
-		"constant": {
+        "constant": {
             "truck": {
-                "east": [
-                    5.323,
-                    ["FIVAI", "FIVAL", "FIVAR"]
-                ],
-                "west": [
-                    9.206,
-                    ["FIKIL", "FITOR"]
-                ]
+                "east": {
+                    "border_points": ["FIVAI", "FIVAL", "FIVAR"],
+                    "dummy": 5.323
+                },
+                "west": {
+                    "border_points": ["FIKIL", "FITOR"],
+                    "dummy": 9.206
+                }
             },
             "general_cargo": {
-                "first_class": [
-                    5.219,
-                    ["FIRAU", "FIHMN", "FILPP"]
-                ],
-                "second_class": [
-                    2.499,
-                    ["FIKOK", "FIKAS", "FIINK", "FITKU"]
-                ]
+                "first_class": {
+                    "border_points": ["FIRAU", "FIHMN", "FILPP"],
+                    "dummy": 5.219
+                },
+                "second_class": {
+                    "border_points": ["FIKOK", "FIKAS", "FIINK", "FITKU"],
+                    "dummy": 2.499
+                }
             }
-		},
-		"impedance": {
-            "leg_cost": {
+        },
+        "impedance": {
+            "cost": {
                 "leg_one": -0.02911,
                 "leg_two": -0.02911,
                 "leg_three": -0.02339
             }
-		}
+        }
     }
 }
