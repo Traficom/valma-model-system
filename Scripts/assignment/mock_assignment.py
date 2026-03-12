@@ -181,29 +181,16 @@ class MockPeriod(Period):
             Subtype (car/truck/inv_time/...) : numpy 2-d matrix
                 Matrix of the specified type
         """
-        try:
-            assignment_classes.add("car")
-        except AttributeError:
-            try:
-                assignment_classes.append("car")
-            except AttributeError:
-                assignment_classes += ("car",)
         with self.matrices.open(
                 mtx_type, self.name, transport_classes=[]) as mtx:
             matrix_list = set(assignment_classes) & set(mtx.matrix_list)
             matrices = {mode: mtx[mode] for mode in matrix_list}
             new_zone_numbers = mtx.zone_numbers
-        for mode in list(matrices):
+        for mode in matrices:
             if numpy.any(matrices[mode] > 1e10):
                 log.warn(f"Matrix with infinite values: {mtx_type} : {mode}.")
             idx = numpy.where(numpy.isin(self.zone_numbers, new_zone_numbers))[0]
-            # Quickfix, need to be changed!!
-            mtx = matrices[mode][idx[:, None], idx]
-            matrices[mode] = mtx
-            if mode == "car":
-                matrices["icev"] = mtx
-                matrices["bev"] = mtx
-                matrices["phev"] = mtx
+            matrices[mode] = matrices[mode][idx[:, None], idx]
         return matrices
 
     def get_matrix(self,

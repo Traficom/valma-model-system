@@ -1,7 +1,8 @@
 {
     "car_cost": {
-        "car": 0.12,
-        "car_electric": 0.04,
+        "icev": 0.12,
+        "bev": 0.04,
+        "phev": 0.06,
         "van": 0.20,
         "truck": 0.23,
         "semi_trailer": 0.35,

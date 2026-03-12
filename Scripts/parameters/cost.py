@@ -84,6 +84,10 @@ vot = {
         "pt_taxi_egr": 7.7,
         "car_drv": 11.4,
         "car_pax": 11.4,
+        "bev_drv": 11.4,
+        "bev_pax": 11.4,
+        "phev_drv": 11.4,
+        "phev_pax": 11.4,
     },
     "hb_business": {
         "airplane": 11.4,
@@ -97,6 +101,10 @@ vot = {
         "pt_taxi_egr": 7.7,
         "car_drv": 11.4,
         "car_pax": 11.4,
+        "bev_drv": 11.4,
+        "bev_pax": 11.4,
+        "phev_drv": 11.4,
+        "phev_pax": 11.4,
     }
 }
 

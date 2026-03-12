@@ -397,8 +397,8 @@ time_periods = {
     "iht": "AssignmentPeriod",
     "it": "TransitAssignmentPeriod",
 }
-cp_mode = "car_pax"
 ec_modes = ("bev", "phev")
+cp_mode = "car_pax"
 ecp_modes = ("bev_pax", "phev_pax")
 pax_modes = (cp_mode,) + ecp_modes
 car_classes = (

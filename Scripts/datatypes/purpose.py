@@ -19,6 +19,7 @@ from parameters.assignment import (
     cp_mode,
     ecp_modes,
     pax_modes,
+    car_egress_classes,
     mode_impedance
 )
 import parameters.cost as cost
@@ -179,16 +180,16 @@ class Purpose:
                         day_imp[mode][mtx_type] *= cost.cost_discount[self.name][mode]
                     except KeyError:
                         pass
-                if mtx_type == "time" and "car" in mode:
+                if mtx_type == "time" and (mode_impedance[mode] in car_classes + car_egress_classes):
                     day_imp[mode][mtx_type] += self.attraction_zone_data["avg_park_time"].values
-                if mtx_type == "cost" and "car" in mode:
+                if mtx_type == "cost" and (mode_impedance[mode] in car_classes + car_egress_classes):
                     try:
                         day_imp[mode][mtx_type] += (cost.activity_time[self.name] *
                                                     cost.share_paying[self.name] *
                                                     self.attraction_zone_data["avg_park_cost"].values)
                     except KeyError:
                         pass
-                if mtx_type == "cost" and mode in car_classes:
+                if mtx_type == "cost" and mode_impedance[mode] in car_classes and mode not in pax_modes:
                     try:
                         day_imp[mode][mtx_type] *= (1 - cost.sharing_factor[self.name] *
                                                     (cost.car_drv_occupancy[self.name] - 1) /
@@ -321,7 +322,6 @@ class TourPurpose(Purpose):
         self.connection_models: Dict[str, logit.LogitModel] = {}
         if "access_mode_choice" in specification:
             for mode in self.intermodals:
-                self.modes += self.intermodals[mode]
                 new_spec = copy(specification)
                 new_spec["mode_choice"] = new_spec["access_mode_choice"][mode]
                 self.connection_models[mode] = logit.LogitModel(
