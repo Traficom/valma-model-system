@@ -891,10 +891,7 @@ class FreightPurpose(Purpose):
         demand = demand.T if not self.is_export else demand
 
         # Finland border control point key - zone index
-        border_indices = {
-            key: idx for idx, key in enumerate(
-                sorted(fin_border_ids, key=fin_border_ids.get))
-        }
+        border_indices = {key: idx for idx, key in enumerate(fin_border_ids)}
         route_model = TradeRouteModule(impedance_legs, self.route_params, 
                                        border_indices, self.is_export)
         trade_demand = run_trade_model(route_model, demand)

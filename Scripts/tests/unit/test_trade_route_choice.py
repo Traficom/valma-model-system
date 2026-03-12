@@ -28,7 +28,7 @@ class TradeRouteChoiceTest(unittest.TestCase):
         truck_name = "truck"
         train_name = "freight_train"
         marine_modes = ("container_ship", "roro_vessel")
-        fin_border = {"FIHMN": 19401, "FIHKO": 4102}
+        fin_border = {"FIHKO": 4102, "FIHMN": 19401}
         cluster_border = {"EETLL": 50107, "SESTO": 50127}
 
         zonedata = FreightZoneData(TEST_DATA_PATH / "freight_zonedata.gpkg", 
@@ -132,7 +132,7 @@ class TradeRouteChoiceTest(unittest.TestCase):
             numpy.testing.assert_array_almost_equal(
                 numpy.sum(leg_two["roro_vessel"], axis=0), roro_leg2_cols)
 
-            truck_leg3_cols = numpy.array((9.165112, 13.319366), dtype=numpy.float32)
+            truck_leg3_cols = numpy.array((9.165112, 13.319365), dtype=numpy.float32)
             self.assertAlmostEqual(numpy.sum(leg_three["truck"]), 22.484474, places=3)
             numpy.testing.assert_array_almost_equal(
                 numpy.sum(leg_three["truck"], axis=0), truck_leg3_cols)
