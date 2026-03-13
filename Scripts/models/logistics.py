@@ -127,10 +127,18 @@ class TradeRouteModule(FreightDetourInference):
         FreightDetourInference.__init__(self, impedance, model_parameters)
         self.fin_borders = fin_borders
         self.is_export = is_export
+        self.len_leg_two = len(impedance.get("leg_two"))
 
     def calculate_utilities(self, leg_name: str, add_constant: bool) -> dict:
-        """Compute utility components for a given leg
+        """Compute utility components for a given leg.
         
+        Parameters
+        ----------
+        leg_name : str
+            leg for which utilities are calculated
+        add_constant : bool
+            add model specification constants
+
         Returns
         -------
         dict
@@ -152,8 +160,15 @@ class TradeRouteModule(FreightDetourInference):
         return utility
     
     def get_impedance_beta(self, mode: str, leg_name: str) -> float:
-        """Fetch mode specific coefficient from model specification
+        """Fetch impedance coefficient from model specification.
         
+        Parameters
+        ----------
+        mode : str
+            mode for which utilities are calculated
+        leg_name : str
+            leg for which utilities are calculated
+
         Returns
         -------
         float
@@ -170,8 +185,16 @@ class TradeRouteModule(FreightDetourInference):
         return b
 
     def add_constants(self, mode: str, utility_shape: tuple) -> np.ndarray:
-        """Sums leg specific mode-border constants
+        """Create mode and Finnish border point specific constant matrix.
+        Returns zeros matrix if specification has no constants for mode.
         
+        Parameters
+        ----------
+        mode : str
+            mode for which utilities are calculated
+        utility_shape : tuple
+            shape of a leg's utility matrix
+
         Returns
         -------
         numpy.ndarray
@@ -189,8 +212,8 @@ class TradeRouteModule(FreightDetourInference):
                         constants_mtx[:, idx] += class_items["dummy"]
         return constants_mtx
 
-    def calculate_probabilities(self, len_leg_two: int) -> Tuple[np.ndarray]:
-        """Compute choice probabilities
+    def calculate_probabilities(self) -> Tuple[np.ndarray]:
+        """Calculate choice probabilities.
 
         Returns
         -------
@@ -202,9 +225,9 @@ class TradeRouteModule(FreightDetourInference):
         util_one, util_two, util_three = [
             self.calculate_utilities(leg_name, add_constant[i])
             for i, leg_name in enumerate(leg_names)]
-        util_three = np.concatenate([util_three] * len_leg_two, axis=0)
+        util_three = np.concatenate([util_three] * self.len_leg_two, axis=0)
         
-        # dimensions = origins, origin bcp, dest bcp * leg2 modes, destinations
+        # axes = origins, origin bcp, dest bcp * leg2 modes, destinations
         route_util = (
             util_one[:, :, None, None]
             + util_two[None, :, :, None]
@@ -214,7 +237,7 @@ class TradeRouteModule(FreightDetourInference):
         n_origin, n_orig_alt, n_dest_bcp_alt, n_dest = route_util.shape
         route_flat = route_util.reshape(n_origin, n_orig_alt * n_dest_bcp_alt, n_dest)
         route_probs_flat = self.softmax(route_flat, axis=1)
-        route_probs = route_probs_flat.reshape(n_origin, n_orig_alt, n_dest_bcp_alt, n_dest)
+        route_probs = route_probs_flat.reshape(route_util.shape)
         
         prob_origin_bcp = np.sum(route_probs, axis=2)
         prob_origin_bcp_marginal = prob_origin_bcp[:, :, None]
@@ -224,9 +247,20 @@ class TradeRouteModule(FreightDetourInference):
                   where=prob_origin_bcp_marginal > 0.0)
         return prob_origin_bcp, prob_leg2_given_bcp
 
-    def route_demand(self, demand: np.ndarray, len_leg_two: int) -> Tuple[np.ndarray]:
-        """Distribute demand across logit route alternatives and aggregate flows"""
-        prob_orig_bcp, prob_dest_bcp = self.calculate_probabilities(len_leg_two)
+    def route_demand(self, demand: np.ndarray) -> Tuple[np.ndarray]:
+        """Distribute demand across logit route alternatives and aggregate flows.
+        
+        Parameters
+        ----------
+        demand : np.ndarray
+            exported/imported trade demand
+
+        Returns
+        -------
+        Tuple[np.ndarray]
+            leg specific routed demand flow
+        """
+        prob_orig_bcp, prob_dest_bcp = self.calculate_probabilities()
         
         # swap destinations to axis 1 for demand multiplication
         prob_orig_bcp = np.moveaxis(prob_orig_bcp, 2, 1)
@@ -237,15 +271,16 @@ class TradeRouteModule(FreightDetourInference):
             * prob_dest_bcp
         )
         
-        # axes now = (n_orig (batched), n_dest, n_orig_alt, n_dest_bcp_alt)
+        # axes now = (n_orig, n_dest, n_orig_alt, n_dest_bcp_alt)
         # keep axes defining each leg segment, sum out the rest
         flow_leg1 = np.sum(demand_routed, axis=(1, 3))
         flow_leg2 = np.sum(demand_routed, axis=(0, 1))
         flow_leg3 = np.sum(demand_routed, axis=(0, 2))
+        
         # leg3 still has leg2 mode alternatives. Collapse and sum dest bcp inflow 
         n_dest, n_dest_bcp_modes = flow_leg3.shape
-        n_dest_bcp = int(n_dest_bcp_modes / len_leg_two)
-        flow_leg3 = flow_leg3.reshape(n_dest, len_leg_two, n_dest_bcp)
+        n_dest_bcp = int(n_dest_bcp_modes / self.len_leg_two)
+        flow_leg3 = flow_leg3.reshape(n_dest, self.len_leg_two, n_dest_bcp)
         flow_leg3 = np.sum(flow_leg3, axis=1).T
         return flow_leg1, flow_leg2, flow_leg3
 
@@ -304,15 +339,15 @@ def run_trade_model(model: TradeRouteModule, demand: np.ndarray):
     calculates how demand is routed through Finnish and foreign border control 
     points with leg specific mode alternatives.
     
-    Used variable bcp refers to these border control points, as in, pass through
-    points within Finland and country clusters.
+    Used variable bcp refers to these border control points within and outside
+    Finland that route alternatives must pass through.
 
     Parameters
     ----------
     model : TradeRouteModule
         TradeRouteModule class object
     demand : np.ndarray
-        external export/import trade demand
+        exported/imported trade demand
 
     Returns
     -------
@@ -320,25 +355,23 @@ def run_trade_model(model: TradeRouteModule, demand: np.ndarray):
         Leg name (one/two/three) : Mode
             Name (truck/container_ship...) : numpy 2d array
     """
-    len_leg_two = len(model.impedance.get("leg_two"))
-    flows = model.route_demand(demand, len_leg_two)
+    flows = model.route_demand(demand)
     trade_demand = {
         leg_name: matrix_mode_slicer(flows[i], list(model.impedance[leg_name]))
         for i, leg_name in enumerate(leg_names)
     }
     return trade_demand
 
-def matrix_mode_slicer(flow, modes):
-    """Slice leg specific demand matrices to leg's modes
+def matrix_mode_slicer(flow: np.ndarray, modes: list) -> dict:
+    """Extract mode-specific demand matrices from a concatenated flow matrix.
+    
+    Assumes columns are equally divided among modes.
     
     Returns
     -------
     dict
-        mode : 2d array
+        Mode (truck/container_ship...) : 2D numpy array
     """
-    n_zones = int(flow.shape[1] / len(modes))
-    flow_matrices = {}
-    for i, mode in enumerate(modes):
-        col = slice(i * n_zones, (i + 1) * n_zones)
-        flow_matrices[mode] = flow[:, col]
-    return flow_matrices
+    split_flows = np.split(flow, len(modes), axis=1)
+    mode_flows = dict(zip(modes, split_flows))
+    return mode_flows
