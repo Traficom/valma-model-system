@@ -4,6 +4,7 @@
 import logging
 import numpy
 import pandas
+import json
 
 import parameters.assignment as param
 import utils.log as log
@@ -81,17 +82,14 @@ class EmmeAssignmentTest:
         self.long_dist_model = ass.EmmeAssignmentModel(
             emme_context, scenario_num, "koko_suomi",
             use_free_flow_speeds=True, time_periods={"vrk": "WholeDayPeriod"})
-        self.dist_cost = {
-            "car": 0.12,
-            "trailer_truck": 0.5,
-            "semi_trailer": 0.4,
-            "truck": 0.3,
-            "van": 0.2,
-        }
+        with open(TEST_DATA_PATH / "Scenario_input_data" / "costdata.json") as file:
+            self.costdata = json.load(file)
         self.resultdata = ResultsData(TEST_DATA_PATH / "Results" / "assignment")
     
     def test_assignment(self):
-        self.ass_model.prepare_network(self.dist_cost)
+        self.ass_model.prepare_network(self.costdata["vehicle_km_cost"],
+                                       self.costdata["vehicle_hour_cost"],
+                                       [])
         nr_zones = self.ass_model.nr_zones
         car_matrix = numpy.full((nr_zones, nr_zones), 10.0)
         demand = {
@@ -124,7 +122,9 @@ class EmmeAssignmentTest:
                         mtx[ass_class] = cost_data
 
     def test_park_and_ride(self):
-        self.long_dist_model.prepare_network(self.dist_cost)
+        self.long_dist_model.prepare_network(self.costdata["vehicle_km_cost"],
+                                             self.costdata["vehicle_hour_cost"],
+                                             [])
         nr_zones = self.ass_model.nr_zones
         car_matrix = numpy.full((nr_zones, nr_zones), 10.0)
         ass_classes = [
@@ -166,7 +166,9 @@ class EmmeAssignmentTest:
 
     def test_freight_assignment(self):
         purposes = ["marita", "kalevi"]
-        self.ass_model.prepare_freight_network(self.dist_cost, purposes)
+        self.ass_model.prepare_freight_network(self.costdata["vehicle_km_cost"],
+                                               self.costdata["vehicle_hour_cost"],
+                                               purposes)
         temp_impedance = self.ass_model.freight_network.assign()
         nr_zones = self.ass_model.nr_zones
         freight_modes = ["truck", "freight_train", "ship"]
