@@ -38,7 +38,7 @@ class ForeignExternalModel:
             "orig": None,
             "dest": None,
             "generation_area": "domestic",
-            "attraction_area": "domestic",
+            "attraction_area": "domestic", #TODO: Tää attraction area on oikeasti ulkomaat, mutta miten se määritellään ja mitä väliä tällä on, pitää kysyä erikseen.
             "impedance_share": None,
             "demand_share": demand_share["foreign_external"]
         }
@@ -62,7 +62,7 @@ class ForeignExternalModel:
         # (eli esim. 'car' eikä 'ship')
         # Eli tämän funktion input mode tulee olla foreign_external mode (niinkuin se nyt onkin), mutta output mode on assignment mode.
 
-        # NOTE: Tässä oletetaaan, että base_demand -matriisi on symmetrinen, muuten fratar ei toimi oikein.
+        # NOTE: Eli tässä input-matriisissa on kaikki sentroidit, mutta nollasta poikkeavia arvoja on vain lähtömaa-sijoittelualue - ulkomaan alueklusteri -pareilla.
         with self.base_demand.open("ext_foreign_passenger", "vrk", list(zone_numbers)) as mtx:
             # Remove zero values
             base_mtx = mtx[mode].clip(0.000001, None)

@@ -4,12 +4,12 @@ import parameters.commodity as param
 
 
 def fratar(target_vect, trips, max_iter=10):
-    """Perform fratar adjustment of matrix.
+    """Perform fratar adjustment of matrix with production target.
 
     Parameters
     ----------
     target_vect : numpy/pandas array
-        Production/attraction target
+        Production target
     trips : pandas DataFrame
         Seed trip matrix
     max_iter (optional) : int
@@ -21,13 +21,17 @@ def fratar(target_vect, trips, max_iter=10):
         Fratared trip matrix
     """
     # Run 2D balancing
+    # Assumes only production target vectors is given, and the other is constructed such that target totals match
+    prod_target = target_vect
+    attr_share = trips.sum(axis=0) / trips.values.sum()
+    attr_target = attr_share * prod_target.sum()
     for _ in range(0, max_iter):
         colsum = trips.sum("columns")
         colsum[colsum == 0] = 1
-        trips = trips.mul(target_vect/colsum, "index")
+        trips = trips.mul(attr_target/colsum, "index")
         rowsum = trips.sum("index")
         rowsum[rowsum == 0] = 1
-        trips = trips.mul(target_vect/rowsum, "columns")
+        trips = trips.mul(prod_target/rowsum, "columns")
     return trips
 
 def calibrate(calib_base, production_base, production_forecast):
