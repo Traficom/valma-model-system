@@ -133,7 +133,3 @@ class WholeDayPeriod(AssignmentPeriod):
             self._calc_transit_link_results()
         return self._get_impedances(
             param.car_classes + param.transit_classes + ("walk",))
-
-    @property
-    def boarding_penalty(self):
-        return param.long_boarding_penalty

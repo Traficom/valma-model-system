@@ -606,7 +606,7 @@ class AssignmentPeriod(Period):
             except KeyError:
                 line[weight_attr] = 1.0
             try:
-                penalty = self.boarding_penalty[line.mode.id] + extra_penalty
+                penalty = param.boarding_penalty[line.mode.id] + extra_penalty
             except KeyError:
                 penalty = extra_penalty
                 missing_penalties.add(line.mode.id)
@@ -616,10 +616,6 @@ class AssignmentPeriod(Period):
             missing_penalties_str: str = ", ".join(missing_penalties)
             log.warn("No boarding penalty found for transit modes " + missing_penalties_str)
         self.emme_scenario.publish_network(network)
-
-    @property
-    def boarding_penalty(self):
-        return param.boarding_penalty
 
     def _assign_cars(self, 
                      stopping_criteria: Dict[str, Union[int, float]]):

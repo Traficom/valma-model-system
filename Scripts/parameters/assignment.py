@@ -153,33 +153,6 @@ freight_terminal_cost = {
     'J': 0,
     'W': 0
 }
-in_vehicle_weight = {
-    'j': 0.8,
-}
-# Boarding penalties for different transit modes
-boarding_penalty = {
-    'b': 3, # Bus
-    'g': 3, # Trunk bus
-    'e': 8, # Coach bus
-    't': 0, # Tram
-    'p': 0, # Light rail
-    'm': 0, # Metro
-    'w': 0, # Ferry
-    'r': 2, # Commuter train
-    'j': 2, # Long-distance train
-}
-# Boarding penalties for long-distance trips
-long_boarding_penalty = {
-    'b': 3, # Bus
-    'g': 3, # Trunk bus
-    'e': 8, # Coach bus
-    't': 0, # Tram
-    'p': 0, # Light rail
-    'm': 0, # Metro
-    'w': 0, # Ferry
-    'r': 2, # Commuter train
-    'j': 2, # Long-distance train
-}
 # Headway standard deviation function parameters for different transit modes
 headway_sd_func = {
     'b': {
@@ -219,31 +192,38 @@ stopping_criteria = {
         "normalized_gap": 0.005,
     },
 }
-# Congestion function for congested transit assignment
-trass_func = {
-    "type": "BPR",
-    "weight": 1.23,
-    "exponent": 3,
-    "assignment_period": 1,
-    "orig_func": False,
-    "congestion_attribute": "us3",
-}
-# Stopping criteria for congested transit assignment
-trass_stop = {
-    "max_iterations": 50,
-    "normalized_gap": 0.01,
-    "relative_gap": 0.001
-}
 # Specification for the transit assignment
+in_vehicle_weight = {
+    'b': 1, # Bus
+    'g': 1, # Trunk bus
+    'e': 1, # Coach bus
+    't': 0.8, # Tram
+    'p': 0.8, # Light rail
+    'm': 0.8, # Metro
+    'w': 1, # Ferry
+    'r': 0.8, # Commuter train
+    'j': 0.7, # Long-distance train
+}
+boarding_penalty = {
+    'b': 5, # Bus
+    'e': 5, # Coach bus
+    'g': 3, # Trunk bus
+    't': 0, # Tram
+    'p': 0, # Light rail
+    'm': 0, # Metro
+    'w': 0, # Ferry
+    'r': 0, # Commuter train
+    'j': 0, # Long-distance train
+}
 transfer_penalty = {
-    "transit": 5,
-    "airplane": 5,
-    "pt_car_acc": 5,
-    "pt_taxi_acc": 5,
-    "airpl_car_acc": 5,
-    "pt_car_egr": 5,
-    "pt_taxi_egr": 5,
-    "airpl_car_egr": 5,
+    "transit": 10,
+    "airplane": 10,
+    "pt_car_acc": 10,
+    "pt_taxi_acc": 10,
+    "airpl_car_acc": 10,
+    "pt_car_egr": 10,
+    "pt_taxi_egr": 10,
+    "airpl_car_egr": 10,
 }
 extra_waiting_time = {
     "penalty": "@wait_time_dev",
