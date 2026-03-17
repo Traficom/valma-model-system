@@ -80,7 +80,8 @@ class ModelSystem:
         self.freight_matrices = (MatrixData(freight_matrices_path)
             if freight_matrices_path is not None else None)
         cost_data: dict = json.loads(cost_data_path.read_text("utf-8"))
-        self.car_dist_cost = cost_data["car_cost"]
+        self.car_dist_cost = cost_data["vehicle_km_cost"]
+        self.car_time_cost = cost_data["vehicle_hour_cost"]
         self.transit_cost = {data.pop("id"): data for data
             in cost_data["transit_cost"].values()}
         if mode_dest_calibration_path is None:
@@ -265,7 +266,8 @@ class ModelSystem:
             List can be empty, if car times are already stored on network.
         """
         # create attributes and background variables to network
-        self.ass_model.prepare_network(self.car_dist_cost, car_time_files)
+        self.ass_model.prepare_network(
+            self.car_dist_cost, self.car_time_cost, car_time_files)
         self.dtm = dt.DirectDepartureTimeModel(self.ass_model)
 
         self.ass_model.calc_transit_cost(self.transit_cost)

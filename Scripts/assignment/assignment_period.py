@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING, Dict, Union, Iterable, Optional
 import utils.log as log
 from utils.validate_assignment import divide_matrices, output_od_los
 import parameters.assignment as param
+from parameters.cost import value_of_time
 from assignment.datatypes.assignment_mode import AssignmentMode, BikeMode, WalkMode
 from assignment.datatypes.car import CarMode, TruckMode
 from assignment.datatypes.car_specification import CarSpecification
@@ -105,6 +106,7 @@ class AssignmentPeriod(Period):
         return "#{}_{}".format(attr, self.name)
 
     def prepare(self, dist_unit_cost: Dict[str, float],
+                time_unit_cost: Dict[str, float],
                 day_scenario: int, save_matrices: bool):
         """Prepare network for assignment.
 
@@ -118,28 +120,34 @@ class AssignmentPeriod(Period):
                 Assignment class (car/truck/...)
             value : float
                 Length multiplier to calculate link cost
+        time_unit_cost : dict
+            key : str
+                Assignment class (car_work/truck/...)
+            value : float
+                Value of time in euros per hour for truck modes
         day_scenario : int
             EMME scenario linked to the whole day
         save_matrices : bool
             Whether matrices will be saved in Emme format for all time periods
         """
-        self._prepare_cars(dist_unit_cost, save_matrices)
+        self._prepare_cars(dist_unit_cost, time_unit_cost, save_matrices)
         self._prepare_walk_and_bike(save_matrices=False)
         self._prepare_transit(day_scenario, save_matrices, save_matrices)
 
     def _prepare_cars(self, dist_unit_cost: Dict[str, float],
+                      time_unit_cost: Dict[str, float],
                       save_matrices: bool,
                       car_classes: Iterable[str] = param.car_and_van_classes,
                       truck_classes: Iterable[str] = param.truck_classes):
         include_toll_cost = self.emme_scenario.network_field(
             "LINK", self.netfield("hinta")) is not None
         car_modes = {mode: CarMode(
-                mode, self, dist_unit_cost[mode], include_toll_cost,
-                save_matrices)
+                mode, self, dist_unit_cost[mode], value_of_time[mode],
+                include_toll_cost, save_matrices)
             for mode in car_classes}
         truck_modes = {mode: TruckMode(
-                mode, self, dist_unit_cost[mode], include_toll_cost,
-                save_matrices)
+                mode, self, dist_unit_cost[mode], time_unit_cost[mode],
+                include_toll_cost, save_matrices)
             for mode in truck_classes}
         modes = {**car_modes, **truck_modes}
         if include_toll_cost:

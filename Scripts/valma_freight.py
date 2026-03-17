@@ -47,7 +47,9 @@ def main(args):
                                resultdata, costdata["freight"])
     purposes_to_assign = [purpose for purpose in list(commodity_conversion)
                           if purpose in args.specify_commodity_names]
-    ass_model.prepare_freight_network(costdata["car_cost"], purposes_to_assign)
+    ass_model.prepare_freight_network(
+        costdata["vehicle_km_cost"], costdata["vehicle_hour_cost"],
+        purposes_to_assign)
     store_demand = StoreDemand(ass_model.freight_network, resultmatrices, 
                                zonedata.all_zone_numbers, zonedata.zone_numbers)
     impedance = ass_model.freight_network.assign()

@@ -68,8 +68,10 @@ def main(args):
             log.error(msg)
             raise ValueError(msg)
         cost_data = json.loads(Path(data_path).read_text("utf-8"))
-        for ass_class in cost_data["car_cost"]:
-            float(cost_data["car_cost"][ass_class])
+        for ass_class in cost_data["vehicle_km_cost"]:
+            float(cost_data["vehicle_km_cost"][ass_class])
+        for ass_class in cost_data["vehicle_hour_cost"]:
+            float(cost_data["vehicle_hour_cost"][ass_class])
         transit_cost = {data.pop("id"): data for data
             in cost_data["transit_cost"].values()}
         for operator in transit_cost.values():

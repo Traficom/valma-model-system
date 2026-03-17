@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Dict
 
 import parameters.assignment as param
-from parameters.cost import tour_duration
+from parameters.cost import tour_duration, value_of_time
 from assignment.datatypes.assignment_mode import AssignmentMode
 from assignment.datatypes.journey_level import JourneyLevel
 if TYPE_CHECKING:
@@ -30,7 +30,7 @@ class TransitMode(AssignmentMode):
             Whether extra LOS-component matrices will be saved in Emme format
         """
         AssignmentMode.__init__(self, name, assignment_period, save_matrices)
-        self.vot_inv = param.vot_inv[param.vot_classes[self.name]]
+        self.vot_inv = 60 / value_of_time[self.name]
         self._create_matrices()
 
         # Create extra attributes

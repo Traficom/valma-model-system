@@ -25,6 +25,11 @@ class EmmeAssignmentTest(unittest.TestCase):
             "truck": 0.3,
             "van": 0.2,
         }
+        self.time_cost = {
+            "truck": 31.96,
+            "semi_trailer": 35.11,
+            "trailer_truck": 36.0,
+        }
         firstb_single = (2, 3, 5, 70, 0, 1.5)
         dist_single = (0.1, 0.2, 0.1, 0.3, 0.1, 0.2)
         self.fares = pandas.DataFrame(
@@ -39,7 +44,8 @@ class EmmeAssignmentTest(unittest.TestCase):
                 self.scenario_id).get_network())
         ass_model = EmmeAssignmentModel(
             self.context, self.scenario_id, "uusimaa")
-        ass_model.prepare_network(self.dist_cost, car_time_files=[])
+        ass_model.prepare_network(
+            self.dist_cost, self.time_cost, car_time_files=[])
         ass_model.calc_transit_cost(self.fares)
         nr_zones = ass_model.nr_zones
         car_matrix = numpy.arange(nr_zones**2).reshape(nr_zones, nr_zones)
@@ -72,7 +78,7 @@ class EmmeAssignmentTest(unittest.TestCase):
         ass_model = EmmeAssignmentModel(
             self.context, self.scenario_id, "koko_suomi",
             use_free_flow_speeds=True, time_periods={"vrk": "WholeDayPeriod"})
-        ass_model.prepare_network(self.dist_cost)
+        ass_model.prepare_network(self.dist_cost, self.time_cost)
         ass_model.calc_transit_cost(self.fares)
         nr_zones = ass_model.nr_zones
         car_matrix = numpy.arange(nr_zones**2).reshape(nr_zones, nr_zones)
@@ -96,7 +102,8 @@ class EmmeAssignmentTest(unittest.TestCase):
     def test_freight_assignment(self):
         ass_model = EmmeAssignmentModel(
             self.context, self.scenario_id, "koko_suomi")
-        ass_model.prepare_freight_network(self.dist_cost, ["c1", "c2"])
+        ass_model.prepare_freight_network(
+            self.dist_cost, self.time_cost, ["c1", "c2"])
         ass_model.freight_network.assign()
         demand = numpy.full((ass_model.nr_zones, ass_model.nr_zones), 1.0)
         for mode in ["truck", "freight_train", "ship"]:
