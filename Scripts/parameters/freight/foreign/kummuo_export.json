@@ -1,10 +1,10 @@
 {
-    "name": "kemlaa_import",
+    "name": "kummuo_export",
     "orig": "null",
     "dest": "null",
-    "generation_area": "foreign",
-    "attraction_area": "domestic",
-    "struct": "import",
+    "generation_area": "domestic",
+    "attraction_area": "foreign",
+    "struct": "export",
     "impedance_share": {},
     "distance_boundaries": {
         "truck": [
@@ -29,63 +29,55 @@
     "route_choice": {
         "constant": {
             "truck": {
-                "east": {
-                    "border_points": ["FIVAI", "FIVAL", "FIVAR"],
-                    "dummy": 6.704
-                },
                 "west": {
                     "border_points": ["FIKIL", "FITOR"],
-                    "dummy": 6.365
+                    "dummy": 1.459
                 }
             },
             "container_ship": {
                 "first_class": {
                     "border_points": ["FIRAU", "FIHMN", "FIHEL"],
-                    "dummy": -2.102
+                    "dummy": 1.634
                 },
                 "second_class": {
                     "border_points": ["FIOUL", "FIKEM"],
-                    "dummy": -6.95
+                    "dummy": -0.07566
                 }
             },
             "general_cargo": {
                 "first_class": {
                     "border_points": ["FIRAA", "FIKOK", "FIKEM", "FIRAU", "FIHMN"],
-                    "dummy": 0.9581
+                    "dummy": 1.136
                 },
                 "second_class": {
                     "border_points": ["FIUKI", "FITKU", "FIPOR", "FIKAS", "FIINK", "FIHEL"],
-                    "dummy": 0.4468
+                    "dummy": 1.804
                 }
             },
             "roro_vessel": {
                 "first_class": {
                     "border_points": ["FIHKO", "FIHEL"],
-                    "dummy": 1.912
+                    "dummy": 0.7105
                 },
                 "second_class": {
                     "border_points": ["FIVAA", "FIUKI", "FITKU", "FIRAU", "FIHMN"],
-                    "dummy": 1.279
+                    "dummy": 0.3797
                 }
             },
             "product_tanker": {
                 "first_class": {
                     "border_points": ["FISKV"],
-                    "dummy": 4.649
+                    "dummy": 4.441
                 },
                 "second_class": {
                     "border_points": ["FITKU", "FIPOR", "FIHMN"],
-                    "dummy": 1.685
+                    "dummy": 0.4698
                 }
             }
         },
         "impedance": {
-            "cost": {
-                "leg_one": -0.006002,
-                "leg_two": -0.006002,
-                "leg_three": -0.04101
-            },
-            "frequency": 0.0002915
+            "cost": -1.157e-09,
+            "frequency": 0.0001383
         }
     }
 }

@@ -1,0 +1,67 @@
+{
+    "name": "marita_import",
+    "orig": "null",
+    "dest": "null",
+    "generation_area": "foreign",
+    "attraction_area": "domestic",
+    "struct": "import",
+    "impedance_share": {},
+    "distance_boundaries": {
+        "truck": [
+            0,
+            9999
+        ],
+        "freight_train": [
+            0,
+            9999
+        ],
+        "ship": [
+            0,
+            9999
+        ]
+    },
+    "destination_choice": {},
+    "mode_choice": {
+        "truck": {},
+        "freight_train": {}
+    },
+    "demand_share": {},
+    "route_choice": {
+        "constant": {
+            "truck": {
+                "west": {
+                    "border_points": ["FIKIL", "FITOR"],
+                    "dummy": 18.73
+                }
+            },
+            "container_ship": {
+                "base_class": {
+                    "border_points": ["FIOUL", "FIKEM", "FIRAU", "FIHMN", "FIHEL"],
+                    "dummy": 2.196
+                }
+            },
+            "general_cargo": {
+                "base_class": {
+                    "border_points": ["FIUKI", "FITKU", "FIRAA", "FIPOR", "FIKOK", 
+                                      "FIKEM", "FIKAS", "FIRAU", "FIHMN", "FIHEL"],
+                    "dummy": 1.228
+                }
+            },
+            "roro_vessel": {
+                "base_class": {
+                    "border_points": ["FIVAA", "FIUKI", "FITKU", "FIHKO", "FIRAU", 
+                                      "FIHMN", "FIHEL"],
+                    "dummy": 0.2113
+                }
+            }
+        },
+        "impedance": {
+            "cost": {
+                "leg_one": -1.099e-09,
+                "leg_two": -1.099e-09,
+                "leg_three": -0.02052
+            },
+            "frequency": 0.0001213
+        }
+    }
+}

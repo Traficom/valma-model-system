@@ -24,6 +24,7 @@ from utils.freight_costs import calc_cost, get_foreign_ship_cost
 from utils.calibrate import attempt_calibration
 from models.logistics import (LogisticsModule, TradeRouteModule,
                               run_logistics_model, run_trade_model)
+from parameters.marine_ship import leg_names
 
 
 class Purpose:
@@ -759,23 +760,16 @@ class FreightPurpose(Purpose):
         fin_zones = numpy.isin(all_zones, numpy.union1d(self.orig_zone_numbers, 
                                                         fin_port_zones))
         cluster_zones = ~fin_zones & ~cluster_borders
-
+        
         masks = (fin_zones, fin_borders, cluster_borders, cluster_zones)
-        leg_modes = (
-            ("truck", "freight_train"),  # finland domestic leg
-            ("truck", "freight_train"),  # international land leg
-            ("truck",)  # foreign domestic leg
-        )
         if not self.is_export:
             masks = masks[::-1]
-            leg_modes = leg_modes[::-1]
 
         costs = self.get_costs(impedance)
-        impedance_legs = {l: {} for l in ["leg_one", "leg_two", "leg_three"]}
+        impedance_legs = {l: {} for l in leg_names}
         for i, imp_leg in enumerate(impedance_legs.values()):
-            for mode in leg_modes[i]:
-                imp_leg[mode] = {imp_type: mtx[numpy.ix_(masks[i], masks[i+1])]
-                                 for imp_type, mtx in costs[mode].items()}
+            imp_leg["truck"] = {imp_type: mtx[numpy.ix_(masks[i], masks[i+1])]
+                                for imp_type, mtx in costs["truck"].items()}
         ship_costs = get_foreign_ship_cost(
             self.costdata, ship_imps, self.model_category, fin_border_ids,
             self.is_export)
@@ -883,8 +877,9 @@ class FreightPurpose(Purpose):
 
         Returns
         -------
-        __type__
-            _description_
+        dict
+            Leg name (one/two/three) : Mode
+                Name (truck/container_ship...) : numpy 2d array
         """
         impedance_legs = self.form_impedance_legs(
             impedance, ship_imps, fin_border_ids, cluster_border_ids)
@@ -895,9 +890,11 @@ class FreightPurpose(Purpose):
         if mapping_name == "municipality_center":
             df = pandas.DataFrame(demand, trade_mappings["finland_zone_number"])
             demand = df.groupby(self.generation_zone_data.mapping).sum().to_numpy()
+        demand = demand.T if not self.is_export else demand
 
-        port_indices = numpy.arange(len(fin_border_ids))
-
-        route_model = TradeRouteModule(impedance_legs, self.route_params, port_indices)
+        # Finland border control point key - zone index
+        border_indices = {key: idx for idx, key in enumerate(fin_border_ids)}
+        route_model = TradeRouteModule(impedance_legs, self.route_params, 
+                                       border_indices, self.is_export)
         trade_demand = run_trade_model(route_model, demand)
         return trade_demand
