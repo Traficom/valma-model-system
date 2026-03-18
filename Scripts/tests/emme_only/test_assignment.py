@@ -12,7 +12,7 @@ import assignment.emme_assignment as ass
 from datahandling.matrixdata import MatrixData
 from datahandling.resultdata import ResultsData
 from tests.integration.test_data_handling import (
-    TEST_DATA_PATH,
+    TEST_DATA_PATH, COSTDATA_PATH
 )
 from datahandling.traversaldata import transform_traversal_data
 try:
@@ -82,7 +82,7 @@ class EmmeAssignmentTest:
         self.long_dist_model = ass.EmmeAssignmentModel(
             emme_context, scenario_num, "koko_suomi",
             use_free_flow_speeds=True, time_periods={"vrk": "WholeDayPeriod"})
-        with open(TEST_DATA_PATH / "Scenario_input_data" / "costdata.json") as file:
+        with open(COSTDATA_PATH) as file:
             self.costdata = json.load(file)
         self.resultdata = ResultsData(TEST_DATA_PATH / "Results" / "assignment")
     
