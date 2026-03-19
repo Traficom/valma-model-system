@@ -33,7 +33,7 @@ def initialize(args):
     # Rotating file logger
     scenario_name = (args.scenario_name
         if isinstance(args.scenario_name, str) else args.scenario_name[0])
-    result_dir = Path(args.results_path, scenario_name)
+    result_dir = Path(args.result_data_folder, scenario_name)
     result_dir.mkdir(parents=True, exist_ok=True)
     global filename
     filename = result_dir / f"{scenario_name}.log"

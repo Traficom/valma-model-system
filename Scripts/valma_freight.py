@@ -22,12 +22,12 @@ from parameters.commodity import commodity_conversion
 
 def main(args):
     # Connect to emme project, set zonedata and other path variables
-    zonedata_path = Path(args.forecast_data_path)
-    cost_data_path = Path(args.cost_data_path)
-    results_path = Path(args.results_path, args.scenario_name)
-    emme_project_path = Path(args.emme_path)
+    zone_data_file = Path(args.zone_data_file)
+    cost_data_file = Path(args.cost_data_file)
+    result_data_folder = Path(args.result_data_folder, args.scenario_name)
+    emme_project_path = Path(args.emme_project_file)
     parameters_path = Path(__file__).parent / "parameters" / "freight"
-    trade_demand_path = Path(args.trade_demand_data_path)
+    trade_demand_file = Path(args.trade_demand_file)
     save_matrices = True if args.specify_commodity_names else False
     ep = EmmeProject(emme_project_path)
     ep.try_open_db("koko_suomi")
@@ -37,10 +37,10 @@ def main(args):
                                     submodel="freight",
                                     save_matrices=save_matrices,
                                     first_matrix_id=args.first_matrix_id)
-    zonedata = FreightZoneData(zonedata_path, ass_model.zone_numbers, "koko_suomi")
-    resultdata = ResultsData(results_path)
-    resultmatrices = MatrixData(results_path / "Matrices" / "koko_suomi")
-    costdata = json.loads(cost_data_path.read_text("utf-8"))
+    zonedata = FreightZoneData(zone_data_file, ass_model.zone_numbers, "koko_suomi")
+    resultdata = ResultsData(result_data_folder)
+    resultmatrices = MatrixData(result_data_folder / "Matrices" / "koko_suomi")
+    costdata = json.loads(cost_data_file.read_text("utf-8"))
     
     # Set purposes and fetch impedances
     purposes = create_purposes(parameters_path / "foreign", zonedata, 
@@ -62,10 +62,10 @@ def main(args):
         log.info(f"Calculating trade route for purpose: {purpose.name}")
         if purpose.is_export:
             demand = purpose.run_trade_route_module(impedance, *marine_export,
-                                                    trade_demand_path)
+                                                    trade_demand_file)
         else:
             demand = purpose.run_trade_route_module(impedance, *marine_import,
-                                                    trade_demand_path)
+                                                    trade_demand_file)
         trade_demand[purpose.name] = demand
     marine_export, marine_import = None, None
 
@@ -179,19 +179,19 @@ if __name__ == "__main__":
         type=str,
         help="Scenario name.")
     parser.add_argument(
-        "--forecast-data-path",
+        "--zone-data-file",
         type=str,
         help="Path to file containing forecast zonedata.")
     parser.add_argument(
-        "--cost-data-path",
+        "--cost-data-file",
         type=str,
         help="Path to file containing transport cost data.")
     parser.add_argument(
-        "--results-path",
+        "--result-data-folder",
         type=str,
         help="Path to folder where result data is saved to.")
     parser.add_argument(
-        "--emme-path",
+        "--emme-project-file",
         type=str,
         help="Filepath to .emp EMME-project-file.")
     parser.add_argument(
@@ -210,9 +210,9 @@ if __name__ == "__main__":
         "--specify-commodity-names",
         nargs="*",
         choices=commodity_conversion,
-        help="Commodity names in 29 classification. Assigned and saved as mtx.")
+        help="Specify commodity names to be assigned and saved as matrix.")
     parser.add_argument(
-        "--trade-demand-data-path",
+        "--trade-demand-file",
         type=str,
         help="Path to .omx file containing freight foreign trade demand.")
 

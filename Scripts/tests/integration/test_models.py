@@ -13,8 +13,8 @@ from tests.integration.test_data_handling import (
     ZONEDATA_PATH,
     COSTDATA_PATH,
     BASE_MATRICES_PATH,
-    MODE_DEST_CALIBRATION_PATH,
-    MUNICIPALITY_CALIBRATION_PATH
+    MODE_DEST_CALIBRATION_FILE,
+    MUNICIPALITY_CALIBRATION_FILE
 )
 
 
@@ -22,7 +22,7 @@ class Config():
     log_format = None
     log_level = "DEBUG"
     scenario_name = "TEST"
-    results_path = TEST_DATA_PATH / "Results"
+    result_data_folder = TEST_DATA_PATH / "Results"
 
 
 class ModelTest(unittest.TestCase):
@@ -34,8 +34,8 @@ class ModelTest(unittest.TestCase):
             RESULTS_PATH / "Matrices" / "uusimaa"))
         model = ModelSystem(
             ZONEDATA_PATH, COSTDATA_PATH, BASE_MATRICES_PATH, RESULTS_PATH,
-            ass_model, "uusimaa", MODE_DEST_CALIBRATION_PATH,
-            MUNICIPALITY_CALIBRATION_PATH)
+            ass_model, "uusimaa", MODE_DEST_CALIBRATION_FILE,
+            MUNICIPALITY_CALIBRATION_FILE)
         impedance = model.assign_base_demand()
         for ap in ass_model.assignment_periods:
             tp = ap.name
