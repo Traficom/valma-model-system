@@ -3,20 +3,14 @@ from typing import Dict, Tuple
 from concurrent.futures import ThreadPoolExecutor
 from threading import Lock
 
+from parameters.marine_ship import leg_names
 import utils.log as log
 
 class FreightDetourInference:
-    def __init__(self, impedance: Dict[str, np.ndarray], model_parameters: dict, 
-                 lc_indices: np.ndarray) -> None:
+    def __init__(self, impedance: Dict[str, np.ndarray], model_parameters: dict) -> None:
         self.impedance = impedance
-        self.lc_indices = lc_indices
-
-        # Estimation parameters
         self.constant = model_parameters["constant"]
         self.impedance_coeff = model_parameters["impedance"]
-        self.size = model_parameters["size"]
-
-        # Threading parameters
         self.batch_size = 15
         self.max_workers = 16
 
@@ -37,8 +31,9 @@ class FreightDetourInference:
 class LogisticsModule(FreightDetourInference):
     def __init__(self, costs: Dict[str, np.ndarray], model_parameters: dict, 
                  lc_indices: np.ndarray, lc_sizes: np.ndarray):
-        FreightDetourInference.__init__(self, costs, model_parameters, lc_indices)
-        self.size *= np.log(lc_sizes)
+        FreightDetourInference.__init__(self, costs, model_parameters)
+        self.lc_indices = lc_indices
+        self.size = model_parameters["size"] * np.log(lc_sizes)
         self.scale = 5.0
 
     def compute_utilities(self, origin_indices: np.ndarray, 
@@ -61,20 +56,15 @@ class LogisticsModule(FreightDetourInference):
 
         # utilities for direct routes
         direct_utilities = ((self.impedance_coeff["orig_dest_direct"]
-                            * truck_cost[origin_indices, destination_indices])
+                            * truck_cost[o_idx_exp, d_idx_exp])
                             + self.constant["direct"])
         # combine detour and direct
-        return np.concatenate([detour_utilities, 
-                               np.expand_dims(direct_utilities, axis=1)], axis=1)
+        return np.concatenate([detour_utilities, direct_utilities], axis=1)
     
-    def forward(self, probs_indices: np.ndarray) -> np.ndarray:
-        # compute only for origins with data
-        origin_set = probs_indices[:,0]
-        # compute only for destination with data
-        destination_set = probs_indices[:,1]
-        weighted = self.compute_utilities(origin_indices=origin_set, 
-                                          destination_indices=destination_set)
-        
+    def forward(self, origin_indices: np.ndarray, 
+                destination_indices: np.ndarray) -> np.ndarray:
+        weighted = self.compute_utilities(origin_indices, destination_indices)
+
         # Now you have 2 top-level utilities: direct_util vs. detour_util_top
         detour_util = weighted[:, :-1] / self.scale
         exp_x_detour, detour_util_sum_exp, logsum_exp = self.sumexp(detour_util, axis=1)
@@ -99,10 +89,11 @@ class LogisticsModule(FreightDetourInference):
                                    + current_batch_size, dtype=np.int32)
         dest_indices = np.arange(n, dtype=np.int32)
         o_grid, d_grid = np.meshgrid(origin_indices, dest_indices, indexing='ij')
-        eval_indices = np.stack([o_grid.ravel(), d_grid.ravel()], axis=1)
+        origin_indices = o_grid.ravel()
+        destination_indices = d_grid.ravel()
 
         # Get probabilities and reshape
-        probs_batch_flat = self.forward(probs_indices=eval_indices)
+        probs_batch_flat = self.forward(origin_indices, destination_indices)
         probs_batch = probs_batch_flat.reshape(current_batch_size, n, k_plus1)
         
         # Get demand batch and expand dimensions
@@ -132,9 +123,166 @@ class LogisticsModule(FreightDetourInference):
 
 class TradeRouteModule(FreightDetourInference):
     def __init__(self, impedance: Dict[str, np.ndarray], model_parameters: dict, 
-                 port_indices: np.ndarray):
-        FreightDetourInference.__init__(self, impedance, model_parameters, port_indices)
+                 fin_borders: dict, is_export: bool):
+        FreightDetourInference.__init__(self, impedance, model_parameters)
+        self.fin_borders = fin_borders
+        self.is_export = is_export
+        self.len_leg_two = len(impedance.get("leg_two"))
 
+    def calculate_utilities(self, leg_name: str, add_constant: bool) -> dict:
+        """Compute utility components for a given leg.
+        
+        Parameters
+        ----------
+        leg_name : str
+            leg for which utilities are calculated
+        add_constant : bool
+            add model specification constants
+
+        Returns
+        -------
+        dict
+            Mode (truck/container_ship...) : numpy 2d array
+        """
+        utility_parts = {}
+        for mode in self.impedance[leg_name]:
+            item = self.impedance[leg_name][mode]
+            b = self.get_impedance_beta(mode, leg_name)
+            utility = b * item["cost"]
+            if add_constant:
+                utility += self.add_constants(mode, utility.shape)
+            if "frequency" in item and self.impedance_coeff.get("frequency"):
+                freq_mtx = item["frequency"]
+                freq_mtx[freq_mtx == np.inf] = -np.inf
+                utility += self.impedance_coeff["frequency"] * freq_mtx
+            utility_parts[mode] = utility
+        utility = np.concatenate(list(utility_parts.values()), axis=1)
+        return utility
+    
+    def get_impedance_beta(self, mode: str, leg_name: str) -> float:
+        """Fetch impedance coefficient from model specification.
+        
+        Parameters
+        ----------
+        mode : str
+            mode for which utilities are calculated
+        leg_name : str
+            leg for which utilities are calculated
+
+        Returns
+        -------
+        float
+            estimated coefficient
+        """
+        b = self.impedance_coeff["cost"]
+        if not isinstance(b, float):
+            if mode in b:
+                b = b[mode]
+            elif isinstance(b[leg_name], float):
+                b = b[leg_name]
+            else:
+                b = b[leg_name][mode]
+        return b
+
+    def add_constants(self, mode: str, utility_shape: tuple) -> np.ndarray:
+        """Create mode and Finnish border point specific constant matrix.
+        Returns zeros matrix if specification has no constants for mode.
+        
+        Parameters
+        ----------
+        mode : str
+            mode for which utilities are calculated
+        utility_shape : tuple
+            shape of a leg's utility matrix
+
+        Returns
+        -------
+        numpy.ndarray
+            constant matrix
+        """
+        constants_mtx = np.zeros(utility_shape, dtype=np.float32)
+        if mode in self.constant:
+            for class_items in self.constant[mode].values():
+                borders = set(self.fin_borders) & set(class_items["border_points"])
+                for border in borders:
+                    idx = self.fin_borders[border]
+                    if self.is_export:
+                        constants_mtx[idx, :] += class_items["dummy"]
+                    else:
+                        constants_mtx[:, idx] += class_items["dummy"]
+        return constants_mtx
+
+    def calculate_probabilities(self) -> Tuple[np.ndarray]:
+        """Calculate choice probabilities.
+
+        Returns
+        -------
+        Tuple[np.ndarray]
+            probability of choosing origin bcp i
+            probability of choosing leg2 bcp j given choice of i
+        """
+        add_constant = (False, True, False)
+        util_one, util_two, util_three = [
+            self.calculate_utilities(leg_name, add_constant[i])
+            for i, leg_name in enumerate(leg_names)]
+        util_three = np.concatenate([util_three] * self.len_leg_two, axis=0)
+        
+        # axes = origins, origin bcp, dest bcp * leg2 modes, destinations
+        route_util = (
+            util_one[:, :, None, None]
+            + util_two[None, :, :, None]
+            + util_three[None, None, :, :]
+        )
+
+        n_origin, n_orig_alt, n_dest_bcp_alt, n_dest = route_util.shape
+        route_flat = route_util.reshape(n_origin, n_orig_alt * n_dest_bcp_alt, n_dest)
+        route_probs_flat = self.softmax(route_flat, axis=1)
+        route_probs = route_probs_flat.reshape(route_util.shape)
+        
+        prob_origin_bcp = np.sum(route_probs, axis=2)
+        prob_origin_bcp_marginal = prob_origin_bcp[:, :, None]
+        prob_leg2_given_bcp = np.zeros_like(route_probs)
+        np.divide(route_probs, prob_origin_bcp_marginal, 
+                  out=prob_leg2_given_bcp,
+                  where=prob_origin_bcp_marginal > 0.0)
+        return prob_origin_bcp, prob_leg2_given_bcp
+
+    def route_demand(self, demand: np.ndarray) -> Tuple[np.ndarray]:
+        """Distribute demand across logit route alternatives and aggregate flows.
+        
+        Parameters
+        ----------
+        demand : np.ndarray
+            exported/imported trade demand
+
+        Returns
+        -------
+        Tuple[np.ndarray]
+            leg specific routed demand flow
+        """
+        prob_orig_bcp, prob_dest_bcp = self.calculate_probabilities()
+        
+        # swap destinations to axis 1 for demand multiplication
+        prob_orig_bcp = np.moveaxis(prob_orig_bcp, 2, 1)
+        prob_dest_bcp = np.moveaxis(prob_dest_bcp, 3, 1)
+        demand_routed = (
+            demand[:, :, None, None]
+            * prob_orig_bcp[:, :, :, None]
+            * prob_dest_bcp
+        )
+        
+        # axes now = (n_orig, n_dest, n_orig_alt, n_dest_bcp_alt)
+        # keep axes defining each leg segment, sum out the rest
+        flow_leg1 = np.sum(demand_routed, axis=(1, 3))
+        flow_leg2 = np.sum(demand_routed, axis=(0, 1))
+        flow_leg3 = np.sum(demand_routed, axis=(0, 2))
+        
+        # leg3 still has leg2 mode alternatives. Collapse and sum dest bcp inflow 
+        n_dest, n_dest_bcp_modes = flow_leg3.shape
+        n_dest_bcp = int(n_dest_bcp_modes / self.len_leg_two)
+        flow_leg3 = flow_leg3.reshape(n_dest, self.len_leg_two, n_dest_bcp)
+        flow_leg3 = np.sum(flow_leg3, axis=1).T
+        return flow_leg1, flow_leg2, flow_leg3
 
 def run_logistics_model(model: LogisticsModule, demand: np.ndarray, 
                         iteration: int) -> Tuple[np.ndarray]:
@@ -187,20 +335,43 @@ def run_logistics_model(model: LogisticsModule, demand: np.ndarray,
     return final_demand, total_per_route
 
 def run_trade_model(model: TradeRouteModule, demand: np.ndarray):
-    """Using given truck demand full matrix, calculates share of demand for 
-    mode-route alternatives between Finnish zones and foreign country clusters
-    through designated border control points.
+    """Using given trade demand between Finnish zones and foreign country clusters,
+    calculates how demand is routed through Finnish and foreign border control 
+    points with leg specific mode alternatives.
+    
+    Used variable bcp refers to these border control points within and outside
+    Finland that route alternatives must pass through.
 
     Parameters
     ----------
     model : TradeRouteModule
         TradeRouteModule class object
     demand : np.ndarray
-        external export/import trade demand for commodity
+        exported/imported trade demand
 
     Returns
     -------
-    __type__
-        _description_
+    dict
+        Leg name (one/two/three) : Mode
+            Name (truck/container_ship...) : numpy 2d array
     """
-    return demand
+    flows = model.route_demand(demand)
+    trade_demand = {
+        leg_name: matrix_mode_slicer(flows[i], list(model.impedance[leg_name]))
+        for i, leg_name in enumerate(leg_names)
+    }
+    return trade_demand
+
+def matrix_mode_slicer(flow: np.ndarray, modes: list) -> dict:
+    """Extract mode-specific demand matrices from a concatenated flow matrix.
+    
+    Assumes columns are equally divided among modes.
+    
+    Returns
+    -------
+    dict
+        Mode (truck/container_ship...) : 2D numpy array
+    """
+    split_flows = np.split(flow, len(modes), axis=1)
+    mode_flows = dict(zip(modes, split_flows))
+    return mode_flows

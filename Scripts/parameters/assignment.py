@@ -147,16 +147,6 @@ performance_settings = {
     "network_acceleration": True,
     "u_turns_allowed": True,
 }
-# Inversed value of time [min/eur]
-vot_inv = {
-    "all": 8.721, # 1 / ((6.88 eur/h) / (60 min/h)) = 7.576 min/eur
-    "work": 7.576, # 1 / ((7.92 eur/h) / (60 min/h)) = 7.576 min/eur
-    "business": 2.439, # 1 / ((24.60 eur/h) / (60 min/h)) = 2.439 min/eur
-    "leisure": 11.173, # 1 / ((5.37 eur/h) / (60 min/h)) = 11.173 min/eur
-    "truck": 1.877, # 1 / ((31.96 eur/h) / (60 min/h)) = 1.877 min/eur
-    "semi_trailer": 1.709, # 1 / ((35.11 eur/h) / (60 min/h)) = 1.709 min/eur
-    "trailer_truck": 1.667, # 1 / ((36 eur/h) / (60 min/h)) = 1.667 min/eur
-}
 congested_time_weight = 1.5
 freight_terminal_cost = {
     'D': 0,
@@ -164,7 +154,7 @@ freight_terminal_cost = {
     'W': 0
 }
 in_vehicle_weight = {
-    'j': 0.6,
+    'j': 0.8,
 }
 # Boarding penalties for different transit modes
 boarding_penalty = {

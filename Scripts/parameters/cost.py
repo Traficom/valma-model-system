@@ -71,33 +71,17 @@ car_pax_occupancy = {
     "hb_escort": 2.89
 }
 
-vot = {
-    "hb_leisure_overnight": {
-        "airplane": 11.4,
-        "airpl_car_acc": 11.4,
-        "airpl_taxi_acc": 11.4,
-        "airpl_car_egr": 11.4,
-        "transit": 7.7,
-        "pt_car_acc": 7.7,
-        "pt_taxi_acc": 7.7,
-        "pt_car_egr": 7.7,
-        "pt_taxi_egr": 7.7,
-        "car_drv": 11.4,
-        "car_pax": 11.4,
-    },
-    "hb_business": {
-        "airplane": 11.4,
-        "airpl_car_acc": 11.4,
-        "airpl_taxi_acc": 11.4,
-        "airpl_car_egr": 11.4,
-        "transit": 7.7,
-        "pt_car_acc": 7.7,
-        "pt_taxi_acc": 7.7,
-        "pt_car_egr": 7.7,
-        "pt_taxi_egr": 7.7,
-        "car_drv": 11.4,
-        "car_pax": 11.4,
-    }
+value_of_time = {  # [eur/hour]
+    "car": 9.18,
+    "transit": 7.3,
+    "airplane": 11.4,
+    "pt_car_acc": 7.7,
+    "pt_taxi_acc": 7.7,
+    "airpl_car_acc": 11.4,
+    "pt_car_egr": 7.7,
+    "pt_taxi_egr": 7.7,
+    "airpl_car_egr": 11.4,
+    "van": 29.02,
 }
 
 tour_duration = {

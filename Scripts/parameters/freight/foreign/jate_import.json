@@ -1,0 +1,48 @@
+{
+    "name": "jate_import",
+    "orig": "null",
+    "dest": "null",
+    "generation_area": "foreign",
+    "attraction_area": "domestic",
+    "struct": "import",
+    "impedance_share": {},
+    "distance_boundaries": {
+        "truck": [
+            0,
+            9999
+        ],
+        "freight_train": [
+            0,
+            9999
+        ],
+        "ship": [
+            0,
+            9999
+        ]
+    },
+    "destination_choice": {},
+    "mode_choice": {
+        "truck": {},
+        "freight_train": {}
+    },
+    "demand_share": {},
+    "route_choice": {
+        "constant": {
+            "truck": {
+                "west": {
+                    "border_points": ["FIKIL", "FITOR"],
+                    "dummy": 45.54
+                }
+            }
+        },
+        "impedance": {
+            "cost": {
+                "truck": -0.09852,
+                "general_cargo": -0.001948,
+                "container_ship": -0.001966,
+                "roro_vessel": -0.002169
+            },
+            "frequency": 2.163e-05
+        }
+    }
+}

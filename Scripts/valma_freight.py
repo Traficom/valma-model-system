@@ -47,22 +47,26 @@ def main(args):
                                resultdata, costdata["freight"])
     purposes_to_assign = [purpose for purpose in list(commodity_conversion)
                           if purpose in args.specify_commodity_names]
-    ass_model.prepare_freight_network(costdata["car_cost"], purposes_to_assign)
+    ass_model.prepare_freight_network(
+        costdata["vehicle_km_cost"], costdata["vehicle_hour_cost"],
+        purposes_to_assign)
     store_demand = StoreDemand(ass_model.freight_network, resultmatrices, 
                                zonedata.all_zone_numbers, zonedata.zone_numbers)
     impedance = ass_model.freight_network.assign()
     
     log.info("Read marine ship impedances from network")
+    trade_demand = {}
     marine_export = ass_model.freight_network.read_ship_impedances(True)
     marine_import = ass_model.freight_network.read_ship_impedances(False)
     for purpose in purposes.values():
-        log.info(f"Calculating trade routes for foreign purpose: {purpose.name}")
+        log.info(f"Calculating trade route for purpose: {purpose.name}")
         if purpose.is_export:
             demand = purpose.run_trade_route_module(impedance, *marine_export,
                                                     trade_demand_file)
         else:
             demand = purpose.run_trade_route_module(impedance, *marine_import,
                                                     trade_demand_file)
+        trade_demand[purpose.name] = demand
     marine_export, marine_import = None, None
 
     # prepare domestic model by splicing impedances and initializing final demand matrix 
@@ -76,7 +80,7 @@ def main(args):
                                resultdata, costdata["freight"])
     # Run domestic demand calculation
     for purpose in purposes.values():
-        log.info(f"Calculating demand for domestic purpose: {purpose.name}")
+        log.info(f"Calculating demand for purpose: {purpose.name}")
         demand = purpose.calc_traffic(impedance)
         if purpose.route_params and args.logistics_iterations > 0:
             demand["truck"], _ = purpose.run_logistics_module(demand["truck"], impedance, 
