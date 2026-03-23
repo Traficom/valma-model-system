@@ -14,8 +14,8 @@ TEST_DATA_PATH = Path(__file__).parent.parent / "test_data"
 RESULTS_PATH = TEST_DATA_PATH / "Results" / "test"
 ZONEDATA_PATH = TEST_DATA_PATH / "Scenario_input_data" / "zonedata_test.gpkg"
 COSTDATA_PATH = TEST_DATA_PATH / "Scenario_input_data" / "costdata.json"
-MODE_DEST_CALIBRATION_PATH = TEST_DATA_PATH / "Scenario_input_data" / "mode_dest_calibration.json"
-MUNICIPALITY_CALIBRATION_PATH = TEST_DATA_PATH / "Scenario_input_data" / "municipality_calibration.txt"
+MODE_DEST_CALIBRATION_FILE = TEST_DATA_PATH / "Scenario_input_data" / "mode_dest_calibration.json"
+MUNICIPALITY_CALIBRATION_FILE = TEST_DATA_PATH / "Scenario_input_data" / "municipality_calibration.txt"
 BASE_MATRICES_PATH = TEST_DATA_PATH / "Scenario_input_data" / "Matrices"
 INTERNAL_ZONES = [
     202, 1344, 1755, 2037, 2129, 2224, 2333, 2413, 2519, 2621, 2707, 2814, 2918,
@@ -31,7 +31,7 @@ class Config():
     log_format = None
     log_level = "DEBUG"
     scenario_name = "TEST"
-    results_path = TEST_DATA_PATH / "Results"
+    result_data_folder = TEST_DATA_PATH / "Results"
 
 class MatrixDataTest(unittest.TestCase):
 
