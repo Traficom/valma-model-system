@@ -69,17 +69,16 @@ def write_leg2_summary(purpose: FreightPurpose, demand: dict,
     df_data = []
     for mode in demand["leg_two"]:
         mtx = numpy.round(demand["leg_two"][mode], 5)
-        nonzero_indices = numpy.nonzero(mtx)
-        for i, j in zip(nonzero_indices[0], nonzero_indices[1]):
-            fin_border_idx = i if purpose.is_export else j
-            foreign_border_idx = j if purpose.is_export else i
+        for row, col in zip(*numpy.nonzero(mtx)):
+            fin_border_idx = row if purpose.is_export else col
+            foreign_border_idx = col if purpose.is_export else row
             df_data.append({
                 "Commodity": commodity,
                 "Type": trade_type,
                 "Mode": mode,
                 "Finnish border": fin_border_indices[fin_border_idx],
                 "Foreign border": cluster_border_indices[foreign_border_idx],
-                "Tons (t/annual)": mtx[i, j]
+                "Tons (t/annual)": mtx[row, col]
             })
     filename = "freight_leg2_summary.txt"
     resultdata.print_concat(DataFrame(df_data), filename)
