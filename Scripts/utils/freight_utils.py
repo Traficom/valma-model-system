@@ -58,8 +58,10 @@ def create_purposes(parameters_path: Path, zonedata: FreightZoneData,
 def write_leg2_summary(purpose: FreightPurpose, demand: dict, 
                        _, fin_border_ids: dict, cluster_border_ids: dict,
                        resultdata: ResultsData):
-    """Write summary for leg two of trade routes, including commodity, type, mode,
-    border crossings, and tons for non-zero demand pairs.
+    """Write summary for leg two of freight trade module. Summary file includes
+    commodity name, type (export/import), mode name, Finnish side border 
+    crossing point, border crossing point abroad and transported tons.
+    Summary only includes non-zero demand pairs.
     """
     commodity, trade_type = purpose.name.split("_")
     fin_border_indices = {i: key for i, key in enumerate(fin_border_ids)}
@@ -69,20 +71,17 @@ def write_leg2_summary(purpose: FreightPurpose, demand: dict,
         mtx = numpy.round(demand["leg_two"][mode], 5)
         nonzero_indices = numpy.nonzero(mtx)
         for i, j in zip(nonzero_indices[0], nonzero_indices[1]):
-            tons = mtx[i, j]
             fin_border_idx = i if purpose.is_export else j
             foreign_border_idx = j if purpose.is_export else i
-            fin_border = fin_border_indices[fin_border_idx]
-            foreign_border = cluster_border_indices[foreign_border_idx]
             df_data.append({
                 "Commodity": commodity,
                 "Type": trade_type,
                 "Mode": mode,
-                "Finnish border": fin_border,
-                "Foreign border": foreign_border,
-                "Tons (t/annual)": tons
+                "Finnish border": fin_border_indices[fin_border_idx],
+                "Foreign border": cluster_border_indices[foreign_border_idx],
+                "Tons (t/annual)": mtx[i, j]
             })
-    filename = "leg2_summary.txt"
+    filename = "freight_leg2_summary.txt"
     resultdata.print_concat(DataFrame(df_data), filename)
 
 def write_purpose_summary(purpose: FreightPurpose, demand: dict, aux_demand: dict, 
