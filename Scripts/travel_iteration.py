@@ -66,8 +66,8 @@ class ModelSystem:
                  results_path: Path,
                  assignment_model: AssignmentModel,
                  submodel: str,
-                 mode_dest_calibration_path: Optional[Path] = None,
-                 municipality_calibration_path: Optional[Path] = None,
+                 mode_dest_calibration_path: Optional[str] = None,
+                 municipality_calibration_path: Optional[str] = None,
                  long_dist_matrices_path: Optional[Path] = None,
                  freight_matrices_path: Optional[Path] = None):
         self.ass_model = cast(Union[MockAssignmentModel,EmmeAssignmentModel], assignment_model) #type checker hint
