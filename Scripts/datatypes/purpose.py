@@ -774,6 +774,20 @@ class FreightPurpose(Purpose):
             self.costdata, ship_imps, self.model_category, fin_border_ids,
             self.is_export)
         impedance_legs["leg_two"].update(ship_costs)
+
+        # Retain leg two truck cost only for designated border pairs
+        mask = numpy.ones(impedance_legs["leg_two"]["truck"]["cost"].shape, dtype=bool)
+        fin_indices = {key: idx for idx, key in enumerate(fin_border_ids)}
+        foreign_indices = {key: idx for idx, key in enumerate(cluster_border_ids)}
+        for border_pair in param.land_border_pairs.values():
+            if (border_pair["finland_border"] in fin_border_ids 
+            and border_pair["foreign_border"] in cluster_border_ids):
+                fin_index = fin_indices[border_pair["finland_border"]]
+                foreign_index = foreign_indices[border_pair["foreign_border"]]
+                row = fin_index if self.is_export else foreign_index
+                col = foreign_index if self.is_export else fin_index
+                mask[row, col] = False
+        impedance_legs["leg_two"]["truck"]["cost"][mask] = numpy.inf
         return impedance_legs
 
     def get_costs(self, impedance: dict):
