@@ -136,7 +136,7 @@
             "impedance": {},
             "log": {
                 "attraction_size": 1,
-                "logsum": 0.7176
+                "logsum": 0.7323
             },
             "attraction_size": {
                 "workplaces": 1
@@ -145,7 +145,7 @@
     },
     "mode_choice": {
         "car_drv": {
-            "constant": -8.378,
+            "constant": -11.18,
             "generation": {},
             "transform": {
                 "attraction": {},
@@ -157,19 +157,19 @@
                 "within_zone_inf": -1
             },
             "impedance": {
-                "gen_cost": -0.01941
+                "gen_cost": -0.01665
             },
             "log": {
-                "transform": -2.215
+                "transform": -2.275
             },
             "individual_dummy": {
-                "sh_cars1_hh1": 3.263,
-                "sh_cars2_hh2": 3.263,
-                "sh_cars1_hh2": 2.534
+                "sh_cars1_hh1": 3.234,
+                "sh_cars2_hh2": 3.234,
+                "sh_cars1_hh2": 2.53
             }
         },
         "car_pax": {
-            "constant": -8.866,
+            "constant": -11.56,
             "generation": {},
             "transform": {
                 "attraction": {},
@@ -181,24 +181,24 @@
                 "within_zone_inf": -1
             },
             "impedance": {
-                "gen_cost": -0.01792
+                "gen_cost": -0.01144
             },
             "log": {
-                "transform": -2.758
+                "transform": -2.876
             },
             "individual_dummy": {
-                "sh_cars1_hh2": 0.9903,
-                "sh_cars2_hh2": 0.9903
+                "sh_cars1_hh2": 0.986,
+                "sh_cars2_hh2": 0.986
             }
         },
         "transit": {
-            "constant": -6.853,
+            "constant": -4.051,
             "generation": {},
             "attraction": {
                 "within_zone_inf": -1
             },
             "impedance": {
-                "logsum": 0.8522
+                "logsum": 1.352
             },
             "log": {},
             "individual_dummy": {}
@@ -210,38 +210,38 @@
                 "within_zone_inf": -1
             },
             "impedance": {
-                "logsum": 0.8522
+                "logsum": 1.352
             },
             "log": {},
             "individual_dummy": {}
         },
         "walk": {
-            "constant": -8.653,
+            "constant": -11.57,
             "generation": {},
             "attraction": {
                 "within_zone_inf": -1
             },
             "impedance": {
-                "dist": -0.4056
+                "dist": -0.4113
             },
             "log": {},
             "individual_dummy": {}
         },
         "calibration": {
             "car_drv": {
-                "constant": -0.038
+                "constant": 0.0
             },
             "car_pax": {
-                "constant": 0.138
+                "constant": 0.0
             },
             "transit": {
-                "constant": 0.040
+                "constant": 0.0
             },
             "airplane": {
-                "constant": -0.062
+                "constant": 0.0
             },
             "walk": {
-                "constant": 0.156
+                "constant": 0.0
             }
         }
     },
