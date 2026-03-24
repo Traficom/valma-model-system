@@ -66,8 +66,8 @@ class ModelSystem:
                  results_path: Path,
                  assignment_model: AssignmentModel,
                  submodel: str,
-                 mode_dest_calibration_path: Optional[Path] = None,
-                 municipality_calibration_path: Optional[Path] = None,
+                 mode_dest_calibration_path: Optional[str] = None,
+                 municipality_calibration_path: Optional[str] = None,
                  long_dist_matrices_path: Optional[Path] = None,
                  freight_matrices_path: Optional[Path] = None):
         self.ass_model = cast(Union[MockAssignmentModel,EmmeAssignmentModel], assignment_model) #type checker hint
@@ -88,16 +88,16 @@ class ModelSystem:
             mode_dummies = {}
             dest_dummies = {}
         else:
-            calibration_data: dict = json.loads(
-                mode_dest_calibration_path.read_text("utf-8"))
+            path = Path(mode_dest_calibration_path)
+            calibration_data: dict = json.loads(path.read_text("utf-8"))
             mode_dummies = calibration_data["mode_choice_calibration"]
             dest_dummies = calibration_data["destination_choice_calibration"]
         extra_dummies = {**mode_dummies, **dest_dummies}
         if municipality_calibration_path is None:
             municip_calib = {}
         else:
-            municip_calib = pandas.read_csv(
-                municipality_calibration_path, sep="\t",
+            path = Path(municipality_calibration_path)
+            municip_calib = pandas.read_csv(path, sep="\t",
                 index_col=["generation", "attraction"]).to_dict("series")
         self._zone_datas = {
             model_area: ZoneData(

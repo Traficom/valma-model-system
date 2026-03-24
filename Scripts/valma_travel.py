@@ -37,8 +37,6 @@ def main(args):
     cost_data_file = Path(args.cost_data_file)
     result_data_folder = Path(args.result_data_folder, args.scenario_name)
     emme_project_path = Path(args.emme_project_file)
-    mode_dest_calibration_file = Path(args.mode_dest_calibration_file)
-    municipality_calibration_file = Path(args.municipality_calibration_file)
     log_extra = {
         "status": {
             "name": args.scenario_name,
@@ -103,7 +101,7 @@ def main(args):
     log.info("Initializing matrices and models...", extra=log_extra)
     model_args = (zone_data_file, cost_data_file,
                   base_matrices_path, result_data_folder, ass_model, args.submodel,
-                  mode_dest_calibration_file, municipality_calibration_file,
+                  args.mode_dest_calibration_file, args.municipality_calibration_file,
                   long_dist_matrices_path, freight_matrices_path)
     model = ModelSystem(*model_args)
     log_extra["status"]["results"] = model.mode_share
