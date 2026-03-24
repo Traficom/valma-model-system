@@ -190,7 +190,7 @@
                 "logsum": 0.2177
             },
             "individual_dummy": {
-                "ob_other_parent_car_leisure_share": 10.27
+                "ob_other_parent_car_drv_share": 10.27
             }
         },
         "car_pax": {
@@ -241,7 +241,7 @@
             "car_drv": {
                 "constant": 0.2177,
                 "individual_dummy": {
-                    "ob_other_parent_car_leisure_share": 0.2177
+                    "ob_other_parent_car_drv_share": 0.2177
                 }
             },
             "car_pax": {

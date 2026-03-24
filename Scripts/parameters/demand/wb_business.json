@@ -176,7 +176,7 @@
                 "logsum": 1
             },
             "individual_dummy": {
-                "wb_business_parent_car_work_share": 2.453
+                "wb_business_parent_car_drv_share": 2.453
             }
         },
         "car_pax": {
@@ -225,7 +225,7 @@
             "car_drv": {
                 "constant": 1,
                 "individual_dummy": {
-                    "wb_business_parent_car_work_share": 1
+                    "wb_business_parent_car_drv_share": 1
                 }
             },
             "car_pax": {
