@@ -67,6 +67,7 @@ def main(args):
             demand = purpose.run_trade_route_module(impedance, *marine_import,
                                                     trade_demand_file)
         trade_demand[purpose.name] = demand
+    fin_borders = marine_export[1]
     marine_export, marine_import = None, None
 
     # prepare domestic model by splicing impedances and initializing final demand matrix 
@@ -82,6 +83,8 @@ def main(args):
     for purpose in purposes.values():
         log.info(f"Calculating demand for purpose: {purpose.name}")
         demand = purpose.calc_traffic(impedance)
+        trade_truck_demand = purpose.calc_trade_mode_share(demand, trade_demand, 
+                                                           fin_borders)
         if purpose.route_params and args.logistics_iterations > 0:
             demand["truck"], _ = purpose.run_logistics_module(demand["truck"], impedance, 
                                                               ass_model.mapping, 

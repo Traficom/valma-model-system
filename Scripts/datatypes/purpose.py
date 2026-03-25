@@ -816,6 +816,46 @@ class FreightPurpose(Purpose):
         vehicles += vehicles.T * costdata["empty_share"]
         return vehicles
 
+    def calc_trade_mode_share(self, demand: dict, trade_demand: dict,
+                              fin_borders: dict):
+        """Calculate truck mode share for domestic demand. Use the share
+        to calculate how traded demand for self purpose are distributed
+        to truck mode on domestic leg.
+
+        Parameters
+        ----------
+        demand : dict
+            Mode (truck/train/...) : calculated demand (numpy 2d matrix)
+        trade_demand : dict
+            Purpose name (elektr_export/elektr_import...) : Leg
+                Name (one/two/three) : Mode
+                    Name (truck/container_ship...) : numpy 2d array
+        fin_borders : dict
+            Finland border id (FIHEL/FISKV...) : str
+                Centroid id : int
+
+        Returns
+        -------
+        numpy.ndarray
+            truck tons on domestic leg
+        """
+        demand_sum = sum(demand[mode] for mode in demand)
+        truck_share = numpy.divide(demand["truck"], demand_sum,
+                                   where=demand_sum > 0)
+        purpose_trade_demand = {k: v for k, v in trade_demand.items()
+                                if k.split('_')[0] == self.name}
+        fin_borders = numpy.array(list(fin_borders.values()), dtype=numpy.int32)
+        fin_borders = numpy.isin(self.orig_zone_numbers, fin_borders)
+        matrices = []
+        for purpose in purpose_trade_demand:
+            trade_demand = numpy.zeros_like(truck_share)
+            if purpose.split("_")[1] == "export":
+                trade_demand[:, fin_borders] = purpose_trade_demand[purpose]["leg_one"]["truck"]
+            else:
+                trade_demand[fin_borders, :] = purpose_trade_demand[purpose]["leg_three"]["truck"]
+            matrices.append(trade_demand * truck_share)
+        return sum(matrix for matrix in matrices)
+
     def run_logistics_module(self, demand_truck: numpy.ndarray, impedance: numpy.ndarray, 
                              zone_index_map: dict, iterations: int) -> tuple:
         """Entry point for running logistics module for truck demand within Finland
@@ -887,9 +927,18 @@ class FreightPurpose(Purpose):
 
         mapping_name = (self.generation_zone_data.mapping.name if self.is_export 
                         else self.attraction_zone_data.mapping.name)
+        all_zones = self.generation_zone_data.all_zone_numbers
         if mapping_name == "municipality_center":
             df = pandas.DataFrame(demand, trade_mappings["finland_zone_number"])
             demand = df.groupby(self.generation_zone_data.mapping).sum().to_numpy()
+        elif demand.shape[0] != self.orig_zone_numbers.size:
+            idx_names = ["finland_zone_number", "cluster_zone_number"]
+            idx = [None, None]
+            for i, name in enumerate(idx_names):
+                mapping_arr = numpy.array(trade_mappings[name], dtype=all_zones.dtype)
+                mask = numpy.isin(all_zones, mapping_arr)
+                idx[i] = numpy.where(mask)[0].astype(numpy.int32)
+            demand = demand[numpy.ix_(idx[0], idx[1])]
         demand = demand.T if not self.is_export else demand
 
         # Finland border control point key - zone index
