@@ -44,7 +44,7 @@ class ForeignExternalModel:
         }
         self.purpose = Purpose(spec, zone_data_base)
 
-    def calc_foreign_external_traffic(self, mode: str) -> Demand:
+    def calc_foreign_external_traffic(self, mode: str) -> numpy.ndarray:
         """Calculate foreign external passenger traffic matrix.
 
         Return
@@ -57,10 +57,6 @@ class ForeignExternalModel:
         production_base: numpy.ndarray = self._generate_trips(zone_data_base, mode)
         production_forecast: numpy.ndarray = self._generate_trips(zone_data_forecast, mode)
         zone_numbers = self.zdata_b.zone_numbers
-
-        # TODO: Tästä funkiosta ulos saatava Demand-objekti tulee olla sellainen, että sen 'mode' tulee olla assignment mode
-        # (eli esim. 'car' eikä 'ship')
-        # Eli tämän funktion input mode tulee olla foreign_external mode (niinkuin se nyt onkin), mutta output mode on assignment mode.
 
         # NOTE: Eli tässä input-matriisissa on kaikki sentroidit, mutta nollasta poikkeavia arvoja on vain lähtömaa-sijoittelualue - ulkomaan alueklusteri -pareilla.
         with self.base_demand.open("ext_foreign_passenger", "vrk", list(zone_numbers)) as mtx:
@@ -75,7 +71,7 @@ class ForeignExternalModel:
         # Matrix balancing
         demand = fratar(production, mtx)
         
-        return Demand(self.purpose, mode, demand.values)
+        return demand.to_numpy()
 
     def _generate_trips(self, 
                         zone_data: pandas.DataFrame, 
