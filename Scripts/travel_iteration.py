@@ -300,12 +300,16 @@ class ModelSystem:
             self.dtm.init_demand(param.truck_classes)
             self._add_external_demand(
                 self.freight_matrices, param.truck_classes)
-        
+
         # Calculate and add foreign external passenger demand
-        self.foreign_ext_ship = self.fem.calc_foreign_external_traffic("ship")
-        self.foreign_ext_airplane = self.fem.calc_foreign_external_traffic("airplane")
-        self.dtm.add_demand(self.foreign_ext_ship)
-        self.dtm.add_demand(self.foreign_ext_airplane)
+        foreign_ext_ship_mtx = self.fem.calc_foreign_external_traffic("ship")
+        foreign_ext_airplane_mtx = self.fem.calc_foreign_external_traffic("airplane")
+        # Calculate modified attraction vectors for foreign external destination choice model
+        foreign_ext_ship_attraction = numpy.sum(foreign_ext_ship_mtx, axis=0)
+        foreign_ext_airplane_attraction = numpy.sum(foreign_ext_airplane_mtx, axis=0)
+        foreign_ext_attraction = foreign_ext_ship_attraction + foreign_ext_airplane_attraction
+        # Add to zonedata
+        self._zone_datas["domestic"]._add_fratar_attraction(pandas.Series(foreign_ext_attraction))
 
         # Add beeline distance dummy
         zd = self._zone_datas["domestic"]
