@@ -199,6 +199,9 @@ class ZoneData:
                 couples_children, couples)
             self.share["sh_hh_2_adults_no_children"] = divide(
                 couples_no_children, couples)
+    
+    def _add_fratar_attraction(self, attraction_vector: pandas.Series):
+        self["fratar_attraction"] = attraction_vector
 
     def dummy(self, division_type, name, bounds=slice(None)):
         if division_type == "zone":
