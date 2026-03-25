@@ -83,8 +83,7 @@ def main(args):
     for purpose in purposes.values():
         log.info(f"Calculating demand for purpose: {purpose.name}")
         demand = purpose.calc_traffic(impedance)
-        trade_truck_demand = purpose.calc_trade_mode_share(demand, trade_demand, 
-                                                           fin_borders)
+        demand_trade = purpose.calc_trade_mode_share(demand, trade_demand, fin_borders)
         if purpose.route_params and args.logistics_iterations > 0:
             demand["truck"], _ = purpose.run_logistics_module(demand["truck"], impedance, 
                                                               ass_model.mapping, 

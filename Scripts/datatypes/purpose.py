@@ -818,9 +818,8 @@ class FreightPurpose(Purpose):
 
     def calc_trade_mode_share(self, demand: dict, trade_demand: dict,
                               fin_borders: dict):
-        """Calculate truck mode share for domestic demand. Use the share
-        to calculate how traded demand for self purpose are distributed
-        to truck mode on domestic leg.
+        """Calculate mode share of trade demand on its domestic leg 
+        between freight land modes.
 
         Parameters
         ----------
@@ -836,25 +835,29 @@ class FreightPurpose(Purpose):
 
         Returns
         -------
-        numpy.ndarray
-            truck tons on domestic leg
+        dict
+            mode (truck/freight_train) : tons on domestic leg
         """
-        demand_sum = sum(demand[mode] for mode in demand)
+        demand_sum = sum(demand[mode] for mode in demand
+                         if mode in ["truck", "freight_train"])
         truck_share = numpy.divide(demand["truck"], demand_sum,
                                    where=demand_sum > 0)
+        train_share = numpy.ones_like(truck_share) - truck_share
         purpose_trade_demand = {k: v for k, v in trade_demand.items()
                                 if k.split('_')[0] == self.name}
         fin_borders = numpy.array(list(fin_borders.values()), dtype=numpy.int32)
         fin_borders = numpy.isin(self.orig_zone_numbers, fin_borders)
-        matrices = []
+        mode_demand = {k: numpy.zeros_like(truck_share)
+                       for k in ("truck", "freight_train")}
         for purpose in purpose_trade_demand:
             trade_demand = numpy.zeros_like(truck_share)
             if purpose.split("_")[1] == "export":
                 trade_demand[:, fin_borders] = purpose_trade_demand[purpose]["leg_one"]["truck"]
             else:
                 trade_demand[fin_borders, :] = purpose_trade_demand[purpose]["leg_three"]["truck"]
-            matrices.append(trade_demand * truck_share)
-        return sum(matrix for matrix in matrices)
+            mode_demand["truck"] += trade_demand * truck_share
+            mode_demand["freight_train"] += trade_demand * train_share
+        return mode_demand
 
     def run_logistics_module(self, demand_truck: numpy.ndarray, impedance: numpy.ndarray, 
                              zone_index_map: dict, iterations: int) -> tuple:
