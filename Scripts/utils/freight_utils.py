@@ -2,6 +2,7 @@ import json
 import numpy
 from pathlib import Path
 from typing import Dict
+from pandas import DataFrame, concat
 
 import utils.log as log
 from datatypes.purpose import FreightPurpose
@@ -52,6 +53,31 @@ def create_purposes(parameters_path: Path, zonedata: FreightZoneData,
                                                             zone_data, resultdata,
                                                             purpose_cost)
     return purposes
+
+def write_domestic_leg_summary(demand_trade: dict, impedance: dict,
+                               resultdata: ResultsData):
+    """Write summary for trade demand's domestic leg including transported
+    commodity, trade type (export/import), mode, tons and ton mileage.
+    '"""
+    df_data = []
+    for purpose in demand_trade:
+        trade_type = "export" if purpose.is_export else "import"
+        modes = list(demand_trade[purpose])
+        mode_tons = [numpy.sum(demand_trade[purpose][mode], dtype=int)
+                     for mode in modes]
+        mode_ton_dist = [numpy.sum(demand_trade[purpose][mode]
+                                   * impedance[mode]["dist"], dtype=int)
+                        for mode in modes]
+        df_data.append(DataFrame(data={
+            "Commodity": [purpose.name] * len(modes),
+            "Type": [trade_type] * len(modes),
+            "Mode": modes,
+            "Tons (t/annual)": mode_tons,
+            "Ton mileage (tkm/annual)": mode_ton_dist
+            })
+        )
+    filename = "freight_domestic_leg_summary.txt"
+    resultdata.print_concat(concat(df_data, ignore_index=True), filename)
 
 class StoreDemand():
     """Handles demand dimension compatibility when storing demand matrices 

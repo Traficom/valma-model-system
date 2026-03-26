@@ -15,7 +15,7 @@ from assignment.emme_bindings.emme_project import EmmeProject
 from datahandling.matrixdata import MatrixData
 from datatypes.purpose import FreightPurpose
 
-from utils.freight_utils import create_purposes, StoreDemand
+from utils.freight_utils import create_purposes, StoreDemand, write_domestic_leg_summary
 from datahandling.traversaldata import transform_traversal_data
 from parameters.commodity import commodity_conversion
 
@@ -66,7 +66,7 @@ def main(args):
         else:
             demand = purpose.run_trade_route_module(impedance, *marine_import,
                                                     trade_demand_file)
-        trade_demand[purpose.name] = demand
+        trade_demand[purpose] = demand
     fin_borders = marine_export[1]
     marine_export, marine_import = None, None
 
@@ -101,6 +101,7 @@ def main(args):
             total_demand[mode] += purpose.calc_vehicles(ton_demand, mode)
         write_purpose_summary(purpose, demand, aux_demand, impedance, resultdata)
         write_zone_summary(purpose.name, zonedata.zone_numbers, demand, resultdata)
+        write_domestic_leg_summary(demand_trade, impedance, resultdata)
     write_vehicle_summary(total_demand, impedance, resultdata)
     resultdata.flush()
     
