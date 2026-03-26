@@ -91,7 +91,7 @@ def write_domestic_leg_summary(demand_trade: dict, impedance: dict,
     for purpose in demand_trade:
         trade_type = "export" if purpose.is_export else "import"
         modes = list(demand_trade[purpose])
-        mode_tons = [numpy.sum(demand_trade[purpose][mode], dtype=numpy.int32)
+        mode_tons = [numpy.sum(demand_trade[purpose][mode], dtype=numpy.float32)
                      for mode in modes]
         mode_ton_dist = [numpy.sum(demand_trade[purpose][mode]
                                    * impedance[mode]["dist"], dtype=numpy.int64)
