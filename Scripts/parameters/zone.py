@@ -79,10 +79,11 @@ cluster_border_points = {
     "USHOU": {"name": "Houston", "id": 50130},
 }
 
+# Finnish land border centroid and its foreign counterpart
 land_border_pairs = {
-    "Vainikkala": {"finland_border": "FIVAI", "foreign_border": "RUVAI"},
-    "Vaalimaa": {"finland_border": "FIVAL", "foreign_border": "RUVAL"},
-    "Vartius": {"finland_border": "FIVAR", "foreign_border": "RUVAR"},
-    "Tornio": {"finland_border": "FITOR", "foreign_border": "SEHAA"},
-    "Kilpisjärvi": {"finland_border": "FIKIL", "foreign_border": "NOKIL"},
+    "Vainikkala": [15106, 50120],
+    "Vaalimaa": [19705, 50122],
+    "Vartius": [26946, 50121],
+    "Tornio": [28615, 50124],
+    "Kilpisjarvi": [30219, 50117]
 }
