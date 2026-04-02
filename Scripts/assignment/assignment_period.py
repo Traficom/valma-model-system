@@ -593,7 +593,7 @@ class AssignmentPeriod(Period):
                 link[mode.link_cost_attr] = toll_cost + dist_cost
         self.emme_scenario.publish_network(network)
 
-    def _calc_boarding_penalties(self, extra_penalty: int = 0):
+    def _calc_boarding_penalties(self):
         """Calculate boarding penalties for transit assignment."""
         # Definition of line specific boarding penalties
         network = self.emme_scenario.get_network()
@@ -606,20 +606,16 @@ class AssignmentPeriod(Period):
             except KeyError:
                 line[weight_attr] = 1.0
             try:
-                penalty = self.boarding_penalty[line.mode.id] + extra_penalty
+                boarding_penalty = param.boarding_penalty[line.mode.id]
             except KeyError:
-                penalty = extra_penalty
+                boarding_penalty = 0
                 missing_penalties.add(line.mode.id)
-            for transit_class, transfer_pen in param.transfer_penalty.items():
-                line[penalty_attr + transit_class] = penalty + transfer_pen
+            for transit_class, transfer_penalty in param.transfer_penalty.items():
+                line[penalty_attr + transit_class] = boarding_penalty + transfer_penalty
         if missing_penalties:
             missing_penalties_str: str = ", ".join(missing_penalties)
             log.warn("No boarding penalty found for transit modes " + missing_penalties_str)
         self.emme_scenario.publish_network(network)
-
-    @property
-    def boarding_penalty(self):
-        return param.boarding_penalty
 
     def _assign_cars(self, 
                      stopping_criteria: Dict[str, Union[int, float]]):

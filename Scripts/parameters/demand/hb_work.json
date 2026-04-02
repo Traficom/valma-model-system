@@ -110,7 +110,7 @@
             "impedance": {},
             "log": {
                 "attraction_size": 1,
-                "logsum": 0.8594
+                "logsum": 0.8892
             },
             "attraction_size": {
                 "workplaces": 1
@@ -119,7 +119,7 @@
     },
     "mode_choice": {
         "car_drv": {
-            "constant": -3.772,
+            "constant": -3.818,
             "generation": {},
             "transform": {
                 "attraction": {
@@ -130,24 +130,24 @@
                 }
             },
             "attraction": {
-                "time*within_zone": -0.04235,
-                "cost*within_zone": -0.06337
+                "time*within_zone": -0.04073,
+                "cost*within_zone": -0.06477
             },
             "impedance": {
-                "time": -0.04235,
-                "cost": -0.06337
+                "time": -0.04073,
+                "cost": -0.06477
             },
             "log": {
-                "transform": -0.2208
+                "transform": -0.2166
             },
             "individual_dummy": {
-                "sh_cars1_hh1": 4.56,
-                "sh_cars2_hh2": 4.56,
-                "sh_cars1_hh2": 3.085
+                "sh_cars1_hh1": 4.562,
+                "sh_cars2_hh2": 4.562,
+                "sh_cars1_hh2": 3.089
             }
         },
         "car_pax": {
-            "constant": -4.515,
+            "constant": -4.538,
             "generation": {},
             "transform": {
                 "attraction": {
@@ -158,45 +158,45 @@
                 }
             },
             "attraction": {
-                "time*within_zone": -0.07072,
-                "cost*within_zone": -0.06337
+                "time*within_zone": -0.06982,
+                "cost*within_zone": -0.06477
             },
             "impedance": {
-                "time": -0.07072,
-                "cost": -0.06337
+                "time": -0.06982,
+                "cost": -0.06477
             },
             "log": {
-                "transform": -0.2208
+                "transform": -0.2166
             },
             "individual_dummy": {
-                "sh_cars1_hh2": 0.9788,
-                "sh_cars2_hh2": 0.9788
+                "sh_cars1_hh2": 0.9877,
+                "sh_cars2_hh2": 0.9877
             }
         },
         "transit": {
-            "constant": -1.481,
+            "constant": -1.265,
             "generation": {},
             "attraction": {
                 "within_zone_inf": -1,
-                "sh_office": 1.221
+                "sh_office": 1.147
             },
             "impedance": {
-                "time": -0.01548,
-                "cost": -0.06337
+                "time": -0.01517,
+                "cost": -0.06477
             },
             "log": {
-                "cost": -0.2208
+                "cost": -0.2166
             },
             "individual_dummy": {}
         },
         "bike": {
-            "constant": -1.297,
+            "constant": -1.301,
             "generation": {},
             "attraction": {
-                "dist*within_zone": -0.1585
+                "dist*within_zone": -0.1555
             },
             "impedance": {
-                "dist": -0.1585
+                "dist": -0.1555
             },
             "log": {},
             "individual_dummy": {}
