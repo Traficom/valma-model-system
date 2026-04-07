@@ -775,17 +775,14 @@ class FreightPurpose(Purpose):
             self.is_export)
         impedance_legs["leg_two"].update(ship_costs)
 
-        # Retain leg two truck cost only for designated border pairs
-        pairs = numpy.array(list(param.land_border_pairs.values()))
-        exists = pairs[numpy.isin(pairs[:, 0], fin_port_zones) 
-                       & numpy.isin(pairs[:, 1], cluster_port_zones)]
-        fin_idx = numpy.searchsorted(fin_port_zones, exists[:, 0])
-        cluster_idx = numpy.searchsorted(cluster_port_zones, exists[:, 1])
-        mask = numpy.ones(impedance_legs["leg_two"]["truck"]["cost"].shape, dtype=bool)
-        rows = fin_idx if self.is_export else cluster_idx
-        cols = cluster_idx if self.is_export else fin_idx
-        mask[rows, cols] = False
-        impedance_legs["leg_two"]["truck"]["cost"][mask] = numpy.inf
+        # Retain leg two truck cost only for designated land border pairs
+        mask = pandas.DataFrame(True, index=fin_port_zones, columns=cluster_port_zones)
+        for fin_border, cluster_border in param.land_border_pairs.values():
+            if fin_border in fin_port_zones and cluster_border in cluster_port_zones:
+                mask.at[fin_border, cluster_border] = False
+        if not self.is_export:
+            mask = mask.T
+        impedance_legs["leg_two"]["truck"]["cost"][mask.to_numpy()] = numpy.inf
         return impedance_legs
 
     def get_costs(self, impedance: dict):
