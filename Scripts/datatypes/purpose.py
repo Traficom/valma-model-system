@@ -816,19 +816,19 @@ class FreightPurpose(Purpose):
         vehicles += vehicles.T * costdata["empty_share"]
         return vehicles
 
-    def calc_trade_mode_share(self, demand: dict, trade_demand: dict,
+    def calc_trade_mode_share(self, dom_demand: dict, trade_demand: dict,
                               fin_borders: dict):
         """Calculate mode share of trade demand on its domestic leg 
-        between freight land modes.
+        among freight land mode alternatives.
 
         Parameters
         ----------
-        demand : dict
-            Mode (truck/train/...) : calculated demand (numpy 2d matrix)
+        dom_demand : dict
+            Mode (truck/train/...) : domestic demand numpy 2d array
         trade_demand : dict
-            Foreign FreightPurpose : Leg
-                Name (one/two/three) : Mode
-                    Name (truck/container_ship...) : numpy 2d array
+            Foreign purpose name : str
+                Leg (one/two/three) : str
+                    Mode (truck/container_ship...) : trade demand numpy 2d array
         fin_borders : dict
             Finland border id (FIHEL/FISKV...) : str
                 Centroid id : int
@@ -836,32 +836,34 @@ class FreightPurpose(Purpose):
         Returns
         -------
         dict
-            Foreign FreightPurpose : Mode
-                Name (truck/freight_train) : tons on domestic leg
+            Foreign purpose name : str
+                Mode (truck/freight_train) : trade demand domestic leg numpy 2d array
         """
-        demand_sum = sum(demand[mode] for mode in demand
+        demand_sum = sum(dom_demand[mode] for mode in dom_demand
                          if mode in ["truck", "freight_train"])
         truck_share = numpy.zeros_like(demand_sum)
-        numpy.divide(demand["truck"], demand_sum, out=truck_share,
+        numpy.divide(dom_demand["truck"], demand_sum, out=truck_share,
                      where=demand_sum > 0.0)
         train_share = numpy.ones_like(truck_share) - truck_share
         
         purpose_trade_demand = {k: v for k, v in trade_demand.items()
-                                if k.name.split('_')[0] == self.name}
+                                if k.split('_')[0] == self.name}
         fin_borders = numpy.array(list(fin_borders.values()), dtype=numpy.int32)
-        fin_borders = numpy.isin(self.orig_zone_numbers, fin_borders)
-        mode_demand = {}
+        mask = numpy.isin(self.orig_zone_numbers, fin_borders)
+        dom_leg_demand = {
+            purpose: {mode: numpy.zeros_like(truck_share)
+                      for mode in ["truck", "freight_train"]} 
+            for purpose in purpose_trade_demand
+        }
         for purpose in purpose_trade_demand:
             demand_full = numpy.zeros_like(truck_share)
-            if purpose.is_export:
-                demand_full[:, fin_borders] = purpose_trade_demand[purpose]["leg_one"]["truck"]
+            if purpose.split("_")[1] == "export":
+                demand_full[:, mask] = purpose_trade_demand[purpose]["leg_one"]["truck"]
             else:
-                demand_full[fin_borders, :] = purpose_trade_demand[purpose]["leg_three"]["truck"]
-            mode_demand[purpose] = {"truck": demand_full * truck_share}
-            train_demand = demand_full * train_share
-            if numpy.sum(train_demand) > 0.0:
-                mode_demand[purpose].update({"freight_train": train_demand})
-        return mode_demand
+                demand_full[mask, :] = purpose_trade_demand[purpose]["leg_three"]["truck"]
+            dom_leg_demand[purpose]["truck"] += demand_full * truck_share
+            dom_leg_demand[purpose]["freight_train"] += demand_full * train_share
+        return dom_leg_demand
 
     def run_logistics_module(self, demand_truck: numpy.ndarray, impedance: numpy.ndarray, 
                              zone_index_map: dict, iterations: int) -> tuple:

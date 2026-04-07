@@ -24,16 +24,13 @@ ZONE_NUMBERS = [202, 1344, 1755, 2037, 2129, 2224, 2333, 2413, 2519, 2621,
 
 class FreightModelTest(unittest.TestCase):
 
-    def test_freight_model(self):      
+    def test_freight_model(self):
         zonedata = FreightZoneData(
             TEST_DATA_PATH / "freight_zonedata.gpkg", numpy.array(ZONE_NUMBERS),
             "koko_suomi")
         resultdata = ResultsData(RESULT_PATH)
         with open(TEST_DATA_PATH / "costdata.json") as file:
             costdata = json.load(file)
-        purposes = create_purposes(PARAMETERS_PATH / "domestic", zonedata, 
-                                   resultdata, costdata["freight"])
-        self.assertGreaterEqual(len(purposes), 1)
         
         time_impedance = omx.open_file(TEST_MATRICES / "freight_time.omx", "r")
         dist_impedance = omx.open_file(TEST_MATRICES / "freight_dist.omx", "r")
@@ -60,12 +57,20 @@ class FreightModelTest(unittest.TestCase):
                 "canal_cost": numpy.zeros([len(ZONE_NUMBERS), len(ZONE_NUMBERS)])
             }
         }
+
+        trade_demand, fin_borders = self.run_trade_route_choice(zonedata, resultdata, 
+                                                                costdata, impedance)
         for mtx_type in impedance.keys():
             for ass_class, mtx in impedance[mtx_type].items():
                 impedance[mtx_type][ass_class] = mtx[:zonedata.nr_zones, :zonedata.nr_zones]
-        
+        purposes = create_purposes(PARAMETERS_PATH / "domestic", zonedata, 
+                                   resultdata, costdata["freight"])
+        self.assertEqual(len(purposes), 2)
+
         for purpose in purposes.values():
             demand = purpose.calc_traffic(impedance)
+            demand_trade = purpose.calc_trade_mode_share(demand, trade_demand, 
+                                                         fin_borders)
             costs = purpose.get_costs(impedance)
             for mode in demand:
                 self.assertTrue(numpy.isfinite(demand[mode]).all())
@@ -73,3 +78,35 @@ class FreightModelTest(unittest.TestCase):
                     self.assertTrue(numpy.isfinite(costs[mode]["cost"]).all())
                 else:
                     self.assertTrue(numpy.isfinite(costs[mode]["cost"]).any())
+
+
+    def run_trade_route_choice(self, zonedata, resultdata, costdata, impedance):
+        marine_modes = ("container_ship", "roro_vessel")
+        fin_border = {"FIHKO": 4102, "FIHMN": 19401}
+        cluster_border = {"EETLL": 50107, "SESTO": 50127}
+        trade_demand_path = Path(TEST_MATRICES / "trade_demand.omx")
+
+        purposes = create_purposes(PARAMETERS_PATH / "foreign", zonedata, 
+                                   resultdata, costdata["freight"])
+        del purposes["kummuo_export"]
+        del purposes["kummuo_import"]
+        self.assertEqual(len(purposes), 2)
+
+        ship_imps = {
+            mode: {
+                imp: numpy.full((len(fin_border), len(fin_border)), 
+                                numpy.inf, dtype="float32")
+                for imp in ("dist", "frequency")}
+            for mode in marine_modes
+        }
+        ship_imps["container_ship"]["dist"][1][1] = 532
+        ship_imps["container_ship"]["frequency"][1][1] = 38
+        ship_imps["roro_vessel"]["dist"][0][0] = 126
+        ship_imps["roro_vessel"]["frequency"][0][0] = 162
+        marine_attr = (ship_imps, fin_border, cluster_border)
+
+        trade_demand = {}
+        for purpose in purposes.values():
+            trade_demand[purpose.name] = purpose.run_trade_route_module(
+                impedance, *marine_attr, trade_demand_path)
+        return trade_demand, fin_border

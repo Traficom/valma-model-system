@@ -66,7 +66,7 @@ def main(args):
         demand = purpose.run_trade_route_module(impedance, *marine_data,
                                                 trade_demand_file)
         write_leg2_summary(purpose, demand, *marine_data, resultdata)
-        trade_demand[purpose] = demand
+        trade_demand[purpose.name] = demand
     resultdata.flush()
     fin_borders = marine_export[1]
     marine_export, marine_import = None, None
