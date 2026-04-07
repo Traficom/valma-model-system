@@ -33,7 +33,7 @@ class MarineCostTest(unittest.TestCase):
         ship_imps["container_ship"]["frequency"][1][1] = 38
         ship_imps["roro_vessel"]["dist"][0][0] = 126
         ship_imps["roro_vessel"]["frequency"][0][0] = 162
-        origs = {"FIHMN": 19401, "FIHNK": 4102, "FIHEL": 524}
+        origs = {"FIHMN": 19401, "FIHKO": 4102, "FIHEL": 524}
         dests = {"EETLL": 50107, "SESTO": 50127}
 
         costs = get_foreign_ship_cost(costdata, ship_imps, "foreign", origs, dests)

@@ -1,0 +1,43 @@
+{
+    "name": "papsel_import",
+    "orig": "null",
+    "dest": "null",
+    "generation_area": "foreign",
+    "attraction_area": "domestic",
+    "struct": "import",
+    "impedance_share": {},
+    "distance_boundaries": {
+        "truck": [
+            0,
+            9999
+        ],
+        "freight_train": [
+            0,
+            9999
+        ],
+        "ship": [
+            0,
+            9999
+        ]
+    },
+    "destination_choice": {},
+    "mode_choice": {
+        "truck": {},
+        "freight_train": {}
+    },
+    "demand_share": {},
+    "route_choice": {
+        "constant": {
+            "truck": {
+                "all": {
+                    "border_points": ["FIVAI", "FIVAL", "FIVAR", "FIKIL", "FITOR"],
+                    "dummy": 1.5
+                }
+            }
+        },
+        "impedance": {
+            "cost": -1.703e-08,
+            "frequency": 0.0008203
+        }
+    }
+}

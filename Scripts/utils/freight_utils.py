@@ -2,6 +2,7 @@ import json
 import numpy
 from pathlib import Path
 from typing import Dict
+from pandas import DataFrame
 
 import utils.log as log
 from datatypes.purpose import FreightPurpose
@@ -52,6 +53,92 @@ def create_purposes(parameters_path: Path, zonedata: FreightZoneData,
                                                             zone_data, resultdata,
                                                             purpose_cost)
     return purposes
+
+
+def write_leg2_summary(purpose: FreightPurpose, demand: dict, 
+                       _, fin_border_ids: dict, cluster_border_ids: dict,
+                       resultdata: ResultsData):
+    """Write summary for leg two of freight trade module. Summary file includes
+    commodity name, type (export/import), mode name, Finnish side border 
+    crossing point, border crossing point abroad and transported tons.
+    Summary only includes non-zero demand pairs.
+    """
+    commodity, trade_type = purpose.name.split("_")
+    fin_border_indices = {i: key for i, key in enumerate(fin_border_ids)}
+    cluster_border_indices = {i: key for i, key in enumerate(cluster_border_ids)}
+    df_data = []
+    for mode in demand["leg_two"]:
+        mtx = numpy.round(demand["leg_two"][mode], 5)
+        for row, col in zip(*numpy.nonzero(mtx)):
+            fin_border_idx = row if purpose.is_export else col
+            foreign_border_idx = col if purpose.is_export else row
+            df_data.append({
+                "Commodity": commodity,
+                "Type": trade_type,
+                "Mode": mode,
+                "Finnish border": fin_border_indices[fin_border_idx],
+                "Foreign border": cluster_border_indices[foreign_border_idx],
+                "Tons (t/annual)": mtx[row, col]
+            })
+    filename = "freight_leg2_summary.txt"
+    resultdata.print_concat(DataFrame(df_data), filename)
+
+def write_purpose_summary(purpose: FreightPurpose, demand: dict, aux_demand: dict, 
+                          impedance: dict, resultdata: ResultsData):
+    """Write purpose-mode specific summary as txt-file containing mode shares 
+    calculated from demand (tons), mode specific demand (tons), mode shares 
+    calculated from mileage, mode specific ton-mileage, mode auxiliary ton-mileage
+    and total eur-ton product.
+    """
+    modes = list(demand)
+    mode_tons = [numpy.sum(demand[mode])+0.01 for mode in modes]
+    shares_tons = [tons / sum(mode_tons) for tons in mode_tons]
+    mode_ton_dist = [numpy.sum(demand[mode]*impedance[mode]["dist"])+0.01 for mode in modes]
+    shares_mileage = [share / sum(mode_ton_dist) for share in mode_ton_dist]
+    costs = {mode: c["cost"] for mode, c in purpose.get_costs(impedance).items()}
+    for cost in costs.values():
+        cost[cost == numpy.inf] = 0
+    ton_costs = [numpy.sum(costs.pop(mode)*demand[mode]) for mode in modes]
+    aux_ton_dist = [numpy.sum(aux_demand[mode]*impedance["truck"]["dist"]) 
+                    if mode != "truck" else 0 for mode in modes]
+    df = DataFrame(data={
+        "Commodity": [purpose.name]*len(modes),
+        "Mode": modes,
+        "Mode share from tons (%)": [round(i, 3) for i in shares_tons],
+        "Tons (t/annual)": [int(i) for i in mode_tons],
+        "Mode share from mileage (%)": [round(i, 3) for i in shares_mileage],
+        "Ton mileage (tkm/annual)": [int(i) for i in mode_ton_dist],
+        "Aux ton mileage (tkm/annual)": [int(i) for i in aux_ton_dist],
+        "Costs (eur-ton/annual)": [int(i) for i in ton_costs]
+        })
+    filename = "freight_purpose_summary.txt"
+    resultdata.print_concat(df, filename)
+
+def write_zone_summary(purpose_name: str, zone_numbers: list, 
+                       demand: dict, resultdata: ResultsData):
+    """Write purpose and mode specific departing and arriving tons for each zone
+    in zone mapping.
+    """
+    df = DataFrame(index=zone_numbers)
+    for mode in demand:
+        df[f"Departing_{purpose_name}_{mode}"] = numpy.sum(demand[mode], axis=1, dtype="int32")
+        df[f"Arriving_{purpose_name}_{mode}"] = numpy.sum(demand[mode], axis=0, dtype="int32")
+    filename = "freight_zone_summary.txt"
+    resultdata.print_data(df, filename)
+
+def write_vehicle_summary(demand: dict, impedance: dict, resultdata: ResultsData):
+    """Write summary for truck classes and their mileage."""
+    modes = list(demand)
+    vehicles_sum = [numpy.sum(demand[mode]) for mode in modes]
+    mileage_sum = [numpy.sum(impedance[mode]["dist"]*demand[mode]) for mode in modes]
+    df = DataFrame(data={
+        "Mode": modes,
+        "Vehicle trips (day)": [int(i) for i in vehicles_sum],
+        "Vehicle mileage (vkm/day)": [int(i) for i in mileage_sum]
+        })
+    filename = "freight_vehicle_summary.txt"
+    resultdata.print_data(df, filename)
+
 
 class StoreDemand():
     """Handles demand dimension compatibility when storing demand matrices 

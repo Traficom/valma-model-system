@@ -1,0 +1,85 @@
+{
+    "name": "elint_import",
+    "orig": "null",
+    "dest": "null",
+    "generation_area": "foreign",
+    "attraction_area": "domestic",
+    "struct": "import",
+    "impedance_share": {},
+    "distance_boundaries": {
+        "truck": [
+            0,
+            9999
+        ],
+        "freight_train": [
+            0,
+            9999
+        ],
+        "ship": [
+            0,
+            9999
+        ]
+    },
+    "destination_choice": {},
+    "mode_choice": {
+        "truck": {},
+        "freight_train": {}
+    },
+    "demand_share": {},
+    "route_choice": {
+        "constant": {
+            "truck": {
+                "west": {
+                    "border_points": ["FIKIL", "FITOR"],
+                    "dummy": 55.43
+                }
+            },
+            "container_ship": {
+                "first_class": {
+                    "border_points": ["FIRAU", "FIHMN", "FIHEL"],
+                    "dummy": 1.98
+                }
+            },
+            "general_cargo": {
+                "first_class": {
+                    "border_points": ["FIRAA", "FIKOK", "FIKEM", "FIRAU", "FIHMN"],
+                    "dummy": 0.773
+                },
+                "second_class": {
+                    "border_points": ["FIUKI", "FITKU", "FIPOR", "FIKAS", "FIINK", "FIHEL"],
+                    "dummy": 1.562
+                }
+            },
+            "roro_vessel": {
+                "first_class": {
+                    "border_points": ["FIHKO", "FIHEL"],
+                    "dummy": 2.795
+                },
+                "second_class": {
+                    "border_points": ["FIVAA", "FIUKI", "FITKU", "FIRAU", "FIHMN"],
+                    "dummy": 1.06
+                }
+            },
+            "product_tanker": {
+                "first_class": {
+                    "border_points": ["FISKV"],
+                    "dummy": 1.22
+                },
+                "second_class": {
+                    "border_points": ["FITKU", "FIPOR", "FIHMN"],
+                    "dummy": -1.621
+                }
+            }
+        },
+        "impedance": {
+            "cost": {
+                "truck": -0.1595,
+                "container_ship": -4.12e-08,
+                "roro_vessel": -4.73e-09,
+                "general_cargo": -3.743e-08,
+                "product_tanker": -2.023e-08
+            },
+            "frequency": 3.736e-05
+        }
+    }
+}

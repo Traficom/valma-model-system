@@ -66,8 +66,8 @@ class ModelSystem:
                  results_path: Path,
                  assignment_model: AssignmentModel,
                  submodel: str,
-                 mode_dest_calibration_path: Optional[Path] = None,
-                 municipality_calibration_path: Optional[Path] = None,
+                 mode_dest_calibration_path: Optional[str] = None,
+                 municipality_calibration_path: Optional[str] = None,
                  long_dist_matrices_path: Optional[Path] = None,
                  freight_matrices_path: Optional[Path] = None):
         self.ass_model = cast(Union[MockAssignmentModel,EmmeAssignmentModel], assignment_model) #type checker hint
@@ -80,23 +80,24 @@ class ModelSystem:
         self.freight_matrices = (MatrixData(freight_matrices_path)
             if freight_matrices_path is not None else None)
         cost_data: dict = json.loads(cost_data_path.read_text("utf-8"))
-        self.car_dist_cost = cost_data["car_cost"]
+        self.car_dist_cost = cost_data["vehicle_km_cost"]
+        self.car_time_cost = cost_data["vehicle_hour_cost"]
         self.transit_cost = {data.pop("id"): data for data
             in cost_data["transit_cost"].values()}
         if mode_dest_calibration_path is None:
             mode_dummies = {}
             dest_dummies = {}
         else:
-            calibration_data: dict = json.loads(
-                mode_dest_calibration_path.read_text("utf-8"))
+            path = Path(mode_dest_calibration_path)
+            calibration_data: dict = json.loads(path.read_text("utf-8"))
             mode_dummies = calibration_data["mode_choice_calibration"]
             dest_dummies = calibration_data["destination_choice_calibration"]
         extra_dummies = {**mode_dummies, **dest_dummies}
         if municipality_calibration_path is None:
             municip_calib = {}
         else:
-            municip_calib = pandas.read_csv(
-                municipality_calibration_path, sep="\t",
+            path = Path(municipality_calibration_path)
+            municip_calib = pandas.read_csv(path, sep="\t",
                 index_col=["generation", "attraction"]).to_dict("series")
         self._zone_datas = {
             model_area: ZoneData(
@@ -266,7 +267,8 @@ class ModelSystem:
             List can be empty, if car times are already stored on network.
         """
         # create attributes and background variables to network
-        self.ass_model.prepare_network(self.car_dist_cost, car_time_files)
+        self.ass_model.prepare_network(
+            self.car_dist_cost, self.car_time_cost, car_time_files)
         self.dtm = dt.DirectDepartureTimeModel(self.ass_model)
 
         self.ass_model.calc_transit_cost(self.transit_cost)

@@ -1,0 +1,63 @@
+{
+    "name": "puukor_import",
+    "orig": "null",
+    "dest": "null",
+    "generation_area": "foreign",
+    "attraction_area": "domestic",
+    "struct": "import",
+    "impedance_share": {},
+    "distance_boundaries": {
+        "truck": [
+            0,
+            9999
+        ],
+        "freight_train": [
+            0,
+            9999
+        ],
+        "ship": [
+            0,
+            9999
+        ]
+    },
+    "destination_choice": {},
+    "mode_choice": {
+        "truck": {},
+        "freight_train": {}
+    },
+    "demand_share": {},
+    "route_choice": {
+        "constant": {
+            "truck": {
+                "all": {
+                    "border_points": ["FIVAI", "FIVAL", "FIVAR", "FIKIL", "FITOR"],
+                    "dummy": 5.846
+                }
+            },
+            "general_cargo": {
+                "base_class": {
+                    "border_points": ["FIUKI", "FITKU", "FIRAA", "FIPOR", "FIKOK", 
+                                      "FIKEM", "FIKAS", "FIINK", "FIRAU", "FIHMN", "FIHEL"],
+                    "dummy": 2.121
+                }
+            },
+            "roro_vessel": {
+                "first_class": {
+                    "border_points": ["FIHKO", "FIHEL"],
+                    "dummy": 1.988
+                },
+                "second_class": {
+                    "border_points": ["FIVAA", "FIUKI", "FITKU", "FIRAU", "FIHMN"],
+                    "dummy": 0.08042
+                }
+            }
+        },
+        "impedance": {
+            "cost": {
+                "leg_one": -0.01234,
+                "leg_two": -0.01234,
+                "leg_three": -0.03438
+            }
+        }
+    }
+}

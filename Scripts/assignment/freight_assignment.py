@@ -16,8 +16,9 @@ class FreightAssignmentPeriod(AssignmentPeriod):
         for criteria in self.stopping_criteria.values():
                 criteria["max_iterations"] = 0
 
-    def prepare(self, dist_unit_cost: Dict[str, float], save_matrices: bool):
-        self._prepare_cars(dist_unit_cost, save_matrices)
+    def prepare(self, dist_unit_cost: Dict[str, float],
+                time_unit_cost: Dict[str, float], save_matrices: bool):
+        self._prepare_cars(dist_unit_cost, time_unit_cost, save_matrices)
         network = self.emme_scenario.get_network()
         for line in network.transit_lines():
             mode = line.mode.id

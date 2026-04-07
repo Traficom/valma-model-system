@@ -329,6 +329,8 @@ class ZoneData:
         mapping = self.demand_aggs.mappings["submodel"]
         submodels = mapping.drop_duplicates()
         for submodel in submodels:
+            if submodel is None:
+                continue
             if self.mapping.name == submodel.lower().replace('-', '_'):
                 return mapping == submodel
         else:
