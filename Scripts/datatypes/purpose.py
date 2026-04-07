@@ -846,23 +846,24 @@ class FreightPurpose(Purpose):
                      where=demand_sum > 0.0)
         train_share = numpy.ones_like(truck_share) - truck_share
         
-        purpose_trade_demand = {k: v for k, v in trade_demand.items()
-                                if k.split('_')[0] == self.name}
+        purpose_trade_demand = {
+            k: v for k, v in trade_demand.items()
+            if k.startswith(f"{self.name}_")
+        }
         fin_borders = numpy.array(list(fin_borders.values()), dtype=numpy.int32)
         mask = numpy.isin(self.orig_zone_numbers, fin_borders)
-        dom_leg_demand = {
-            purpose: {mode: numpy.zeros_like(truck_share)
-                      for mode in ["truck", "freight_train"]} 
-            for purpose in purpose_trade_demand
-        }
+        
+        dom_leg_demand = {}
         for purpose in purpose_trade_demand:
             demand_full = numpy.zeros_like(truck_share)
-            if purpose.split("_")[1] == "export":
+            if purpose.endswith("_export"):
                 demand_full[:, mask] = purpose_trade_demand[purpose]["leg_one"]["truck"]
             else:
                 demand_full[mask, :] = purpose_trade_demand[purpose]["leg_three"]["truck"]
-            dom_leg_demand[purpose]["truck"] += demand_full * truck_share
-            dom_leg_demand[purpose]["freight_train"] += demand_full * train_share
+            dom_leg_demand[purpose] = {"truck": demand_full * truck_share}
+            train_share = demand_full * train_share
+            if numpy.sum(train_share) > 0.0:
+                dom_leg_demand[purpose].update({"freight_train": train_share})
         return dom_leg_demand
 
     def run_logistics_module(self, demand_truck: numpy.ndarray, impedance: numpy.ndarray, 
