@@ -438,6 +438,8 @@ assignment_classes = {
     "wb_other": "leisure",
     "ob_other": "leisure",
     "external": "leisure",
+    "hb_abroad_northern": "leisure",
+    "hb_abroad_other": "leisure",
 }
 main_mode = 'h'
 bike_mode = 'f'
