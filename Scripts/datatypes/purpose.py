@@ -427,7 +427,10 @@ class TourPurpose(Purpose):
             for main_mode, split in acc_splits.items():
                 main_prob = prob[main_mode]
                 for acc_mode in split:
-                    prob[acc_mode] = split[acc_mode] * main_prob
+                    if self.name == "hb_abroad_other":
+                        prob[acc_mode] = split[acc_mode]
+                    else:
+                        prob[acc_mode] = split[acc_mode] * main_prob
         return prob
 
     def split_connection_mode(self, impedance, pt_mode):
