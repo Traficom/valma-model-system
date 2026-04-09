@@ -122,7 +122,7 @@ class TransitMode(AssignmentMode):
         }
         is_park_and_ride = self._add_park_and_ride()
         self.transit_spec["journey_levels"] = [JourneyLevel(
-                level, self.name, is_park_and_ride).spec
+                level, self.name, is_park_and_ride)
             for level in range(7)]
         result_specs = self._add_matrix_specs(modes)
         for matrix_subset, spec in zip(
