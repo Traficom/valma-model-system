@@ -89,8 +89,14 @@ class Zone:
         self.number = number
         self.index = Zone.counter
         Zone.counter += 1
-        self.county = aggregations.mappings["county"][number]
-        self.municipality = aggregations.mappings["municipality"][number]
+        try:
+            self.county = aggregations.mappings["county"][number]
+        except KeyError:
+            self.county = None
+        try:
+            self.municipality = aggregations.mappings["municipality"][number]
+        except KeyError:
+            self.municipality = None
 
 class WeightedAverage:
 
