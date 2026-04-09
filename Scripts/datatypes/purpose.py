@@ -193,12 +193,11 @@ class Purpose:
                     day_imp[mode][mtx_type] -= day_imp[mode]["car_time"] * 1.5
                 if mtx_type == "time" and mode in transit_access_modes:
                     day_imp[mode][mtx_type] -= day_imp[mode]["car_time"] * 6.5
-            try:
+            if "vrk" in self.impedance_share[mode] and mode != "walk":
                 vot = cost.value_of_time[mode_impedance[mode]]
-                day_imp[mode]["gen_cost"] = day_imp[mode]["cost"] + (day_imp[mode]["time"]/60) * vot
+                day_imp[mode]["gen_cost"] = (day_imp[mode].pop("cost")
+                                             + vot*day_imp[mode].pop("time")/60)
                 log.info(f"Generalized cost calculated for {self.name} {mode}.")
-            except KeyError:
-                pass
             if mode in mixed_mode_classes:
                 day_imp[mode]["park_cost"] = (day_imp[mode]["park_cost"]
                                               * cost.tour_duration[mode][self.name]
