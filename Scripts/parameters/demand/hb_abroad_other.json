@@ -2,8 +2,8 @@
     "name": "hb_abroad_other",
     "orig": "home",
     "dest": "leisure",
-    "generation_area": "domestic",
-    "attraction_area": "domestic",
+    "generation_area": "all",
+    "attraction_area": "all",
     "struct": "dest>mode",
     "gen_model": "rate",
     "generation": {
