@@ -141,9 +141,7 @@
             "attraction_size": {
                 "area_leisure_buildings": 1,
                 "wrk_hospitality": 47.94239,
-                "population": 2.16994,
-                "zone_constraint": -1000000000,
-                "fratar_attraction": 676767.6767
+                "population": 2.16994
             }
         }
     },
