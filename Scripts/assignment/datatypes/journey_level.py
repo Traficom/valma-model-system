@@ -36,6 +36,11 @@ class JourneyLevel:
     """
     Journey level specification for transit assignment.
 
+    Boarding local transit modes triggers free transfers.
+    For long-distance transit assignment, destinations are reachable
+    only after boarding long-distance transit mode.
+    Car access is allowed only directly to long-distance transit modes.
+
     Parameters
     ----------
     level : int
@@ -53,18 +58,23 @@ class JourneyLevel:
     """
     def __new__(self, level: int, transit_class: str,
                  park_and_ride: bool = False):
-        # Boarding transit modes allowed only on levels 0-4
         if level <= BOARDED_LOCAL:
-            next = BOARDED_LOCAL
+            if transit_class in param.car_access_classes:
+                after_local_board = FORBIDDEN
+            else:
+                after_local_board = BOARDED_LOCAL
         elif level <= BOARDED_DEST:
-            next = BOARDED_DEST
+            if transit_class in param.car_egress_classes:
+                after_local_board = FORBIDDEN
+            else:
+                after_local_board = BOARDED_DEST
         else:
-            next = FORBIDDEN
+            after_local_board = FORBIDDEN
         local_transit_modes = [mode for mode in param.local_transit_modes
             if mode not in param.long_dist_transit_modes[transit_class]]
         transitions = [{
                 "mode": mode,
-                "next_journey_level": next,
+                "next_journey_level": after_local_board,
             } for mode in local_transit_modes]
         next = BOARDED_LONG_D if level <= BOARDED_DEST else FORBIDDEN
         transitions += [{
