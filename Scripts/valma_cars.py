@@ -14,10 +14,6 @@ def main(args):
     zone_data_file = Path(args.zone_data_file)
     cost_data_file = Path(args.cost_data_file)
     result_data_folder = Path(args.result_data_folder, args.scenario_name)
-    if not base_matrices_path.is_dir():
-        raise NameError(
-            "Baseline matrix directory '{}' does not exist.".format(
-                base_matrices_path))
     if not zone_data_file.is_file():
         raise NameError(
             "Forecast data file '{}' does not exist.".format(
