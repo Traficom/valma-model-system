@@ -14,11 +14,11 @@ purpose_areas: Dict[str, Tuple[int,int]] = {
 tour_length_intervals = (0, 3, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100,
                          200, 300, 400, 500, 600, 700, 800, float("inf"))
 
-# Finnish ports and road border control points
+# Finnish ports and land border control points
 finland_border_points = {
     "FIHEL": {"name": "Vuosaari", "id": 524},
     "FISKV": {"name": "Skoljdvik", "id": 3607},
-    "FIHNK": {"name": "Hanko", "id": 4102},
+    "FIHKO": {"name": "Hanko", "id": 4102},
     "FIINK": {"name": "Inkoo", "id": 4201},
     "FIPOR": {"name": "Pori", "id": 10411},
     "FIRAU": {"name": "Rauma", "id": 11233},
@@ -34,7 +34,7 @@ finland_border_points = {
     "FIVRK": {"name": "Varkaus", "id": 22623},
     "FIVAR": {"name": "Vartius", "id": 26946},
     "FIKOK": {"name": "Kokkola", "id": 27964},
-    "FIHAA": {"name": "Haaparanta", "id": 28615},
+    "FITOR": {"name": "Tornio", "id": 28615},
     "FIKEM": {"name": "Kemi", "id": 28700},
     "FIKIL": {"name": "Kilpisjarvi", "id": 30219},
     "FIKAS": {"name": "Kaskinen", "id": 31000},
@@ -44,7 +44,7 @@ finland_border_points = {
     "FIKJO": {"name": "Kalajoki", "id": 34611},
 }
 
-# Clusters of foreign ports and border control points
+# cluster ports and land border control points
 cluster_border_points = {
     "AEJEA": {"name": "Jebel Ali", "id": 50100},
     "BRITQ": {"name": "Itaqui", "id": 50101},
@@ -77,4 +77,13 @@ cluster_border_points = {
     "SGJUR": {"name": "Singapore", "id": 50128},
     "TRIST": {"name": "Istanbul", "id": 50129},
     "USHOU": {"name": "Houston", "id": 50130},
+}
+
+# Finnish land border centroid and its foreign counterpart
+land_border_pairs = {
+    "Vainikkala": [15106, 50120],
+    "Vaalimaa": [19705, 50122],
+    "Vartius": [26946, 50121],
+    "Tornio": [28615, 50124],
+    "Kilpisjarvi": [30219, 50117]
 }

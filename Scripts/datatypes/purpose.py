@@ -13,7 +13,9 @@ import models.logit as logit
 from parameters.assignment import (
     assignment_classes,
     intermodals,
-    mixed_mode_classes)
+    mixed_mode_classes,
+    mode_impedance
+)
 import parameters.cost as cost
 import models.generation as generation
 from datatypes.demand import Demand
@@ -22,6 +24,7 @@ from utils.freight_costs import calc_cost, get_foreign_ship_cost
 from utils.calibrate import attempt_calibration
 from models.logistics import (LogisticsModule, TradeRouteModule,
                               run_logistics_model, run_trade_model)
+from parameters.marine_ship import leg_names
 
 
 class Purpose:
@@ -122,10 +125,7 @@ class Purpose:
         day_imp = defaultdict(lambda: defaultdict(float))
         for mode in self.impedance_share:
             share_sum = 0
-            if mode in ["car_drv", "car_pax"]:
-                ass_class = "car"
-            else:
-                ass_class = mode
+            ass_class = mode_impedance[mode]
             for time_period in self.impedance_share[mode]:
                 for mtx_type in impedance[time_period]:
                     if ass_class in impedance[time_period][mtx_type]:
@@ -193,12 +193,11 @@ class Purpose:
                     day_imp[mode][mtx_type] -= day_imp[mode]["car_time"] * 1.5
                 if mtx_type == "time" and mode in transit_access_modes:
                     day_imp[mode][mtx_type] -= day_imp[mode]["car_time"] * 6.5
-            try:
-                vot = cost.vot[self.name][mode]
-                day_imp[mode]["gen_cost"] = day_imp[mode]["cost"] + (day_imp[mode]["time"]/60) * vot
+            if "vrk" in self.impedance_share[mode] and mode != "walk":
+                vot = cost.value_of_time[mode_impedance[mode]]
+                day_imp[mode]["gen_cost"] = (day_imp[mode].pop("cost")
+                                             + vot*day_imp[mode].pop("time")/60)
                 log.info(f"Generalized cost calculated for {self.name} {mode}.")
-            except KeyError:
-                pass
             if mode in mixed_mode_classes:
                 day_imp[mode]["park_cost"] = (day_imp[mode]["park_cost"]
                                               * cost.tour_duration[mode][self.name]
@@ -760,27 +759,29 @@ class FreightPurpose(Purpose):
         fin_zones = numpy.isin(all_zones, numpy.union1d(self.orig_zone_numbers, 
                                                         fin_port_zones))
         cluster_zones = ~fin_zones & ~cluster_borders
-
+        
         masks = (fin_zones, fin_borders, cluster_borders, cluster_zones)
-        leg_modes = (
-            ("truck", "freight_train"),  # finland domestic leg
-            ("truck", "freight_train"),  # international land leg
-            ("truck",)  # foreign domestic leg
-        )
         if not self.is_export:
             masks = masks[::-1]
-            leg_modes = leg_modes[::-1]
 
         costs = self.get_costs(impedance)
-        impedance_legs = {l: {} for l in ["leg_one", "leg_two", "leg_three"]}
+        impedance_legs = {l: {} for l in leg_names}
         for i, imp_leg in enumerate(impedance_legs.values()):
-            for mode in leg_modes[i]:
-                imp_leg[mode] = {imp_type: mtx[numpy.ix_(masks[i], masks[i+1])]
-                                 for imp_type, mtx in costs[mode].items()}
+            imp_leg["truck"] = {imp_type: mtx[numpy.ix_(masks[i], masks[i+1])]
+                                for imp_type, mtx in costs["truck"].items()}
         ship_costs = get_foreign_ship_cost(
             self.costdata, ship_imps, self.model_category, fin_border_ids,
             self.is_export)
         impedance_legs["leg_two"].update(ship_costs)
+
+        # Retain leg two truck cost only for designated land border pairs
+        mask = pandas.DataFrame(True, index=fin_port_zones, columns=cluster_port_zones)
+        for fin_border, cluster_border in param.land_border_pairs.values():
+            if fin_border in fin_port_zones and cluster_border in cluster_port_zones:
+                mask.at[fin_border, cluster_border] = False
+        if not self.is_export:
+            mask = mask.T
+        impedance_legs["leg_two"]["truck"]["cost"][mask.to_numpy()] = numpy.inf
         return impedance_legs
 
     def get_costs(self, impedance: dict):
@@ -884,8 +885,9 @@ class FreightPurpose(Purpose):
 
         Returns
         -------
-        __type__
-            _description_
+        dict
+            Leg name (one/two/three) : Mode
+                Name (truck/container_ship...) : numpy 2d array
         """
         impedance_legs = self.form_impedance_legs(
             impedance, ship_imps, fin_border_ids, cluster_border_ids)
@@ -896,9 +898,11 @@ class FreightPurpose(Purpose):
         if mapping_name == "municipality_center":
             df = pandas.DataFrame(demand, trade_mappings["finland_zone_number"])
             demand = df.groupby(self.generation_zone_data.mapping).sum().to_numpy()
+        demand = demand.T if not self.is_export else demand
 
-        port_indices = numpy.arange(len(fin_border_ids))
-
-        route_model = TradeRouteModule(impedance_legs, self.route_params, port_indices)
+        # Finland border control point key - zone index
+        border_indices = {key: idx for idx, key in enumerate(fin_border_ids)}
+        route_model = TradeRouteModule(impedance_legs, self.route_params, 
+                                       border_indices, self.is_export)
         trade_demand = run_trade_model(route_model, demand)
         return trade_demand

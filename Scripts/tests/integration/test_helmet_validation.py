@@ -11,12 +11,12 @@ class Args:
     log_level = "DEBUG"
     model_types = ["passenger_transport"]
     end_assignment_only = False
-    baseline_data_path = TEST_DATA_PATH / "Scenario_input_data"
-    emme_paths = [ZONEDATA_PATH / "2016.cco"]
+    base_data_folder = TEST_DATA_PATH / "Scenario_input_data"
+    emme_project_files = [ZONEDATA_PATH / "2016.cco"]
     first_scenario_ids = ["test"]
-    forecast_data_paths = [ZONEDATA_PATH]
-    cost_data_paths = [COSTDATA_PATH]
-    results_path = TEST_DATA_PATH / "Results"
+    zone_data_files = [ZONEDATA_PATH]
+    cost_data_files = [COSTDATA_PATH]
+    result_data_folder = TEST_DATA_PATH / "Results"
     scenario_name = ["test"]
     do_not_use_emme = True
     long_dist_demand_forecast = ["base"]

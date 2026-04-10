@@ -147,48 +147,11 @@ performance_settings = {
     "network_acceleration": True,
     "u_turns_allowed": True,
 }
-# Inversed value of time [min/eur]
-vot_inv = {
-    "all": 8.721, # 1 / ((6.88 eur/h) / (60 min/h)) = 7.576 min/eur
-    "work": 7.576, # 1 / ((7.92 eur/h) / (60 min/h)) = 7.576 min/eur
-    "business": 2.439, # 1 / ((24.60 eur/h) / (60 min/h)) = 2.439 min/eur
-    "leisure": 11.173, # 1 / ((5.37 eur/h) / (60 min/h)) = 11.173 min/eur
-    "truck": 1.877, # 1 / ((31.96 eur/h) / (60 min/h)) = 1.877 min/eur
-    "semi_trailer": 1.709, # 1 / ((35.11 eur/h) / (60 min/h)) = 1.709 min/eur
-    "trailer_truck": 1.667, # 1 / ((36 eur/h) / (60 min/h)) = 1.667 min/eur
-}
 congested_time_weight = 1.5
 freight_terminal_cost = {
     'D': 0,
     'J': 0,
     'W': 0
-}
-in_vehicle_weight = {
-    'j': 0.6,
-}
-# Boarding penalties for different transit modes
-boarding_penalty = {
-    'b': 3, # Bus
-    'g': 3, # Trunk bus
-    'e': 8, # Coach bus
-    't': 0, # Tram
-    'p': 0, # Light rail
-    'm': 0, # Metro
-    'w': 0, # Ferry
-    'r': 2, # Commuter train
-    'j': 2, # Long-distance train
-}
-# Boarding penalties for long-distance trips
-long_boarding_penalty = {
-    'b': 3, # Bus
-    'g': 3, # Trunk bus
-    'e': 8, # Coach bus
-    't': 0, # Tram
-    'p': 0, # Light rail
-    'm': 0, # Metro
-    'w': 0, # Ferry
-    'r': 2, # Commuter train
-    'j': 2, # Long-distance train
 }
 # Headway standard deviation function parameters for different transit modes
 headway_sd_func = {
@@ -229,22 +192,31 @@ stopping_criteria = {
         "normalized_gap": 0.005,
     },
 }
-# Congestion function for congested transit assignment
-trass_func = {
-    "type": "BPR",
-    "weight": 1.23,
-    "exponent": 3,
-    "assignment_period": 1,
-    "orig_func": False,
-    "congestion_attribute": "us3",
-}
-# Stopping criteria for congested transit assignment
-trass_stop = {
-    "max_iterations": 50,
-    "normalized_gap": 0.01,
-    "relative_gap": 0.001
-}
 # Specification for the transit assignment
+in_vehicle_weight = {
+    'b': 1, # Bus
+    'g': 1, # Trunk bus
+    'e': 1, # Coach bus
+    't': 0.8, # Tram
+    'p': 0.8, # Light rail
+    'm': 0.8, # Metro
+    'w': 1, # Ferry
+    'r': 0.8, # Commuter train
+    'j': 0.7, # Long-distance train
+    'l': 1, # Airplane
+}
+boarding_penalty = {
+    'b': 10, # Bus
+    'e': 10, # Coach bus
+    'g': 8, # Trunk bus
+    't': 5, # Tram
+    'p': 5, # Light rail
+    'm': 5, # Metro
+    'w': 5, # Ferry
+    'r': 5, # Commuter train
+    'j': 5, # Long-distance train
+    'l': 5, # Airplane
+}
 transfer_penalty = {
     "transit": 5,
     "airplane": 5,
@@ -377,15 +349,6 @@ effective_headway_ld = {
 }
 
 ### ASSIGNMENT REFERENCES ###
-asymmetric_demand = {
-    "pt_car_acc": "pt_car_egr",
-    "pt_taxi_acc": "pt_taxi_egr",
-    "airpl_car_acc": "airpl_car_egr",
-    "pt_car_egr": "pt_car_acc",
-    "pt_taxi_egr": "pt_taxi_acc",
-    "airpl_car_egr": "airpl_car_acc"
-}
-
 time_periods = {
     "aht": "AssignmentPeriod",
     "pt": "OffPeakPeriod",
@@ -599,4 +562,36 @@ roadtypes = {
     5: "single-lane",
     11: "ferry",
     99: "connector",
+}
+# modes in choice model : impedance
+mode_impedance = {
+    "car_drv": "car", 
+    "car_pax": "car",
+    "transit": "transit",
+    "airplane": "airplane",
+    "bike": "bike",
+    "walk": "walk",
+    "pt_car_acc": "pt_car_acc",
+    "pt_taxi_acc": "pt_taxi_acc",
+    "airpl_car_acc": "airpl_car_acc",
+    "pt_car_egr": "pt_car_egr",
+    "pt_taxi_egr": "pt_taxi_egr",
+    "airpl_car_egr": "airpl_car_egr"
+
+}
+# modes in choice model : [assignment classes]
+mode_assignment_classes = {
+    "car_drv": ["car"], 
+    "car_pax": [],
+    "car": ["car"],
+    "transit": ["transit"],
+    "airplane": ["airplane"],
+    "bike": ["bike"],
+    "walk": ["walk"],
+    "pt_car_acc": ["pt_car_acc", "pt_car_egr"],
+    "pt_taxi_acc": ["pt_taxi_acc", "pt_taxi_egr"],
+    "airpl_car_acc": ["airpl_car_acc", "airpl_car_egr"],
+    "pt_car_egr": ["pt_car_egr", "pt_car_acc"],
+    "pt_taxi_egr": ["pt_taxi_egr", "pt_taxi_acc"],
+    "airpl_car_egr": ["airpl_car_egr", "airpl_car_acc"]
 }

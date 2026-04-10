@@ -12,8 +12,8 @@ if TYPE_CHECKING:
 
 class VehicleMode(AssignmentMode):
     def __init__(self, name: str, assignment_period: AssignmentPeriod,
-                 dist_unit_cost: float, include_toll_cost: bool,
-                 save_matrices: bool = False):
+                 dist_unit_cost: float, time_unit_cost: float,
+                 include_toll_cost: bool, save_matrices: bool = False):
         """Initialize car mode.
 
         Parameters
@@ -24,13 +24,15 @@ class VehicleMode(AssignmentMode):
             Assignment period to link to the mode
         dist_unit_cost : float
             Length multiplier to calculate link cost
+        time_unit_cost : float
+            Value of time in euros per hour
         include_toll_cost : bool
             Whether network links have "hinta" attribute defined
         save_matrices : bool (optional)
             Whether matrices will be saved in Emme format for all time periods
         """
         AssignmentMode.__init__(self, name, assignment_period, save_matrices)
-        self.vot_inv = param.vot_inv[param.vot_classes[self.name]]
+        self.vot_inv = 60 / time_unit_cost
         self.gen_cost = self._create_matrix("gen_cost")
         self.dist = self._create_matrix("dist")
         self.dist_unit_cost = dist_unit_cost

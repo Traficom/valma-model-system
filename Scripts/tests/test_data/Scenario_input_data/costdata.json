@@ -1,11 +1,16 @@
 {
-    "car_cost": {
+    "vehicle_km_cost": {
         "car": 0.12,
         "car_electric": 0.04,
         "van": 0.20,
         "truck": 0.23,
         "semi_trailer": 0.35,
         "trailer_truck": 0.44
+    },
+    "vehicle_hour_cost": {
+        "truck": 31.96,
+        "semi_trailer": 35.11,
+        "trailer_truck": 36.0
     },
     "transit_cost": {
         "HSL": {

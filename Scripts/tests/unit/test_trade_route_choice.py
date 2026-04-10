@@ -9,7 +9,7 @@ import openmatrix as omx
 from datahandling.resultdata import ResultsData
 from datahandling.zonedata import FreightZoneData
 from utils.freight_utils import create_purposes
-
+from parameters.marine_ship import leg_names
 
 TEST_PATH = Path(__file__).parent.parent / "test_data"
 TEST_DATA_PATH = TEST_PATH / "Scenario_input_data"
@@ -28,16 +28,19 @@ class TradeRouteChoiceTest(unittest.TestCase):
         truck_name = "truck"
         train_name = "freight_train"
         marine_modes = ("container_ship", "roro_vessel")
-        origs_exp = {"FIHMN": 19401, "FIHNK": 4102}
-        dests_exp = {"EETLL": 50107, "SESTO": 50127}
+        fin_border = {"FIHKO": 4102, "FIHMN": 19401}
+        cluster_border = {"EETLL": 50107, "SESTO": 50127}
 
         zonedata = FreightZoneData(TEST_DATA_PATH / "freight_zonedata.gpkg", 
                                    numpy.array(ZONE_NUMBERS), "koko_suomi")
         resultdata = ResultsData(RESULT_PATH)
+        trade_demand_path = Path(TEST_MATRICES / "trade_demand.omx")
         with open(TEST_DATA_PATH / "costdata.json") as file:
             costdata = json.load(file)
         purposes = create_purposes(PARAMETERS_PATH / "foreign", zonedata, 
                                    resultdata, costdata["freight"])
+        del purposes["kummuo_export"]
+        del purposes["kummuo_import"]
         self.assertEqual(len(purposes), 2)
 
         with open(TEST_DATA_PATH / "costdata.json") as file:
@@ -62,7 +65,7 @@ class TradeRouteChoiceTest(unittest.TestCase):
 
         ship_imps = {
             mode: {
-                imp: numpy.full((len(origs_exp), len(origs_exp)), numpy.inf, dtype="float32")
+                imp: numpy.full((len(fin_border), len(fin_border)), numpy.inf, dtype="float32")
                 for imp in ("dist", "frequency")}
             for mode in marine_modes
         }
@@ -71,16 +74,18 @@ class TradeRouteChoiceTest(unittest.TestCase):
         ship_imps["roro_vessel"]["dist"][0][0] = 126
         ship_imps["roro_vessel"]["frequency"][0][0] = 162
 
+        marine_attr = (ship_imps, fin_border, cluster_border)
         for purpose in purposes.values():
-            split_impedances = purpose.form_impedance_legs(
-                impedance, ship_imps, origs_exp, dests_exp)
-            self._assert_split_impedances(purpose.name, split_impedances, truck_name, 
-                                          train_name, marine_modes)
+            split_impedances = purpose.form_impedance_legs(impedance, *marine_attr)
+            self._assert_leg_impedances(purpose.name, split_impedances, 
+                                        truck_name, marine_modes)
+            
+            demand = purpose.run_trade_route_module(impedance, *marine_attr, trade_demand_path)
+            self._assert_leg_demand(purpose.name, demand)
 
-    def _assert_split_impedances(self, name, split_impedances, truck_name, 
-                                 train_name, marine_modes):
+    def _assert_leg_impedances(self, name, split_impedances, truck_name, marine_modes):
         if name.split("_")[0] == "kemlaa":
-            leg_one, leg_two, leg_three = "leg_one", "leg_two", "leg_three"
+            leg_one, leg_two, leg_three = leg_names
             self.assertEqual(len(split_impedances), 3)
             self.assertEqual([leg_one, leg_two, leg_three], 
                                 list(split_impedances))
@@ -89,14 +94,72 @@ class TradeRouteChoiceTest(unittest.TestCase):
                             and all(mode not in split_impedances[leg_three] for mode in marine_modes))
             self.assertEqual(["cost", "draught", "frequency"], 
                              list(split_impedances[leg_two]["container_ship"]))
-            self.assertTrue(numpy.all(numpy.isinf(split_impedances[leg_two][train_name]["cost"])))
             self.assertEqual(split_impedances[leg_two][truck_name]["cost"].shape, (2, 2))
             
             if name == "kemlaa_export":
-                self.assertEqual(len(split_impedances[leg_one]), 2)
+                self.assertEqual(len(split_impedances[leg_one]), 1)
                 self.assertEqual(split_impedances[leg_one][truck_name]["cost"].shape, (30, 2))
                 self.assertEqual(split_impedances[leg_three][truck_name]["cost"].shape, (2, 2))
             elif name == "kemlaa_import":
                 self.assertEqual(len(split_impedances[leg_one]), 1)
                 self.assertEqual(split_impedances[leg_one][truck_name]["cost"].shape, (2, 2))
                 self.assertEqual(split_impedances[leg_three][truck_name]["cost"].shape, (2, 30))
+
+    def _assert_leg_demand(self, name, demand):
+        leg_one, leg_two, leg_three = [demand[leg_name] for leg_name in leg_names]
+        self.assertEqual(len(leg_one), 1)
+        self.assertEqual(len(leg_two), 3)
+        self.assertEqual(len(leg_three), 1)
+        if name == "kemlaa_export":
+            truck_leg1_cols = numpy.array((6.469845, 16.014631), dtype=numpy.float32)
+            self.assertAlmostEqual(numpy.sum(leg_one["truck"]), 22.484474, places=3)
+            numpy.testing.assert_array_almost_equal(
+                numpy.sum(leg_one["truck"], axis=0), truck_leg1_cols)
+
+            truck_leg2_cols = numpy.array((0.0, 0.0), dtype=numpy.float32)
+            truck_leg2_row = numpy.array((0.0, 0.0), dtype=numpy.float32)
+            container_leg2_cols = numpy.array((0, 16.014631), dtype=numpy.float32)
+            roro_leg2_cols = numpy.array((6.4698453, 0), dtype=numpy.float32)
+            self.assertAlmostEqual(numpy.sum(leg_two["truck"]), 0.0)
+            self.assertAlmostEqual(numpy.sum(leg_two["container_ship"]), 16.014631, places=3)
+            self.assertAlmostEqual(numpy.sum(leg_two["roro_vessel"]), 6.4698453, places=3)
+            numpy.testing.assert_array_almost_equal(
+                numpy.sum(leg_two["truck"], axis=0), truck_leg2_cols)
+            numpy.testing.assert_array_almost_equal(
+                numpy.sum(leg_two["truck"], axis=1), truck_leg2_row)
+            numpy.testing.assert_array_almost_equal(
+                numpy.sum(leg_two["container_ship"], axis=0), container_leg2_cols)
+            numpy.testing.assert_array_almost_equal(
+                numpy.sum(leg_two["roro_vessel"], axis=0), roro_leg2_cols)
+
+            truck_leg3_cols = numpy.array((9.165112, 13.319365), dtype=numpy.float32)
+            self.assertAlmostEqual(numpy.sum(leg_three["truck"]), 22.484474, places=3)
+            numpy.testing.assert_array_almost_equal(
+                numpy.sum(leg_three["truck"], axis=0), truck_leg3_cols)
+            
+        elif name == "kemlaa_import":
+            truck_leg1_row = numpy.array((203.28798, 231.84686), dtype=numpy.float32)
+            self.assertAlmostEqual(numpy.sum(leg_one["truck"]), 435.13483, places=3)
+            numpy.testing.assert_array_almost_equal(
+                numpy.sum(leg_one["truck"], axis=1), truck_leg1_row)
+
+            truck_leg2_cols = numpy.array((0.0, 0.0), dtype=numpy.float32)
+            truck_leg2_row = numpy.array((0.0, 0.0), dtype=numpy.float32)
+            container_leg2_row = numpy.array((0, 81.80068), dtype=numpy.float32)
+            roro_leg2_row = numpy.array((353.33417, 0), dtype=numpy.float32)
+            self.assertAlmostEqual(numpy.sum(leg_two["truck"]), 0.0)
+            self.assertAlmostEqual(numpy.sum(leg_two["container_ship"]), 81.80068, places=3)
+            self.assertAlmostEqual(numpy.sum(leg_two["roro_vessel"]), 353.33417, places=3)
+            numpy.testing.assert_array_almost_equal(
+                numpy.sum(leg_two["truck"], axis=0), truck_leg2_cols)
+            numpy.testing.assert_array_almost_equal(
+                numpy.sum(leg_two["truck"], axis=1), truck_leg2_row)
+            numpy.testing.assert_array_almost_equal(
+                numpy.sum(leg_two["container_ship"], axis=1), container_leg2_row)
+            numpy.testing.assert_array_almost_equal(
+                numpy.sum(leg_two["roro_vessel"], axis=1), roro_leg2_row)
+            
+            truck_leg3_cols = numpy.array((353.33414, 81.80069), dtype=numpy.float32)
+            self.assertAlmostEqual(numpy.sum(leg_three["truck"]), 435.13483, places=3)
+            numpy.testing.assert_array_almost_equal(
+                numpy.sum(leg_three["truck"], axis=1), truck_leg3_cols)

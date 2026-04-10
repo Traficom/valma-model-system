@@ -9,7 +9,7 @@ import inro.emme.database.emmebank as _eb
 import parameters.assignment as param
 
 def create_emme_project(args):
-    project_dir = args.emme_path
+    project_dir = args.emme_data_folder
     project_name = args.project_name
     try:
         project_path = _app.create_project(project_dir, project_name)
@@ -111,7 +111,7 @@ if __name__ == "__main__":
         type=str,
         help="Name of submodel, used for choosing appropriate database dimensions"),
     parser.add_argument(
-        "--emme-path",
+        "--emme-data-folder",
         type=str,
         help="Filepath to folder where EMME project will be created"),
     parser.add_argument(
