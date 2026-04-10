@@ -10,22 +10,22 @@ from datahandling.matrixdata import MatrixData
 
 
 def main(args):
-    base_matrices_path = Path(args.baseline_data_path, "Matrices")
-    forecast_zonedata_path = Path(args.forecast_data_path)
-    cost_data_path = Path(args.cost_data_path)
-    results_path = Path(args.results_path, args.scenario_name)
+    base_matrices_path = Path(args.base_data_folder, "Matrices")
+    zone_data_file = Path(args.zone_data_file)
+    cost_data_file = Path(args.cost_data_file)
+    result_data_folder = Path(args.result_data_folder, args.scenario_name)
     if not base_matrices_path.is_dir():
         raise NameError(
             "Baseline matrix directory '{}' does not exist.".format(
                 base_matrices_path))
-    if not forecast_zonedata_path.is_file():
+    if not zone_data_file.is_file():
         raise NameError(
             "Forecast data file '{}' does not exist.".format(
-                forecast_zonedata_path))
+                zone_data_file))
 
     # Choose and initialize the Traffic Assignment (supply)model
     log.info("Initializing MockAssignmentModel...")
-    mock_result_path = results_path / "Matrices" / args.submodel
+    mock_result_path = result_data_folder / "Matrices" / args.submodel
     if not mock_result_path.is_dir():
         raise NameError(
             "Mock Results directory {} does not exist.".format(
@@ -36,8 +36,8 @@ def main(args):
     # and providing demand calculations as Python modules)
     # Read input matrices (.omx) and zonedata (.csv)
     log.info("Initializing matrices and models...")
-    model_args = (forecast_zonedata_path, cost_data_path,
-                  base_matrices_path, results_path, ass_model, args.submodel)
+    model_args = (zone_data_file, cost_data_file,
+                  base_matrices_path, result_data_folder, ass_model, args.submodel)
     model = ModelSystem(*model_args)
 
     # Run  simulation for one iteration.
@@ -108,7 +108,7 @@ if __name__ == "__main__":
     log.debug('sys.path=' + str(sys.path))
     json_dump = utils.config.dump(args_dict)
     log.debug(json_dump)
-    p = Path(args.results_path, args.scenario_name, "runtime_params.json")
+    p = Path(args.result_data_folder, args.scenario_name, "runtime_params.json")
     with open(p, 'w') as file:
         file.write(json_dump)
 
