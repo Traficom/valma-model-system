@@ -338,20 +338,21 @@ class ModelSystem:
             self.resultdata.flush()
 
         # Calculate and add foreign external passenger demand
-        foreign_ext_ship_mtx = self.fem.calc_foreign_external_traffic("ship")
-        foreign_ext_airplane_mtx = self.fem.calc_foreign_external_traffic("airplane")
-        foreign_ext_mtx = foreign_ext_ship_mtx + foreign_ext_airplane_mtx
-        # Calculate assignment mode demand matrices from foreign external demand
-        file_path = Path(__file__).parent / "parameters" / "demand" / "hb_abroad_other.json"
-        specification = json.loads(file_path.read_text("utf-8"))
-        purp_abroad_other = new_tour_purpose(specification, self._zone_datas, self.resultdata, self.cost_data["cost_changes"])
-        assignment_mode_probs = purp_abroad_other.calc_prob(impedance, False)
-        # Calculate and add demand for all access modes of foreign external demand
-        for ass_mode in assignment_mode_probs:
-            ass_probs = assignment_mode_probs[ass_mode]
-            ass_mode_mtx = foreign_ext_mtx * assignment_mode_probs[ass_mode]
-            ass_mode_demand = Demand(purp_abroad_other, ass_mode, ass_mode_mtx)
-            self.dtm.add_demand(ass_mode_demand)
+        if self.ass_model.use_free_flow_speeds:
+            foreign_ext_ship_mtx = self.fem.calc_foreign_external_traffic("ship")
+            foreign_ext_airplane_mtx = self.fem.calc_foreign_external_traffic("airplane")
+            foreign_ext_mtx = foreign_ext_ship_mtx + foreign_ext_airplane_mtx
+            # Calculate assignment mode demand matrices from foreign external demand
+            file_path = Path(__file__).parent / "parameters" / "demand" / "hb_abroad_other.json"
+            specification = json.loads(file_path.read_text("utf-8"))
+            purp_abroad_other = new_tour_purpose(specification, self._zone_datas, self.resultdata, self.cost_data["cost_changes"])
+            assignment_mode_probs = purp_abroad_other.calc_prob(impedance, False)
+            # Calculate and add demand for all access modes of foreign external demand
+            for ass_mode in assignment_mode_probs:
+                ass_probs = assignment_mode_probs[ass_mode]
+                ass_mode_mtx = foreign_ext_mtx * assignment_mode_probs[ass_mode]
+                ass_mode_demand = Demand(purp_abroad_other, ass_mode, ass_mode_mtx)
+                self.dtm.add_demand(ass_mode_demand)
         
         return impedance
 
