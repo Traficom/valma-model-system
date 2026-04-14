@@ -68,7 +68,7 @@ def main(args):
         write_leg2_summary(purpose, demand, *marine_data, resultdata)
         trade_demand[purpose.name] = demand
     resultdata.flush()
-    fin_borders = marine_export[1]
+    fin_border_ids = list(marine_export[1].values())
     marine_export, marine_import = None, None
 
     # prepare domestic model by splicing impedances and initializing final demand matrix 
@@ -84,7 +84,7 @@ def main(args):
     for purpose in purposes.values():
         log.info(f"Calculating demand for purpose: {purpose.name}")
         demand = purpose.calc_traffic(impedance)
-        demand_trade = purpose.calc_trade_mode_share(demand, trade_demand, fin_borders)
+        demand_trade = purpose.calc_trade_mode_share(demand, trade_demand, fin_border_ids)
         if purpose.route_params and args.logistics_iterations > 0:
             demand["truck"], _ = purpose.run_logistics_module(demand["truck"], impedance, 
                                                               ass_model.mapping, 
