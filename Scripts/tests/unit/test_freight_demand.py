@@ -11,7 +11,7 @@ from datahandling.resultdata import ResultsData
 from datahandling.zonedata import FreightZoneData
 from utils.freight_utils import (
     create_purposes, write_leg2_summary, write_purpose_summary, 
-    write_zone_summary, write_vehicle_summary
+    write_zone_summary, write_vehicle_summary, write_domestic_leg_summary
 )
 
 TEST_PATH = Path(__file__).parent.parent / "test_data"
@@ -74,9 +74,9 @@ class FreightModelTest(unittest.TestCase):
 
         total_demand = {mode: numpy.zeros_like(impedance["truck"]["time"])
                         for mode in param.truck_classes}
-
         for purpose in purposes.values():
             demand = purpose.calc_traffic(impedance)
+            demand_trade = purpose.calc_trade_mode_share(demand, trade_demand, fin_borders)
             costs = purpose.get_costs(impedance)
             self._assert_calc_demand_results(demand, costs)
             aux_demand = {
@@ -88,6 +88,7 @@ class FreightModelTest(unittest.TestCase):
                 total_demand[mode] += purpose.calc_vehicles(ton_demand, mode)
             write_purpose_summary(purpose, demand, aux_demand, impedance, resultdata)
             write_zone_summary(purpose.name, zonedata.zone_numbers, demand, resultdata)
+            write_domestic_leg_summary(demand_trade, impedance, resultdata)
         write_vehicle_summary(total_demand, impedance, resultdata)
         resultdata.flush()
 
@@ -125,7 +126,7 @@ class FreightModelTest(unittest.TestCase):
                                fin_border, cluster_border, resultdata)
             trade_demand[purpose.name] = demand
         resultdata.flush()
-        return trade_demand, fin_border
+        return trade_demand, list(fin_border.values())
 
     def _assert_calc_demand_results(self, demand, costs):
         for mode in demand:

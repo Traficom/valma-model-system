@@ -86,26 +86,22 @@ def write_domestic_leg_summary(demand_trade: dict, impedance: dict,
                                resultdata: ResultsData):
     """Write summary for trade demand's domestic leg including transported
     commodity, trade type (export/import), mode, tons and ton mileage.
-    '"""
-    df_data = []
-    for purpose in demand_trade:
-        trade_type = "export" if purpose.is_export else "import"
-        modes = list(demand_trade[purpose])
-        mode_tons = [numpy.sum(demand_trade[purpose][mode], dtype=numpy.float32)
-                     for mode in modes]
-        mode_ton_dist = [numpy.sum(demand_trade[purpose][mode]
-                                   * impedance[mode]["dist"], dtype=numpy.int64)
-                        for mode in modes]
-        df_data.append(DataFrame(data={
-            "Commodity": [purpose.name] * len(modes),
-            "Type": [trade_type] * len(modes),
-            "Mode": modes,
-            "Tons (t/annual)": mode_tons,
-            "Ton mileage (tkm/annual)": mode_ton_dist
-            })
-        )
+    """
+    rows = [
+        {
+            "Commodity": name,
+            "Type": trade_type,
+            "Mode": mode,
+            "Tons (t/annual)": numpy.sum(demand_trade[purpose][mode], dtype=numpy.float32),
+            "Ton mileage (tkm/annual)": numpy.sum(
+                demand_trade[purpose][mode] * impedance[mode]["dist"], dtype=numpy.int64),
+        }
+        for purpose in demand_trade
+        for name, trade_type in [purpose.split("_")]
+        for mode in demand_trade[purpose]
+    ]
     filename = "freight_domestic_leg_summary.txt"
-    resultdata.print_concat(concat(df_data, ignore_index=True), filename)
+    resultdata.print_concat(DataFrame(rows), filename)
 
 def write_purpose_summary(purpose: FreightPurpose, demand: dict, aux_demand: dict, 
                           impedance: dict, resultdata: ResultsData):
