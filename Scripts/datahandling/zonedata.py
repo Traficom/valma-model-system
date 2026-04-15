@@ -290,17 +290,22 @@ class ZoneData:
         data = {k: self._values[k] for k in variables}
         return pandas.DataFrame(data)
 
-    def get_data(self, key: str, bounds: slice, generation: bool=False) -> Union[pandas.Series, numpy.ndarray]:
+    def get_data(self, key: str, generation_bounds: slice, attraction_bounds: slice, generation: bool=False, attraction: bool=False) -> Union[pandas.Series, numpy.ndarray]:
         """Get data of correct shape for zones included in purpose.
         
         Parameters
         ----------
         key : str
             Key describing the data (e.g., "population")
-        bounds : slice
-            Slice that describes the lower and upper bounds of purpose
+        generation_bounds : slice
+            Slice that describes the lower and upper bounds of the generation area
+        attraction_bounds : slice
+            Slice that describes the lower and upper bounds of the attraction area
         generation : bool, optional
-            If set to True, returns data only for zones in purpose,
+            If set to True, returns data only for zones in purpose generation,
+            otherwise returns data for all zones
+        attraction : bool, optional
+            If set to True, returns data only for zones in purpose attraction,
             otherwise returns data for all zones
         
         Returns
@@ -313,12 +318,17 @@ class ZoneData:
             keyl: List[str] = key.split('*')
             if (len(keyl) == 2):
                 # If parameter is two-fold, they will be multiplied
-                return (self.get_data(keyl[0], bounds, generation)
-                        * self.get_data(keyl[1], bounds, generation))
+                data_1 = self.get_data(keyl[0], generation_bounds, attraction_bounds, generation, attraction)
+                data_2 = self.get_data(keyl[1], generation_bounds, attraction_bounds, generation, attraction)
+                if data_1.ndim == 1:
+                    data_1 = data_1[:, None]
+                if data_2.ndim == 1:
+                    data_2 = data_2[:, None]
+                return (data_1 * data_2)
             elif "beeline" in key:
                 beeline, lower, upper, _ = key.split('_')
                 mtx = self[beeline]
-                return (mtx > int(lower)) & (mtx <= int(upper))[bounds, :]
+                return (mtx > int(lower)) & (mtx <= int(upper))[generation_bounds, attraction_bounds]
             elif "municipality_calibration" in key:
                 try:
                     # Try to find mode-specific calibration matrix
@@ -328,16 +338,23 @@ class ZoneData:
                 else:
                     idx = self.demand_aggs.mappings["municipality"].values
                     return calib.unstack("attraction").reindex(
-                        index=idx, columns=idx, fill_value=0.0).values[bounds, :]
+                        index=idx, columns=idx, fill_value=0.0).values[generation_bounds, attraction_bounds]
             else:
                 raise KeyError(err)
         if val.ndim == 1: # If not a compound (i.e., matrix)
             if generation:  # Return values for purpose zones
-                return val[bounds].values
+                return val[generation_bounds].values
+            elif attraction:
+                return val[attraction_bounds].values
             else:  # Return values for all zones
                 return val.values
-        else:  # Return matrix (purpose zones -> all zones)
-            return val[bounds, :]
+        else:  # Return matrix (purpose zones -> attraction zones)
+            if generation and not attraction:
+                return val[generation_bounds, :]
+            elif attraction and not generation:
+                return val[:, attraction_bounds]
+            else:
+                return val[generation_bounds, attraction_bounds]
     
     def reindex_zones(self, zone_ids):
         new_index = pandas.Index(zone_ids, name="analysis_zone_id")
