@@ -5,10 +5,11 @@ from typing import Any, Dict, List, Tuple, Union
 # Tour purpose zone intervals
 # Some demand models have separate sub-region parameters,
 # hence need sub-intervals defined.
-purpose_areas: Dict[str, Tuple[int,int]] = {
+purpose_areas: Dict[str, Union[Tuple[int,int], Tuple[Tuple[int,int], ...]]] = {
     "domestic": (0, 50000),
     "external": (50000, 60000),
     "foreign": (60000, 70000),
+    "domestic_foreign": ((0, 50000), (60000, 70000)),
     "all": (0, 70000),
 }
 tour_length_intervals = (0, 3, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100,
