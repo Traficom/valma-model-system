@@ -43,7 +43,8 @@ class LogitModel:
                  resultdata: ResultsData):
         self.resultdata = resultdata
         self.purpose = purpose
-        self.bounds = purpose.bounds
+        self.generation_bounds = purpose.bounds
+        self.attraction_bounds = purpose.dest_interval
         self.zone_data = zone_data
         self.mode_utils: Dict[str, numpy.ndarray] = {}
         self.dest_choice_param: Dict[str, Dict[str, Any]] = parameters["destination_choice"]
@@ -158,7 +159,7 @@ class LogitModel:
             utility += b[i] * log(imp)
         return utility
 
-    def _add_zone_util(self, utility, b, generation=False):
+    def _add_zone_util(self, utility, b, generation=True, attraction=True):
         """Adds simple linear zone terms to utility.
         
         Parameters
@@ -174,16 +175,25 @@ class LogitModel:
         """
         zdata = self.zone_data
         for i in b:
-            utility += b[i] * zdata.get_data(i, self.bounds, generation)
+            data = zdata.get_data(i, self.generation_bounds, self.attraction_bounds, generation, attraction)
+            if isinstance(data, int):
+                continue
+            if data.ndim == 1 and not utility.ndim == 1:
+                data = data[:, None]
+            utility += b[i] * data
         return utility
     
     def _add_sec_zone_util(self, utility, b):
         for i in b:
-            data = self.zone_data.get_data(i, self.bounds, generation=True)
+            data = self.zone_data.get_data(i, self.generation_bounds, self.attraction_bounds, generation=True, attraction=True)
+            if isinstance(data, int):
+                continue
+            if data.ndim == 1 and not utility.ndim == 1:
+                data = data[:, None]
             utility += b[i] * data
         return utility
 
-    def _add_log_zone_util(self, exps, b, generation=False):
+    def _add_log_zone_util(self, exps, b, generation=True, attraction=True):
         """Adds log transformations of zone data to utility.
         
         This is an optimized way of calculating log terms. Calculates
@@ -204,8 +214,12 @@ class LogitModel:
         """
         zdata = self.zone_data
         for i in b:
-            exps *= numpy.power(
-                zdata.get_data(i, self.bounds, generation) + 1, b[i])
+            data = zdata.get_data(i, self.generation_bounds, self.attraction_bounds, generation, attraction)
+            if isinstance(data, int):
+                continue
+            if data.ndim == 1 and not exps.ndim == 1:
+                data = data[:, None]
+            exps *= numpy.power(data + 1, b[i])
         return exps
 
 
@@ -432,7 +446,7 @@ class ModeDestModel(LogitModel):
         for dummy, modes in dummies.items():
             try:
                 dummy_share = self.zone_data.get_data(
-                    dummy, self.bounds, generation=True)
+                    dummy, self.generation_bounds, self.attraction_bounds, generation=True, attraction=True)
             except KeyError:
                 self._stashed_exps = [mode_exps, mode_expsum]
                 return None
@@ -545,7 +559,7 @@ class DestModeModel(LogitModel):
         prob = defaultdict(float)
         for dummy in dummies:
             dummy_share = self.zone_data.get_data(
-                dummy, self.bounds, generation=True)
+                dummy, self.generation_bounds, self.attraction_bounds, generation=True, attraction=True)
             no_dummy_share -= dummy_share
             tmp_prob = self._calc_prob(impedance, dummy)
             for mode in self.mode_choice_param:
@@ -649,7 +663,8 @@ class GenerationLogit(LogitModel):
                  resultdata: ResultsData):
         self.resultdata = resultdata
         self.zone_data = zone_data
-        self.bounds = bounds
+        self.generation_bounds = bounds
+        self.attraction_bounds = bounds
         attempt_calibration(parameters)
         self.param = parameters
 
@@ -660,7 +675,7 @@ class GenerationLogit(LogitModel):
         # First calc probabilites without individual dummies
         for nr in self.param:
             b = self.param[nr]
-            utility = numpy.zeros(self.bounds.stop, dtype=numpy.float32)
+            utility = numpy.zeros(self.generation_bounds.stop - self.generation_bounds.start, dtype=numpy.float32)
             utility += b["constant"]
             utility = self._add_zone_util(utility, b["generation"], True)
             self.exps[nr] = numpy.minimum(numpy.exp(utility), 99999)
@@ -684,11 +699,11 @@ class GenerationLogit(LogitModel):
         self.calc_basic_prob()
         prob = {}
         for nr in self.param:
-            prob[nr] = numpy.zeros(self.bounds.stop, dtype=numpy.float32)
+            prob[nr] = numpy.zeros(self.generation_bounds.stop - self.generation_bounds.start, dtype=numpy.float32)
         # Calculate probability with individual dummies and combine
         for dummy in self.param["0"]["individual_dummy"]:
             nr_exp = {}
-            nr_expsum = numpy.zeros(self.bounds.stop, dtype=numpy.float32)
+            nr_expsum = numpy.zeros(self.generation_bounds.stop - self.generation_bounds.start, dtype=numpy.float32)
             for nr in self.param:
                 b = self.param[nr]["individual_dummy"][dummy]
                 nr_exp[nr] = self.exps[nr] * numpy.exp(b)
@@ -696,7 +711,10 @@ class GenerationLogit(LogitModel):
             for nr in self.param:
                 ind_prob = nr_exp[nr] / nr_expsum
                 dummy_share = self.zone_data.get_data(
-                    dummy, self.bounds, generation=True)
-                with_dummy = dummy_share * ind_prob
-                prob[nr] += with_dummy
+                    dummy, self.generation_bounds, self.generation_bounds, generation=True)
+                with_dummy = dummy_share.ravel() * ind_prob
+                try:
+                    prob[nr] += with_dummy
+                except ValueError:
+                    prob[nr] += with_dummy.sum(axis=0)
         return prob
