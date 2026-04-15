@@ -57,6 +57,7 @@ class LogitModelTest(unittest.TestCase):
         pur.bounds = slice(0, 24)
         pur.orig_zone_numbers = INTERNAL_ZONES
         pur.dist = mtx
+        pur.dest_interval = slice(0, 30)
         parameters_path = Path(__file__).parents[2] / "parameters" / "demand"
         for file in parameters_path.rglob("*.json"):
             parameters = json.loads(file.read_text("utf-8"))
