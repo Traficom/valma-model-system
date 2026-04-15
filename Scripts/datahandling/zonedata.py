@@ -53,9 +53,18 @@ class ZoneData:
         all_zone_numbers = numpy.array(zone_numbers)
         self.all_zone_numbers = all_zone_numbers
         area = param.purpose_areas[model_area]
-        self.zone_numbers = pandas.Index(
-            all_zone_numbers[slice(*all_zone_numbers.searchsorted(area))],
-            name="analysis_zone_id")
+        if isinstance(area[0], (tuple, list)):
+            zone_number_groups = [
+                all_zone_numbers[slice(*all_zone_numbers.searchsorted(sub_area))]
+                for sub_area in area
+            ]
+            self.zone_numbers = pandas.Index(
+                numpy.concatenate(zone_number_groups),
+                name="analysis_zone_id")
+        else:
+            self.zone_numbers = pandas.Index(
+                all_zone_numbers[slice(*all_zone_numbers.searchsorted(area))],
+                name="analysis_zone_id")
         Zone.counter = 0
         data, mapping = read_zonedata(
             data_path, self.zone_numbers, zone_mapping, data_type)

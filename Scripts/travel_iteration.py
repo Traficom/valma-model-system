@@ -106,12 +106,12 @@ class ModelSystem:
                 model_area=model_area, municipality_calibration=municip_calib,
                 extra_dummies=extra_dummies,
                 car_dist_cost=self.car_dist_cost["car"]
-            ) for model_area in ["domestic", "foreign"]}
+            ) for model_area in ["domestic", "foreign", "domestic_foreign"]}
         
-        # Create zone data for all zones, created from domestic zonedata and default values for zones not in .gpkg
+        # Create zone data for all zones, created from domestic + foreign zonedata and default values for zones not in .gpkg
         zonedata_all = ZoneData(
             zone_data_path, self.zone_numbers, submodel,
-            model_area="domestic", municipality_calibration=municip_calib,
+            model_area="domestic_foreign", municipality_calibration=municip_calib,
             extra_dummies=extra_dummies,
             car_dist_cost=self.car_dist_cost["car"])
         zonedata_all.reindex_zones(self.zone_numbers)

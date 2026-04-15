@@ -287,7 +287,12 @@ class TourPurpose(Purpose):
                 self.bounds, resultdata)
         else:
             log.error(f"Tour generation model not defined for {self.name}")
-        args = (self, specification, self.attraction_zone_data, resultdata)
+        
+        if specification["generation_area"] != specification["attraction_area"]:
+            self.logit_zone_data = zone_datas["all"] #TODO: Tee generalisoitu ratkaisu, joka ei ole riippuvainen mallialueiden nimistä
+        else:
+            self.logit_zone_data = self.attraction_zone_data
+        args = (self, specification, self.logit_zone_data, resultdata)
         if specification["struct"] == "mode>dest":
             self.model = logit.ModeDestModel(*args)
         elif specification["struct"] == "dest>mode":
