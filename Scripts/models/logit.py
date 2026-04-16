@@ -544,7 +544,7 @@ class DestModeModel(LogitModel):
         no_dummy_share = 1.0
         prob = defaultdict(float)
         for dummy in dummies:
-            dummy_share = self.zone_data.get_data(
+            dummy_share = self.purpose.generation_zone_data.get_data(
                 dummy, self.bounds, generation=True)
             no_dummy_share -= dummy_share
             tmp_prob = self._calc_prob(impedance, dummy)
