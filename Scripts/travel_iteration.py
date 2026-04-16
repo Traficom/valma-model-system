@@ -105,7 +105,7 @@ class ModelSystem:
                 model_area=model_area, municipality_calibration=municip_calib,
                 extra_dummies=extra_dummies,
                 car_dist_cost=self.car_dist_cost["car"]
-            ) for model_area in ["domestic"]}
+            ) for model_area in ["domestic", "foreign"]}
 
         # Output data
         self.resultdata = ResultsData(results_path)
