@@ -95,14 +95,14 @@ class DepartureTimeModel:
         """
         position: Sequence[int] = demand.position
         ass_classes = mode_assignment_classes[demand.mode]
-        for ass_class in ass_classes:
+        for is_return, ass_class in enumerate(ass_classes):
             if len(position) == 2:
                 share: Dict[str, Any] = demand.purpose.demand_share[demand.mode]
                 for ap in self.assignment_periods:
                     if ass_class in ap.assignment_modes:
+                        mtx = demand.matrix.T if is_return else demand.matrix
                         self._add_2d_demand(
-                            share[ap.name], ass_class, ap.name,
-                            demand.matrix, position)
+                            share[ap.name], ass_class, ap.name, mtx, position)
             elif len(position) == 3:
                 for ap in self.assignment_periods:
                     if ass_class in ap.assignment_modes:
