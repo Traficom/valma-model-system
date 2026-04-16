@@ -2,7 +2,7 @@ import json
 import numpy
 from pathlib import Path
 from typing import Dict
-from pandas import DataFrame
+from pandas import DataFrame, concat
 
 import utils.log as log
 from datatypes.purpose import FreightPurpose
@@ -54,7 +54,6 @@ def create_purposes(parameters_path: Path, zonedata: FreightZoneData,
                                                             purpose_cost)
     return purposes
 
-
 def write_leg2_summary(purpose: FreightPurpose, demand: dict, 
                        _, fin_border_ids: dict, cluster_border_ids: dict,
                        resultdata: ResultsData):
@@ -82,6 +81,27 @@ def write_leg2_summary(purpose: FreightPurpose, demand: dict,
             })
     filename = "freight_leg2_summary.txt"
     resultdata.print_concat(DataFrame(df_data), filename)
+
+def write_domestic_leg_summary(demand_trade: dict, impedance: dict,
+                               resultdata: ResultsData):
+    """Write summary for trade demand's domestic leg including transported
+    commodity, trade type (export/import), mode, tons and ton mileage.
+    """
+    rows = [
+        {
+            "Commodity": name,
+            "Type": trade_type,
+            "Mode": mode,
+            "Tons (t/annual)": numpy.sum(demand_trade[purpose][mode], dtype=numpy.float32),
+            "Ton mileage (tkm/annual)": numpy.sum(
+                demand_trade[purpose][mode] * impedance[mode]["dist"], dtype=numpy.int64),
+        }
+        for purpose in demand_trade
+        for name, trade_type in [purpose.split("_")]
+        for mode in demand_trade[purpose]
+    ]
+    filename = "freight_domestic_leg_summary.txt"
+    resultdata.print_concat(DataFrame(rows), filename)
 
 def write_purpose_summary(purpose: FreightPurpose, demand: dict, aux_demand: dict, 
                           impedance: dict, resultdata: ResultsData):
@@ -138,7 +158,6 @@ def write_vehicle_summary(demand: dict, impedance: dict, resultdata: ResultsData
         })
     filename = "freight_vehicle_summary.txt"
     resultdata.print_data(df, filename)
-
 
 class StoreDemand():
     """Handles demand dimension compatibility when storing demand matrices 
