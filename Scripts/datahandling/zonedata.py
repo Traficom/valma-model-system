@@ -264,6 +264,19 @@ class ZoneData:
         """
         return self.zones[zone_number].index
 
+    def get_foreign_external_data(self) -> pandas.DataFrame:
+        """Get zone data for foreign external passenger traffic calculation.
+        Returns
+        -------
+        pandas DataFrame
+            Zone data for foreign external passenger traffic calculation
+        """
+        variables = (
+            "population", # TODO: Tähän lisää muuttujia kun saadaan se koko malli speksattua.
+        )
+        data = {k: self._values[k] for k in variables}
+        return pandas.DataFrame(data)
+
     def get_data(self, key: str, bounds: slice, generation: bool=False) -> Union[pandas.Series, numpy.ndarray]:
         """Get data of correct shape for zones included in purpose.
         
@@ -312,6 +325,78 @@ class ZoneData:
                 return val.values
         else:  # Return matrix (purpose zones -> all zones)
             return val[bounds, :]
+    
+    def reindex_zones(self, zone_ids):
+        new_index = pandas.Index(zone_ids, name="analysis_zone_id")
+        old_index = self.zone_numbers
+        # Map new index to old positions
+        indexer = old_index.get_indexer(new_index)
+        new_values = {}
+        for key, val in self._values.items():
+            # ---- CASE 1: Pandas Series ----
+            if isinstance(val, pandas.Series):
+                reindexed = val.reindex(new_index)
+                mean_val = val.mean()
+                new_values[key] = reindexed.fillna(mean_val)
+            # ---- CASE 2: NumPy array ----
+            elif isinstance(val, numpy.ndarray):
+                if val.ndim == 1:
+                    # 1D array (zone-based)
+                    new_arr = numpy.full(len(new_index), numpy.nan, dtype=val.dtype)
+                    valid = indexer >= 0
+                    new_arr[valid] = val[indexer[valid]]
+                    # Fill missing with mean to avoid NaN affecting calculations
+                    mean_val = numpy.nanmean(val)
+                    new_arr[~valid] = mean_val
+                    new_values[key] = new_arr
+                elif val.ndim == 2:
+                    # 2D matrix (zone x zone)
+                    n = len(new_index)
+                    new_arr = numpy.full((n, n), numpy.nan, dtype=val.dtype)
+                    valid = indexer >= 0
+                    for i_new, i_old in enumerate(indexer):
+                        if i_old == -1:
+                            continue
+                        for j_new, j_old in enumerate(indexer):
+                            if j_old == -1:
+                                continue
+                            new_arr[i_new, j_new] = val[i_old, j_old]
+                    # Fill missing rows/cols with mean
+                    mean_val = numpy.nanmean(val)
+                    for i_new in range(n):
+                        if indexer[i_new] == -1:
+                            new_arr[i_new, :] = mean_val
+                    for j_new in range(n):
+                        if indexer[j_new] == -1:
+                            new_arr[:, j_new] = mean_val
+                    new_values[key] = new_arr
+                else:
+                    raise ValueError(f"Unsupported array dimension for key {key}")
+            else:
+                # Keep untouched (or handle case-by-case)
+                new_values[key] = val
+
+        # Special handling for within_zone_inf (2D matrix)
+        # Diagonal: inf, off-diagonal: 0.0
+        if "within_zone_inf" in new_values:
+            arr = new_values["within_zone_inf"]
+            if isinstance(arr, numpy.ndarray) and arr.ndim == 2:
+                nan_mask = numpy.isnan(arr)
+                arr[nan_mask & numpy.eye(len(new_index), dtype=bool)] = numpy.inf
+                arr[nan_mask & ~numpy.eye(len(new_index), dtype=bool)] = 0.0
+
+        # Replace values
+        self._values = new_values
+        # Update metadata
+        self.zone_numbers = new_index
+        self.all_zone_numbers = new_index.values
+        self.nr_zones = len(new_index)
+        # Rebuild zones
+        self.zones = {
+            number: Zone(number, self.demand_aggs)
+            for number in self.zone_numbers}
+    
+    
 
     @property
     def is_in_submodel(self) -> pandas.Series:

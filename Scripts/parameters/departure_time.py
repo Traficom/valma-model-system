@@ -65,6 +65,18 @@ demand_share: Dict[str,Dict[str,Any]] = {
             "iht": (0.33, 0.0),
         },
     },
+    "foreign_external": { # TODO: Mistäs nää tulee?
+        "ship": {
+            "aht": (0.066, 0),
+            "pt": (0.07, 0),
+            "iht": (0.066, 0),
+        },
+        "airplane": {
+            "aht": (0.066, 0),
+            "pt": (0.07, 0),
+            "iht": (0.066, 0),
+        },
+    },
 }
 backup_demand_share = {
     "aht": (0.042, 0.028),
