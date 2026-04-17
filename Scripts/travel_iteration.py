@@ -338,7 +338,7 @@ class ModelSystem:
             self.ass_model.aggregate_results(self.resultdata)
             self.resultdata.flush()
 
-        # Calculate and add foreign external passenger demand
+        # Calculate and add foreign external passenger demand (airplane)
         if self.ass_model.use_free_flow_speeds:
             foreign_ext_mtx = self.fem.calc_foreign_external_traffic("airplane")
             # Calculate assignment mode demand matrices from foreign external demand
@@ -347,11 +347,19 @@ class ModelSystem:
             purp_abroad_other = new_tour_purpose(specification, self._zone_datas, self.resultdata, self.cost_data["cost_changes"])
             assignment_mode_probs = purp_abroad_other.calc_prob(impedance, False)
             # Calculate and add demand for all access modes of foreign external demand
-            for access_mode in assignment_mode_probs:
-                access_probs = assignment_mode_probs[access_mode]
-                access_mode_mtx = foreign_ext_mtx * access_probs
-                access_mode_demand = Demand(purp_abroad_other, access_mode, access_mode_mtx)
-                self.dtm.add_demand(access_mode_demand)
+            self.dtm.init_demand(param.foreign_external_classes)
+            with self.resultmatrices.open(
+                "demand", "vrk", self.zone_numbers, m='w') as mtx:
+                # Access mode demand
+                for access_mode in assignment_mode_probs:
+                    access_probs = assignment_mode_probs[access_mode]
+                    access_mode_mtx = foreign_ext_mtx * access_probs
+                    access_mode_demand = Demand(purp_abroad_other, access_mode, access_mode_mtx)
+                    self.dtm.add_demand(access_mode_demand)
+                    mtx[access_mode] = access_mode_demand.matrix
+                # Main mode demand (airplane)
+                mtx["airplane"] = foreign_ext_mtx
+            log.info("Foreign external demand added and saved to " + str(self.resultmatrices.path))
                 
         return impedance
 
