@@ -349,7 +349,7 @@ class ModelSystem:
             # Calculate and add demand for all access modes of foreign external demand
             self.dtm.init_demand(param.foreign_external_classes)
             with self.resultmatrices.open(
-                "demand", "vrk", self.zone_numbers, m='w') as mtx:
+                "demand", "vrk", self.ass_model.zone_numbers, m='a') as mtx:
                 # Access mode demand
                 for access_mode in assignment_mode_probs:
                     access_probs = assignment_mode_probs[access_mode]
