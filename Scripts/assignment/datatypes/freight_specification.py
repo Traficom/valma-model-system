@@ -142,8 +142,8 @@ class FreightMode(AssignmentMode):
             **self.time.item,
             **self.canal_cost.item,
         }
-        aux_cost = (self._time_unit_cost*self.time.data/60
-                    + self._dist_unit_cost*self.dist.data)
+        aux_cost = (self._time_unit_cost*self.aux_time.data/60
+                    + self._dist_unit_cost*self.aux_dist.data)
         if self._include_toll_cost:
             aux_cost += self.toll_cost.data
         mtxs["aux_cost"] = aux_cost
