@@ -29,8 +29,11 @@ class FreightAssignmentPeriod(AssignmentPeriod):
                     line[cost_attrs[mode]] = cost
                     break
         self.emme_scenario.publish_network(network)
+        include_toll_cost = self.emme_scenario.network_field(
+            "LINK", self.netfield("hinta")) is not None
         self.assignment_modes.update({ass_class: FreightMode(
-                ass_class, self, save_matrices)
+                ass_class, self, dist_unit_cost["truck"],
+                time_unit_cost["truck"], include_toll_cost, save_matrices)
             for ass_class in param.freight_modes})
 
     def assign(self):

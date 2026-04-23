@@ -116,3 +116,5 @@ tour_duration = {
         "hb_leisure_overnight": 9,
     }
 }
+
+truck_overhead_cost = 1.15
