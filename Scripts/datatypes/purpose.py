@@ -863,7 +863,8 @@ class FreightPurpose(Purpose):
         dom_leg_demand = {}
         for purpose in purpose_trade_demand:
             demand_full = pandas.DataFrame(
-                0, index=self.orig_zone_numbers, columns=self.orig_zone_numbers
+                0, index=self.orig_zone_numbers, columns=self.orig_zone_numbers,
+                dtype=numpy.float32
             )
             if purpose.endswith("_export"):
                 demand_full.loc[:, fin_borders] = purpose_trade_demand[purpose]["leg_one"]["truck"]
