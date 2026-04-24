@@ -10,7 +10,9 @@ import parameters.ext_tour_generation as param
 from parameters.departure_time import demand_share
 from utils.external import fratar, calibrate
 from datatypes.demand import Demand
+import openmatrix as omx # type: ignore
 from datatypes.purpose import Purpose
+from parameters.zone import purpose_areas
 
 
 class ForeignExternalModel:
@@ -33,7 +35,7 @@ class ForeignExternalModel:
         self.zdata_b = zone_data_base["domestic"]
         self.zdata_f = zone_data_forecast["domestic"]
         self.base_demand = base_demand
-        self.zone_numbers_full = zone_numbers
+        self.zone_numbers = zone_numbers
         self.zone_numbers_zone_data = list(self.zdata_b.zone_numbers)
 
     def calc_foreign_external_traffic(self, mode: str) -> numpy.ndarray:
@@ -49,20 +51,21 @@ class ForeignExternalModel:
         production_forecast = self._generate_trips(zone_data_forecast, mode)
 
         # NOTE: Eli tässä input-matriisissa on kaikki sentroidit, mutta nollasta poikkeavia arvoja on vain lähtömaa-sijoittelualue - ulkomaan alueklusteri -pareilla.
-        with self.base_demand.open(mtx_type="ext_foreign_passenger",
-                                   time_period="vrk",
-                                   zone_numbers=list(self.zone_numbers_full),
-                                   transport_classes=[mode]) as mtx:
-            mapping_full = mtx.mapping
+        with omx.open_file(self.base_demand.path / "ext_foreign_passenger_vrk.omx", "r") as mtx:
             # Remove zero values
-            base_mtx = mtx[mode].clip(0.000001, None)
+            base_mtx = numpy.array(mtx[mode]).clip(0.000001, None)
             base_colsum = base_mtx.sum(1)
-            # Add ones for missing zones in zonedata
-            production_base_full = numpy.array([0 if i not in self.zone_numbers_zone_data else production_base[i] for i in self.zone_numbers_full])
-            production_forecast_full = numpy.array([0 if i not in self.zone_numbers_zone_data else production_forecast[i] for i in self.zone_numbers_full])
+        # Calibrate generation
         production = calibrate(
-            base_colsum, production_base_full, production_forecast_full)
-        mtx = pandas.DataFrame(base_mtx, self.zone_numbers_full, self.zone_numbers_full)
+            base_colsum, production_base, production_forecast)
+        
+        # Get zone numbers for matrix construction
+        all_zone_numbers = numpy.array(self.zone_numbers)
+        domestic_zone_numbers = all_zone_numbers[(all_zone_numbers >= purpose_areas["domestic"][0]) & (all_zone_numbers <= purpose_areas["domestic"][1])]
+        external_zone_numbers = all_zone_numbers[(all_zone_numbers >= purpose_areas["external"][0]) & (all_zone_numbers <= purpose_areas["external"][1])]
+
+        # Construct matrix with correct zone numbers
+        mtx = pandas.DataFrame(base_mtx, domestic_zone_numbers, external_zone_numbers)
 
         # NOTE: Tässä on tiputettu se HELMET-mallissa suuntautumismuutos-hommeli pois, koska nää on kiertomatkoja by defalult ja kohdemaissa ei oo aluejakoa
 
@@ -72,7 +75,11 @@ class ForeignExternalModel:
         # Remove small values
         demand[demand < 0.0001] = 0
 
-        return demand.to_numpy()
+        # Convert to full matrix
+        mtx_full = pandas.DataFrame(numpy.zeros((len(all_zone_numbers),len(all_zone_numbers))),all_zone_numbers,all_zone_numbers)
+        mtx_full = mtx_full.add(mtx, fill_value=0)
+
+        return mtx_full.to_numpy()
 
     def _generate_trips(self, 
                         zone_data: pandas.DataFrame, 
