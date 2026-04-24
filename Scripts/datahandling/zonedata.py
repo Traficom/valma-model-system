@@ -206,9 +206,6 @@ class ZoneData:
         return {key: val for key, val in self._values.items()
             if isinstance(val, pandas.Series)}
 
-    def __getitem__(self, key):
-        return self._values[key]
-
     def __setitem__(self, key: str, data: pandas.Series):
         try:
             if not numpy.isfinite(data).all():
@@ -255,26 +252,15 @@ class ZoneData:
         """
         return self.zones[zone_number].index
 
-    def get_data(self, key: str) -> Union[pandas.Series, numpy.ndarray]:
-        """Get data of correct shape for zones included in purpose.
-        
-        Parameters
-        ----------
-        key : str
-            Key describing the data (e.g., "population")
-
-        Returns
-        -------
-        pandas Series or numpy 2-d matrix
-        """
+    def __getitem__(self, key: str) -> Union[pandas.Series, numpy.ndarray]:
         try:
-            return self._values[key].values
+            return self._values[key]
         except KeyError as err:
             keyl: List[str] = key.split('*')
             mun_idx = self.demand_aggs.mappings["municipality"].to_numpy()
             if (len(keyl) == 2):
                 # If parameter is two-fold, they will be multiplied
-                return self.get_data(keyl[0]) * self.get_data(keyl[1])
+                return numpy.asarray(self[keyl[0]]) * numpy.asarray(self[keyl[1]])
             elif "within_zone" in key:
                 mtx = numpy.zeros(
                     (self.nr_zones, self.nr_zones), dtype=numpy.float32)

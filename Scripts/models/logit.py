@@ -178,12 +178,12 @@ class LogitModel:
         zdata = (self.generation_zone_data if generation
                  else self.attraction_zone_data)
         for i in b:
-            utility += b[i] * zdata.get_data(i)
+            utility += b[i] * numpy.asarray(zdata[i])
         return utility
     
     def _add_sec_zone_util(self, utility, b):
         for i in b:
-            data = self.generation_zone_data.get_data(i)
+            data = self.generation_zone_data[i].to_numpy()
             utility += b[i] * data
         return utility
 
@@ -210,7 +210,7 @@ class LogitModel:
                  else self.attraction_zone_data)
         for i in b:
             exps *= numpy.power(
-                zdata.get_data(i) + 1, b[i])
+                numpy.asarray(zdata[i]) + 1, b[i])
         return exps
 
 
@@ -436,7 +436,7 @@ class ModeDestModel(LogitModel):
         no_dummy_share = 1.0
         for dummy, modes in dummies.items():
             try:
-                dummy_share = self.generation_zone_data.get_data(dummy)
+                dummy_share = numpy.asarray(self.generation_zone_data[dummy])
             except KeyError:
                 self._stashed_exps = [mode_exps, mode_expsum]
                 return None
@@ -548,7 +548,7 @@ class DestModeModel(LogitModel):
         no_dummy_share = 1.0
         prob = defaultdict(float)
         for dummy in dummies:
-            dummy_share = self.generation_zone_data.get_data(dummy)
+            dummy_share = numpy.asarray(self.generation_zone_data[dummy])
             no_dummy_share -= dummy_share
             tmp_prob = self._calc_prob(impedance, dummy)
             for mode in self.mode_choice_param:
@@ -698,7 +698,7 @@ class GenerationLogit(LogitModel):
                 nr_expsum += nr_exp[nr]
             for nr in self.param:
                 ind_prob = nr_exp[nr] / nr_expsum
-                dummy_share = self.generation_zone_data.get_data(dummy)
+                dummy_share = numpy.asarray(self.generation_zone_data[dummy])
                 with_dummy = dummy_share * ind_prob
                 prob[nr] += with_dummy
         return prob
