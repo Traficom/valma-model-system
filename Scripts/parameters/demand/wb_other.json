@@ -12,9 +12,9 @@
     "struct": "mode>dest",
     "gen_model": "rate",
     "generation": {
-        "hb_work": 0.0687,
-        "hb_edu_basic": 0.0362,
-        "hb_edu_student": 0.0295
+        "hb_work": 0.1104,
+        "hb_edu_basic": 0.0287,
+        "hb_edu_student": 0.0319
     },
     "impedance_share": {
         "car_drv": {

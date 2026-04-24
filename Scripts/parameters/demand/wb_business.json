@@ -10,7 +10,7 @@
     "struct": "mode>dest",
     "gen_model": "rate",
     "generation": {
-        "hb_work": 0.0454
+        "hb_work": 0.0486
     },
     "impedance_share": {
         "car_drv": {

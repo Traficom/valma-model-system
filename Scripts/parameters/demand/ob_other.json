@@ -12,9 +12,9 @@
     "struct": "mode>dest",
     "gen_model": "rate",
     "generation": {
-        "hb_leisure": 0.0206,
-        "hb_sport": 0.0107,
-        "hb_visit": 0.0544
+        "hb_leisure": 0.0235,
+        "hb_sport": 0.0067,
+        "hb_visit": 0.1093
     },
     "impedance_share": {
         "car_drv": {
