@@ -271,7 +271,7 @@ class ZoneData:
             return self._values[key].values
         except KeyError as err:
             keyl: List[str] = key.split('*')
-            mun_idx = self.demand_aggs.mappings["municipality"].values
+            mun_idx = self.demand_aggs.mappings["municipality"].to_numpy()
             if (len(keyl) == 2):
                 # If parameter is two-fold, they will be multiplied
                 return self.get_data(keyl[0]) * self.get_data(keyl[1])
@@ -303,7 +303,8 @@ class ZoneData:
                     return 0
                 else:
                     return calib.unstack("attraction").reindex(
-                        index=mun_idx, columns=mun_idx, fill_value=0.0).values
+                        index=mun_idx, columns=mun_idx, fill_value=0.0
+                    ).to_numpy(numpy.float32)
             else:
                 raise KeyError(err)
 
