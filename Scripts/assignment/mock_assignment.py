@@ -7,7 +7,6 @@ if TYPE_CHECKING:
 
 
 import utils.log as log
-from utils.validate_assignment import divide_matrices, output_od_los
 import parameters.assignment as param
 import parameters.zone as zone_param
 from assignment.abstract_assignment import AssignmentModel, Period
@@ -150,16 +149,6 @@ class MockPeriod(Period):
             if mtx_type not in ("toll_cost", "train_users")]
         mtxs = {mtx_type: self._get_matrices(mtx_type, assignment_classes)
             for mtx_type in impedance_output}
-        for mtx_type in mtxs:
-            for mode, mtx in mtxs[mtx_type].items():
-                output_od_los(mtx, self.mapping, mtx_type, mode)
-        for mode in mtxs["time"]:
-            try:
-                divide_matrices(
-                    mtxs["dist"][mode], mtxs["time"][mode]/60,
-                    f"OD speed (km/h) {mode}")
-            except KeyError:
-                pass
         return mtxs
 
     def _get_matrices(self,

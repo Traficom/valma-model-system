@@ -1,12 +1,14 @@
 import numpy
 from typing import Dict
+from parameters.zone import print_od_pairs
 
 import utils.log as log
+from datahandling.resultdata import ResultsData
 
-
-def divide_matrices(mtx1: numpy.ndarray,
-                    mtx2: numpy.ndarray,
-                    description: str):
+def log_avg_speed(mtx1: numpy.ndarray,
+                     mtx2: numpy.ndarray,
+                     mode: str,
+                     tp: str):
     """Perform array division where division by zero is skipped.
 
     Log descriptives min, median, max.
@@ -14,28 +16,46 @@ def divide_matrices(mtx1: numpy.ndarray,
     mask = mtx2 != 0
     mtx = mtx1[mask] / mtx2[mask]
     v = [round(numpy.quantile(mtx, q)) for q in [0.00, 0.50, 1.00]]
-    log.debug(f"{description} (min, median, max) {v[0]} - {v[1]} - {v[2]}")
+    log.debug(f"{tp} {mode} (min, median, max) {v[0]} - {v[1]} - {v[2]}")
 
-def output_od_los(los_mtx: numpy.ndarray,
-                  mapping: Dict[int, int],
+def output_od_los(impedance: numpy.ndarray,
+                  zone_numbers: numpy.ndarray,
                   mtx_type: str,
-                  mode: str):
-    """Log LOS between Helsinki and Jyvaskyla.
+                  mode: str,
+                  tp: str,
+                  resultdata: ResultsData):
+    """Write LOS between OD pairs.
 
     Parameters
     ----------
-    los_mtx : numpy.ndarray
+    impedance : numpy.ndarray
         Level-of-service matrix
-    mapping : dict
-        key : int
-            Zone number
-        value : int
-            Matrix index
+    zone_numbers : numpy.ndarray
+        Array mapping matrix indices to zone numbers
     mtx_type : str
         Type (time/cost/dist/...)
     mode : str
         Assignment class (car/transit/...)
+    tp : str
+        Time period
+    resultdata : ResultsData
+        Output data handler
     """
-    los = int(los_mtx[mapping[202], mapping[17278]])
-    los = f"{los//60}h {los%60}min" if "time" in mtx_type else los
-    log.debug(f"{mtx_type} {mode} Helsinki - Jyvaskyla: {los}")
+    zone_to_idx = {zone: idx for idx, zone in enumerate(zone_numbers)}
+    for od_pair, (z0, z1) in print_od_pairs.items():
+        idx0 = zone_to_idx.get(z0)
+        idx1 = zone_to_idx.get(z1)
+        if idx0 is None or idx1 is None:
+            continue
+        los = int(impedance[idx0, idx1])
+        if "time" in mtx_type:
+            los = round(los / 60, 1)
+            unit = "h"
+        elif "cost" in mtx_type:
+            unit = "eur"
+        elif "dist" in mtx_type:
+            unit = "km"
+        else:
+            unit = ""
+        txt = f"{od_pair}\t{tp}\t{mode}\t{mtx_type}\t{los}\t{unit}"
+        resultdata.print_line(txt, "los_validation")
