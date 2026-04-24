@@ -354,7 +354,7 @@ class ModelSystem:
                     Impedance (float 2-d matrix)
         """
         impedance = {}
-        self.dtm.init_demand({**self.travel_modes, "van": True})
+        self.dtm.init_demand(self.ass_classes | {"van"})
 
         self.dm.calculate_car_ownership(previous_iter_impedance)
 
