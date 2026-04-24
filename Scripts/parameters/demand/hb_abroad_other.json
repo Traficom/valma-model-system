@@ -311,5 +311,13 @@
                 1.0
                 ]
         }
+    },
+    "tour_generation": {
+        "ship": {
+            "population": 0.01
+        },
+        "airplane": {
+            "population": 0.01
+        }
     }
 }
