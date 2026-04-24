@@ -57,7 +57,6 @@ def calibrate(calib_base, production_base, production_forecast):
     threshold = param.vector_calibration_threshold
     n[n == 0] = 0.000001
 
-    debug = numpy.where(s < threshold*n, s * b/n, s + threshold*(b - n))
 
 
     return numpy.where(s < threshold*n, s * b/n, s + threshold*(b - n))
