@@ -183,8 +183,7 @@ class LogitModel:
     
     def _add_sec_zone_util(self, utility, b):
         for i in b:
-            data = self.generation_zone_data[i].to_numpy()
-            utility += b[i] * data
+            utility += b[i] * numpy.asarray(self.generation_zone_data[i])
         return utility
 
     def _add_log_zone_util(self, exps, b, generation=False):
