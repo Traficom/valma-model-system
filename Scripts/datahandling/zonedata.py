@@ -39,7 +39,7 @@ class ZoneData:
     car_dist_cost : float
         Car cost (eur) per km
     """
-    distance: numpy.ndarray
+    beeline_dist: numpy.ndarray
 
     def __init__(self, *args, **kwargs):
         self._init_data(*args, **kwargs)
@@ -55,9 +55,9 @@ class ZoneData:
         all_zone_numbers = numpy.array(zone_numbers)
         self.all_zone_numbers = all_zone_numbers
         area = param.purpose_areas[model_area]
+        self.zone_slice = slice(*all_zone_numbers.searchsorted(area))
         self.zone_numbers = pandas.Index(
-            all_zone_numbers[slice(*all_zone_numbers.searchsorted(area))],
-            name="analysis_zone_id")
+            all_zone_numbers[self.zone_slice], name="analysis_zone_id")
         Zone.counter = 0
         data, mapping = read_zonedata(
             data_path, self.zone_numbers, zone_mapping, data_type)
@@ -273,8 +273,7 @@ class ZoneData:
             elif key == "outside_municipality":
                 return mun_idx[:, numpy.newaxis] != mun_idx
             elif "beeline" in key:
-                idx = numpy.isin(self.zone_numbers, self.all_zone_numbers)
-                mtx = self.distance[numpy.ix_(idx, idx)]
+                mtx = self.beeline_dist[self.zone_slice, self.zone_slice]
                 try:  # If key contains km interval (e.g., "beeline_10_100_km")
                     _, lower, upper, _ = key.split('_')
                 except ValueError:

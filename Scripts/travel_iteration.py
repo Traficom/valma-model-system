@@ -271,7 +271,7 @@ class ModelSystem:
         self.dtm = dt.DirectDepartureTimeModel(self.ass_model)
 
         self.ass_model.calc_transit_cost(self.transit_cost)
-        ZoneData.distance = self.ass_model.beeline_dist
+        ZoneData.beeline_dist = self.ass_model.beeline_dist
         if not isinstance(self.ass_model, MockAssignmentModel):
             with self.resultmatrices.open(
                     "beeline", "", self.ass_model.zone_numbers, m="w") as mtx:

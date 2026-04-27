@@ -318,7 +318,7 @@ class TourPurpose(Purpose):
 
     @property
     def dist(self):
-        return ZoneData.distance[self.bounds, self.dest_interval]
+        return ZoneData.beeline_dist[self.bounds, self.dest_interval]
     
     @property
     def generated_tours_all(self):
