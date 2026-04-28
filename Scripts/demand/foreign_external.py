@@ -5,13 +5,12 @@ import pandas
 if TYPE_CHECKING:
     from datahandling.matrixdata import MatrixData
     from datahandling.zonedata import ZoneData
+    from datatypes.purpose import Purpose
 
-import parameters.ext_tour_generation as param
 from parameters.departure_time import demand_share
+from pathlib import Path
 from utils.external import fratar, calibrate
-from datatypes.demand import Demand
 import openmatrix as omx # type: ignore
-from datatypes.purpose import Purpose
 from parameters.zone import purpose_areas
 
 
@@ -27,14 +26,16 @@ class ForeignExternalModel:
         Base demand matrices
     """
 
-    def __init__(self, 
+    def __init__(self,
+                 purpose: Purpose, 
                  zone_data_base: Dict[str, ZoneData], 
                  zone_data_forecast: Dict[str, ZoneData], 
-                 base_demand: MatrixData,
+                 base_demand_path: Path,
                  zone_numbers: numpy.ndarray):
+        self.purpose = purpose
         self.zdata_b = zone_data_base["domestic"]
         self.zdata_f = zone_data_forecast["domestic"]
-        self.base_demand = base_demand
+        self.base_demand_path = base_demand_path
         self.zone_numbers = zone_numbers
         self.zone_numbers_zone_data = list(self.zdata_b.zone_numbers)
 
@@ -42,7 +43,7 @@ class ForeignExternalModel:
         """Calculate foreign external passenger traffic matrix.
         Return
         ------
-        datatypes.demand.Demand
+        numpy.ndarray
             Foreign external passenger demand matrix for whole day
         """
         zone_data_base = self.zdata_b.get_foreign_external_data()
@@ -51,7 +52,7 @@ class ForeignExternalModel:
         production_forecast = self._generate_trips(zone_data_forecast, mode)
 
         # NOTE: Eli tässä input-matriisissa on kaikki sentroidit, mutta nollasta poikkeavia arvoja on vain lähtömaa-sijoittelualue - ulkomaan alueklusteri -pareilla.
-        with omx.open_file(self.base_demand.path / "ext_foreign_passenger_vrk.omx", "r") as mtx:
+        with omx.open_file(self.base_demand_path / "ext_foreign_passenger_vrk.omx", "r") as mtx:
             # Remove zero values
             base_mtx = numpy.array(mtx[mode]).clip(0.000001, None)
             base_colsum = base_mtx.sum(1)
@@ -84,5 +85,5 @@ class ForeignExternalModel:
     def _generate_trips(self, 
                         zone_data: pandas.DataFrame, 
                         mode: str) -> numpy.ndarray:
-        b = pandas.Series(param.tour_generation[mode])
+        b = pandas.Series(self.purpose.tour_generation[mode])
         return (b * zone_data).sum(1) + 0.001

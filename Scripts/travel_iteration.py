@@ -19,9 +19,8 @@ from datahandling.zonedata import ZoneData
 from datahandling.matrixdata import MatrixData
 from demand.trips import DemandModel
 from demand.external import ExternalPurpose
-from demand.foreign_external import ForeignExternalModel
 from datatypes.purpose import new_tour_purpose
-from datatypes.purpose import Purpose, TourPurpose, SecDestPurpose
+from datatypes.purpose import Purpose, TourPurpose, SecDestPurpose, ForeignExternalPurpose
 from datatypes.demand import Demand
 import parameters.assignment as param
 import parameters.zone as zone_param
@@ -108,15 +107,7 @@ class ModelSystem:
                 extra_dummies=extra_dummies,
                 car_dist_cost=self.car_dist_cost["car"]
             ) for model_area in ["domestic"]}
-        
-        # Create zone data for all zones, created from domestic zonedata and default values for zones not in .gpkg
-        zonedata_all = ZoneData(
-            zone_data_path, self.zone_numbers, submodel,
-            model_area="domestic", municipality_calibration=municip_calib,
-            extra_dummies=extra_dummies,
-            car_dist_cost=self.car_dist_cost["car"])
-        zonedata_all.reindex_zones(self.zone_numbers)
-        self._zone_datas["all"] = zonedata_all
+
 
         # Output data
         self.resultdata = ResultsData(results_path)
@@ -130,8 +121,6 @@ class ModelSystem:
         purpose_names = []
         for file in parameters_path.glob("*.json"):
             specification = json.loads(file.read_text("utf-8"))
-            if specification["name"] == "hb_abroad_other":
-                continue
             for dummies in mode_dummies.values():
                 for subarea in dummies:
                     for mode, coeff in dummies[subarea].items():
@@ -144,9 +133,16 @@ class ModelSystem:
                         if mode in specification["destination_choice"]:
                             (specification["destination_choice"][mode]
                                           ["attraction"][subarea]) = coeff
-            purpose = new_tour_purpose(
-                specification, self._zone_datas, self.resultdata,
-                cost_data["cost_changes"])
+            if specification["name"] == "hb_abroad_other":
+                purpose = ForeignExternalPurpose(specification,
+                                                              self._zone_datas,
+                                                              self.resultdata,
+                                                              self.cost_data["cost_changes"],
+                                                              self.basematrices.path)
+            else:
+                purpose = new_tour_purpose(
+                    specification, self._zone_datas, self.resultdata,
+                    cost_data["cost_changes"])
             required_time_periods = sorted(
                 {tp for m in purpose.impedance_share.values() for tp in m})
             if required_time_periods == sorted(assignment_model.time_periods):
@@ -179,8 +175,6 @@ class ModelSystem:
         self.external_purpose = ExternalPurpose(numpy.array(self.zone_numbers))
         self.mode_share: List[Dict[str,Any]] = []
         self.convergence = []
-        self.fem = ForeignExternalModel(
-            self._zone_datas, self._zone_datas, self.basematrices, self.ass_model.zone_numbers)
 
     def _init_demand_model(self, tour_purposes: List[TourPurpose]):
         return DemandModel(
@@ -315,10 +309,9 @@ class ModelSystem:
                 self.freight_matrices, param.truck_classes)
 
         # Add beeline distance dummy
-        for model_area in self._zone_datas:
-            zd = self._zone_datas[model_area]
-            idx = numpy.isin(self.zone_numbers, zd.zone_numbers)
-            zd["beeline"] = Purpose.distance[numpy.ix_(idx, idx)]
+        zd = self._zone_datas["domestic"]
+        idx = numpy.isin(self.zone_numbers, zd.zone_numbers)
+        zd["beeline"] = Purpose.distance[numpy.ix_(idx, idx)]
 
         # Perform traffic assignment and get result impedance,
         # for each time period
@@ -337,30 +330,6 @@ class ModelSystem:
         if is_end_assignment:
             self.ass_model.aggregate_results(self.resultdata)
             self.resultdata.flush()
-
-        # Calculate and add foreign external passenger demand (airplane)
-        if self.ass_model.use_free_flow_speeds:
-            foreign_ext_mtx = self.fem.calc_foreign_external_traffic("airplane")
-            # Calculate assignment mode demand matrices from foreign external demand
-            file_path = Path(__file__).parent / "parameters" / "demand" / "hb_abroad_other.json"
-            specification = json.loads(file_path.read_text("utf-8"))
-            purp_abroad_other = new_tour_purpose(specification, self._zone_datas, self.resultdata, self.cost_data["cost_changes"])
-            assignment_mode_probs = purp_abroad_other.calc_prob(impedance, False)
-            # Calculate and add demand for all access modes of foreign external demand
-            self.dtm.init_demand(param.foreign_external_classes)
-            with self.resultmatrices.open(
-                "demand", "vrk", self.ass_model.zone_numbers, m='a') as mtx:
-                # Access mode demand
-                for access_mode in assignment_mode_probs:
-                    access_probs = assignment_mode_probs[access_mode]
-                    access_mode_mtx = foreign_ext_mtx * access_probs
-                    access_mode_demand = Demand(purp_abroad_other, access_mode, access_mode_mtx)
-                    self.dtm.add_demand(access_mode_demand)
-                    mtx[access_mode] = access_mode_demand.matrix
-                # Main mode demand (airplane)
-                mtx["airplane"] = foreign_ext_mtx
-            log.info("Foreign external demand added and saved to " + str(self.resultmatrices.path))
-                
         return impedance
 
     def run_iteration(self, previous_iter_impedance, iteration=None):
