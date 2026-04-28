@@ -56,7 +56,6 @@ class Purpose:
     mtx_adjustment : dict (optional)
         Dict of matrix adjustments for testing elasticities
     """
-    distance: numpy.ndarray
 
     def __init__(self, 
                  specification: Dict[str,Optional[str]],
@@ -293,7 +292,8 @@ class TourPurpose(Purpose):
                 self.bounds, resultdata)
         else:
             log.error(f"Tour generation model not defined for {self.name}")
-        args = (self, specification, self.attraction_zone_data, resultdata)
+        args = (self, specification, self.generation_zone_data,
+                self.attraction_zone_data, resultdata)
         if specification["struct"] == "mode>dest":
             self.model = logit.ModeDestModel(*args)
         elif specification["struct"] == "dest>mode":
@@ -312,7 +312,8 @@ class TourPurpose(Purpose):
                 new_spec = copy(specification)
                 new_spec["mode_choice"] = new_spec["access_mode_choice"][mode]
                 self.connection_models[mode] = logit.LogitModel(
-                    self, new_spec, self.generation_zone_data, resultdata)
+                    self, new_spec, self.generation_zone_data,
+                    self.attraction_zone_data, resultdata)
         self.histograms = {mode: TourLengthHistogram(self.name)
             for mode in self.modes}
         self.orig_mappings = self.generation_zone_data.result_aggs.mappings
@@ -323,7 +324,7 @@ class TourPurpose(Purpose):
 
     @property
     def dist(self):
-        return self.distance[self.bounds, self.dest_interval]
+        return ZoneData.beeline_dist[self.bounds, self.dest_interval]
     
     @property
     def generated_tours_all(self):
@@ -684,13 +685,12 @@ class FreightPurpose(Purpose):
         self.costdata = costdata
         self.model_category = list(zone_data)[0]
         self.modes: List[str] = list(specification["mode_choice"])
-
+        args = (self, specification, self.generation_zone_data,
+                self.attraction_zone_data, resultdata)
         if specification["struct"] == "dest>mode":
-            self.model = logit.DestModeModel(self, specification, zone_data[self.model_category], 
-                                             resultdata)
+            self.model = logit.DestModeModel(*args)
         elif specification["struct"] == "mode>dest":
-            self.model = logit.ModeDestModel(self, specification, zone_data[self.model_category], 
-                                             resultdata)
+            self.model = logit.ModeDestModel(*args)
         else:
             self.model = None
         self.route_params = specification.get("route_choice", None)

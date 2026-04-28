@@ -280,7 +280,7 @@ class ModelSystem:
         self.dtm = dt.DirectDepartureTimeModel(self.ass_model)
 
         self.ass_model.calc_transit_cost(self.transit_cost)
-        Purpose.distance = self.ass_model.beeline_dist
+        ZoneData.beeline_dist = self.ass_model.beeline_dist
         if not isinstance(self.ass_model, MockAssignmentModel):
             with self.resultmatrices.open(
                     "beeline", "", self.ass_model.zone_numbers, m="w") as mtx:
@@ -307,11 +307,6 @@ class ModelSystem:
             self.dtm.init_demand(param.truck_classes)
             self._add_external_demand(
                 self.freight_matrices, param.truck_classes)
-
-        # Add beeline distance dummy
-        zd = self._zone_datas["domestic"]
-        idx = numpy.isin(self.zone_numbers, zd.zone_numbers)
-        zd["beeline"] = Purpose.distance[numpy.ix_(idx, idx)]
 
         # Perform traffic assignment and get result impedance,
         # for each time period
