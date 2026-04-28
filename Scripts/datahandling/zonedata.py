@@ -39,6 +39,8 @@ class ZoneData:
     car_dist_cost : float
         Car cost (eur) per km
     """
+    beeline_dist: numpy.ndarray
+
     def __init__(self, *args, **kwargs):
         self._init_data(*args, **kwargs)
 
@@ -53,9 +55,9 @@ class ZoneData:
         all_zone_numbers = numpy.array(zone_numbers)
         self.all_zone_numbers = all_zone_numbers
         area = param.purpose_areas[model_area]
+        self.zone_slice = slice(*all_zone_numbers.searchsorted(area))
         self.zone_numbers = pandas.Index(
-            all_zone_numbers[slice(*all_zone_numbers.searchsorted(area))],
-            name="analysis_zone_id")
+            all_zone_numbers[self.zone_slice], name="analysis_zone_id")
         Zone.counter = 0
         data, mapping = read_zonedata(
             data_path, self.zone_numbers, zone_mapping, data_type)
@@ -123,22 +125,11 @@ class ZoneData:
         self["pop_density"] = divide(data["population"], data["land_area"])
         self["log_pop_density"] = numpy.log(self["pop_density"]+1)
 
-        # Create diagonal matrix
-        self["within_zone"] = numpy.full((self.nr_zones, self.nr_zones), 0.0)
-        self["within_zone"][numpy.diag_indices(self.nr_zones)] = 1.0
         # Two-way intrazonal distances from building distances
         self["dist"] = data["avg_building_distance"] * 2
         self["time"] = self["dist"] / (20/60) # 20 km/h
         self["cost"] = car_dist_cost * self["dist"]
-        # Unavailability of intrazonal tours
-        self["within_zone_inf"] = numpy.full((self.nr_zones, self.nr_zones), 0.0)
-        self["within_zone_inf"][numpy.diag_indices(self.nr_zones)] = numpy.inf
-        # Create matrix where value is True if origin and destination is in
-        # same municipality
-        municipalities = self.demand_aggs.mappings["municipality"].values
-        within_municipality = municipalities[:, numpy.newaxis] == municipalities
-        self["within_municipality"] = within_municipality
-        self["outside_municipality"] = ~within_municipality
+
         dummies = {
             "zone": {},
             "municipality": {},
@@ -215,9 +206,6 @@ class ZoneData:
         return {key: val for key, val in self._values.items()
             if isinstance(val, pandas.Series)}
 
-    def __getitem__(self, key):
-        return self._values[key]
-
     def __setitem__(self, key: str, data: pandas.Series):
         try:
             if not numpy.isfinite(data).all():
@@ -264,35 +252,34 @@ class ZoneData:
         """
         return self.zones[zone_number].index
 
-    def get_data(self, key: str, bounds: slice, generation: bool=False) -> Union[pandas.Series, numpy.ndarray]:
-        """Get data of correct shape for zones included in purpose.
-        
-        Parameters
-        ----------
-        key : str
-            Key describing the data (e.g., "population")
-        bounds : slice
-            Slice that describes the lower and upper bounds of purpose
-        generation : bool, optional
-            If set to True, returns data only for zones in purpose,
-            otherwise returns data for all zones
-        
-        Returns
-        -------
-        pandas Series or numpy 2-d matrix
-        """
+    def __getitem__(self, key: str) -> Union[pandas.Series, numpy.ndarray]:
         try:
-            val = self._values[key]
+            return self._values[key]
         except KeyError as err:
             keyl: List[str] = key.split('*')
+            mun_idx = self.demand_aggs.mappings["municipality"].to_numpy()
             if (len(keyl) == 2):
                 # If parameter is two-fold, they will be multiplied
-                return (self.get_data(keyl[0], bounds, generation)
-                        * self.get_data(keyl[1], bounds, generation))
+                return numpy.asarray(self[keyl[0]]) * numpy.asarray(self[keyl[1]])
+            elif "within_zone" in key:
+                mtx = numpy.zeros(
+                    (self.nr_zones, self.nr_zones), dtype=numpy.float32)
+                numpy.fill_diagonal(mtx, numpy.inf if "inf" in key else 1.0)
+                return mtx
+            elif key == "within_municipality":
+                # Create matrix with True if origin and destination
+                # is in same municipality
+                return mun_idx[:, numpy.newaxis] == mun_idx
+            elif key == "outside_municipality":
+                return mun_idx[:, numpy.newaxis] != mun_idx
             elif "beeline" in key:
-                beeline, lower, upper, _ = key.split('_')
-                mtx = self[beeline]
-                return (mtx > int(lower)) & (mtx <= int(upper))[bounds, :]
+                mtx = self.beeline_dist[self.zone_slice, self.zone_slice]
+                try:  # If key contains km interval (e.g., "beeline_10_100_km")
+                    _, lower, upper, _ = key.split('_')
+                except ValueError:
+                    return mtx
+                else:
+                    return (mtx > int(lower)) & (mtx <= int(upper))
             elif "municipality_calibration" in key:
                 try:
                     # Try to find mode-specific calibration matrix
@@ -300,18 +287,11 @@ class ZoneData:
                 except KeyError:
                     return 0
                 else:
-                    idx = self.demand_aggs.mappings["municipality"].values
                     return calib.unstack("attraction").reindex(
-                        index=idx, columns=idx, fill_value=0.0).values[bounds, :]
+                        index=mun_idx, columns=mun_idx, fill_value=0.0
+                    ).to_numpy(numpy.float32)
             else:
                 raise KeyError(err)
-        if val.ndim == 1: # If not a compound (i.e., matrix)
-            if generation:  # Return values for purpose zones
-                return val[bounds].values
-            else:  # Return values for all zones
-                return val.values
-        else:  # Return matrix (purpose zones -> all zones)
-            return val[bounds, :]
 
     @property
     def is_in_submodel(self) -> pandas.Series:
