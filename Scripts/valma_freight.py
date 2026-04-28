@@ -13,8 +13,11 @@ from assignment.emme_assignment import EmmeAssignmentModel
 from assignment.emme_bindings.emme_project import EmmeProject
 from datahandling.matrixdata import MatrixData
 
-from utils.freight_utils import (create_purposes, write_purpose_summary, write_zone_summary,
-                                 write_vehicle_summary, write_leg2_summary, StoreDemand)
+from utils.freight_utils import (
+    create_purposes, StoreDemand,
+    write_leg2_summary, write_domestic_leg_summary, write_purpose_summary, 
+    write_zone_summary, write_vehicle_summary
+)
 from datahandling.traversaldata import transform_traversal_data
 from parameters.commodity import commodity_conversion
 
@@ -65,6 +68,7 @@ def main(args):
         write_leg2_summary(purpose, demand, *marine_data, resultdata)
         trade_demand[purpose.name] = demand
     resultdata.flush()
+    fin_border_ids = list(marine_export[1].values())
     marine_export, marine_import = None, None
 
     # prepare domestic model by splicing impedances and initializing final demand matrix 
@@ -80,6 +84,7 @@ def main(args):
     for purpose in purposes.values():
         log.info(f"Calculating demand for purpose: {purpose.name}")
         demand = purpose.calc_traffic(impedance)
+        demand_trade = purpose.calc_trade_mode_share(demand, trade_demand, fin_border_ids)
         if purpose.route_params and args.logistics_iterations > 0:
             demand["truck"], _ = purpose.run_logistics_module(demand["truck"], impedance, 
                                                               ass_model.mapping, 
@@ -97,6 +102,7 @@ def main(args):
             total_demand[mode] += purpose.calc_vehicles(ton_demand, mode)
         write_purpose_summary(purpose, demand, aux_demand, impedance, resultdata)
         write_zone_summary(purpose.name, zonedata.zone_numbers, demand, resultdata)
+        write_domestic_leg_summary(demand_trade, impedance, resultdata)
     write_vehicle_summary(total_demand, impedance, resultdata)
     resultdata.flush()
     
