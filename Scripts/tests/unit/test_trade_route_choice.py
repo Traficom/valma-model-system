@@ -111,18 +111,18 @@ class TradeRouteChoiceTest(unittest.TestCase):
         self.assertEqual(len(leg_two), 3)
         self.assertEqual(len(leg_three), 1)
         if name == "kemlaa_export":
-            truck_leg1_cols = numpy.array((8.169347, 14.315129), dtype=numpy.float32)
+            truck_leg1_cols = numpy.array((6.469845, 16.014631), dtype=numpy.float32)
             self.assertAlmostEqual(numpy.sum(leg_one["truck"]), 22.484474, places=3)
             numpy.testing.assert_array_almost_equal(
                 numpy.sum(leg_one["truck"], axis=0), truck_leg1_cols)
 
-            truck_leg2_cols = numpy.array((4.003486, 4.003484), dtype=numpy.float32)
-            truck_leg2_row = numpy.array((4.0034847, 4.0034847), dtype=numpy.float32)
-            container_leg2_cols = numpy.array((0, 10.3116455), dtype=numpy.float32)
-            roro_leg2_cols = numpy.array((4.1658616, 0), dtype=numpy.float32)
-            self.assertAlmostEqual(numpy.sum(leg_two["truck"]), 8.006969, places=3)
-            self.assertAlmostEqual(numpy.sum(leg_two["container_ship"]), 10.3116455, places=3)
-            self.assertAlmostEqual(numpy.sum(leg_two["roro_vessel"]), 4.1658616, places=3)
+            truck_leg2_cols = numpy.array((0.0, 0.0), dtype=numpy.float32)
+            truck_leg2_row = numpy.array((0.0, 0.0), dtype=numpy.float32)
+            container_leg2_cols = numpy.array((0, 16.014631), dtype=numpy.float32)
+            roro_leg2_cols = numpy.array((6.4698453, 0), dtype=numpy.float32)
+            self.assertAlmostEqual(numpy.sum(leg_two["truck"]), 0.0)
+            self.assertAlmostEqual(numpy.sum(leg_two["container_ship"]), 16.014631, places=3)
+            self.assertAlmostEqual(numpy.sum(leg_two["roro_vessel"]), 6.4698453, places=3)
             numpy.testing.assert_array_almost_equal(
                 numpy.sum(leg_two["truck"], axis=0), truck_leg2_cols)
             numpy.testing.assert_array_almost_equal(
@@ -138,18 +138,18 @@ class TradeRouteChoiceTest(unittest.TestCase):
                 numpy.sum(leg_three["truck"], axis=0), truck_leg3_cols)
             
         elif name == "kemlaa_import":
-            truck_leg1_row = numpy.array((203.28798, 231.84685), dtype=numpy.float32)
+            truck_leg1_row = numpy.array((203.28798, 231.84686), dtype=numpy.float32)
             self.assertAlmostEqual(numpy.sum(leg_one["truck"]), 435.13483, places=3)
             numpy.testing.assert_array_almost_equal(
                 numpy.sum(leg_one["truck"], axis=1), truck_leg1_row)
 
-            truck_leg2_cols = numpy.array((34.18222, 32.160725), dtype=numpy.float32)
-            truck_leg2_row = numpy.array((33.581642, 32.761303), dtype=numpy.float32)
-            container_leg2_row = numpy.array((0, 61.939617), dtype=numpy.float32)
-            roro_leg2_row = numpy.array((306.85233, 0), dtype=numpy.float32)
-            self.assertAlmostEqual(numpy.sum(leg_two["truck"]), 66.34295, places=3)
-            self.assertAlmostEqual(numpy.sum(leg_two["container_ship"]), 61.939617, places=3)
-            self.assertAlmostEqual(numpy.sum(leg_two["roro_vessel"]), 306.85233, places=3)
+            truck_leg2_cols = numpy.array((0.0, 0.0), dtype=numpy.float32)
+            truck_leg2_row = numpy.array((0.0, 0.0), dtype=numpy.float32)
+            container_leg2_row = numpy.array((0, 81.80068), dtype=numpy.float32)
+            roro_leg2_row = numpy.array((353.33417, 0), dtype=numpy.float32)
+            self.assertAlmostEqual(numpy.sum(leg_two["truck"]), 0.0)
+            self.assertAlmostEqual(numpy.sum(leg_two["container_ship"]), 81.80068, places=3)
+            self.assertAlmostEqual(numpy.sum(leg_two["roro_vessel"]), 353.33417, places=3)
             numpy.testing.assert_array_almost_equal(
                 numpy.sum(leg_two["truck"], axis=0), truck_leg2_cols)
             numpy.testing.assert_array_almost_equal(
@@ -159,7 +159,7 @@ class TradeRouteChoiceTest(unittest.TestCase):
             numpy.testing.assert_array_almost_equal(
                 numpy.sum(leg_two["roro_vessel"], axis=1), roro_leg2_row)
             
-            truck_leg3_cols = numpy.array((341.03445, 94.10034), dtype=numpy.float32)
+            truck_leg3_cols = numpy.array((353.33414, 81.80069), dtype=numpy.float32)
             self.assertAlmostEqual(numpy.sum(leg_three["truck"]), 435.13483, places=3)
             numpy.testing.assert_array_almost_equal(
                 numpy.sum(leg_three["truck"], axis=1), truck_leg3_cols)

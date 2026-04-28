@@ -524,7 +524,7 @@ segment_results = {
 uncongested_transit_time = "base_timtr"
 basic_impedance_output = ["time", "cost", "dist", "toll_cost", "inv_time",
                           "train_users"]
-mixed_mode_output = ["car_time", "transfer_time", "park_cost"]
+mixed_mode_output = ["park_cost"]
 impedance_output = basic_impedance_output + mixed_mode_output
 transit_impedance_matrices = {
     "total": {
@@ -605,7 +605,9 @@ mode_impedance = {
     "airpl_car_egr": "airpl_car_egr"
 
 }
-# modes in choice model : [assignment classes]
+# Modes in choice model : [assignment classes]
+# If the mode has two assignment classes, demand
+# will be transposed for the second one.
 mode_assignment_classes = {
     "car_drv": ["icev"],
     "car_pax": [],

@@ -61,7 +61,6 @@ class Purpose:
     mtx_adjustment : dict (optional)
         Dict of matrix adjustments for testing elasticities
     """
-    distance: numpy.ndarray
 
     def __init__(self, 
                  specification: Dict[str,Optional[str]],
@@ -203,18 +202,11 @@ class Purpose:
                                                     cost.car_pax_occupancy[self.name])
                     except KeyError:
                         pass
-                airpl_access_modes = ["airpl_car_acc", "airpl_taxi_acc", "airpl_car_egr"]
-                transit_access_modes = ["pt_car_acc", "pt_taxi_acc", "pt_taxi_egr"]
-                if mtx_type == "time" and mode in airpl_access_modes:
-                    day_imp[mode][mtx_type] -= day_imp[mode]["car_time"] * 1.5
-                if mtx_type == "time" and mode in transit_access_modes:
-                    day_imp[mode][mtx_type] -= day_imp[mode]["car_time"] * 6.5
-            try:
+            if "vrk" in self.impedance_share[mode] and mode != "walk":
                 vot = cost.value_of_time[mode_impedance[mode]]
-                day_imp[mode]["gen_cost"] = day_imp[mode]["cost"] + (day_imp[mode]["time"]/60) * vot
+                day_imp[mode]["gen_cost"] = (day_imp[mode].pop("cost")
+                                             + vot*day_imp[mode].pop("time")/60)
                 log.info(f"Generalized cost calculated for {self.name} {mode}.")
-            except KeyError:
-                pass
             if mode in mixed_mode_classes:
                 day_imp[mode]["park_cost"] = (day_imp[mode]["park_cost"]
                                               * cost.tour_duration[mode][self.name]
@@ -304,7 +296,8 @@ class TourPurpose(Purpose):
                 self.bounds, resultdata)
         else:
             log.error(f"Tour generation model not defined for {self.name}")
-        args = (self, specification, self.attraction_zone_data, resultdata)
+        args = (self, specification, self.generation_zone_data,
+                self.attraction_zone_data, resultdata)
         if specification["struct"] == "mode>dest":
             self.model = logit.ModeDestModel(*args)
         elif specification["struct"] == "dest>mode":
@@ -326,7 +319,8 @@ class TourPurpose(Purpose):
                 new_spec = copy(specification)
                 new_spec["mode_choice"] = new_spec["access_mode_choice"][mode]
                 self.connection_models[mode] = logit.LogitModel(
-                    self, new_spec, self.generation_zone_data, resultdata)
+                    self, new_spec, self.generation_zone_data,
+                    self.attraction_zone_data, resultdata)
         self.histograms = {mode: TourLengthHistogram(self.name)
             for mode in self.modes}
         self.orig_mappings = self.generation_zone_data.result_aggs.mappings
@@ -337,7 +331,7 @@ class TourPurpose(Purpose):
 
     @property
     def dist(self):
-        return self.distance[self.bounds, self.dest_interval]
+        return ZoneData.beeline_dist[self.bounds, self.dest_interval]
     
     @property
     def generated_tours_all(self):
@@ -695,13 +689,12 @@ class FreightPurpose(Purpose):
         self.costdata = costdata
         self.model_category = list(zone_data)[0]
         self.modes: List[str] = list(specification["mode_choice"])
-
+        args = (self, specification, self.generation_zone_data,
+                self.attraction_zone_data, resultdata)
         if specification["struct"] == "dest>mode":
-            self.model = logit.DestModeModel(self, specification, zone_data[self.model_category], 
-                                             resultdata)
+            self.model = logit.DestModeModel(*args)
         elif specification["struct"] == "mode>dest":
-            self.model = logit.ModeDestModel(self, specification, zone_data[self.model_category], 
-                                             resultdata)
+            self.model = logit.ModeDestModel(*args)
         else:
             self.model = None
         self.route_params = specification.get("route_choice", None)
@@ -793,6 +786,15 @@ class FreightPurpose(Purpose):
             self.costdata, ship_imps, self.model_category, fin_border_ids,
             self.is_export)
         impedance_legs["leg_two"].update(ship_costs)
+
+        # Retain leg two truck cost only for designated land border pairs
+        mask = pandas.DataFrame(True, index=fin_port_zones, columns=cluster_port_zones)
+        for fin_border, cluster_border in param.land_border_pairs.values():
+            if fin_border in fin_port_zones and cluster_border in cluster_port_zones:
+                mask.at[fin_border, cluster_border] = False
+        if not self.is_export:
+            mask = mask.T
+        impedance_legs["leg_two"]["truck"]["cost"][mask.to_numpy()] = numpy.inf
         return impedance_legs
 
     def get_costs(self, impedance: dict):
@@ -834,6 +836,58 @@ class FreightPurpose(Purpose):
                     / costdata["avg_load"] / 365)
         vehicles += vehicles.T * costdata["empty_share"]
         return vehicles
+
+    def calc_trade_mode_share(self, dom_demand: dict, trade_demand: dict,
+                              fin_borders: list):
+        """Calculate mode share of trade demand on its domestic leg 
+        among freight land mode alternatives.
+
+        Parameters
+        ----------
+        dom_demand : dict
+            Mode (truck/train/...) : domestic demand numpy 2d array
+        trade_demand : dict
+            Foreign purpose name : str
+                Leg (one/two/three) : str
+                    Mode (truck/container_ship...) : trade demand numpy 2d array
+        fin_borders : list[int]
+            Finnish border centroid ids
+
+        Returns
+        -------
+        dict
+            Foreign purpose name : str
+                Mode (truck/freight_train) : trade demand domestic leg numpy 2d array
+        """
+        demand_sum = sum(dom_demand[mode] for mode in dom_demand
+                         if mode in ["truck", "freight_train"])
+        truck_share = numpy.zeros_like(demand_sum)
+        numpy.divide(dom_demand["truck"], demand_sum, out=truck_share,
+                     where=demand_sum > 0.0)
+        train_share = numpy.ones_like(truck_share) - truck_share
+        
+        # Extracts trade purposes with same name as self.name
+        # e.g. if self is kemlaa, extracts kemlaa_export and kemlaa_import
+        purpose_trade_demand = {
+            k: v for k, v in trade_demand.items()
+            if k.startswith(f"{self.name}_")
+        }
+        
+        dom_leg_demand = {}
+        for purpose in purpose_trade_demand:
+            demand_full = pandas.DataFrame(
+                0, index=self.orig_zone_numbers, columns=self.orig_zone_numbers,
+                dtype=numpy.float32
+            )
+            if purpose.endswith("_export"):
+                demand_full.loc[:, fin_borders] = purpose_trade_demand[purpose]["leg_one"]["truck"]
+            else:
+                demand_full.loc[fin_borders, :] = purpose_trade_demand[purpose]["leg_three"]["truck"]
+            dom_leg_demand[purpose] = {"truck": demand_full.values * truck_share}
+            train_demand = demand_full.values * train_share
+            if numpy.sum(train_demand) > 0.0:
+                dom_leg_demand[purpose]["freight_train"] = train_demand
+        return dom_leg_demand
 
     def run_logistics_module(self, demand_truck: numpy.ndarray, impedance: numpy.ndarray, 
                              zone_index_map: dict, iterations: int) -> tuple:

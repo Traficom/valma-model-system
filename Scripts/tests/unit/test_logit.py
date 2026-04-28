@@ -26,12 +26,12 @@ class LogitModelTest(unittest.TestCase):
         class Purpose:
             pass
         pur = Purpose()
-        zi = numpy.array(INTERNAL_ZONES + EXTERNAL_ZONES)
+        zi = numpy.array(INTERNAL_ZONES)
         zd = ZoneData(
             ZONEDATA_PATH, zi, "uusimaa", car_dist_cost=0.12,
             electric_car_share={"default": {"bev": 0.1, "phev": 0.2}})
-        mtx = numpy.arange(720, dtype=numpy.float32)
-        mtx.shape = (24, 30)
+        mtx = numpy.arange(24*24, dtype=numpy.float32)
+        mtx.shape = (24, 24)
         mtx[numpy.diag_indices(24)] = 0
         impedance = {
             "car_drv": {
@@ -78,7 +78,7 @@ class LogitModelTest(unittest.TestCase):
             attempt_calibration(parameters)
             pur.name = parameters["name"]
             if parameters["name"] == "hb_work":
-                args = (pur, parameters, zd, resultdata)
+                args = (pur, parameters, zd, zd, resultdata)
                 model = (DestModeModel(*args)
                     if parameters["struct"] == "dest>mode"
                     else ModeDestModel(*args))
