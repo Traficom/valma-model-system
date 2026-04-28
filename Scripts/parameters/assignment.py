@@ -579,7 +579,9 @@ mode_impedance = {
     "airpl_car_egr": "airpl_car_egr"
 
 }
-# modes in choice model : [assignment classes]
+# Modes in choice model : [assignment classes]
+# If the mode has two assignment classes, demand
+# will be transposed for the second one.
 mode_assignment_classes = {
     "car_drv": ["car"], 
     "car_pax": [],

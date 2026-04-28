@@ -818,6 +818,58 @@ class FreightPurpose(Purpose):
         vehicles += vehicles.T * costdata["empty_share"]
         return vehicles
 
+    def calc_trade_mode_share(self, dom_demand: dict, trade_demand: dict,
+                              fin_borders: list):
+        """Calculate mode share of trade demand on its domestic leg 
+        among freight land mode alternatives.
+
+        Parameters
+        ----------
+        dom_demand : dict
+            Mode (truck/train/...) : domestic demand numpy 2d array
+        trade_demand : dict
+            Foreign purpose name : str
+                Leg (one/two/three) : str
+                    Mode (truck/container_ship...) : trade demand numpy 2d array
+        fin_borders : list[int]
+            Finnish border centroid ids
+
+        Returns
+        -------
+        dict
+            Foreign purpose name : str
+                Mode (truck/freight_train) : trade demand domestic leg numpy 2d array
+        """
+        demand_sum = sum(dom_demand[mode] for mode in dom_demand
+                         if mode in ["truck", "freight_train"])
+        truck_share = numpy.zeros_like(demand_sum)
+        numpy.divide(dom_demand["truck"], demand_sum, out=truck_share,
+                     where=demand_sum > 0.0)
+        train_share = numpy.ones_like(truck_share) - truck_share
+        
+        # Extracts trade purposes with same name as self.name
+        # e.g. if self is kemlaa, extracts kemlaa_export and kemlaa_import
+        purpose_trade_demand = {
+            k: v for k, v in trade_demand.items()
+            if k.startswith(f"{self.name}_")
+        }
+        
+        dom_leg_demand = {}
+        for purpose in purpose_trade_demand:
+            demand_full = pandas.DataFrame(
+                0, index=self.orig_zone_numbers, columns=self.orig_zone_numbers,
+                dtype=numpy.float32
+            )
+            if purpose.endswith("_export"):
+                demand_full.loc[:, fin_borders] = purpose_trade_demand[purpose]["leg_one"]["truck"]
+            else:
+                demand_full.loc[fin_borders, :] = purpose_trade_demand[purpose]["leg_three"]["truck"]
+            dom_leg_demand[purpose] = {"truck": demand_full.values * truck_share}
+            train_demand = demand_full.values * train_share
+            if numpy.sum(train_demand) > 0.0:
+                dom_leg_demand[purpose]["freight_train"] = train_demand
+        return dom_leg_demand
+
     def run_logistics_module(self, demand_truck: numpy.ndarray, impedance: numpy.ndarray, 
                              zone_index_map: dict, iterations: int) -> tuple:
         """Entry point for running logistics module for truck demand within Finland
