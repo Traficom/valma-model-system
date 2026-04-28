@@ -187,12 +187,6 @@ class Purpose:
                                                     cost.car_pax_occupancy[self.name])
                     except KeyError:
                         pass
-                airpl_access_modes = ["airpl_car_acc", "airpl_taxi_acc", "airpl_car_egr"]
-                transit_access_modes = ["pt_car_acc", "pt_taxi_acc", "pt_taxi_egr"]
-                if mtx_type == "time" and mode in airpl_access_modes:
-                    day_imp[mode][mtx_type] -= day_imp[mode]["car_time"] * 1.5
-                if mtx_type == "time" and mode in transit_access_modes:
-                    day_imp[mode][mtx_type] -= day_imp[mode]["car_time"] * 6.5
             if "vrk" in self.impedance_share[mode] and mode != "walk":
                 vot = cost.value_of_time[mode_impedance[mode]]
                 day_imp[mode]["gen_cost"] = (day_imp[mode].pop("cost")

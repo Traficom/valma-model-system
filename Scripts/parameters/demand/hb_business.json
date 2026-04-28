@@ -147,12 +147,6 @@
         "car_drv": {
             "constant": -12.18,
             "generation": {},
-            "transform": {
-                "attraction": {},
-                "impedance": {
-                    "gen_cost": 1
-                }
-            },
             "attraction": {
                 "within_zone_inf": -1
             },
@@ -160,7 +154,7 @@
                 "gen_cost": -0.04359
             },
             "log": {
-                "transform": -1.476
+                "gen_cost": -1.476
             },
             "individual_dummy": {
                 "sh_cars1_hh1": 2.995,
@@ -171,12 +165,6 @@
         "car_pax": {
             "constant": -13.45,
             "generation": {},
-            "transform": {
-                "attraction": {},
-                "impedance": {
-                    "gen_cost": 1
-                }
-            },
             "attraction": {
                 "within_zone_inf": -1
             },
@@ -184,7 +172,7 @@
                 "gen_cost": -0.05019
             },
             "log": {
-                "transform": -1.885
+                "gen_cost": -1.885
             },
             "individual_dummy": {
                 "sh_cars1_hh2": 1.25,
@@ -255,13 +243,7 @@
                     "gen_cost": -0.01113
                 },
                 "log": {
-                    "transform": -2.715
-                },
-                "transform": {
-                    "attraction": {},
-                    "impedance": {
-                        "gen_cost": 1
-                    }
+                    "gen_cost": -2.715
                 },
                 "individual_dummy": {}
             },
@@ -273,13 +255,7 @@
                     "gen_cost": -0.01113
                 },
                 "log": {
-                    "transform": -2.715
-                },
-                "transform": {
-                    "attraction": {},
-                    "impedance": {
-                        "gen_cost": 1
-                    }
+                    "gen_cost": -2.715
                 },
                 "individual_dummy": {
                     "sh_cars1_hh1": 4.14,
@@ -295,13 +271,7 @@
                     "gen_cost": -0.01113
                 },
                 "log": {
-                    "transform": -2.715
-                },
-                "transform": {
-                    "attraction": {},
-                    "impedance": {
-                        "gen_cost": 1
-                    }
+                    "gen_cost": -2.715
                 },
                 "individual_dummy": {
                     "sh_cars1_hh2": 1.573,
@@ -316,13 +286,7 @@
                     "gen_cost": -0.01113
                 },
                 "log": {
-                    "transform": -2.715
-                },
-                "transform": {
-                    "attraction": {},
-                    "impedance": {
-                        "gen_cost": 1
-                    }
+                    "gen_cost": -2.715
                 },
                 "individual_dummy": {}
             }
@@ -336,13 +300,7 @@
                     "gen_cost": -0.01113
                 },
                 "log": {
-                    "transform": -2.715
-                },
-                "transform": {
-                    "attraction": {},
-                    "impedance": {
-                        "gen_cost": 1
-                    }
+                    "gen_cost": -2.715
                 },
                 "individual_dummy": {}
             },
@@ -354,13 +312,7 @@
                     "gen_cost": -0.01113
                 },
                 "log": {
-                    "transform": -2.715
-                },
-                "transform": {
-                    "attraction": {},
-                    "impedance": {
-                        "gen_cost": 1
-                    }
+                    "gen_cost": -2.715
                 },
                 "individual_dummy": {
                     "sh_cars1_hh1": 4.14,
@@ -376,13 +328,7 @@
                     "gen_cost": -0.01113
                 },
                 "log": {
-                    "transform": -2.715
-                },
-                "transform": {
-                    "attraction": {},
-                    "impedance": {
-                        "gen_cost": 1
-                    }
+                    "gen_cost": -2.715
                 },
                 "individual_dummy": {
                     "sh_cars1_hh2": 1.573,
@@ -397,13 +343,7 @@
                     "gen_cost": -0.01113
                 },
                 "log": {
-                    "transform": -2.715
-                },
-                "transform": {
-                    "attraction": {},
-                    "impedance": {
-                        "gen_cost": 1
-                    }
+                    "gen_cost": -2.715
                 },
                 "individual_dummy": {}
             }
