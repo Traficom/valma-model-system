@@ -275,7 +275,7 @@ class ModelSystem:
         if not isinstance(self.ass_model, MockAssignmentModel):
             with self.resultmatrices.open(
                     "beeline", "", self.ass_model.zone_numbers, m="w") as mtx:
-                mtx["all"] = Purpose.distance
+                mtx["all"] = ZoneData.beeline_dist
         for ap in self.ass_model.assignment_periods:
             tp = ap.name
             log.info(f"Initializing assignment for period {tp}...")
