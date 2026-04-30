@@ -48,7 +48,6 @@ class LogitModel:
         self.purpose = purpose
         self.generation_zone_data = generation_zone_data
         self.attraction_zone_data = attraction_zone_data
-        self.mode_utils: Dict[str, numpy.ndarray] = {}
         self.dest_choice_param: Dict[str, Dict[str, Any]] = parameters["destination_choice"]
         self.mode_choice_param: Optional[Dict[str, Dict[str, Any]]] = parameters["mode_choice"]
         self.distance_boundary = parameters["distance_boundaries"]
@@ -56,7 +55,6 @@ class LogitModel:
     def calc_mode_prob(self, impedance: Dict[str, numpy.ndarray]):
         expsum, mode_exps = self._calc_mode_utils(impedance)
         impedance.clear()
-        self.mode_utils.clear()
         prob = {mode: divide(mode_exps.pop(mode), expsum).T
             for mode in self.mode_choice_param}
         return prob, log(expsum)
@@ -91,7 +89,6 @@ class LogitModel:
         utility = self._add_zone_util(
             utility.T, b["generation"], generation=True).T
         exps = self._calc_alt_util(mode, utility, impedance, b)
-        self.mode_utils[mode] = utility
         return exps
 
     def _calc_mode_utils(self, impedance: Dict[str, Dict[str, numpy.ndarray]],
@@ -560,7 +557,6 @@ class DestModeModel(LogitModel):
     def _calc_prob(self, impedance: Dict[str, Dict[str, numpy.ndarray]],
                    dummy: Optional[str] = None, store_logsum: bool = False):
         mode_expsum, mode_exps = self._calc_mode_utils(impedance, dummy)
-        self.mode_utils = {}
         dest_exps = self._calc_dest_util("logsum", {"logsum": mode_expsum})
         try:
             dest_expsum = dest_exps.sum(1)
