@@ -40,9 +40,6 @@ class GenerationModel:
         self.purpose = purpose
         self.param = param
 
-    def init_tours(self):
-        pass
-
     def add_tours(self):
         pass
 
