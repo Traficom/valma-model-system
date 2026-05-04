@@ -43,9 +43,10 @@ def output_od_los(impedance: numpy.ndarray,
     """
     zone_to_idx = {zone: idx for idx, zone in enumerate(zone_numbers)}
     for od_pair, (z0, z1) in print_od_pairs.items():
-        idx0 = zone_to_idx.get(z0)
-        idx1 = zone_to_idx.get(z1)
-        if idx0 is None or idx1 is None:
+        try:
+            idx0 = zone_to_idx[z0]
+            idx1 = zone_to_idx[z1]
+        except KeyError:
             continue
         los = int(impedance[idx0, idx1])
         if "time" in mtx_type:
