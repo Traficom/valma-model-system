@@ -297,11 +297,6 @@ class ModeDestModel(LogitModel):
         First calculates basic probabilities. Then inserts individual
         dummy variables by calling `calc_individual_prob()`.
 
-        If model for non-home-based tours has individual dummy variables
-        representing parent tour mode choice, None will be returned,
-        because it requires parent tour demand to be calculated first.
-        In this case, `calc_prob_again` will be called later.
-
         Parameters
         ----------
         impedance : dict
