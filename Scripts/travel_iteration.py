@@ -156,8 +156,8 @@ class ModelSystem:
             raise ValueError(msg)
         self.dm = self._init_demand_model(
             home_based_work_purposes + other_work_purposes
-            + home_based_leisure_purposes + other_leisure_purposes
-            + sec_dest_purposes)
+            + home_based_leisure_purposes + other_leisure_purposes,
+            sec_dest_purposes)
         self.travel_modes = {mode: True for purpose in self.dm.tour_purposes
             for mode in purpose.modes}  # Dict instead of set, to preserve order
         self.ass_classes = set()
@@ -167,9 +167,11 @@ class ModelSystem:
         self.mode_share: List[Dict[str,Any]] = []
         self.convergence = []
 
-    def _init_demand_model(self, tour_purposes: List[TourPurpose]):
+    def _init_demand_model(self, primary_purposes: List[TourPurpose], 
+                           sec_dest_purposes: List[TourPurpose]):
         return DemandModel(
-            self._zone_datas["domestic"], self.resultdata, tour_purposes)
+            self._zone_datas["domestic"], self.resultdata, 
+            primary_purposes, sec_dest_purposes)
 
     def _add_internal_demand(self, previous_iter_impedance, is_last_iteration):
         """Produce mode-specific demand matrices.
@@ -194,6 +196,9 @@ class ModelSystem:
             secondary destinations are calculated for all modes
         """
         log.info("Demand calculation started...")
+        for purpose in self.dm.tour_purposes:
+            if isinstance(purpose, SecDestPurpose):
+                purpose.init_tours()
         for purpose in self.dm.tour_purposes:
             if isinstance(purpose, SecDestPurpose):
                 purpose_impedance = purpose.calc_prob(
@@ -443,7 +448,7 @@ class ModelSystem:
                     mtx[ass_class] = impedance[mtx_type][ass_class]
 
     def _export_accessibility(self):
-        for purpose in self.dm.tour_purposes:
+        for purpose in self.dm.primary_purposes:
             for logsum in purpose.model.accessibility.values():
                 self.resultdata.print_data(logsum, f"accessibility.txt")
     
@@ -451,21 +456,21 @@ class ModelSystem:
         self.resultdata.print_data(
             self._zone_datas["domestic"].zone_values, "zonedata_input.txt")
         gen_tours_purpose = {purpose.name: purpose.generated_tours_all
-                             for purpose in self.dm.tour_purposes}
+                             for purpose in self.dm.primary_purposes}
         self.resultdata.print_data(
             gen_tours_purpose, "zone_generation_by_purpose.txt")
         attr_tours_purpose = {purpose.name: purpose.attracted_tours_all
-                              for purpose in self.dm.tour_purposes}
+                              for purpose in self.dm.primary_purposes}
         self.resultdata.print_data(
             attr_tours_purpose, "zone_attraction_by_purpose.txt")
         gen_dist_purpose = {
             purpose.name: purpose.generated_dist_all / purpose.generated_tours_all
-                              for purpose in self.dm.tour_purposes}
+                              for purpose in self.dm.primary_purposes}
         self.resultdata.print_data(
             gen_dist_purpose, "zone_generation_dist_by_purpose.txt")
         attr_dist_purpose = {
             purpose.name: purpose.attracted_dist_all / purpose.attracted_tours_all
-                              for purpose in self.dm.tour_purposes}
+                              for purpose in self.dm.primary_purposes}
         self.resultdata.print_data(
             attr_dist_purpose, "zone_attraction_dist_by_purpose.txt")
         tours, dists = self._get_mode_tours()
@@ -474,7 +479,7 @@ class ModelSystem:
         tours, dists = self._get_mode_tours(generation=False)
         self.resultdata.print_data(tours, "zone_attraction_by_mode.txt")
         self.resultdata.print_data(dists, "zone_attraction_dist_by_mode.txt")
-        for purpose in self.dm.tour_purposes:
+        for purpose in self.dm.primary_purposes:
             self.resultdata.print_concat(
                 purpose.generation_mode_shares, "purpose_mode_shares.txt")
             self.resultdata.print_concat(
@@ -513,6 +518,7 @@ class ModelSystem:
     def _distribute_sec_dests(self, purpose, mode, impedance):
         threads = []
         demand = []
+        ass_class = param.mode_impedance[mode]
         nr_threads = param.performance_settings["number_of_processors"]
         if nr_threads == "max":
             nr_threads = multiprocessing.cpu_count()
@@ -525,7 +531,7 @@ class ModelSystem:
             origs = range(i, bounds.stop - bounds.start, nr_threads)
             # Results will be saved in a temp dtm, to avoid memory clashes
             dtm = dt.DepartureTimeModel(
-                self.ass_model.nr_zones, self.ass_model.time_periods, [mode])
+                self.ass_model.nr_zones, self.ass_model.assignment_periods, [ass_class])
             demand.append(dtm)
             thread = threading.Thread(
                 target=self._distribute_tours,

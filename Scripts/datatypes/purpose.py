@@ -493,11 +493,8 @@ class TourPurpose(Purpose):
         dest_agg = self.attraction_zone_data.result_aggs
         for mode in self.modes:
             mtx = (prob.pop(mode) * tours).T
-            try:
-                self.sec_dest_purpose.gen_model.add_secondary_tours(
-                    mtx, mode, self)
-            except AttributeError:
-                pass
+            if self.sec_dest_purpose is not None:
+                self.sec_dest_purpose.gen_model.add_secondary_tours(mtx, mode, self)
             self.attracted_tours[mode] = mtx.sum(0)
             self.generated_tours[mode] = mtx.sum(1)
             self.attracted_distance[mode] = (self.dist*mtx).sum(0)
@@ -547,14 +544,24 @@ class SecDestPurpose(Purpose):
     """
 
     def __init__(self, specification, zone_data, resultdata, mtx_adjustment):
-        args = (self, specification, zone_data, resultdata)
-        Purpose.__init__(*args, mtx_adjustment)
+        Purpose.__init__(self, specification, zone_data, resultdata, mtx_adjustment)
         self.gen_model = generation.SecDestGeneration(
             self, resultdata, specification["generation"])
+        args = (self, specification, self.attraction_zone_data, resultdata)
         self.model = logit.SecDestModel(*args)
         self.modes = list(self.model.dest_choice_param)
         for mode in self.demand_share:
             self.demand_share[mode]["vrk"] = [[0.5, 0.5], [0.5, 0.5]]
+        for mode in self.impedance_share:
+            if mode not in self.demand_share:
+                self.demand_share[mode] = self.impedance_share[mode]
+
+    @property
+    def dist(self):
+        return self.distance[self.bounds, self.dest_interval]
+
+    def init_tours(self):
+        self.gen_model.init_tours()
 
     def _init_sums(self):
         for mode in self.model.dest_choice_param:
@@ -564,16 +571,11 @@ class SecDestPurpose(Purpose):
                 self.attracted_tours[mode] = numpy.zeros_like(
                     self.attraction_zone_data.zone_numbers, float)
 
-    def calc_basic_prob(self, *args):
-        self._init_sums()
-
     def calc_prob(self, impedance, is_last_iteration):
-        self.gen_model.init_tours()
         return self.transform_impedance(impedance)
 
     def generate_tours(self):
         """Generate the source tours without secondary destinations."""
-        self.gen_model.init_tours()
         self.tours = {}
         self._init_sums()
         for mode in self.model.dest_choice_param:
@@ -603,7 +605,7 @@ class SecDestPurpose(Purpose):
         generation = self.tours[mode][orig, :]
         # All o-d pairs below threshold are neglected,
         # total demand is increased for other pairs.
-        dests = generation > param.secondary_destination_threshold
+        dests = generation > 0.0001
         if not dests.any():
             # If no o-d pairs have demand above threshold,
             # the sole destination with largest demand is picked

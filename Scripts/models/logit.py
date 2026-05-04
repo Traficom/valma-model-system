@@ -108,19 +108,27 @@ class LogitModel:
         dest_exp = self._calc_alt_util(mode, utility, impedance, b)
         return dest_exp
     
-    def _calc_sec_dest_util(self, mode, impedance, orig, dest):
+    def _calc_sec_dest_util(self, mode, impedance, orig, dests):
         b = self.dest_choice_param[mode]
         utility = numpy.zeros_like(next(iter(impedance.values())))
-        self._add_sec_zone_util(utility, b["attraction"], orig, dest)
+        self._add_sec_zone_util(utility, b["attraction"], orig, dests)
         self._add_impedance(utility, impedance, b["impedance"])
-        dest_exps = numpy.exp(utility)
         size = numpy.zeros_like(utility)
-        self._add_sec_zone_util(size, b["attraction_size"])
+        self._add_sec_zone_util(size, b["attraction_size"], orig, dests)
         impedance["attraction_size"] = size
-        self._add_log_impedance(dest_exps, impedance, b["log"])
-        if mode != "logsum":
+        if "transform" in b:
+            b_transf = b["transform"]
+            transimp = numpy.zeros_like(utility)
+            self._add_sec_zone_util(transimp, b_transf["attraction"], orig, dests)
+            self._add_impedance(transimp, impedance, b_transf["impedance"])
+            impedance["transform"] = transimp
+        self._add_log_impedance(utility, impedance, b["log"])
+        dest_exps = numpy.exp(utility)
+        dist = self.purpose.dist
+        if dist.shape == dest_exps.shape:
+            # If this is the lower level in nested model
             l, u = self.distance_boundary[mode]
-            dest_exps[(impedance["dist"] < l) | (impedance["dist"] >= u)] = 0
+            dest_exps[(dist < l) | (dist >= u)] = 0
         return dest_exps
 
     def _add_impedance(self, utility, impedance, b):
@@ -177,10 +185,24 @@ class LogitModel:
             utility += b[i] * zdata.get_data(i, self.bounds, generation)
         return utility
     
-    def _add_sec_zone_util(self, utility, b):
+    def _add_sec_zone_util(self, utility, b, orig, dests):
+        """Adds linear zone terms to utility.
+        Simple 1-d zone data is broadcasted to size of utility. 
+        Matrix 2-d is sliced to same dimensions as sec dest utility.
+        
+        Parameters
+        ----------
+        utility : ndarray
+            Numpy array to which the impedances will be added
+        b : dict
+            The parameters for different zone data.
+        """
         for i in b:
-            data = self.zone_data.get_data(i, self.bounds, generation=True)
-            utility += b[i] * data
+            data = self.zone_data.get_data(i, self.bounds, generation=False)
+            try:
+                utility += b[i] * data
+            except ValueError:
+                utility += b[i] * data[dests,:]
         return utility
 
     def _add_log_zone_util(self, exps, b, generation=False):
@@ -600,7 +622,7 @@ class SecDestModel(LogitModel):
         Writer object to result directory
     """
 
-    def calc_prob(self, mode, impedance, origin, destination=None):
+    def calc_prob(self, mode, impedance, origin, dests=None):
         """Calculate matrix of choice probabilities.
         
         Parameters
@@ -612,7 +634,7 @@ class SecDestModel(LogitModel):
                 Impedances
         origin: int
             Origin zone index
-        destination: int or ndarray (optional)
+        dests: int or ndarray (optional)
             Destination zone index or boolean array (if calculation for 
             all primary destinations is performed in parallel)
         
@@ -621,7 +643,7 @@ class SecDestModel(LogitModel):
         numpy 2-d matrix
                 Choice probabilities
         """
-        dest_exps = self._calc_sec_dest_util(mode, impedance, origin, destination)
+        dest_exps = self._calc_sec_dest_util(mode, impedance, origin, dests)
         return dest_exps.T / dest_exps.sum(1)
 
 

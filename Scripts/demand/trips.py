@@ -32,12 +32,14 @@ class DemandModel:
     def __init__(self, 
                  zone_data: ZoneData, 
                  resultdata: ResultsData,
-                 tour_purposes: List[TourPurpose]):
+                 primary_purposes: List[TourPurpose],
+                 sec_dest_purposes: List[TourPurpose]):
         self.resultdata = resultdata
         self.zone_data = zone_data
-        self.tour_purposes = tour_purposes
-        self.purpose_dict = {purpose.name: purpose for purpose in tour_purposes}
-        for purpose in tour_purposes:
+        self.primary_purposes = primary_purposes
+        self.tour_purposes = primary_purposes + sec_dest_purposes
+        self.purpose_dict = {purpose.name: purpose for purpose in self.tour_purposes}
+        for purpose in self.tour_purposes:
             try:
                 sources = purpose.sources
             except AttributeError:

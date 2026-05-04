@@ -49,7 +49,10 @@ class DepartureTimeModel:
             max_gap : float
                 Maximum gap for OD pair in car work demand matrix
         """
-        car_demand = next(iter(self.demand.values()))["car"]
+        try:
+            car_demand = next(iter(self.demand.values()))["car"]
+        except KeyError:
+            car_demand = 0
         max_gap = numpy.abs(car_demand - self.old_car_demand).max()
         try:
             old_sum = self.old_car_demand.sum()
@@ -76,7 +79,7 @@ class DepartureTimeModel:
         """
         try:
             self.old_car_demand = next(iter(self.demand.values()))["car"]
-        except FileNotFoundError:
+        except (FileNotFoundError, KeyError):
             pass
         n = self.nr_zones
         for ap in self.assignment_periods:
@@ -146,8 +149,8 @@ class DepartureTimeModel:
         if demand.dest is not None:
             share = demand.purpose.sec_dest_purpose.demand_share[demand.mode][tp]
         colsum = mtx.sum(0)[:, numpy.newaxis]
-        self._add_2d_demand(share[0], ass_class, tp, mtx, (d1, d2))
-        self._add_2d_demand(share[1], ass_class, tp, colsum, (d2, o))
+        self._add_2d_demand(share, ass_class, tp, mtx, (d1, d2))
+        self._add_2d_demand(share, ass_class, tp, colsum, (d2, o))
     
     def add_vans(self, time_period: str, nr_zones: int):
         """Add vans as a share of private car trips for one time period.
