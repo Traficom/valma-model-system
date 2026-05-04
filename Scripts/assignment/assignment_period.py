@@ -7,7 +7,6 @@ from pathlib import Path
 
 from typing import TYPE_CHECKING, Dict, Union, Iterable, Optional
 import utils.log as log
-from utils.validate_assignment import divide_matrices, output_od_los
 import parameters.assignment as param
 from parameters.cost import value_of_time
 from assignment.datatypes.assignment_mode import AssignmentMode, BikeMode, WalkMode
@@ -270,14 +269,7 @@ class AssignmentPeriod(Period):
         mtxs = {tc: self.assignment_modes[tc].get_matrices()
             for tc in assignment_classes}
         for mode in mtxs:
-            try:
-                divide_matrices(
-                    mtxs[mode]["dist"], mtxs[mode]["time"]/60,
-                    f"OD speed (km/h) {mode}")
-            except KeyError:
-                pass
             for mtx_type, mtx in mtxs[mode].items():
-                output_od_los(mtx, self.mapping, mtx_type, mode)
                 if numpy.any(mtx > 1e10):
                     log.warn(f"Matrix with infinite values: {mtx_type} {mode}")
         impedance = {mtx_type: {mode: mtxs[mode][mtx_type]
