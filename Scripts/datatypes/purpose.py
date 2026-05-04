@@ -478,9 +478,8 @@ class TourPurpose(Purpose):
         Demand
                 Mode-specific demand matrix for whole day
         """
-        prob = self.calc_prob(impedance, is_last_iteration)
-        self.gen_model.init_tours()
         self.gen_model.add_tours()
+        prob = self.calc_prob(impedance, is_last_iteration)
         tours = self.gen_model.get_tours()
         if prob is None:
             prob = self.model.calc_prob_again()
