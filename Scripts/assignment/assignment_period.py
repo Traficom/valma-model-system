@@ -360,8 +360,8 @@ class AssignmentPeriod(Period):
             if link.i_node[param.submodel_attr] == 2 and link[time_attr] > 0}
 
     def _set_car_vdfs(self, use_free_flow_speeds: bool = False):
-        log.info("Sets car functions for scenario {}".format(
-            self.emme_scenario.id))
+        log.info("Setting car functions for scenario {}, {}...".format(
+            self.emme_scenario.id, self.name))
         emmebank = self.emme_project.modeller.emmebank
         # Function 90 is used for free-flow speeds on external links
         emmebank.function("fd90").expression = param.volume_delay_funcs["fd90"]
@@ -448,8 +448,8 @@ class AssignmentPeriod(Period):
                 raise ValueError(msg)
 
     def _set_transit_vdfs(self):
-        log.info("Sets transit functions for scenario {}".format(
-            self.emme_scenario.id))
+        log.info("Setting transit functions for scenario {}, {}...".format(
+            self.emme_scenario.id, self.name))
         network = self.emme_scenario.get_network()
         transit_modesets = {modes[0]: {network.mode(m) for m in modes[1]}
             for modes in param.transit_delay_funcs}
@@ -497,8 +497,8 @@ class AssignmentPeriod(Period):
         self.emme_scenario.publish_network(network)
 
     def _set_bike_vdfs(self):
-        log.info("Sets bike functions for scenario {}".format(
-            self.emme_scenario.id))
+        log.info("Setting bike functions for scenario {}, {}...".format(
+            self.emme_scenario.id, self.name))
         emmebank = self.emme_project.modeller.emmebank
         emmebank.function("fd90").expression = param.volume_delay_funcs["fd98"]
         network = self.emme_scenario.get_network()

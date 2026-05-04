@@ -55,7 +55,6 @@ class Purpose:
     mtx_adjustment : dict (optional)
         Dict of matrix adjustments for testing elasticities
     """
-    distance: numpy.ndarray
 
     def __init__(self, 
                  specification: Dict[str,Optional[str]],
@@ -187,12 +186,6 @@ class Purpose:
                                                     cost.car_pax_occupancy[self.name])
                     except KeyError:
                         pass
-                airpl_access_modes = ["airpl_car_acc", "airpl_taxi_acc", "airpl_car_egr"]
-                transit_access_modes = ["pt_car_acc", "pt_taxi_acc", "pt_taxi_egr"]
-                if mtx_type == "time" and mode in airpl_access_modes:
-                    day_imp[mode][mtx_type] -= day_imp[mode]["car_time"] * 1.5
-                if mtx_type == "time" and mode in transit_access_modes:
-                    day_imp[mode][mtx_type] -= day_imp[mode]["car_time"] * 6.5
             if "vrk" in self.impedance_share[mode] and mode != "walk":
                 vot = cost.value_of_time[mode_impedance[mode]]
                 day_imp[mode]["gen_cost"] = (day_imp[mode].pop("cost")
@@ -287,7 +280,8 @@ class TourPurpose(Purpose):
                 self.bounds, resultdata)
         else:
             log.error(f"Tour generation model not defined for {self.name}")
-        args = (self, specification, self.attraction_zone_data, resultdata)
+        args = (self, specification, self.generation_zone_data,
+                self.attraction_zone_data, resultdata)
         if specification["struct"] == "mode>dest":
             self.model = logit.ModeDestModel(*args)
         elif specification["struct"] == "dest>mode":
@@ -306,7 +300,8 @@ class TourPurpose(Purpose):
                 new_spec = copy(specification)
                 new_spec["mode_choice"] = new_spec["access_mode_choice"][mode]
                 self.connection_models[mode] = logit.LogitModel(
-                    self, new_spec, self.generation_zone_data, resultdata)
+                    self, new_spec, self.generation_zone_data,
+                    self.attraction_zone_data, resultdata)
         self.histograms = {mode: TourLengthHistogram(self.name)
             for mode in self.modes}
         self.orig_mappings = self.generation_zone_data.result_aggs.mappings
@@ -317,7 +312,7 @@ class TourPurpose(Purpose):
 
     @property
     def dist(self):
-        return self.distance[self.bounds, self.dest_interval]
+        return ZoneData.beeline_dist[self.bounds, self.dest_interval]
     
     @property
     def generated_tours_all(self):
@@ -675,13 +670,12 @@ class FreightPurpose(Purpose):
         self.costdata = costdata
         self.model_category = list(zone_data)[0]
         self.modes: List[str] = list(specification["mode_choice"])
-
+        args = (self, specification, self.generation_zone_data,
+                self.attraction_zone_data, resultdata)
         if specification["struct"] == "dest>mode":
-            self.model = logit.DestModeModel(self, specification, zone_data[self.model_category], 
-                                             resultdata)
+            self.model = logit.DestModeModel(*args)
         elif specification["struct"] == "mode>dest":
-            self.model = logit.ModeDestModel(self, specification, zone_data[self.model_category], 
-                                             resultdata)
+            self.model = logit.ModeDestModel(*args)
         else:
             self.model = None
         self.route_params = specification.get("route_choice", None)
