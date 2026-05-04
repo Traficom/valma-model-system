@@ -322,32 +322,6 @@ class ModeDestModel(LogitModel):
         if calc_accessibility:
             self._calc_accessibility(mode_exps, mode_expsum)
         mode_probs = self._calc_mode_prob(mode_exps, mode_expsum)
-        if mode_probs is None:
-            self._stashed_exps += [dest_exps, dest_expsums]
-            return None
-        else:
-            try:
-                self.soft_mode_probs = {
-                    mode: mode_probs[mode] for mode in self.soft_mode_exps}
-            except AttributeError:
-                pass
-            return self._calc_prob(mode_probs, dest_exps, dest_expsums)
-
-    def calc_prob_again(self) -> dict:
-        """Return matrix of choice probabilities.
-
-        First recovers basic probabilities. Then inserts individual
-        dummy variables by calling `calc_individual_prob()`.
-
-        Returns
-        -------
-        dict
-            Mode (car/transit/bike/walk) : numpy 2-d matrix
-                Choice probabilities
-        """
-        mode_exps, mode_expsum, dest_exps, dest_expsums = self._stashed_exps
-        del self._stashed_exps
-        mode_probs = self._calc_mode_prob(mode_exps, mode_expsum)
         try:
             self.soft_mode_probs = {
                 mode: mode_probs[mode] for mode in self.soft_mode_exps}
@@ -431,11 +405,7 @@ class ModeDestModel(LogitModel):
         mode_probs: defaultdict[str, list] = defaultdict(list)
         no_dummy_share = 1.0
         for dummy, modes in dummies.items():
-            try:
-                dummy_share = numpy.asarray(self.generation_zone_data[dummy])
-            except KeyError:
-                self._stashed_exps = [mode_exps, mode_expsum]
-                return None
+            dummy_share = numpy.asarray(self.generation_zone_data[dummy])
             no_dummy_share -= dummy_share
             mode_exps2 = self._calc_individual_prob(modes, dummy, mode_exps)
             mode_expsum2 = sum(mode_exps2.values())
