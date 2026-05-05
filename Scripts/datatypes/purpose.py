@@ -19,6 +19,7 @@ from parameters.assignment import (
 import parameters.cost as cost
 import models.generation as generation
 from datatypes.demand import Demand
+from demand.foreign_external import ForeignExternalModel
 from datatypes.histogram import TourLengthHistogram
 from utils.freight_costs import calc_cost, get_foreign_ship_cost
 from utils.calibrate import attempt_calibration
@@ -232,6 +233,8 @@ def new_tour_purpose(*args):
     attempt_calibration(specification)
     if "sec_dest" in specification:
         purpose = SecDestPurpose(*args)
+    elif specification["name"] == "hb_abroad_other":
+        purpose = ForeignExternalPurpose(*args)
     elif (specification["dest"] == "source"
           or specification["name"] == "oop"):
         purpose = SimpleTourPurpose(*args)
@@ -949,3 +952,130 @@ class FreightPurpose(Purpose):
                                        border_indices, self.is_export)
         trade_demand = run_trade_model(route_model, demand)
         return trade_demand
+    
+class ForeignExternalPurpose(TourPurpose):
+    """External two-way tour purpose.
+
+    Parameters
+    ----------
+        See `new_tour_purpose()`
+    zone_datas : Dict
+        key : str
+            Model area (domestic/foreign)
+        val : ZoneData
+            Data used for all demand calculations
+    resultdata : ResultData
+        Writer object for result directory
+    mtx_adjustment : dict (optional)
+        Dict of matrix adjustments for testing elasticities
+    basematrices_path : Path
+        Path to base matrices for calculating foreign external demand
+    """
+
+    def __init__(self, specification, zone_datas, resultdata, mtx_adjustment, basematrices_path):
+        TourPurpose.__init__(
+            self, specification, zone_datas, resultdata, mtx_adjustment)
+        self.tour_generation = specification["tour_generation"]
+        self._zone_datas = zone_datas
+        self.basematrices_path = basematrices_path
+        # NOTE: Modify this if want to use separate zonedatas
+        self.fem = ForeignExternalModel(
+            self, self._zone_datas, self._zone_datas, self.basematrices_path, self.generation_zone_data.all_zone_numbers)
+    
+    def calc_demand(
+            self, impedance, is_last_iteration: bool) -> Iterator[Demand]:
+        """Calculate purpose specific demand matrices.
+
+        Parameters
+        ----------
+        impedance : dict
+            Time period (aht/pt/iht/it) : dict
+                Type (time/cost/dist) : dict
+                    Mode (car/transit/bike/...) : numpy.ndarray
+        is_last_iteration : bool
+            Whether to calculate and store accessibility indicators
+
+        Yields
+        -------
+        Demand
+                Mode-specific demand matrix for whole day
+        """
+
+        # TODO: Check is_last_iteration
+
+        foreign_ext_mtx = self.fem.calc_foreign_external_traffic("airplane")
+        # Calculate probabilities for all access mode of the main mode
+        assignment_mode_probs = self.calc_prob(impedance, is_last_iteration)
+        # Access mode demand
+        # TODO: Add main mode demand also
+        for access_mode in assignment_mode_probs:
+            access_probs = assignment_mode_probs[access_mode]
+            access_mode_mtx = foreign_ext_mtx * access_probs
+            yield Demand(self, access_mode, access_mode_mtx)
+        log.info(f"Demand calculated for {self.name}")
+    
+    def calc_prob(self, impedance, is_last_iteration):
+        """Calculate mode and destination probabilities.
+        
+        Parameters
+        ----------
+        impedance : dict
+            Time period (aht/pt/iht/it) : dict
+                Type (time/cost/dist) : dict
+                    Mode (car/transit/bike/...) : numpy.ndarray
+        is_last_iteration : bool
+            Whether to calclulate and store accessibility indicators
+
+        Returns
+        -------
+        dict
+            Mode (car/transit/bike/walk) : numpy 2-d matrix
+                Choice probabilities
+        """
+        purpose_impedance = self.transform_impedance(impedance)
+
+        # TODO: REWRITE THIS FUNCTION SO THAT IT ONLY USES GENERATION DATA FOR MODE PROBABILITIES AND STILL WORKS
+
+        #If the trip is long-distance, calculate unimodal/intermodal
+        # probability split for each main mode
+        if "vrk" in impedance:
+            acc_splits = {}
+            matrixdata = MatrixData(self.resultdata.path / "Matrices")
+            with matrixdata.open(
+                    f"logsum_{self.name}", "vrk", list(self.orig_zone_numbers), m='w'
+                    ) as mtx:
+                for main_mode, acc_modes in self.intermodals.items():
+                    mode_impedance = {mode: purpose_impedance.pop(mode)
+                        for mode in [main_mode] + acc_modes}
+                    acc_splits[main_mode], logsum = self.split_connection_mode(
+                        mode_impedance, main_mode)
+                    purpose_impedance[main_mode] = {"logsum": logsum}
+                    mtx[main_mode] = logsum
+
+        # TODO: "THE IDEA IS TO SKIP THIS STEP BELOW ENTIRELY"
+        # Calculate main mode probability after access mode probability
+        # to have access mode logsum as variable
+        prob = self.model.calc_prob(purpose_impedance, is_last_iteration)
+        log.info(f"Mode and dest probabilities calculated for {self.name}")
+
+        # If the trip is long-distance, calculate joint main mode/access
+        # mode probability for each intermodal class in EMME assignment
+        if "vrk" in impedance:
+            for main_mode, split in acc_splits.items():
+                main_prob = prob[main_mode]
+                for acc_mode in split:
+                    if self.name == "hb_abroad_other":
+                        prob[acc_mode] = split[acc_mode]
+                    else:
+                        prob[acc_mode] = split[acc_mode] * main_prob
+        return prob
+
+    def split_connection_mode(self, impedance, pt_mode):
+        if pt_mode == "airplane":
+            impedance["airpl_taxi_acc"] = impedance["airpl_car_acc"]
+        model = self.connection_models[pt_mode]
+        prob, logsum = model.calc_mode_prob(impedance)
+        if "airpl_taxi_acc" in prob:
+            prob["airpl_car_acc"] += prob.pop("airpl_taxi_acc")
+        return prob, logsum
+

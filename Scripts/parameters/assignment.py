@@ -379,6 +379,11 @@ long_distance_transit_classes = (mixed_mode_classes
 local_transit_classes = (
     "transit",
 )
+foreign_external_classes = (
+    "airplane",
+    "airpl_car_acc",
+    "airpl_car_egr",
+)
 simple_transit_classes = local_transit_classes + long_dist_simple_classes
 transit_classes = simple_transit_classes + mixed_mode_classes
 truck_classes = (
@@ -410,6 +415,7 @@ assignment_classes = {
     "wb_other": "leisure",
     "ob_other": "leisure",
     "external": "leisure",
+    "hb_abroad_other": "leisure",
 }
 main_mode = 'h'
 bike_mode = 'f'
