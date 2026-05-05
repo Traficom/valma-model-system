@@ -3,7 +3,7 @@
     "orig": "home",
     "dest": "leisure",
     "generation_area": "domestic",
-    "attraction_area": "external",
+    "attraction_area": "domestic",
     "struct": "dest>mode",
     "gen_model": "rate",
     "generation": {
@@ -407,6 +407,14 @@
                 1.0,
                 0.0
                 ]
+        }
+    },
+    "tour_generation": {
+        "ship": {
+            "population": 0.01
+        },
+        "airplane": {
+            "population": 0.01
         }
     }
 }
