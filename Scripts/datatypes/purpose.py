@@ -1002,20 +1002,19 @@ class ForeignExternalPurpose(TourPurpose):
                 Mode-specific demand matrix for whole day
         """
 
-        # TODO: Check is_last_iteration
-
         foreign_ext_mtx = self.fem.calc_foreign_external_traffic("airplane")
         # Calculate probabilities for all access mode of the main mode
-        assignment_mode_probs = self.calc_prob(impedance, is_last_iteration)
+        access_mode_probs = self.calc_prob(impedance)["airplane"]
         # Access mode demand
-        # TODO: Add main mode demand also
-        for access_mode in assignment_mode_probs:
-            access_probs = assignment_mode_probs[access_mode]
+        for access_mode in access_mode_probs:
+            access_probs = access_mode_probs[access_mode].T
             access_mode_mtx = foreign_ext_mtx * access_probs
             yield Demand(self, access_mode, access_mode_mtx)
+        # Main mode demand
+        yield Demand(self, "airplane", foreign_ext_mtx)
         log.info(f"Demand calculated for {self.name}")
     
-    def calc_prob(self, impedance, is_last_iteration):
+    def calc_prob(self, impedance):
         """Calculate mode and destination probabilities.
         
         Parameters
@@ -1035,8 +1034,6 @@ class ForeignExternalPurpose(TourPurpose):
         """
         purpose_impedance = self.transform_impedance(impedance)
 
-        # TODO: REWRITE THIS FUNCTION SO THAT IT ONLY USES GENERATION DATA FOR MODE PROBABILITIES AND STILL WORKS
-
         #If the trip is long-distance, calculate unimodal/intermodal
         # probability split for each main mode
         if "vrk" in impedance:
@@ -1052,24 +1049,7 @@ class ForeignExternalPurpose(TourPurpose):
                         mode_impedance, main_mode)
                     purpose_impedance[main_mode] = {"logsum": logsum}
                     mtx[main_mode] = logsum
-
-        # TODO: "THE IDEA IS TO SKIP THIS STEP BELOW ENTIRELY"
-        # Calculate main mode probability after access mode probability
-        # to have access mode logsum as variable
-        prob = self.model.calc_prob(purpose_impedance, is_last_iteration)
-        log.info(f"Mode and dest probabilities calculated for {self.name}")
-
-        # If the trip is long-distance, calculate joint main mode/access
-        # mode probability for each intermodal class in EMME assignment
-        if "vrk" in impedance:
-            for main_mode, split in acc_splits.items():
-                main_prob = prob[main_mode]
-                for acc_mode in split:
-                    if self.name == "hb_abroad_other":
-                        prob[acc_mode] = split[acc_mode]
-                    else:
-                        prob[acc_mode] = split[acc_mode] * main_prob
-        return prob
+        return acc_splits
 
     def split_connection_mode(self, impedance, pt_mode):
         if pt_mode == "airplane":
