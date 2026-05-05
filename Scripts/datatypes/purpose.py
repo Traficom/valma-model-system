@@ -76,6 +76,9 @@ class Purpose:
             param.purpose_areas[self.generation_area]))
         self.dest_interval = slice(*zone_numbers.searchsorted(
             param.purpose_areas[self.attraction_area]))
+        if self.name == "hb_abroad_other":
+            self.dest_interval = slice(*zone_numbers.searchsorted(
+                param.purpose_areas["external"]))
         self.resultdata = resultdata
         self.mtx_adjustment = mtx_adjustment
         self.generated_tours: Dict[str, numpy.array] = {}
