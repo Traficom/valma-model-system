@@ -146,6 +146,8 @@ class ModelSystem:
                 {tp for m in purpose.impedance_share.values() for tp in m})
             if required_time_periods == sorted(assignment_model.time_periods):
                 purpose_names.append(purpose.name)
+                if purpose.name == "hb_abroad_other":
+                    continue
                 if isinstance(purpose, SecDestPurpose):
                     sec_dest_purposes.append(purpose)
                 elif purpose.orig == "home":
