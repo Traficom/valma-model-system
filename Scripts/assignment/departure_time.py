@@ -101,7 +101,7 @@ class DepartureTimeModel:
                 for ap in self.assignment_periods:
                     if ass_class in ap.assignment_modes:
                         mtx = demand.matrix.T if is_return else demand.matrix
-                        position = (demand.position[1], demand.position[0]) if is_return else demand.position
+                        position = demand.position[::-1] if is_return else demand.position
                         self._add_2d_demand(
                             share[ap.name], ass_class, ap.name, mtx, position)
             elif len(position) == 3:
