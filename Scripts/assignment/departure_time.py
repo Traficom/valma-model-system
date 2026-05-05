@@ -76,7 +76,7 @@ class DepartureTimeModel:
         """
         try:
             self.old_car_demand = next(iter(self.demand.values()))["car"]
-        except FileNotFoundError:
+        except:  # In MockAssignmentModel, this can fail for various reasons
             pass
         n = self.nr_zones
         for ap in self.assignment_periods:

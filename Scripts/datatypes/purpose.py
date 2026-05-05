@@ -11,7 +11,6 @@ import utils.log as log
 import parameters.zone as param
 import models.logit as logit
 from parameters.assignment import (
-    assignment_classes,
     intermodals,
     mixed_mode_classes,
     mode_impedance
