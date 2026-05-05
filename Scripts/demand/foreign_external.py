@@ -76,11 +76,7 @@ class ForeignExternalModel:
         # Remove small values
         demand[demand < 0.0001] = 0
 
-        # Convert to full matrix
-        mtx_full = pandas.DataFrame(numpy.zeros((len(all_zone_numbers),len(all_zone_numbers))),all_zone_numbers,all_zone_numbers)
-        mtx_full = mtx_full.add(mtx, fill_value=0)
-
-        return mtx_full.to_numpy()
+        return demand.to_numpy()
 
     def _generate_trips(self, 
                         zone_data: pandas.DataFrame, 
