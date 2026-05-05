@@ -187,14 +187,16 @@ class Purpose:
                     except KeyError:
                         pass
             if "vrk" in self.impedance_share[mode] and mode != "walk":
+                if mode in mixed_mode_classes:
+                    # Remove default parking cost and add cost based on tour duration
+                    park_time = (cost.tour_duration[mode][self.name]
+                                 / cost.tour_duration[mode]["avg"])
+                    day_imp[mode]["cost"] += (day_imp[mode].pop("park_cost")
+                                              * (park_time-1))
                 vot = cost.value_of_time[mode_impedance[mode]]
                 day_imp[mode]["gen_cost"] = (day_imp[mode].pop("cost")
                                              + vot*day_imp[mode].pop("time")/60)
                 log.info(f"Generalized cost calculated for {self.name} {mode}.")
-            if mode in mixed_mode_classes:
-                day_imp[mode]["park_cost"] = (day_imp[mode]["park_cost"]
-                                              * cost.tour_duration[mode][self.name]
-                                              / cost.tour_duration[mode]["avg"])
         return day_imp
 
 def new_tour_purpose(*args):

@@ -305,11 +305,19 @@ class MixedMode(TransitMode):
         self.emme_scenario.publish_network(network)
 
     def get_matrices(self):
-        car_cost = self.dist_unit_cost * self.car_dist.data
-        mtxs = TransitMode.get_matrices(self)
-        mtxs["cost"] += car_cost
+        transfer_penalty = (param.transfer_penalty[self.name]
+                            * (self.num_board.data > 0)).astype("float32")
+        cost = self.inv_cost.data + self.board_cost.data + self.park_cost.data
+        time = self.gen_cost.data - self.vot_inv*cost - transfer_penalty
+        time[cost > 999999] = 999999
+        mtxs = {"time": time, "cost": cost}
+        for mtx_name in param.impedance_output:
+            if mtx_name in self._matrices:
+                mtxs[mtx_name] = self._matrices[mtx_name].data
+        mtxs["cost"] += self.dist_unit_cost * self.car_dist.data
         car_time_correction = 1.5 if "airpl" in self.name else 6.5
         mtxs["time"] -= car_time_correction * self.car_time.data
+        self._soft_release_matrices()
         return mtxs
 
     def _save_link_results(self, network):
