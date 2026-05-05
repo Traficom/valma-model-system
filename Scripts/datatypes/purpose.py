@@ -309,6 +309,7 @@ class TourPurpose(Purpose):
         self.aggregates = {name: {} for name in self.dest_mappings}
         self.within_zone_tours = {}
         self.sec_dest_purpose: SecDestPurpose = None
+        self.sec_dest_rates = specification["sec_dest_rate"]
 
     @property
     def dist(self):

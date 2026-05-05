@@ -16,6 +16,11 @@
         "hb_edu_basic": 0.0287,
         "hb_edu_student": 0.0319
     },
+    "sec_dest_rate": {
+        "car_drv": 1.0264,
+        "car_pax": 1.0503,
+        "transit": 1.0000
+    },
     "impedance_share": {
         "car_drv": {
             "aht": [

@@ -22,6 +22,11 @@
             "age_65_99": 0.1624
         }
     },
+    "sec_dest_rate": {
+        "car_drv": 1.1209,
+        "car_pax": 1.0806,
+        "transit": 1.0663
+    },
     "impedance_share": {
         "car_drv": {
             "aht": [
