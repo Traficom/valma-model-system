@@ -168,9 +168,9 @@ class Purpose:
                         day_imp[mode][mtx_type] *= cost.cost_discount[self.name][mode]
                     except KeyError:
                         pass
-                if mtx_type == "time" and "car" in mode:
+                if mtx_type == "time" and "car" in mode and not self.name == "hb_abroad_other":
                     day_imp[mode][mtx_type] += self.attraction_zone_data["avg_park_time"].values
-                if mtx_type == "cost" and "car" in mode:
+                if mtx_type == "cost" and "car" in mode and not self.name == "hb_abroad_other":
                     try:
                         day_imp[mode][mtx_type] += (cost.activity_time[self.name] *
                                                     cost.share_paying[self.name] *
