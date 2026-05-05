@@ -44,8 +44,8 @@ class FreightAssignmentPeriod(AssignmentPeriod):
         self._assign_freight()
         mtxs = {tc: self.assignment_modes[tc].get_matrices()
                 for tc in param.truck_classes + tuple(param.freight_modes)}
-        impedance_types = ("time", "dist", "aux_time", "aux_dist",
-                           "toll_cost", "canal_cost")
+        impedance_types = ("time", "dist", "cost", "aux_cost", "aux_dist",
+                           "canal_cost")
         impedance = {mode: {mtx_type: mtxs[mode][mtx_type]
                             for mtx_type in impedance_types if mtx_type in mtxs[mode]}
                     for mode in mtxs}
