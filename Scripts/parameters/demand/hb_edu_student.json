@@ -32,6 +32,11 @@
             }
         }
     },
+    "sec_dest_rate": {
+        "car_drv": 1.0811,
+        "car_pax": 1.0324,
+        "transit": 1.0585
+    },
     "impedance_share": {
         "car_drv": {
             "aht": [

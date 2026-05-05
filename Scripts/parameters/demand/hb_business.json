@@ -22,6 +22,11 @@
             "age_65_99": 0.0199
         }
     },
+    "sec_dest_rate": {
+        "car_drv": 1.0834,
+        "car_pax": 1.1938,
+        "transit": 1.0407
+    },
     "impedance_share": {
         "walk": {
             "vrk": [
