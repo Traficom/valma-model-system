@@ -973,6 +973,7 @@ class ForeignExternalPurpose(TourPurpose):
     """
 
     def __init__(self, specification, zone_datas, resultdata, mtx_adjustment, basematrices_path):
+        attempt_calibration(specification)
         TourPurpose.__init__(
             self, specification, zone_datas, resultdata, mtx_adjustment)
         self.tour_generation = specification["tour_generation"]
