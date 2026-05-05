@@ -59,7 +59,9 @@ def main(args):
     # Check scenario based input data
     log.info("Checking base zonedata & scenario-based input data...")
     for i, emp_path in enumerate(emme_project_files):
-        log.info("Checking input data for scenario #{} ...".format(i))
+        log.info(
+            "Checking input data for "
+            + f"{args.scenario_name[i]} {args.submodel[i]}...")
 
         data_path = args.cost_data_files[i]
         if not os.path.exists(data_path):

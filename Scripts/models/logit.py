@@ -48,7 +48,6 @@ class LogitModel:
         self.purpose = purpose
         self.generation_zone_data = generation_zone_data
         self.attraction_zone_data = attraction_zone_data
-        self.mode_utils: Dict[str, numpy.ndarray] = {}
         self.dest_choice_param: Dict[str, Dict[str, Any]] = parameters["destination_choice"]
         self.mode_choice_param: Optional[Dict[str, Dict[str, Any]]] = parameters["mode_choice"]
         self.distance_boundary = parameters["distance_boundaries"]
@@ -56,7 +55,6 @@ class LogitModel:
     def calc_mode_prob(self, impedance: Dict[str, numpy.ndarray]):
         expsum, mode_exps = self._calc_mode_utils(impedance)
         impedance.clear()
-        self.mode_utils.clear()
         prob = {mode: divide(mode_exps.pop(mode), expsum).T
             for mode in self.mode_choice_param}
         return prob, log(expsum)
@@ -91,7 +89,6 @@ class LogitModel:
         utility = self._add_zone_util(
             utility.T, b["generation"], generation=True).T
         exps = self._calc_alt_util(mode, utility, impedance, b)
-        self.mode_utils[mode] = utility
         return exps
 
     def _calc_mode_utils(self, impedance: Dict[str, Dict[str, numpy.ndarray]],
@@ -322,11 +319,6 @@ class ModeDestModel(LogitModel):
         First calculates basic probabilities. Then inserts individual
         dummy variables by calling `calc_individual_prob()`.
 
-        If model for non-home-based tours has individual dummy variables
-        representing parent tour mode choice, None will be returned,
-        because it requires parent tour demand to be calculated first.
-        In this case, `calc_prob_again` will be called later.
-
         Parameters
         ----------
         impedance : dict
@@ -355,45 +347,13 @@ class ModeDestModel(LogitModel):
         if calc_accessibility:
             self._calc_accessibility(mode_exps, mode_expsum)
         mode_probs = self._calc_mode_prob(mode_exps, mode_expsum)
-        if mode_probs is None:
-            self._stashed_exps += [dest_exps, dest_expsums, ec_impedance]
-            return None
-        else:
-            if ec_impedance:
-                (
-                    mode_probs, ec_dest_exps, ec_dest_expsums
-                ) = self._calc_electric_car_prob(
-                    ec_impedance, mode_exps, mode_probs)
-                dest_exps.update(ec_dest_exps)
-                dest_expsums.update(ec_dest_expsums)
-            try:
-                self.soft_mode_probs = {
-                    mode: mode_probs[mode] for mode in self.soft_mode_exps}
-            except AttributeError:
-                pass
-            return self._calc_prob(mode_probs, dest_exps, dest_expsums)
-
-    def calc_prob_again(self) -> dict:
-        """Return matrix of choice probabilities.
-
-        First recovers basic probabilities. Then inserts individual
-        dummy variables by calling `calc_individual_prob()`.
-
-        Returns
-        -------
-        dict
-            Mode (car/transit/bike/walk) : numpy 2-d matrix
-                Choice probabilities
-        """
-        (
-            mode_exps, mode_expsum, dest_exps, dest_expsums, impedance
-        ) = self._stashed_exps
-        del self._stashed_exps
-        mode_probs = self._calc_mode_prob(mode_exps, mode_expsum)
-        mode_probs, ec_dest_exps, ec_dest_expsums = self._calc_electric_car_prob(
-            impedance, mode_exps, mode_probs)
-        dest_exps.update(ec_dest_exps)
-        dest_expsums.update(ec_dest_expsums)
+        if ec_impedance:
+            (
+                mode_probs, ec_dest_exps, ec_dest_expsums
+            ) = self._calc_electric_car_prob(
+                ec_impedance, mode_exps, mode_probs)
+            dest_exps.update(ec_dest_exps)
+            dest_expsums.update(ec_dest_expsums)
         try:
             self.soft_mode_probs = {
                 mode: mode_probs[mode] for mode in self.soft_mode_exps}
@@ -494,11 +454,7 @@ class ModeDestModel(LogitModel):
         mode_probs: defaultdict[str, list] = defaultdict(list)
         no_dummy_share = 1.0
         for dummy, modes in dummies.items():
-            try:
-                dummy_share = numpy.asarray(self.generation_zone_data[dummy])
-            except KeyError:
-                self._stashed_exps = [mode_exps, mode_expsum]
-                return None
+            dummy_share = numpy.asarray(self.generation_zone_data[dummy])
             no_dummy_share -= dummy_share
             mode_exps2 = self._calc_individual_prob(modes, dummy, mode_exps)
             mode_expsum2 = sum(mode_exps2.values())
@@ -640,7 +596,6 @@ class DestModeModel(LogitModel):
     def _calc_prob(self, impedance: Dict[str, Dict[str, numpy.ndarray]],
                    dummy: Optional[str] = None, store_logsum: bool = False):
         mode_expsum, mode_exps = self._calc_mode_utils(impedance, dummy)
-        self.mode_utils = {}
         dest_exps = self._calc_dest_util("logsum", {"logsum": mode_expsum})
         try:
             dest_expsum = dest_exps.sum(1)

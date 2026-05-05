@@ -24,6 +24,7 @@ from datatypes.purpose import Purpose, TourPurpose, SecDestPurpose
 from datatypes.demand import Demand
 import parameters.assignment as param
 import parameters.zone as zone_param
+from utils.validate_assignment import validate_assignment
 
 
 class ModelSystem:
@@ -276,7 +277,7 @@ class ModelSystem:
         if not isinstance(self.ass_model, MockAssignmentModel):
             with self.resultmatrices.open(
                     "beeline", "", self.ass_model.zone_numbers, m="w") as mtx:
-                mtx["all"] = Purpose.distance
+                mtx["all"] = ZoneData.beeline_dist
         for ap in self.ass_model.assignment_periods:
             tp = ap.name
             log.info(f"Initializing assignment for period {tp}...")
@@ -310,6 +311,8 @@ class ModelSystem:
             impedance[tp] = (ap.end_assign(not is_car_end_assignment)
                              if is_end_assignment
                              else ap.assign(self.ass_classes))
+            validate_assignment(impedance[tp], tp, self.ass_classes, 
+                                self.zone_numbers, self.resultdata)
             if is_end_assignment:
                 if not isinstance(self.ass_model, MockAssignmentModel):
                     self._save_to_omx(impedance[tp], tp)
