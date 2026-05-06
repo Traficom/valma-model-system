@@ -146,8 +146,6 @@ class ModelSystem:
                 {tp for m in purpose.impedance_share.values() for tp in m})
             if required_time_periods == sorted(assignment_model.time_periods):
                 purpose_names.append(purpose.name)
-                if purpose.name == "hb_abroad_other":
-                    continue
                 if isinstance(purpose, SecDestPurpose):
                     sec_dest_purposes.append(purpose)
                 elif purpose.orig == "home":
@@ -502,6 +500,8 @@ class ModelSystem:
             demand = pandas.Series(0.0, idx, name=mode)
             dist = pandas.Series(0.0, idx, name=mode)
             for purpose in self.dm.tour_purposes:
+                if purpose.name == "hb_abroad_other":
+                    continue
                 if mode in purpose.modes and purpose.dest != "source":
                     if generation:
                         bounds = (next(iter(purpose.sources)).bounds
