@@ -1012,6 +1012,8 @@ class ForeignExternalPurpose(TourPurpose):
         for access_mode in access_mode_probs:
             access_probs = access_mode_probs[access_mode].T
             access_mode_mtx = foreign_ext_mtx * access_probs
+            if access_mode == "airplane":
+                access_mode = "transit"
             yield Demand(self, access_mode, access_mode_mtx)
         # Main mode demand
         yield Demand(self, "airplane", foreign_ext_mtx)
