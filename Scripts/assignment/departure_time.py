@@ -96,11 +96,6 @@ class DepartureTimeModel:
         demand : Demand
             Travel demand matrix or number of travellers
         """
-        try:
-            rate = demand.purpose.sec_dest_rates[demand.mode]
-            demand.matrix = demand.matrix * rate
-        except KeyError:
-            pass
         position: Sequence[int] = demand.position
         ass_classes = mode_assignment_classes[demand.mode]
         for is_return, ass_class in enumerate(ass_classes):
