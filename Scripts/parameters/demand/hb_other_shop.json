@@ -293,6 +293,23 @@
             "walk": {
                 "constant": 0.5274
             }
+        },
+        "calibration": {
+            "car_drv": {
+                "constant": 0.044
+            },
+            "car_pax": {
+                "constant": -0.0125
+            },
+            "transit": {
+                "constant": 0.0628
+            },
+            "bike": {
+                "constant": -0.1747
+            },
+            "walk": {
+                "constant": -0.0869
+            }
         }
     },
     "demand_share": {

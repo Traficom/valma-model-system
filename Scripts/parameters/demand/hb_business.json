@@ -222,19 +222,19 @@
         },
         "calibration": {
             "car_drv": {
-                "constant": 0.0
+                "constant": 0.0253
             },
             "car_pax": {
-                "constant": 0.0
+                "constant": -0.3051
             },
             "transit": {
-                "constant": 0.0
+                "constant": -0.1371
             },
             "airplane": {
-                "constant": 0.0
+                "constant": 0.9102
             },
             "walk": {
-                "constant": 0.0
+                "constant": 0.4026
             }
         }
     },
