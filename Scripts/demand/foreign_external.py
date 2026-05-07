@@ -52,7 +52,7 @@ class ForeignExternalModel:
         production_forecast = self._generate_trips(zone_data_forecast, mode)
 
         # NOTE: Eli tässä input-matriisissa on kaikki sentroidit, mutta nollasta poikkeavia arvoja on vain lähtömaa-sijoittelualue - ulkomaan alueklusteri -pareilla.
-        with omx.open_file(self.base_demand_path / "ext_foreign_passenger_vrk.omx", "r") as mtx:
+        with omx.open_file(self.base_demand_path, "r") as mtx:
             # Remove zero values
             base_mtx = numpy.array(mtx[mode]).clip(0.000001, None)
             base_colsum = base_mtx.sum(1)

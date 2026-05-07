@@ -112,6 +112,7 @@ class ModelSystem:
         self.resultdata = ResultsData(results_path)
         self.resultmatrices = MatrixData(results_path / "Matrices" / submodel)
         parameters_path = Path(__file__).parent / "parameters" / "demand"
+        foreign_external_path = self.basematrices.path / "ext_foreign_passenger_vrk.omx"
         home_based_work_purposes = []
         home_based_leisure_purposes = []
         sec_dest_purposes = []
@@ -120,6 +121,8 @@ class ModelSystem:
         purpose_names = []
         for file in parameters_path.glob("*.json"):
             specification = json.loads(file.read_text("utf-8"))
+            if specification["name"] == "hb_abroad_other" and not foreign_external_path.exists():
+                continue
             for dummies in mode_dummies.values():
                 for subarea in dummies:
                     for mode, coeff in dummies[subarea].items():
@@ -137,7 +140,7 @@ class ModelSystem:
                                                               self._zone_datas,
                                                               self.resultdata,
                                                               cost_data["cost_changes"],
-                                                              self.basematrices.path)
+                                                              foreign_external_path)
             else:
                 purpose = new_tour_purpose(
                     specification, self._zone_datas, self.resultdata,
