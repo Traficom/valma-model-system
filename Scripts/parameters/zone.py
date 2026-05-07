@@ -87,3 +87,12 @@ land_border_pairs = {
     "Tornio": [28615, 50124],
     "Kilpisjarvi": [30219, 50117]
 }
+
+# Print LOS for these pairs
+print_od_pairs = {
+    "Helsinki-Pasila": (202, 428),
+    "Helsinki-Jyvaskyla": (202, 17278),
+    "Helsinki-Tukholma": (202, 60021),
+    "Helsinki-Tartto": (202, 60035),
+    "Tampere-Turku": (8302, 12627)
+}

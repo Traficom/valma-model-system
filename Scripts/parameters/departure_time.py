@@ -17,11 +17,12 @@ demand_share: Dict[str,Dict[str,Any]] = {
             "iht": (0.066, 0),
         },
         "van": {
-            # As shares of car traffic
-            # On top of this, the trucks sum is added
-            "aht": (0.054, 0),
-            "pt": (0.07, 0),
-            "iht": (0.044, 0),
+            # Vans are calculated by multiplying car demand with this share.
+            # This is a ratio of total mileage by vans / car driver (Statfi).
+            # Peaks are calculated by assuming that vans have even demand distribution through day.
+            "aht": (0.10, 0),
+            "pt": (0.17, 0),
+            "iht": (0.08, 0),
         },
     },
     "external": {
