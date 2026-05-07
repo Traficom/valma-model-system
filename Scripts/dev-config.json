@@ -1,5 +1,5 @@
 {
-    "LEM_VERSION": "v0.0.1",
+    "LEM_VERSION": "v0.4.0",
     "LOG_LEVEL": "INFO",
     "LOG_FORMAT": "TEXT",
     "PROJECT_NAME": "testproject",
