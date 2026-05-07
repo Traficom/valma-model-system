@@ -1004,16 +1004,16 @@ class ForeignExternalPurpose(TourPurpose):
         Demand
                 Mode-specific demand matrix for whole day
         """
-
-        foreign_ext_mtx = self.fem.calc_foreign_external_traffic("airplane")
-        # Calculate probabilities for all access mode of the main mode
-        access_mode_probs = self.calc_prob(impedance)["airplane"]
-        # Access mode demand
-        for access_mode in access_mode_probs:
-            access_probs = access_mode_probs[access_mode].T
-            access_mode_mtx = foreign_ext_mtx * access_probs
-            yield Demand(self, access_mode, access_mode_mtx)
-        log.info(f"Demand calculated for {self.name}")
+        for main_mode in self.intermodals:
+            foreign_ext_mtx = self.fem.calc_foreign_external_traffic(main_mode)
+            # Calculate probabilities for all access mode of the main mode
+            access_mode_probs = self.calc_prob(impedance)[main_mode]
+            # Access mode demand
+            for access_mode in access_mode_probs:
+                access_probs = access_mode_probs[access_mode].T
+                access_mode_mtx = foreign_ext_mtx * access_probs
+                yield Demand(self, access_mode, access_mode_mtx)
+            log.info(f"Demand calculated for {self.name}")
     
     def calc_prob(self, impedance):
         """Calculate mode and destination probabilities.

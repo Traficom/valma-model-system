@@ -155,6 +155,16 @@
             },
             "log": {},
             "individual_dummy": {}
+        },
+        "transit": {
+            "constant": -2.443,
+            "generation": {},
+            "attraction": {},
+            "impedance": {
+                "logsum": 0.8008
+            },
+            "log": {},
+            "individual_dummy": {}
         }
     },
     "access_mode_choice": {
@@ -203,6 +213,63 @@
                 }
             },
             "airpl_car_egr": {
+                "constant": -3.002,
+                "generation": {},
+                "attraction": {},
+                "impedance": {
+                    "gen_cost": -0.01113
+                },
+                "log": {
+                    "gen_cost": -2.715
+                },
+                "individual_dummy": {}
+            }
+        },
+        "transit": {
+            "transit": {
+                "constant": 0,
+                "generation": {},
+                "attraction": {},
+                "impedance": {
+                    "gen_cost": -0.01113
+                },
+                "log": {
+                    "gen_cost": -2.715
+                },
+                "individual_dummy": {}
+            },
+            "pt_car_acc": {
+                "constant": -4.27,
+                "generation": {},
+                "attraction": {},
+                "impedance": {
+                    "gen_cost": -0.01113
+                },
+                "log": {
+                    "gen_cost": -2.715
+                },
+                "individual_dummy": {
+                    "sh_cars1_hh1": 4.14,
+                    "sh_cars2_hh2": 4.14,
+                    "sh_cars1_hh2": 3.153
+                }
+            },
+            "pt_taxi_acc": {
+                "constant": -3.384,
+                "generation": {},
+                "attraction": {},
+                "impedance": {
+                    "gen_cost": -0.01113
+                },
+                "log": {
+                    "gen_cost": -2.715
+                },
+                "individual_dummy": {
+                    "sh_cars1_hh2": 1.573,
+                    "sh_cars2_hh2": 1.573
+                }
+            },
+            "pt_taxi_egr": {
                 "constant": -3.002,
                 "generation": {},
                 "attraction": {},
@@ -285,7 +352,7 @@
         }
     },
     "tour_generation": {
-        "ship": {
+        "transit": {
             "population": 0.01
         },
         "airplane": {
