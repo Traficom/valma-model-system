@@ -539,7 +539,7 @@ class SecDestPurpose(Purpose):
         Purpose.__init__(self, specification, zone_data, resultdata, mtx_adjustment)
         self.gen_model = generation.SecDestGeneration(
             self, resultdata, specification["generation"])
-        args = (self, specification, self.attraction_zone_data, resultdata)
+        args = (self, specification, self.generation_zone_data, self.attraction_zone_data, resultdata)
         self.model = logit.SecDestModel(*args)
         self.modes = list(self.model.dest_choice_param)
         for mode in self.demand_share:
