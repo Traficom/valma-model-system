@@ -87,6 +87,13 @@
             ]
         }
     },
+    "activity_time": 0.4,
+    "parking_cost_share": 0.0,
+    "car_cost_sharing": 1.0,
+    "occupancy": {
+        "car_drv": 1.81,
+        "car_pax": 2.89
+    },
     "distance_boundaries": {
         "car_drv": [
             0,
@@ -111,57 +118,35 @@
     },
     "destination_choice": {
         "car_drv": {
-            "attraction": {
-                "time*within_zone": -0.01865,
-                "cost*within_zone": -0.2406
-            },
+            "attraction": {},
             "impedance": {
                 "time": -0.01865,
                 "cost": -0.2406
             },
             "log": {
                 "attraction_size": 1,
-                "transform": -0.5503
+                "cost": -0.5503
             },
             "attraction_size": {
                 "students_comprehensive*within_municipality": 1,
 				"students_comprehensive*outside_municipality": 0.33689,
                 "population": 0.03072
-            },
-            "transform": {
-                "attraction": {
-                    "cost*within_zone": 1
-                },
-                "impedance": {
-                    "cost": 1
-                }
             }
         },
         "car_pax": {
-            "attraction": {
-                "time*within_zone": -0.00693,
-                "cost*within_zone": -0.2406
-            },
+            "attraction": {},
             "impedance": {
                 "time": -0.00693,
                 "cost": -0.2406
             },
             "log": {
                 "attraction_size": 1,
-                "transform": -0.5503
+                "cost": -0.5503
             },
             "attraction_size": {
                 "students_comprehensive*within_municipality": 1,
 				"students_comprehensive*outside_municipality": 0.33689,
                 "population": 0.03072
-            },
-            "transform": {
-                "attraction": {
-                    "cost*within_zone": 1
-                },
-                "impedance": {
-                    "cost": 1
-                }
             }
         },
         "transit": {
@@ -183,9 +168,7 @@
             }
         },
         "bike": {
-            "attraction": {
-                "dist*within_zone": -0.4476
-            },
+            "attraction": {},
             "impedance": {
                 "dist": -0.4476
             },
@@ -199,9 +182,7 @@
             }
         },
         "walk": {
-            "attraction": {
-                "dist*within_zone": -0.7353
-            },
+            "attraction": {},
             "impedance": {
                 "dist": -0.7353
             },

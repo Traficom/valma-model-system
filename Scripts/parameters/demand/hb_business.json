@@ -89,6 +89,13 @@
                 ]
             }
     },
+    "activity_time": 4.9,
+    "parking_cost_share": 0.5,
+    "car_cost_sharing": 0.0,
+    "occupancy": {
+        "car_drv": 1.171,
+        "car_pax": 2.483
+    },
     "distance_boundaries": {
         "walk": [
             0,

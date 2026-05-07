@@ -81,6 +81,10 @@
             ]
         }
     },
+    "activity_time": 0.0,
+    "parking_cost_share": 0.0,
+    "car_cost_sharing": 0.0,
+    "occupancy": {},
     "distance_boundaries": {
         "car_drv": [
             0,
@@ -105,9 +109,7 @@
     },
     "destination_choice": {
         "car_drv": {
-            "attraction": {
-                "time*within_zone": -0.09557
-            },
+            "attraction": {},
             "impedance": {
                 "time": -0.09557
             },
@@ -121,9 +123,7 @@
             }
         },
         "car_pax": {
-            "attraction": {
-                "time*within_zone": -0.07524
-            },
+            "attraction": {},
             "impedance": {
                 "time": -0.07524
             },
@@ -153,9 +153,7 @@
             }
         },
         "bike": {
-            "attraction": {
-                "dist*within_zone": -0.5191
-            },
+            "attraction": {},
             "impedance": {
                 "dist": -0.5191
             },
@@ -169,9 +167,7 @@
             }
         },
         "walk": {
-            "attraction": {
-                "dist*within_zone": -0.6857
-            },
+            "attraction": {},
             "impedance": {
                 "dist": -0.6857
             },

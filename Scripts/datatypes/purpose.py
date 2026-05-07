@@ -66,6 +66,11 @@ class Purpose:
         self.generation_area = specification["generation_area"]
         self.attraction_area = specification["attraction_area"]
         self.impedance_share = specification["impedance_share"]
+        self.discount = specification.get("discount", {})
+        self.activity_time = specification["activity_time"]
+        self.park_cost_share = specification["parking_cost_share"]
+        self.occupancy = specification["occupancy"]
+        self.cost_share = specification["car_cost_sharing"]
         self.demand_share = specification["demand_share"]
         self.generation_zone_data = zone_datas[self.generation_area]
         self.attraction_zone_data = zone_datas[self.attraction_area]
@@ -156,35 +161,28 @@ class Purpose:
                     except KeyError:
                         pass
         # Apply discounts and transformations to LOS matrices
+        for mode in self.discount:
+            for mtx_type in self.discount[mode]:
+                day_imp[mode][mtx_type] *= self.discount[mode][mtx_type]
+        zone_data = self.attraction_zone_data
         for mode in day_imp:
-            for mtx_type in day_imp[mode]:
-                if mtx_type == "cost":
-                    try:
-                        day_imp[mode][mtx_type] *= cost.cost_discount[self.name][mode]
-                    except KeyError:
-                        pass
-                if mtx_type == "time" and "car" in mode:
-                    day_imp[mode][mtx_type] += self.attraction_zone_data["avg_park_time"].values
-                if mtx_type == "cost" and "car" in mode:
-                    try:
-                        day_imp[mode][mtx_type] += (cost.activity_time[self.name] *
-                                                    cost.share_paying[self.name] *
-                                                    self.attraction_zone_data["avg_park_cost"].values)
-                    except KeyError:
-                        pass
-                if mtx_type == "cost" and mode == "car_drv":
-                    try:
-                        day_imp[mode][mtx_type] *= (1 - cost.sharing_factor[self.name] *
-                                                    (cost.car_drv_occupancy[self.name] - 1) /
-                                                    cost.car_drv_occupancy[self.name])
-                    except KeyError:
-                        pass
-                if mtx_type == "cost" and mode == "car_pax":
-                    try:
-                        day_imp[mode][mtx_type] *= (cost.sharing_factor[self.name] /
-                                                    cost.car_pax_occupancy[self.name])
-                    except KeyError:
-                        pass
+            if "car" in mode:
+                day_imp[mode]["time"] += numpy.asarray(zone_data["avg_park_time"])
+                day_imp[mode]["cost"] += (self.activity_time * self.park_cost_share
+                                          * numpy.asarray(zone_data["avg_park_cost"]))
+        if self.occupancy:
+            if "car_drv" in day_imp:
+                day_imp["car_drv"]["cost"] *= (1 - self.cost_share
+                                               * (self.occupancy["car_drv"]-1)
+                                               / self.occupancy["car_drv"])
+            day_imp["car_pax"]["cost"] *= (self.cost_share
+                                           / self.occupancy["car_pax"])
+        for mode in day_imp:
+            if "car" in mode:
+                day_imp[mode]["time"] += numpy.asarray(zone_data["time*within_zone"])
+                day_imp[mode]["cost"] += numpy.asarray(zone_data["cost*within_zone"])
+            if mode in ("walk", "bike"):
+                day_imp[mode]["dist"] += numpy.asarray(zone_data["dist*within_zone"])
             if "vrk" in self.impedance_share[mode] and mode != "walk":
                 vot = cost.value_of_time[mode_impedance[mode]]
                 day_imp[mode]["gen_cost"] = (day_imp[mode].pop("cost")
