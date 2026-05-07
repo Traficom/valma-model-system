@@ -47,12 +47,16 @@
         }
     },
     "demand_share": {},
-    "logistics_module": {
-        "orig_lc_detour": -0.9985,
-        "lc_dest_detour": -0.9157,
-        "constant_detour": 9.4742,
-        "orig_dest_direct": -0.9986,
-        "constant_direct": -14.4740,
-        "size_factor": 2.9502
+    "route_choice": {
+        "size": 2.9502,
+        "constant": {
+            "detour": 9.4742,
+            "direct": -14.4740
+        },
+        "impedance": {
+            "orig_lc_detour": -0.9985,
+            "lc_dest_detour": -0.9157,
+            "orig_dest_direct": -0.9986
+        }
     }
 }

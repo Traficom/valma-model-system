@@ -1,0 +1,21 @@
+{
+    "mode_choice_calibration": {
+        "calibration_area": {
+            "Helsingin kantakaupunki": {
+                "car_drv":  0.0
+            }
+        }
+    },
+    "destination_choice_calibration": {
+        "zone": {
+            "202": {
+                "car_drv": 0.0
+            }
+        },
+        "calibration_area": {
+            "Helsingin kantakaupunki": {
+                "transit":  0.0
+            }
+        }
+    }
+}

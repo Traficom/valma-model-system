@@ -1,24 +1,4 @@
-# Share of demand that will be simulated in agent model
 from typing import Any, Dict, List, Tuple, Union
-
-# O-D pairs with demand below threshold are neglected in sec dest calculation
-secondary_destination_threshold = 0.1
-
-agent_demand_fraction = 1.0
-
-# Seed number for population attributes:
-# int = fixed seed and same population for each run
-# None = different population for each run
-population_draw = 31
-
-# Age groups in zone data
-age_groups: List[Tuple[int, int]] = [ #changed to list for type checker
-        (7, 17),
-        (18, 29),
-        (30, 49),
-        (50, 64),
-        (65, 99),
-]
 
 ### DEMAND MODEL REFERENCES ###
 
@@ -33,22 +13,12 @@ purpose_areas: Dict[str, Tuple[int,int]] = {
 }
 tour_length_intervals = (0, 3, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100,
                          200, 300, 400, 500, 600, 700, 800, float("inf"))
-# Population in noise zones as share of total area population as
-# function only of zone area, calculated by Ramboll Feb 2021
-pop_share_per_noise_area = {
-    "helsinki_cbd": 0.028816313,
-    "helsinki_other": 0.005536503,
-    "espoo_vant_kau": 0.002148004,
-    "surround_train": 0.0019966,
-    "surround_other": 0.001407824,
-    "peripheral": 0,  # Not calculated
-}
 
-# Finnish ports and road border control points
+# Finnish ports and land border control points
 finland_border_points = {
     "FIHEL": {"name": "Vuosaari", "id": 524},
     "FISKV": {"name": "Skoljdvik", "id": 3607},
-    "FIHNK": {"name": "Hanko", "id": 4102},
+    "FIHKO": {"name": "Hanko", "id": 4102},
     "FIINK": {"name": "Inkoo", "id": 4201},
     "FIPOR": {"name": "Pori", "id": 10411},
     "FIRAU": {"name": "Rauma", "id": 11233},
@@ -64,7 +34,7 @@ finland_border_points = {
     "FIVRK": {"name": "Varkaus", "id": 22623},
     "FIVAR": {"name": "Vartius", "id": 26946},
     "FIKOK": {"name": "Kokkola", "id": 27964},
-    "FIHAA": {"name": "Haaparanta", "id": 28615},
+    "FITOR": {"name": "Tornio", "id": 28615},
     "FIKEM": {"name": "Kemi", "id": 28700},
     "FIKIL": {"name": "Kilpisjarvi", "id": 30219},
     "FIKAS": {"name": "Kaskinen", "id": 31000},
@@ -74,7 +44,7 @@ finland_border_points = {
     "FIKJO": {"name": "Kalajoki", "id": 34611},
 }
 
-# Clusters of foreign ports and border control points
+# cluster ports and land border control points
 cluster_border_points = {
     "AEJEA": {"name": "Jebel Ali", "id": 50100},
     "BRITQ": {"name": "Itaqui", "id": 50101},
@@ -107,4 +77,22 @@ cluster_border_points = {
     "SGJUR": {"name": "Singapore", "id": 50128},
     "TRIST": {"name": "Istanbul", "id": 50129},
     "USHOU": {"name": "Houston", "id": 50130},
+}
+
+# Finnish land border centroid and its foreign counterpart
+land_border_pairs = {
+    "Vainikkala": [15106, 50120],
+    "Vaalimaa": [19705, 50122],
+    "Vartius": [26946, 50121],
+    "Tornio": [28615, 50124],
+    "Kilpisjarvi": [30219, 50117]
+}
+
+# Print LOS for these pairs
+print_od_pairs = {
+    "Helsinki-Pasila": (202, 428),
+    "Helsinki-Jyvaskyla": (202, 17278),
+    "Helsinki-Tukholma": (202, 60021),
+    "Helsinki-Tartto": (202, 60035),
+    "Tampere-Turku": (8302, 12627)
 }

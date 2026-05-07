@@ -17,8 +17,6 @@ class ZoneAggregations:
             Zone numbers as index and different zone mappings as columns
         """
         self.mappings = mappings
-        self.municipality_mapping = mappings.groupby(
-            "municipality").agg("first")["county"]
 
     def averages(self,
                  array: pandas.Series,
@@ -94,9 +92,14 @@ class Zone:
         self.county = aggregations.mappings["county"][number]
         self.municipality = aggregations.mappings["municipality"][number]
 
+class WeightedAverage:
 
-def avg(data, weights):
-    try:
-        return numpy.average(data, weights=weights[data.index])
-    except ZeroDivisionError:
-        return 0
+    def __init__(self, weights: pandas.Series):
+        self._weights = weights
+
+
+    def avg(self, data: pandas.Series) -> float:
+        try:
+            return numpy.average(data, weights=self._weights[data.index])
+        except ZeroDivisionError:
+            return 0.0

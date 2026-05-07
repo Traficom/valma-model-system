@@ -3,7 +3,7 @@ import numpy
 from pathlib import Path
 
 import utils.log as log
-from travel_iteration import ModelSystem, AgentModelSystem
+from travel_iteration import ModelSystem
 from assignment.mock_assignment import MockAssignmentModel
 from datahandling.matrixdata import MatrixData
 from datatypes.demand import Demand
@@ -13,6 +13,8 @@ from tests.integration.test_data_handling import (
     ZONEDATA_PATH,
     COSTDATA_PATH,
     BASE_MATRICES_PATH,
+    MODE_DEST_CALIBRATION_FILE,
+    MUNICIPALITY_CALIBRATION_FILE
 )
 
 
@@ -20,7 +22,7 @@ class Config():
     log_format = None
     log_level = "DEBUG"
     scenario_name = "TEST"
-    results_path = TEST_DATA_PATH / "Results"
+    result_data_folder = TEST_DATA_PATH / "Results"
 
 
 class ModelTest(unittest.TestCase):
@@ -31,8 +33,9 @@ class ModelTest(unittest.TestCase):
         ass_model = MockAssignmentModel(MatrixData(
             RESULTS_PATH / "Matrices" / "uusimaa"))
         model = ModelSystem(
-            ZONEDATA_PATH, COSTDATA_PATH, ZONEDATA_PATH,
-            BASE_MATRICES_PATH, RESULTS_PATH, ass_model, "uusimaa")
+            ZONEDATA_PATH, COSTDATA_PATH, BASE_MATRICES_PATH, RESULTS_PATH,
+            ass_model, "uusimaa", MODE_DEST_CALIBRATION_FILE,
+            MUNICIPALITY_CALIBRATION_FILE)
         impedance = model.assign_base_demand()
         for ap in ass_model.assignment_periods:
             tp = ap.name
@@ -53,8 +56,8 @@ class ModelTest(unittest.TestCase):
 
         # Check that model result does not change
         self.assertAlmostEquals(
-            model.mode_share[0]["car_work"] + model.mode_share[0]["car_leisure"],
-            0.3703464531477787)
+            model.mode_share[0]["car_drv"],
+            0.41666412026484)
         
         print("Model system test done")
 
@@ -64,8 +67,8 @@ class ModelTest(unittest.TestCase):
             MatrixData(RESULTS_PATH / "Matrices" / "koko_suomi"),
             use_free_flow_speeds=True, time_periods={"vrk": "WholeDayPeriod"})
         model = ModelSystem(
-            ZONEDATA_PATH, COSTDATA_PATH, ZONEDATA_PATH,
-            BASE_MATRICES_PATH, RESULTS_PATH, ass_model, "koko_suomi")
+            ZONEDATA_PATH, COSTDATA_PATH, BASE_MATRICES_PATH, RESULTS_PATH,
+            ass_model, "koko_suomi")
         impedance = model.assign_base_demand()
 
         print("Adding demand and assigning")
@@ -73,8 +76,8 @@ class ModelTest(unittest.TestCase):
 
         # Check that model result does not change
         self.assertAlmostEquals(
-            model.mode_share[0]["car_work"] + model.mode_share[0]["car_leisure"],
-            0.649764972030997)
+            model.mode_share[0]["car_drv"],
+            0.697858232719881)
 
     def _validate_impedances(self, impedances):
         self.assertIsNotNone(impedances)
@@ -84,11 +87,11 @@ class ModelTest(unittest.TestCase):
         self.assertIsNotNone(impedances["cost"])
         self.assertIsNotNone(impedances["dist"])
         self.assertIs(type(impedances["time"]), dict)
-        self.assertEquals(len(impedances["time"]), 6)
-        self.assertIsNotNone(impedances["time"]["transit_work"])
-        self.assertIs(type(impedances["time"]["transit_work"]), numpy.ndarray)
-        self.assertEquals(impedances["time"]["transit_work"].ndim, 2)
-        self.assertEquals(len(impedances["time"]["transit_work"]), 34)
+        self.assertEquals(len(impedances["time"]), 4)
+        self.assertIsNotNone(impedances["time"]["transit"])
+        self.assertIs(type(impedances["time"]["transit"]), numpy.ndarray)
+        self.assertEquals(impedances["time"]["transit"].ndim, 2)
+        self.assertEquals(len(impedances["time"]["transit"]), 34)
 
     def _validate_off_peak_impedances(self, impedances):
         self.assertIsNotNone(impedances)
@@ -96,10 +99,10 @@ class ModelTest(unittest.TestCase):
         self.assertIsNotNone(impedances["time"])
         self.assertIsNotNone(impedances["cost"])
         self.assertIs(type(impedances["time"]), dict)
-        self.assertIsNotNone(impedances["time"]["transit_work"])
-        self.assertIs(type(impedances["time"]["transit_work"]), numpy.ndarray)
-        self.assertEquals(impedances["time"]["transit_work"].ndim, 2)
-        self.assertEquals(len(impedances["time"]["transit_work"]), 34)
+        self.assertIsNotNone(impedances["time"]["transit"])
+        self.assertIs(type(impedances["time"]["transit"]), numpy.ndarray)
+        self.assertEquals(impedances["time"]["transit"].ndim, 2)
+        self.assertEquals(len(impedances["time"]["transit"]), 34)
 
     def _validate_demand(self, demand):
         self.assertIsNotNone(demand)

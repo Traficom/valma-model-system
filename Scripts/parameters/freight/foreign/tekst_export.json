@@ -1,0 +1,60 @@
+{
+    "name": "tekst_export",
+    "orig": "null",
+    "dest": "null",
+    "generation_area": "domestic",
+    "attraction_area": "foreign",
+    "struct": "export",
+    "impedance_share": {},
+    "distance_boundaries": {
+        "truck": [
+            0,
+            9999
+        ],
+        "freight_train": [
+            0,
+            9999
+        ],
+        "ship": [
+            0,
+            9999
+        ]
+    },
+    "destination_choice": {},
+    "mode_choice": {
+        "truck": {},
+        "freight_train": {}
+    },
+    "demand_share": {},
+    "route_choice": {
+        "constant": {
+            "truck": {
+                "west": {
+                    "border_points": ["FIKIL", "FITOR"],
+                    "dummy": 21.46
+                }
+            },
+            "container_ship": {
+                "base_class": {
+                    "border_points": ["FIOUL", "FIKEM", "FIRAU", "FIHMN", "FIHEL"],
+                    "dummy": 6.371
+                }
+            },
+            "roro_vessel": {
+                "base_class": {
+                    "border_points": ["FIVAA", "FIUKI", "FITKU", "FIHKO", "FIRAU", 
+                                      "FIHMN", "FIHEL"],
+                    "dummy": 16.03
+                }
+            }
+        },
+        "impedance": {
+            "cost": {
+                "truck": -0.01227,
+                "container_ship": -0.005152,
+                "roro_vessel": -0.01227
+            },
+            "frequency": 0.0005741
+        }
+    }
+}

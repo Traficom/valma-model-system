@@ -1,5 +1,5 @@
 # Commodity classification conversions
-# between 24 and 12 classes
+# between fine finage classification and coarse unit cost classification
 
 commodity_conversion = {
     "marita": "mameka",
@@ -25,5 +25,9 @@ commodity_conversion = {
 	"konela": "metkot",
 	"majon": "metkot",
 	"huonek": "metkot",
-	"jate": "jate"
+	"jate": "jate",
+    "rkoljy": "rkoljy",
+    "kaasu": "kaasu"
 }
+
+vector_calibration_threshold = 5

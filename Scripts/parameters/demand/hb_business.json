@@ -4,26 +4,37 @@
     "dest": "work",
     "generation_area": "domestic",
     "attraction_area": "domestic",
-    "struct": "mode>dest",
+    "struct": "dest>mode",
     "gen_model": "rate",
     "generation": {
         "no_car": {
-			"age_7_17": 0.007,
-			"age_18_29": 0.0357,
-			"age_30_49": 0.026,
-			"age_50_64": 0.0273,
-			"age_65_99": 0.0072
-		},
-		"has_car": {
-			"age_7_17": 0.0044,
-			"age_18_29": 0.0497,
-			"age_30_49": 0.0593,
-			"age_50_64": 0.0516,
-			"age_65_99": 0.0199
-		}
+            "age_7_17": 0.007,
+            "age_18_29": 0.0309,
+            "age_30_49": 0.0252,
+            "age_50_64": 0.0257,
+            "age_65_99": 0.0069
+        },
+        "has_car": {
+            "age_7_17": 0.0042,
+            "age_18_29": 0.0439,
+            "age_30_49": 0.0549,
+            "age_50_64": 0.0471,
+            "age_65_99": 0.0199
+        }
+    },
+    "sec_dest_rate": {
+        "car_drv": 1.0834,
+        "car_pax": 1.1938,
+        "transit": 1.0407
     },
     "impedance_share": {
-        "car_work": {
+        "walk": {
+            "vrk": [
+                1.0,
+                1.0
+              ]
+            },
+        "car_drv": {
             "vrk": [
                 1.0,
                 1.0
@@ -41,13 +52,7 @@
                 1.0
               ]
             },
-        "train": {
-            "vrk": [
-                1.0,
-                1.0
-              ]
-            },
-        "coach": {
+        "transit": {
             "vrk": [
                 1.0,
                 1.0
@@ -59,19 +64,25 @@
                 0.0
                 ]
             },
-        "train_car_acc": {
+        "airpl_car_egr": {
             "vrk": [
                 2.0,
                 0.0
                 ]
             },
-        "train_taxi_acc": {
+        "pt_car_acc": {
             "vrk": [
                 2.0,
                 0.0
                 ]
             },
-        "coach_car_acc": {
+        "pt_taxi_acc": {
+            "vrk": [
+                2.0,
+                0.0
+                ]
+            },
+        "pt_taxi_egr": {
             "vrk": [
                 2.0,
                 0.0
@@ -79,16 +90,20 @@
             }
     },
     "distance_boundaries": {
-        "car_work": [
-            0.1,
+        "walk": [
+            0,
+            30
+        ],
+        "car_drv": [
+            0,
             9999
         ],
         "car_pax": [
-            0.1,
+            0,
             9999
         ],
         "airplane": [
-            0.1,
+            0,
             9999
         ],
         "airpl_car_acc": [
@@ -99,95 +114,34 @@
             0,
             9999
         ],
-        "train": [
-            0.1,
-            9999
-        ],
-        "train_car_acc": [
+        "airpl_car_egr": [
             0,
             9999
         ],
-        "train_taxi_acc": [
+        "transit": [
             0,
             9999
         ],
-        "coach": [
-            0.1,
+        "pt_car_acc": [
+            0,
             9999
         ],
-        "coach_car_acc": [
+        "pt_taxi_acc": [
+            0,
+            9999
+        ],
+        "pt_taxi_egr": [
             0,
             9999
         ]
     },
     "destination_choice": {
-        "airplane": {
-            "attraction": {
-                "within_zone_inf": -1
-            },
-            "impedance": {
-                "logsum": 0.1419
-            },
-            "log": {
-                "attraction_size": 1
-            },
-            "attraction_size": {
-                "workplaces": 1
-            }
-        },
-        "train": {
-            "attraction": {
-                "within_zone_inf": -1
-            },
-            "impedance": {
-                "logsum": 0.1419
-            },
-            "log": {
-                "attraction_size": 1
-            },
-            "attraction_size": {
-                "workplaces": 1
-            }
-        },
-        "coach": {
-            "attraction": {
-                "within_zone_inf": -1
-            },
-            "impedance": {
-                "logsum": 0.1419
-            },
-            "log": {
-                "attraction_size": 1
-            },
-            "attraction_size": {
-                "workplaces": 1
-            }
-        },
-        "car_work": {
-            "attraction": {
-                "within_zone_inf": -1
-            },
-            "impedance": {
-                "time": -0.00455
-            },
+        "logsum": {
+            "attraction": {},
+            "impedance": {},
             "log": {
                 "attraction_size": 1,
-                "cost": -1.211
-            },
-            "attraction_size": {
-                "workplaces": 1
-            }
-        },
-        "car_pax": {
-            "attraction": {
-                "within_zone_inf": -1
-            },
-            "impedance": {
-                "time": -0.00923
-            },
-            "log": {
-                "attraction_size": 1,
-                "cost": -1.211
+                "logsum": 0.6708
             },
             "attraction_size": {
                 "workplaces": 1
@@ -195,207 +149,219 @@
         }
     },
     "mode_choice": {
-        "airplane": {
-            "constant": 0,
+        "car_drv": {
+            "constant": -13.48,
             "generation": {},
-            "attraction": {},
-            "impedance": {},
-            "log": {
-                "logsum": 0.1157
+            "attraction": {
+                "within_zone_inf": -1
             },
-            "individual_dummy": {}
-        },
-        "train": {
-            "constant": 15.46,
-            "generation": {},
-            "attraction": {},
-            "impedance": {},
-            "log": {
-                "logsum": 0.1157
+            "impedance": {
+                "gen_cost": -0.02962
             },
-            "individual_dummy": {}
-        },
-        "coach": {
-            "constant": 16.83,
-            "generation": {},
-            "attraction": {},
-            "impedance": {},
             "log": {
-                "logsum": 0.1157
-            },
-            "individual_dummy": {}
-        },
-        "car_work": {
-            "constant": 39.18,
-            "generation": {},
-            "attraction": {},
-            "impedance": {},
-            "log": {
-                "logsum": 0.1157
+                "gen_cost": -2.086
             },
             "individual_dummy": {
-                "sh_cars1_hh1": 17.85,
-                "sh_cars2_hh2": 17.85,
-                "sh_cars1_hh2": 14.22
+                "sh_cars1_hh1": 3.05,
+                "sh_cars2_hh2": 3.05,
+                "sh_cars1_hh2": 2.374
             }
         },
         "car_pax": {
-            "constant": 23.54,
+            "constant": -14.23,
             "generation": {},
-            "attraction": {},
-            "impedance": {},
+            "attraction": {
+                "within_zone_inf": -1
+            },
+            "impedance": {
+                "gen_cost": -0.03351
+            },
             "log": {
-                "logsum": 0.1157
+                "gen_cost": -2.986
             },
             "individual_dummy": {
-                "sh_cars1_hh2": 0.9077,
-                "sh_cars2_hh2": 0.9077
+                "sh_cars1_hh2": 1.272,
+                "sh_cars2_hh2": 1.272
             }
         },
-        "scaling": {
-            "car_work": {
-                "constant": 0.1157,
-                "individual_dummy": {
-                    "sh_cars1_hh1": 0.1157,
-                    "sh_cars2_hh2": 0.1157,
-                    "sh_cars1_hh2": 0.1157
-                }
+        "transit": {
+            "constant": -5.695,
+            "generation": {},
+            "attraction": {
+                "within_zone_inf": -1
+            },
+            "impedance": {
+                "logsum": 1.442
+            },
+            "log": {},
+            "individual_dummy": {}
+        },
+        "airplane": {
+            "constant": 0,
+            "generation": {},
+            "attraction": {
+                "within_zone_inf": -1
+            },
+            "impedance": {
+                "logsum": 1.442
+            },
+            "log": {},
+            "individual_dummy": {}
+        },
+        "walk": {
+            "constant": -13.67,
+            "generation": {},
+            "attraction": {
+                "within_zone_inf": -1
+            },
+            "impedance": {
+                "dist": -0.6522
+            },
+            "log": {},
+            "individual_dummy": {}
+        },
+        "calibration": {
+            "car_drv": {
+                "constant": 0.0253
             },
             "car_pax": {
-                "constant": 0.1157,
-                "individual_dummy": {
-                    "sh_cars1_hh2": 0.1157,
-                    "sh_cars2_hh2": 0.1157
-                }
+                "constant": -0.3051
             },
-            "train": {
-                "constant": 0.1157
-            },
-            "coach": {
-                "constant": 0.1157
+            "transit": {
+                "constant": -0.1371
             },
             "airplane": {
-                "constant": 0.1157
+                "constant": 0.9102
+            },
+            "walk": {
+                "constant": 0.4026
             }
         }
     },
     "access_mode_choice": {
         "airplane": {
             "airplane": {
-                "constant": 80,
+                "constant": -2,
                 "generation": {},
                 "attraction": {},
                 "impedance": {
-                    "cost": -0.047,
-                    "time": -0.035
+                    "gen_cost": -0.01063
                 },
-                "log": {},
+                "log": {
+                    "gen_cost": -2.642
+                },
                 "individual_dummy": {}
             },
             "airpl_car_acc": {
-                "constant": 79.02,
-                "generation": {
-                    "car_density": 4.83
-                },
+                "constant": -4.196,
+                "generation": {},
                 "attraction": {},
                 "impedance": {
-                    "cost": -0.047,
-                    "park_cost": -0.047,
-                    "time": -0.035,
-                    "transfer_time": 0.018,
-                    "car_time": -0.524
+                    "gen_cost": -0.01063
                 },
-                "log": {},
-                "individual_dummy": {}
+                "log": {
+                    "gen_cost": -2.642
+                },
+                "individual_dummy": {
+                    "sh_cars1_hh1": 4.119,
+                    "sh_cars2_hh2": 4.119,
+                    "sh_cars1_hh2": 3.141
+                }
             },
             "airpl_taxi_acc": {
-                "constant": 78.54,
-                "generation": {
-                    "car_density": 4.54
-                },
-                "attraction": {},
-                "impedance": {
-                    "cost": -0.047,
-                    "time": -0.035,
-                    "transfer_time": 0.018,
-                    "car_time": -0.057
-                },
-                "log": {},
-                "individual_dummy": {}
-            }
-        },
-        "train": {
-            "train": {
-                "constant": 80,
+                "constant": -3.295,
                 "generation": {},
                 "attraction": {},
                 "impedance": {
-                    "cost": -0.047,
-                    "time": -0.02
+                    "gen_cost": -0.01063
                 },
-                "log": {},
-                "individual_dummy": {}
+                "log": {
+                    "gen_cost": -2.642
+                },
+                "individual_dummy": {
+                    "sh_cars1_hh2": 1.569,
+                    "sh_cars2_hh2": 1.569
+                }
             },
-            "train_car_acc": {
-                "constant": 75.59,
-                "generation": {
-                    "car_density": 4.83
-                },
-                "attraction": {},
-                "impedance": {
-                    "cost": -0.047,
-                    "park_cost": -0.047,
-                    "time": -0.02,
-                    "car_time": -0.052
-                },
-                "log": {},
-                "individual_dummy": {}
-            },
-            "train_taxi_acc": {
-                "constant": 76.36,
-                "generation": {
-                    "car_density": 4.54
-                },
-                "attraction": {},
-                "impedance": {
-                    "cost": -0.047,
-                    "time": -0.02,
-                    "car_time": -0.057
-                },
-                "log": {},
-                "individual_dummy": {}
-            }
-        },
-        "coach": {
-            "coach": {
-                "constant": 80,
+            "airpl_car_egr": {
+                "constant": -2.913,
                 "generation": {},
                 "attraction": {},
                 "impedance": {
-                    "cost": -0.047,
-                    "time": -0.012
+                    "gen_cost": -0.01063
                 },
-                "log": {},
+                "log": {
+                    "gen_cost": -2.642
+                },
                 "individual_dummy": {}
-            },
-            "coach_car_acc": {
-                "constant": 75.5,
-                "generation": {
-                    "car_density": 4.54
-                },
+            }
+        },
+        "transit": {
+            "transit": {
+                "constant": 0,
+                "generation": {},
                 "attraction": {},
                 "impedance": {
-                    "cost": -0.047,
-                    "time": -0.012,
-                    "car_time": -0.057
+                    "gen_cost": -0.01063
                 },
-                "log": {},
+                "log": {
+                    "gen_cost": -2.642
+                },
+                "individual_dummy": {}
+            },
+            "pt_car_acc": {
+                "constant": -4.196,
+                "generation": {},
+                "attraction": {},
+                "impedance": {
+                    "gen_cost": -0.01063
+                },
+                "log": {
+                    "gen_cost": -2.642
+                },
+                "individual_dummy": {
+                    "sh_cars1_hh1": 4.119,
+                    "sh_cars2_hh2": 4.119,
+                    "sh_cars1_hh2": 3.141
+                }
+            },
+            "pt_taxi_acc": {
+                "constant": -3.295,
+                "generation": {},
+                "attraction": {},
+                "impedance": {
+                    "gen_cost": -0.01063
+                },
+                "log": {
+                    "gen_cost": -2.642
+                },
+                "individual_dummy": {
+                    "sh_cars1_hh2": 1.569,
+                    "sh_cars2_hh2": 1.569
+                }
+            },
+            "pt_taxi_egr": {
+                "constant": -2.913,
+                "generation": {},
+                "attraction": {},
+                "impedance": {
+                    "gen_cost": -0.01063
+                },
+                "log": {
+                    "gen_cost": -2.642
+                },
                 "individual_dummy": {}
             }
         }
     },
     "demand_share": {
-        "car_work": {
+        "walk": {
+            "vrk": [
+                1.0,
+                1.0
+              ]
+        },
+        "car_drv": {
             "vrk": [
                 1.0,
                 1.0
@@ -413,13 +379,7 @@
                 1.0
               ]
         },
-        "train": {
-            "vrk": [
-                1.0,
-                1.0
-              ]
-        },
-        "coach": {
+        "transit": {
             "vrk": [
                 1.0,
                 1.0
@@ -431,19 +391,13 @@
                 0.0
               ]
         },
-        "train_car_acc": {
+        "pt_car_acc": {
             "vrk": [
                 1.0,
                 0.0
               ]
         },
-        "train_taxi_acc": {
-            "vrk": [
-                1.0,
-                0.0
-              ]
-        },
-        "coach_car_acc": {
+        "pt_taxi_acc": {
             "vrk": [
                 1.0,
                 0.0
@@ -451,27 +405,21 @@
         },
         "airpl_car_egr": {
             "vrk": [
-                0.0,
-                1.0
-              ]
+                1.0,
+                0.0
+                ]
         },
-        "train_car_egr": {
+        "pt_car_egr": {
             "vrk": [
-                0.0,
-                1.0
-              ]
+                1.0,
+                0.0
+                ]
         },
-        "train_taxi_egr": {
+        "pt_taxi_egr": {
             "vrk": [
-                0.0,
-                1.0
-              ]
-        },
-        "coach_car_egr": {
-            "vrk": [
-                0.0,
-                1.0
-              ]
+                1.0,
+                0.0
+                ]
         }
     }
 }

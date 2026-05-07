@@ -32,7 +32,7 @@ The default is `TEXT`, but this can be changed to `JSON`.
 You need to set the name of your scenario.
 Influences result folder name and log file name.
 
-### `RESULTS_PATH`
+### `RESULT_DATA_FOLDER`
 
 You need to set the path to your results folder where you wish your
 result tables and matrices to be written to.
@@ -50,7 +50,7 @@ you need to initialize temporary result matrices to `RESULT_PATH\\SCENARIO_NAME\
 Name of submodel (e.g., "uusimaa", "koko_suomi"),
 used for choosing appropriate zone mapping and base matrices.
 
-### `EMME_PATH`
+### `EMME_PROJECT_FILE`
 
 If you are using Emme assignment, you need to specify where your `.emp` file is located.
 
@@ -63,7 +63,7 @@ EMME scenario ID of the network.
 First matrix ID within EMME project (.emp).
 Used only if `SAVE_MATRICES_IN_EMME` is set to `true`.
 
-### `BASELINE_DATA_PATH`
+### `BASE_DATA_FOLDER`
 
 This a directory path.
 You need base matrices for the initialization phase.
@@ -78,7 +78,7 @@ The name of this directory is hardcoded.
 `Matrices` contains `.omx` files for base demand.
 The matrices may have missing zones (compared to the network), but cannot have extra zones.
 
-### `FORECAST_DATA_PATH`
+### `ZONE_DATA_FILE`
 
 This is a .gpkg file, containing zone data.
 This data will not be written over at any point.
@@ -86,17 +86,26 @@ This data will not be written over at any point.
 If you are trying the test test network and data, try
 `"C:\\FILL_YOUR_PATH\\model-system\\Scripts\\tests\\test_data\\Scenario_input_data\\zonedata_test.gpkg"`.
 
-### `COST_DATA_PATH`
+### `COST_DATA_FILE`
 
 This is a .json file, containing transport cost data.
 
 If you are trying the test test network and data, try
 `"C:\\FILL_YOUR_PATH\\model-system\\Scripts\\tests\\test_data\\Scenario_input_data\\costdata.json"`.
 
+### `MODE_DEST_CALIBRATION_FILE`
+
+File path (.json) where mode and destination choice calibration coefficients
+are found.
+
+### `MUNICIPALITY_CALIBRATION_FILE`
+
+File path (.txt) where municipality calibration coefficients are found
+
 ### `LONG_DIST_DEMAND_FORECAST`
 
 If 'calc', runs assigment with free-flow speed and calculates demand for long-distance trips.
-If 'base', takes long-distance trips from [base matrices](#baseline_data_path).
+If 'base', takes long-distance trips from [base matrices](#BASE_DATA_FOLDER).
 If path, takes long-distance trips from that path.
 The zone system of the long-distance trips in path must match the baseline data
 in `2018_zonedata` directory.

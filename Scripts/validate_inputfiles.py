@@ -17,32 +17,32 @@ from valma_travel import BASE_ZONEDATA_FILE
 
 
 def main(args):
-    base_zonedata_path = Path(args.baseline_data_path, BASE_ZONEDATA_FILE)
-    emme_paths: Union[str,List[str]] = args.emme_paths
+    base_zonedata_path = Path(args.base_data_folder, BASE_ZONEDATA_FILE)
+    emme_project_files: Union[str,List[str]] = args.emme_project_files
     first_scenario_ids: Union[int,List[int]] = args.first_scenario_ids
-    forecast_zonedata_paths: Union[str,List[str]] = args.forecast_data_paths
+    zone_data_files: Union[str,List[str]] = args.zone_data_files
 
-    if not emme_paths:
-        msg = "Missing required argument 'emme-paths'."
+    if not emme_project_files:
+        msg = "Missing required argument 'emme-project-files'."
         log.error(msg)
         raise ValueError(msg)
     if not first_scenario_ids:
         msg = "Missing required argument 'first-scenario-ids'."
         log.error(msg)
         raise ValueError(msg)
-    if not forecast_zonedata_paths:
-        msg = "Missing required argument 'forecast-zonedata-paths'."
+    if not zone_data_files:
+        msg = "Missing required argument 'zone-data-files'."
         log.error(msg)
         raise ValueError(msg)
     # Check arg lengths
-    if not (len(emme_paths) == len(first_scenario_ids)):
-        msg = ("Non-matching number of emme-paths (.emp files) "
+    if not (len(emme_project_files) == len(first_scenario_ids)):
+        msg = ("Non-matching number of emme-project-files (.emp files) "
                + "vs. number of first-scenario-ids")
         log.error(msg)
         raise ValueError(msg)
-    if not (len(emme_paths) == len(forecast_zonedata_paths)):
-        msg = ("Non-matching number of emme-paths (.emp files) "
-               + "vs. number of forecast-zonedata-paths")
+    if not (len(emme_project_files) == len(zone_data_files)):
+        msg = ("Non-matching number of emme-project-files (.emp files) "
+               + "vs. number of zone-data-files")
         log.error(msg)
         raise ValueError(msg)
 
@@ -58,18 +58,22 @@ def main(args):
 
     # Check scenario based input data
     log.info("Checking base zonedata & scenario-based input data...")
-    for i, emp_path in enumerate(emme_paths):
-        log.info("Checking input data for scenario #{} ...".format(i))
+    for i, emp_path in enumerate(emme_project_files):
+        log.info(
+            "Checking input data for "
+            + f"{args.scenario_name[i]} {args.submodel[i]}...")
 
-        data_path = args.cost_data_paths[i]
+        data_path = args.cost_data_files[i]
         if not os.path.exists(data_path):
             msg = "Forecast data file '{}' does not exist.".format(
                 data_path)
             log.error(msg)
             raise ValueError(msg)
         cost_data = json.loads(Path(data_path).read_text("utf-8"))
-        for ass_class in cost_data["car_cost"]:
-            float(cost_data["car_cost"][ass_class])
+        for ass_class in cost_data["vehicle_km_cost"]:
+            float(cost_data["vehicle_km_cost"][ass_class])
+        for ass_class in cost_data["vehicle_hour_cost"]:
+            float(cost_data["vehicle_hour_cost"][ass_class])
         transit_cost = {data.pop("id"): data for data
             in cost_data["transit_cost"].values()}
         for operator in transit_cost.values():
@@ -83,7 +87,7 @@ def main(args):
         # Check network
         if args.do_not_use_emme:
             mock_result_path = Path(
-                args.results_path, args.scenario_name[i], "Matrices",
+                args.result_data_folder, args.scenario_name[i], "Matrices",
                 args.submodel[i])
             if not mock_result_path.exists():
                 msg = "Mock Results directory {} does not exist.".format(
@@ -130,7 +134,7 @@ def main(args):
                     log.warn("Scenarios with different zones found in EMME bank!")
             attrs = {
                 "NODE": (list(param.stop_codes.values())
-                         + [param.subarea_attr, param.municipality_attr]),
+                         + [param.submodel_attr]),
                 "LINK": ["#buslane"],
                 "TRANSIT_LINE": [param.keep_stops_attr],
             }
@@ -197,7 +201,7 @@ def main(args):
         if submodel != "koko_suomi":
             # Check base matrices
             base_matrices_path = Path(
-                args.baseline_data_path, "Matrices", submodel)
+                args.base_data_folder, "Matrices", submodel)
             if not base_matrices_path.exists():
                 msg = "Baseline matrices' directory '{}' does not exist.".format(
                     base_matrices_path)
@@ -219,12 +223,12 @@ def main(args):
             args.scenario_name, args.long_dist_demand_forecast):
         if long_dist == "calc":
             long_dist_result_paths.append(
-                Path(args.results_path, name, "Matrices", "koko_suomi"))
+                Path(args.result_data_folder, name, "Matrices", "koko_suomi"))
     model_types = (args.model_types if args.model_types
-                   else ["passenger_transport" for _ in forecast_zonedata_paths])
-    for model_type, data_path, submodel, long_dist_forecast, freight_path in zip(
-            model_types, forecast_zonedata_paths, args.submodel,
-            args.long_dist_demand_forecast, args.freight_matrix_paths):
+                   else ["passenger_transport" for _ in zone_data_files])
+    for i, (model_type, data_path, submodel, long_dist_forecast, freight_path) in enumerate(zip(
+            model_types, zone_data_files, args.submodel,
+            args.long_dist_demand_forecast, args.freight_matrix_paths)):
         # Check forecasted zonedata
         if not os.path.exists(data_path):
             msg = "Forecast data file '{}' does not exist.".format(
@@ -241,14 +245,15 @@ def main(args):
             long_dist_classes = (param.car_classes
                                  + param.long_dist_simple_classes)
             long_dist_path = Path(long_dist_forecast)
-            if long_dist_path not in long_dist_result_paths:
+            # Do not iterrupt if long distance run is set to be done now
+            # However long dist path must appear before it is used as base data
+            if long_dist_path not in long_dist_result_paths[:i]:
                 long_dist_matrices = MatrixData(long_dist_path)
                 with long_dist_matrices.open(
                         "demand", "vrk", zone_numbers[submodel],
                         forecast_zonedata.mapping, long_dist_classes) as mtx:
                     for ass_class in long_dist_classes:
                         a = mtx[ass_class]
-
         # Check freight matrices
         if freight_path != "none":
             freight_matrices = MatrixData(Path(freight_path))
@@ -321,12 +326,12 @@ if __name__ == "__main__":
         required=True,
         help="Name of HELMET scenario. Influences result folder name and log file name."),
     parser.add_argument(
-        "--results-path",
+        "--result-data-folder",
         type=str,
         help="Path to folder where result data is saved to."),
     # Base input (across all scenarios)
     parser.add_argument(
-        "--baseline-data-path",
+        "--base-data-folder",
         type=str,
         help="Path to folder containing both baseline zonedata and -matrices (Given privately by project manager)"),
     # Scenarios' individual input
@@ -337,7 +342,7 @@ if __name__ == "__main__":
         required=True,
         help="Name of submodel, used for choosing appropriate zone mapping"),
     parser.add_argument(
-        "--emme-paths",
+        "--emme-project-files",
         type=str,
         nargs="+",
         required=True,
@@ -349,17 +354,17 @@ if __name__ == "__main__":
         required=True,
         help="List of first (biking) scenario IDs within EMME project (.emp)."),
     parser.add_argument(
-        "--forecast-data-paths",
+        "--zone-data-files",
         type=str,
         nargs="+",
         required=True,
-        help="List of paths to folder containing forecast zonedata"),
+        help="List of paths to zone data files."),
     parser.add_argument(
-        "--cost-data-paths",
+        "--cost-data-files",
         type=str,
         nargs="+",
         required=True,
-        help="List of paths to files containing transport cost data"),
+        help="List of paths to files containing transport cost data."),
     parser.set_defaults(
         **{key.lower(): val for key, val in config.items()})
     args = parser.parse_args()

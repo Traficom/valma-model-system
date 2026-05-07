@@ -1,6 +1,6 @@
 from __future__ import annotations
-from typing import Any, Dict, Union
 import parameters.assignment as param
+from parameters.cost import value_of_time
 
 
 (
@@ -36,6 +36,11 @@ class JourneyLevel:
     """
     Journey level specification for transit assignment.
 
+    Boarding local transit modes triggers free transfers.
+    For long-distance transit assignment, destinations are reachable
+    only after boarding long-distance transit mode.
+    Car access is allowed only directly to long-distance transit modes.
+
     Parameters
     ----------
     level : int
@@ -44,25 +49,32 @@ class JourneyLevel:
         4 - boarded local service at destination,
         5 - left transit system, 6 - forbidden (virtual level)
     transit_class : str
-        Name of transit class (transit_work/transit_leisure/...)
-    park_and_ride : str or False (optional)
-        Extra attribute name for park-and-ride aux volume if
-        this is park-and-ride assignment, else False
+        Name of transit assignment class (transit/pt_car_acc/...)
+    park_and_ride : bool
+        Whether park-and-ride mode is allowed for this journey level.
+        If True, car parking is allowed on all links where walking
+        to/from a stop is possible.
+        If False, only walk access is allowed.
     """
-    def __init__(self, level: int, transit_class: str,
-                 park_and_ride: Union[str, bool] = False):
-        # Boarding transit modes allowed only on levels 0-4
+    def __new__(self, level: int, transit_class: str,
+                 park_and_ride: bool = False):
         if level <= BOARDED_LOCAL:
-            next = BOARDED_LOCAL
+            if transit_class in param.car_access_classes:
+                after_local_board = FORBIDDEN
+            else:
+                after_local_board = BOARDED_LOCAL
         elif level <= BOARDED_DEST:
-            next = BOARDED_DEST
+            if transit_class in param.car_egress_classes:
+                after_local_board = FORBIDDEN
+            else:
+                after_local_board = BOARDED_DEST
         else:
-            next = FORBIDDEN
+            after_local_board = FORBIDDEN
         local_transit_modes = [mode for mode in param.local_transit_modes
             if mode not in param.long_dist_transit_modes[transit_class]]
         transitions = [{
                 "mode": mode,
-                "next_journey_level": next,
+                "next_journey_level": after_local_board,
             } for mode in local_transit_modes]
         next = BOARDED_LONG_D if level <= BOARDED_DEST else FORBIDDEN
         transitions += [{
@@ -97,7 +109,7 @@ class JourneyLevel:
                 "mode": mode,
                 "next_journey_level": walk,
             } for mode in param.aux_modes]
-        self.spec = {
+        spec = {
             "description": DESCRIPTION[level],
             "destinations_reachable": DESTINATIONS_REACHABLE[level],
             "transition_rules": transitions,
@@ -107,8 +119,7 @@ class JourneyLevel:
                 "at_nodes": None,
                 "on_lines": {
                     "penalty": param.board_fare_attr,
-                    "perception_factor": param.vot_inv[param.vot_classes[
-                        transit_class]],
+                    "perception_factor": 60 / value_of_time[transit_class],
                 },
                 "on_segments": None,
             },
@@ -116,8 +127,9 @@ class JourneyLevel:
         }
         if level in (BOARDED_LOCAL, BOARDED_DEST):
             # Free transfers within local transit
-            (self.spec["boarding_cost"]
-                      ["on_lines"]["penalty"]) =  param.board_long_dist_attr
+            (spec["boarding_cost"]
+                 ["on_lines"]["penalty"]) =  param.board_long_dist_attr
         if (transit_class in param.long_distance_transit_classes
                 and level == BOARDED_LOCAL):
-            self.spec["destinations_reachable"] = False
+            spec["destinations_reachable"] = False
+        return spec
