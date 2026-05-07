@@ -550,7 +550,7 @@ class SecDestPurpose(Purpose):
 
     @property
     def dist(self):
-        return self.distance[self.bounds, self.dest_interval]
+        return ZoneData.beeline_dist[self.bounds, self.dest_interval]
 
     def init_tours(self):
         self.gen_model.init_tours()

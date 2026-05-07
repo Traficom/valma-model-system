@@ -199,7 +199,11 @@ class LogitModel:
             The parameters for different zone data.
         """
         for i in b:
-            utility += b[i] * numpy.asarray(self.generation_zone_data[i])
+            data = numpy.asarray(self.generation_zone_data[i])
+            try:
+                utility += b[i] * data
+            except ValueError:
+                utility += b[i] * data[dests,:]
         return utility
 
     def _add_log_zone_util(self, exps, b, generation=False):
