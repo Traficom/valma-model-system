@@ -65,13 +65,6 @@ class Purpose:
         self.dest = specification["dest"]
         self.generation_area = specification["generation_area"]
         self.attraction_area = specification["attraction_area"]
-        self.impedance_share = specification["impedance_share"]
-        self.discount = specification.get("discount", {})
-        self.activity_time = specification["activity_time"]
-        self.park_cost_share = specification["parking_cost_share"]
-        self.occupancy = specification["occupancy"]
-        self.cost_share = specification["car_cost_sharing"]
-        self.demand_share = specification["demand_share"]
         self.generation_zone_data = zone_datas[self.generation_area]
         self.attraction_zone_data = zone_datas[self.attraction_area]
         zone_numbers = self.generation_zone_data.all_zone_numbers
@@ -93,7 +86,25 @@ class Purpose:
     @property
     def dest_zone_numbers(self):
         return self.attraction_zone_data.zone_numbers
-    
+
+
+class TravelPurpose(Purpose):
+
+    def __init__(self,
+                 specification,
+                 zone_datas,
+                 resultdata = None,
+                 mtx_adjustment = None):
+        Purpose.__init__(
+            self, specification, zone_datas, resultdata, mtx_adjustment)
+        self.impedance_share = specification["impedance_share"]
+        self.demand_share = specification["demand_share"]
+        self.discount = specification.get("discount", {})
+        self.activity_time = specification["activity_time"]
+        self.park_cost_share = specification["parking_cost_share"]
+        self.occupancy = specification["occupancy"]
+        self.cost_share = specification["car_cost_sharing"]
+
     def transform_impedance(self, impedance):
         """Perform transformation from time period dependent matrices
         to aggregate impedance matrices for specific travel purpose.
@@ -194,54 +205,56 @@ class Purpose:
                                               / cost.tour_duration[mode]["avg"])
         return day_imp
 
-def new_tour_purpose(*args):
-    """Create purpose for two-way tour or for secondary destination of tour.
+    def __new__(cls, *args):
+        """Create purpose for two-way tour or for secondary destination of tour.
 
-    Parameters
-    ----------
-    specification : dict
-        "name" : str
-            Tour purpose name (hw/oo/hop/sop/...)
-        "orig" : str
-            Origin of the tours (home/source)
-        "dest" : str
-            Destination of the tours (work/other/source/...)
-        "generation_area" : str
-            Model area (domestic/foreign)
-        "struct" : str
-            Model structure (dest>mode/mode>dest)
-        "impedance_share" : dict
-            Impedance shares
-        "impedance_transform" : dict
-            Impedance transformations
-        "destination_choice" : dict
-            Destionation choice parameters
-        "mode_choice" dict
-            Mode choice parameters
-    zone_data : ZoneData
-        Data used for all demand calculations
-    resultdata : ResultData
-        Writer object for result directory
-    mtx_adjustment : dict (optional)
-        Dict of matrix adjustments for testing elasticities
-    """
-    specification = args[0]
-    attempt_calibration(specification)
-    if "sec_dest" in specification:
-        purpose = SecDestPurpose(*args)
-    elif (specification["dest"] == "source"
-          or specification["name"] == "oop"):
-        purpose = SimpleTourPurpose(*args)
-    else:
-        purpose = TourPurpose(*args)
-    try:
-        purpose.sources = specification["source"]
-    except KeyError:
-        pass
-    return purpose
+        Parameters
+        ----------
+        specification : dict
+            "name" : str
+                Tour purpose name (hw/oo/hop/sop/...)
+            "orig" : str
+                Origin of the tours (home/source)
+            "dest" : str
+                Destination of the tours (work/other/source/...)
+            "generation_area" : str
+                Model area (domestic/foreign)
+            "struct" : str
+                Model structure (dest>mode/mode>dest)
+            "impedance_share" : dict
+                Impedance shares
+            "impedance_transform" : dict
+                Impedance transformations
+            "destination_choice" : dict
+                Destionation choice parameters
+            "mode_choice" dict
+                Mode choice parameters
+        zone_data : ZoneData
+            Data used for all demand calculations
+        resultdata : ResultData
+            Writer object for result directory
+        mtx_adjustment : dict (optional)
+            Dict of matrix adjustments for testing elasticities
+        """
+        if cls is not TravelPurpose:
+            return super(TravelPurpose, cls).__new__(cls)
+        specification = args[0]
+        attempt_calibration(specification)
+        if "sec_dest" in specification:
+            purpose = SecDestPurpose(*args)
+        elif (specification["dest"] == "source"
+            or specification["name"] == "oop"):
+            purpose = SimpleTourPurpose(*args)
+        else:
+            purpose = TourPurpose(*args)
+        try:
+            purpose.sources = specification["source"]
+        except KeyError:
+            pass
+        return purpose
 
 
-class TourPurpose(Purpose):
+class TourPurpose(TravelPurpose):
     """Standard two-way tour purpose.
 
     Parameters
@@ -260,7 +273,7 @@ class TourPurpose(Purpose):
     """
 
     def __init__(self, specification, zone_datas, resultdata, mtx_adjustment):
-        Purpose.__init__(
+        TravelPurpose.__init__(
             self, specification, zone_datas, resultdata, mtx_adjustment)
         if (self.orig == "home" and 
             specification["gen_model"] == "rate"):
@@ -521,7 +534,7 @@ class SimpleTourPurpose(TourPurpose):
         return self.calc_demand(impedance, is_last_iteration)
 
 
-class SecDestPurpose(Purpose):
+class SecDestPurpose(TravelPurpose):
     """Purpose for secondary destination of tour.
 
     Parameters
@@ -538,7 +551,7 @@ class SecDestPurpose(Purpose):
 
     def __init__(self, specification, zone_data, resultdata, mtx_adjustment):
         args = (self, specification, zone_data, resultdata)
-        Purpose.__init__(*args, mtx_adjustment)
+        TravelPurpose.__init__(*args, mtx_adjustment)
         self.gen_model = generation.SecDestGeneration(
             self, resultdata, specification["generation"])
         self.model = logit.SecDestModel(*args)
