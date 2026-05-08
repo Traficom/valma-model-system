@@ -13,35 +13,11 @@ value_of_time = {  # [eur/hour]
     "van": 29.02,
 }
 
-tour_duration = {
-    "pt_car_acc": {
-        "avg": 2.18,
-        "hb_business": 1.12,
-        "hb_leisure_overnight": 9,
-    },
-    "pt_taxi_acc": {
-        "avg": 2.18,
-        "hb_business": 1.12,
-        "hb_leisure_overnight": 9,
-    },
-    "airpl_car_acc": {
-        "avg": 2.39,
-        "hb_business": 2.01,
-        "hb_leisure_overnight": 9,
-    },
-    "pt_car_egr": {
-        "avg": 2.18,
-        "hb_business": 1.12,
-        "hb_leisure_overnight": 9,
-    },
-    "pt_taxi_egr": {
-        "avg": 2.18,
-        "hb_business": 1.12,
-        "hb_leisure_overnight": 9,
-    },
-    "airpl_car_egr": {
-        "avg": 2.39,
-        "hb_business": 2.01,
-        "hb_leisure_overnight": 9,
-    }
+avg_tour_duration = {
+    "pt_car_acc": 2.18,
+    "pt_taxi_acc": 2.18,
+    "airpl_car_acc": 2.39,
+    "pt_car_egr": 2.18,
+    "pt_taxi_egr": 2.18,
+    "airpl_car_egr": 2.39,
 }

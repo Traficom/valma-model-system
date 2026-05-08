@@ -28,38 +28,38 @@ from parameters.marine_ship import leg_names
 
 class Purpose:
     """Generic container class without methods.
-    
-    Sets the purpose zone bounds.
 
-    Parameters
-    ----------
-    specification : dict
-        "name" : str
-            Tour purpose name
-        "orig" : str
-            Origin of the tours
-        "dest" : str
-            Destination of the tours
-        "area" : str
-            Model area
-        "impedance_share" : dict
-            Impedance shares
-    zone_datas : Dict
-        key : str
-            Model area (domestic/foreign)
-        val : ZoneData
-            Data used for all demand calculations
-    resultdata : ResultsData (optional)
-        Writer object to result directory
-    mtx_adjustment : dict (optional)
-        Dict of matrix adjustments for testing elasticities
+    The subclasses contain tour-purpose-specific or goods-type-specific
+    methods for calculating demand.
     """
 
     def __init__(self, 
                  specification: Dict[str,Optional[str]],
                  zone_datas: Dict[str, ZoneData],
-                 resultdata: Optional[ResultsData] = None,
-                 mtx_adjustment: Optional[Dict] = None):
+                 resultdata: ResultsData):
+        """Set the purpose zone bounds.
+
+        Parameters
+        ----------
+        specification : dict
+            "name" : str
+                Tour purpose name
+            "orig" : str
+                Origin of the tours
+            "dest" : str
+                Destination of the tours
+            "generation_area" : str
+                Model area for tour generation
+            "attraction_area" : str
+                Model area for tour attraction
+        zone_datas : Dict
+            key : str
+                Model area (domestic/foreign)
+            val : ZoneData
+                Data used for all demand calculations
+        resultdata : ResultsData
+            Writer object to result directory
+        """
         self.name = specification["name"]
         self.orig = specification["orig"]
         self.dest = specification["dest"]
@@ -73,11 +73,6 @@ class Purpose:
         self.dest_interval = slice(*zone_numbers.searchsorted(
             param.purpose_areas[self.attraction_area]))
         self.resultdata = resultdata
-        self.mtx_adjustment = mtx_adjustment
-        self.generated_tours: Dict[str, numpy.array] = {}
-        self.generated_distance: Dict[str, numpy.array] = {}
-        self.attracted_tours: Dict[str, numpy.array] = {}
-        self.attracted_distance: Dict[str, numpy.array] = {}
 
     @property
     def orig_zone_numbers(self):
@@ -95,8 +90,54 @@ class TravelPurpose(Purpose):
                  zone_datas,
                  resultdata = None,
                  mtx_adjustment = None):
-        Purpose.__init__(
-            self, specification, zone_datas, resultdata, mtx_adjustment)
+        """Create purpose for two-way tour or for secondary destination of tour.
+
+        Parameters
+        ----------
+        specification : dict
+            "name" : str
+                Tour purpose name (hw/oo/hop/sop/...)
+            "orig" : str
+                Origin of the tours (home/source)
+            "dest" : str
+                Destination of the tours (work/other/source/...)
+            "generation_area" : str
+                Model area (domestic/foreign)
+            "attraction_area" : str
+                Model area (domestic/foreign)
+            "struct" : str
+                Model structure (dest>mode/mode>dest)
+            "impedance_share" : dict
+                Impedance shares
+            "demand_share" : dict
+                Demand shares
+            "discount" : dict
+                Discount factors for LOS components
+            "activity_time" : dict
+                Time spent at activity in minutes when parking at destination
+            "parking_cost_share" : float
+                Share of drivers paying for parking at destination
+            "occupancy" : dict
+                "car_drv" : float
+                    Average occupancy of car driver trips
+                "car_pax" : float
+                    Average occupancy of car passenger trips
+            "car_cost_sharing" : float
+                Share of car cost that is shared among passengers
+            "tour_duration" : dict
+                Average tour duration in days for park-and-ride modes
+            "destination_choice" : dict
+                Destionation choice parameters
+            "mode_choice" dict
+                Mode choice parameters
+        zone_data : ZoneData
+            Data used for all demand calculations
+        resultdata : ResultData
+            Writer object for result directory
+        mtx_adjustment : dict (optional)
+            Dict of matrix adjustments for testing elasticities
+        """
+        Purpose.__init__(self, specification, zone_datas, resultdata)
         self.impedance_share = specification["impedance_share"]
         self.demand_share = specification["demand_share"]
         self.discount = specification.get("discount", {})
@@ -104,6 +145,12 @@ class TravelPurpose(Purpose):
         self.park_cost_share = specification["parking_cost_share"]
         self.occupancy = specification["occupancy"]
         self.cost_share = specification["car_cost_sharing"]
+        self.tour_duration = specification.get("tour_duration", {})
+        self.mtx_adjustment = mtx_adjustment
+        self.generated_tours: Dict[str, numpy.array] = {}
+        self.generated_distance: Dict[str, numpy.array] = {}
+        self.attracted_tours: Dict[str, numpy.array] = {}
+        self.attracted_distance: Dict[str, numpy.array] = {}
 
     def transform_impedance(self, impedance):
         """Perform transformation from time period dependent matrices
@@ -201,41 +248,11 @@ class TravelPurpose(Purpose):
                 log.info(f"Generalized cost calculated for {self.name} {mode}.")
             if mode in mixed_mode_classes:
                 day_imp[mode]["park_cost"] = (day_imp[mode]["park_cost"]
-                                              * cost.tour_duration[mode][self.name]
-                                              / cost.tour_duration[mode]["avg"])
+                                              * self.tour_duration[mode]
+                                              / cost.avg_tour_duration[mode])
         return day_imp
 
     def __new__(cls, *args):
-        """Create purpose for two-way tour or for secondary destination of tour.
-
-        Parameters
-        ----------
-        specification : dict
-            "name" : str
-                Tour purpose name (hw/oo/hop/sop/...)
-            "orig" : str
-                Origin of the tours (home/source)
-            "dest" : str
-                Destination of the tours (work/other/source/...)
-            "generation_area" : str
-                Model area (domestic/foreign)
-            "struct" : str
-                Model structure (dest>mode/mode>dest)
-            "impedance_share" : dict
-                Impedance shares
-            "impedance_transform" : dict
-                Impedance transformations
-            "destination_choice" : dict
-                Destionation choice parameters
-            "mode_choice" dict
-                Mode choice parameters
-        zone_data : ZoneData
-            Data used for all demand calculations
-        resultdata : ResultData
-            Writer object for result directory
-        mtx_adjustment : dict (optional)
-            Dict of matrix adjustments for testing elasticities
-        """
         if cls is not TravelPurpose:
             return super(TravelPurpose, cls).__new__(cls)
         specification = args[0]
@@ -255,22 +272,7 @@ class TravelPurpose(Purpose):
 
 
 class TourPurpose(TravelPurpose):
-    """Standard two-way tour purpose.
-
-    Parameters
-    ----------
-    specification : dict
-        See `new_tour_purpose()`
-    zone_datas : Dict
-        key : str
-            Model area (domestic/foreign)
-        val : ZoneData
-            Data used for all demand calculations
-    resultdata : ResultData
-        Writer object for result directory
-    mtx_adjustment : dict (optional)
-        Dict of matrix adjustments for testing elasticities
-    """
+    """Standard two-way tour purpose."""
 
     def __init__(self, specification, zone_datas, resultdata, mtx_adjustment):
         TravelPurpose.__init__(
@@ -535,19 +537,7 @@ class SimpleTourPurpose(TourPurpose):
 
 
 class SecDestPurpose(TravelPurpose):
-    """Purpose for secondary destination of tour.
-
-    Parameters
-    ----------
-    specification : dict
-        See `new_tour_purpose()`
-    zone_data : ZoneData
-        Data used for all demand calculations
-    resultdata : ResultData
-        Writer object to result directory
-    mtx_adjustment : dict (optional)
-        Dict of matrix adjustments for testing elasticities
-    """
+    """Purpose for secondary destination of tour."""
 
     def __init__(self, specification, zone_data, resultdata, mtx_adjustment):
         args = (self, specification, zone_data, resultdata)
