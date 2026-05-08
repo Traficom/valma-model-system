@@ -222,12 +222,16 @@ class TravelPurpose(Purpose):
         for mode in self.discount:
             for mtx_type in self.discount[mode]:
                 day_imp[mode][mtx_type] *= self.discount[mode][mtx_type]
-        zone_data = self.attraction_zone_data
+        zd = self.attraction_zone_data
         for mode in day_imp:
+            for mtx_type in day_imp[mode]:
+                if mtx_type in ("time", "cost", "dist"):
+                    # Get intra-zonal impendances from zone data
+                    numpy.fill_diagonal(day_imp[mode][mtx_type], zd[mtx_type])
             if "car" in mode:
-                day_imp[mode]["time"] += numpy.asarray(zone_data["avg_park_time"])
+                day_imp[mode]["time"] += numpy.asarray(zd["avg_park_time"])
                 day_imp[mode]["cost"] += (self.activity_time * self.park_cost_share
-                                          * numpy.asarray(zone_data["avg_park_cost"]))
+                                          * numpy.asarray(zd["avg_park_cost"]))
         if self.occupancy:
             if "car_drv" in day_imp:
                 day_imp["car_drv"]["cost"] *= (1 - self.cost_share
@@ -236,11 +240,6 @@ class TravelPurpose(Purpose):
             day_imp["car_pax"]["cost"] *= (self.cost_share
                                            / self.occupancy["car_pax"])
         for mode in day_imp:
-            if "car" in mode:
-                day_imp[mode]["time"] += numpy.asarray(zone_data["time*within_zone"])
-                day_imp[mode]["cost"] += numpy.asarray(zone_data["cost*within_zone"])
-            if mode in ("walk", "bike"):
-                day_imp[mode]["dist"] += numpy.asarray(zone_data["dist*within_zone"])
             if "vrk" in self.impedance_share[mode] and mode != "walk":
                 vot = cost.value_of_time[mode_impedance[mode]]
                 day_imp[mode]["gen_cost"] = (day_imp[mode].pop("cost")
