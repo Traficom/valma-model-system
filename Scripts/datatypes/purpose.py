@@ -11,7 +11,6 @@ import utils.log as log
 import parameters.zone as param
 import models.logit as logit
 from parameters.assignment import (
-    assignment_classes,
     intermodals,
     mixed_mode_classes,
     car_classes,
@@ -74,7 +73,7 @@ class Purpose:
         self.attraction_area = specification["attraction_area"]
         self.impedance_share = specification["impedance_share"]
         self.car_modes: Dict[str, Tuple[str, str]] = {}
-        if self.name in assignment_classes:
+        if isinstance(self, TourPurpose):
             self.car_modes[cp_mode] = ecp_modes
             if "car_drv" in self.impedance_share:
                 self.car_modes["car_drv"] = [mode + "_drv" for mode in ec_modes]
@@ -328,6 +327,7 @@ class TourPurpose(Purpose):
         self.aggregates = {name: {} for name in self.dest_mappings}
         self.within_zone_tours = {}
         self.sec_dest_purpose: SecDestPurpose = None
+        self.sec_dest_rates = specification["sec_dest_rate"]
 
     @property
     def dist(self):

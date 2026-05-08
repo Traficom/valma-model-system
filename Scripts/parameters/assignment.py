@@ -412,23 +412,6 @@ intermodals = {
     "transit": ["pt_car_acc", "pt_taxi_acc", "pt_taxi_egr"],
     "airplane": ["airpl_car_acc", "airpl_car_egr"],
 }
-assignment_classes = {
-    "hb_work": "work",
-    "hb_edu_basic": "work",
-    "hb_edu_student": "work",
-    "hb_grocery": "leisure",
-    "hb_other_shop": "leisure",
-    "hb_leisure": "leisure",
-    "hb_escort": "leisure",
-    "hb_sport": "leisure",
-    "hb_visit": "leisure",
-    "hb_leisure_overnight": "leisure",
-    "hb_business": "work",
-    "wb_business": "work",
-    "wb_other": "leisure",
-    "ob_other": "leisure",
-    "external": "leisure",
-}
 main_mode = 'h'
 bike_mode = 'f'
 assignment_modes = {

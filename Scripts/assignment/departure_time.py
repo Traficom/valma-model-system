@@ -77,7 +77,7 @@ class DepartureTimeModel:
         """
         try:
             self.old_car_demand = next(iter(self.demand.values()))["icev"]
-        except FileNotFoundError:
+        except:  # In MockAssignmentModel, this can fail for various reasons
             pass
         n = self.nr_zones
         for ap in self.assignment_periods:
@@ -94,6 +94,11 @@ class DepartureTimeModel:
         demand : Demand
             Travel demand matrix or number of travellers
         """
+        try:
+            rate = demand.purpose.sec_dest_rates[demand.mode]
+            demand.matrix = demand.matrix * rate
+        except KeyError:
+            pass
         position: Sequence[int] = demand.position
         ass_classes = mode_assignment_classes[demand.mode]
         for is_return, ass_class in enumerate(ass_classes):
@@ -102,6 +107,7 @@ class DepartureTimeModel:
                 for ap in self.assignment_periods:
                     if ass_class in ap.assignment_modes:
                         mtx = demand.matrix.T if is_return else demand.matrix
+                        position = demand.position[::-1] if is_return else demand.position
                         self._add_2d_demand(
                             share[ap.name], ass_class, ap.name, mtx, position)
             elif len(position) == 3:
@@ -167,8 +173,6 @@ class DepartureTimeModel:
                 mtx[ass_class][0:n, 0:n] for ass_class in car_classes)
             share = param.demand_share["freight"]["van"][time_period]
             self._add_2d_demand(share, "van", time_period, car_demand, (0, 0))
-            self._add_2d_demand(
-                (1, 0), "van", time_period, mtx["truck"][0:n, 0:n], (0, 0))
 
 
 class DirectDepartureTimeModel (DepartureTimeModel):
