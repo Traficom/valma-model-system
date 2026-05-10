@@ -51,7 +51,6 @@ class ForeignExternalModel:
         production_base = self._generate_trips(zone_data_base, mode)
         production_forecast = self._generate_trips(zone_data_forecast, mode)
 
-        # NOTE: Eli tässä input-matriisissa on kaikki sentroidit, mutta nollasta poikkeavia arvoja on vain lähtömaa-sijoittelualue - ulkomaan alueklusteri -pareilla.
         with omx.open_file(self.base_demand_path, "r") as mtx:
             # Remove zero values
             base_mtx = numpy.array(mtx[mode]).clip(0.000001, None)
@@ -67,8 +66,6 @@ class ForeignExternalModel:
 
         # Construct matrix with correct zone numbers
         mtx = pandas.DataFrame(base_mtx, domestic_zone_numbers, external_zone_numbers)
-
-        # NOTE: Tässä on tiputettu se HELMET-mallissa suuntautumismuutos-hommeli pois, koska nää on kiertomatkoja by defalult ja kohdemaissa ei oo aluejakoa
 
         # Matrix balancing
         demand = fratar(production, mtx)

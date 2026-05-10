@@ -260,7 +260,7 @@ class ZoneData:
             Zone data for foreign external passenger traffic calculation
         """
         variables = (
-            "population", # TODO: Tähän lisää muuttujia kun saadaan se koko malli speksattua.
+            "population",
         )
         data = {k: self._values[k] for k in variables}
         return pandas.DataFrame(data)

@@ -982,7 +982,6 @@ class ForeignExternalPurpose(TourPurpose):
         self.tour_generation = specification["tour_generation"]
         self._zone_datas = zone_datas
         self.basematrices_path = basematrices_path
-        # NOTE: Modify this if want to use separate zonedatas
         self.fem = ForeignExternalModel(
             self, self._zone_datas, self._zone_datas, self.basematrices_path, self.generation_zone_data.all_zone_numbers)
     
