@@ -12,7 +12,7 @@ def fratar(prod, attr, trips, max_iter=10):
         Production target
     attr : numpy/pandas array
         Attraction target
-    trips : pandas DataFrame
+    trips : numpy array
         Seed trip matrix
     max_iter (optional) : int
         Maximum iterations, default is 10
@@ -26,10 +26,10 @@ def fratar(prod, attr, trips, max_iter=10):
     for _ in range(max_iter):
         rowsum = trips.sum(axis=1)
         rowsum[rowsum == 0] = 1
-        trips = trips.mul(prod / rowsum, axis=0)
+        trips *= (prod / rowsum)[:, numpy.newaxis]
         colsum = trips.sum(axis=0)
         colsum[colsum == 0] = 1
-        trips = trips.mul(attr / colsum, axis=1)
+        trips *= (attr / colsum)[numpy.newaxis, :]
     return trips
 
 def calibrate(calib_base, production_base, production_forecast):

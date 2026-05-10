@@ -58,22 +58,15 @@ class ForeignExternalModel:
         # Calibrate generation
         production = calibrate(
             base_colsum, production_base, production_forecast)
-        
-        # Get zone numbers for matrix construction
-        all_zone_numbers = numpy.array(self.zone_numbers)
-        domestic_zone_numbers = all_zone_numbers[(all_zone_numbers >= purpose_areas["domestic"][0]) & (all_zone_numbers <= purpose_areas["domestic"][1])]
-        external_zone_numbers = all_zone_numbers[(all_zone_numbers >= purpose_areas["external"][0]) & (all_zone_numbers <= purpose_areas["external"][1])]
-
-        # Construct matrix with correct zone numbers
-        mtx = pandas.DataFrame(base_mtx, domestic_zone_numbers, external_zone_numbers)
 
         # Matrix balancing
-        demand = fratar(production, production, mtx)
+        mock_attraction = base_mtx.sum(0)
+        demand = fratar(production, mock_attraction, base_mtx)
 
         # Remove small values
         demand[demand < 0.0001] = 0
 
-        return demand.to_numpy()
+        return demand
 
     def _generate_trips(self, 
                         zone_data: pandas.DataFrame, 
