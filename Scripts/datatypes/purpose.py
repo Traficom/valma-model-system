@@ -1051,12 +1051,4 @@ class ForeignExternalPurpose(TourPurpose):
                     mtx[main_mode] = logsum
         return acc_splits
 
-    def split_connection_mode(self, impedance, pt_mode):
-        if pt_mode == "airplane":
-            impedance["airpl_taxi_acc"] = impedance["airpl_car_acc"]
-        model = self.connection_models[pt_mode]
-        prob, logsum = model.calc_mode_prob(impedance)
-        if "airpl_taxi_acc" in prob:
-            prob["airpl_car_acc"] += prob.pop("airpl_taxi_acc")
-        return prob, logsum
 
