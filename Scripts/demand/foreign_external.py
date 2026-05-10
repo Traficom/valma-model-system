@@ -68,7 +68,7 @@ class ForeignExternalModel:
         mtx = pandas.DataFrame(base_mtx, domestic_zone_numbers, external_zone_numbers)
 
         # Matrix balancing
-        demand = fratar(production, mtx)
+        demand = fratar(production, production, mtx)
 
         # Remove small values
         demand[demand < 0.0001] = 0
