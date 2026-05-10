@@ -465,6 +465,41 @@ class TourPurpose(Purpose):
             purpose_impedance, is_last_iteration and self.name[0] != 's')
         log.info(f"Mode and dest probabilities calculated for {self.name}")
         return []
+    
+    def calc_connection_prob(self, impedance):
+        """Calculate mode probabilities for connection modes.
+        
+        Parameters
+        ----------
+        impedance : dict
+            Time period (aht/pt/iht/it) : dict
+                Type (time/cost/dist) : dict
+                    Mode (car/transit/bike/...) : numpy.ndarray
+
+        Returns
+        -------
+        dict
+            Mode (car/transit/bike/walk) : numpy 2-d matrix
+                Choice probabilities
+        """
+        purpose_impedance = self.transform_impedance(impedance)
+
+        #If the trip is long-distance, calculate unimodal/intermodal
+        # probability split for each main mode
+        if "vrk" in impedance:
+            acc_splits = {}
+            matrixdata = MatrixData(self.resultdata.path / "Matrices")
+            with matrixdata.open(
+                    f"logsum_{self.name}", "vrk", list(self.orig_zone_numbers), m='w'
+                    ) as mtx:
+                for main_mode, acc_modes in self.intermodals.items():
+                    mode_impedance = {mode: purpose_impedance.pop(mode)
+                        for mode in [main_mode] + acc_modes}
+                    acc_splits[main_mode], logsum = self.split_connection_mode(
+                        mode_impedance, main_mode)
+                    purpose_impedance[main_mode] = {"logsum": logsum}
+                    mtx[main_mode] = logsum
+        return acc_splits
 
     def calc_demand(
             self, impedance, is_last_iteration: bool) -> Iterator[Demand]:
@@ -1006,49 +1041,11 @@ class ForeignExternalPurpose(TourPurpose):
         for main_mode in self.intermodals:
             foreign_ext_mtx = self.fem.calc_foreign_external_traffic(main_mode)
             # Calculate probabilities for all access mode of the main mode
-            access_mode_probs = self.calc_prob(impedance)[main_mode]
+            access_mode_probs = self.calc_connection_prob(impedance)[main_mode]
             # Access mode demand
             for access_mode in access_mode_probs:
                 access_probs = access_mode_probs[access_mode].T
                 access_mode_mtx = foreign_ext_mtx * access_probs
                 yield Demand(self, access_mode, access_mode_mtx)
             log.info(f"Demand calculated for {self.name}")
-    
-    def calc_prob(self, impedance):
-        """Calculate mode and destination probabilities.
-        
-        Parameters
-        ----------
-        impedance : dict
-            Time period (aht/pt/iht/it) : dict
-                Type (time/cost/dist) : dict
-                    Mode (car/transit/bike/...) : numpy.ndarray
-        is_last_iteration : bool
-            Whether to calclulate and store accessibility indicators
-
-        Returns
-        -------
-        dict
-            Mode (car/transit/bike/walk) : numpy 2-d matrix
-                Choice probabilities
-        """
-        purpose_impedance = self.transform_impedance(impedance)
-
-        #If the trip is long-distance, calculate unimodal/intermodal
-        # probability split for each main mode
-        if "vrk" in impedance:
-            acc_splits = {}
-            matrixdata = MatrixData(self.resultdata.path / "Matrices")
-            with matrixdata.open(
-                    f"logsum_{self.name}", "vrk", list(self.orig_zone_numbers), m='w'
-                    ) as mtx:
-                for main_mode, acc_modes in self.intermodals.items():
-                    mode_impedance = {mode: purpose_impedance.pop(mode)
-                        for mode in [main_mode] + acc_modes}
-                    acc_splits[main_mode], logsum = self.split_connection_mode(
-                        mode_impedance, main_mode)
-                    purpose_impedance[main_mode] = {"logsum": logsum}
-                    mtx[main_mode] = logsum
-        return acc_splits
-
 
