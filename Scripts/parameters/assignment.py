@@ -241,7 +241,21 @@ aux_time_perception_factor_truck = 30
 # Factors for 24-h expansion of volumes
 # TODO: Trucks and vans
 volume_factors = {
-    "car": {
+    "icev": {
+        "aht": 0.439,
+        "pt": 0.098,
+        "iht": 0.378,
+        "it": 0.3,
+        "vrk": 1.0,
+    },
+    "bev": {
+        "aht": 0.439,
+        "pt": 0.098,
+        "iht": 0.378,
+        "it": 0.3,
+        "vrk": 1.0,
+    },
+    "phev": {
         "aht": 0.439,
         "pt": 0.098,
         "iht": 0.378,
@@ -355,9 +369,13 @@ time_periods = {
     "iht": "AssignmentPeriod",
     "it": "TransitAssignmentPeriod",
 }
+ec_modes = ("bev", "phev")
+cp_mode = "car_pax"
+ecp_modes = ("bev_pax", "phev_pax")
+pax_modes = (cp_mode,) + ecp_modes
 car_classes = (
-    "car",
-)
+    "icev",
+) + ec_modes
 car_and_van_classes = car_classes + ("van",)
 private_classes = car_and_van_classes + ("bike",)
 car_access_classes = (
@@ -397,14 +415,18 @@ intermodals = {
 main_mode = 'h'
 bike_mode = 'f'
 assignment_modes = {
-    "car": 'c',
+    "icev": 'c',
+    "bev": 'c',
+    "phev": 'c',
     "trailer_truck": 'y',
     "semi_trailer": 'y',
     "truck": 'k',
     "van": 'v',
 }
 vot_classes = {
-    "car": "all",
+    "icev": "work",
+    "bev": "work",
+    "phev": "work",
     "trailer_truck": "trailer_truck",
     "semi_trailer": "semi_trailer",
     "truck": "truck",
@@ -548,8 +570,12 @@ roadtypes = {
 }
 # modes in choice model : impedance
 mode_impedance = {
-    "car_drv": "car", 
-    "car_pax": "car",
+    "car_drv": "icev",
+    "car_pax": "icev",
+    "bev_drv": "bev",
+    "bev_pax": "bev",
+    "phev_drv": "phev",
+    "phev_pax": "phev",
     "transit": "transit",
     "airplane": "airplane",
     "bike": "bike",
@@ -566,9 +592,15 @@ mode_impedance = {
 # If the mode has two assignment classes, demand
 # will be transposed for the second one.
 mode_assignment_classes = {
-    "car_drv": ["car"], 
+    "car_drv": ["icev"],
     "car_pax": [],
-    "car": ["car"],
+    "bev_drv": ["bev"],
+    "bev_pax": [],
+    "phev_drv": ["phev"],
+    "phev_pax": [],
+    "icev": ["icev"],
+    "bev": ["bev"],
+    "phev": ["phev"],
     "transit": ["transit"],
     "airplane": ["airplane"],
     "bike": ["bike"],

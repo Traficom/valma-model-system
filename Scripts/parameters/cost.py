@@ -72,7 +72,9 @@ car_pax_occupancy = {
 }
 
 value_of_time = {  # [eur/hour]
-    "car": 9.18,
+    "icev": 9.18,
+    "bev": 9.18,
+    "phev": 9.18,
     "transit": 7.3,
     "airplane": 11.4,
     "pt_car_acc": 7.7,

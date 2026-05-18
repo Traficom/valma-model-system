@@ -226,6 +226,7 @@ def main(args):
                 Path(args.result_data_folder, name, "Matrices", "koko_suomi"))
     model_types = (args.model_types if args.model_types
                    else ["passenger_transport" for _ in zone_data_files])
+    electric_car_share = {"default": {"bev": 0.1, "phev": 0.2}}
     for i, (model_type, data_path, submodel, long_dist_forecast, freight_path) in enumerate(zip(
             model_types, zone_data_files, args.submodel,
             args.long_dist_demand_forecast, args.freight_matrix_paths)):
@@ -238,7 +239,9 @@ def main(args):
         zonedata_args = Path(data_path), zone_numbers[submodel], submodel
         forecast_zonedata = (FreightZoneData(*zonedata_args)
                              if model_type == "goods_transport"
-                             else ZoneData(*zonedata_args, car_dist_cost=0.12))
+                             else ZoneData(
+                                 *zonedata_args, car_dist_cost=0.12,
+                                 electric_car_share=electric_car_share))
 
         # Check long-distance base matrices
         if long_dist_forecast not in ("calc", "base"):

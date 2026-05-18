@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Dict, Iterator, Optional, List, cast
+from typing import Dict, Tuple, List, Iterator, Optional, cast
 from copy import copy
 from collections import defaultdict
 import numpy # type: ignore
@@ -13,6 +13,12 @@ import models.logit as logit
 from parameters.assignment import (
     intermodals,
     mixed_mode_classes,
+    car_classes,
+    ec_modes,
+    cp_mode,
+    ecp_modes,
+    pax_modes,
+    car_egress_classes,
     mode_impedance
 )
 import parameters.cost as cost
@@ -66,6 +72,16 @@ class Purpose:
         self.generation_area = specification["generation_area"]
         self.attraction_area = specification["attraction_area"]
         self.impedance_share = specification["impedance_share"]
+        self.car_modes: Dict[str, Tuple[str, str]] = {}
+        if isinstance(self, TourPurpose):
+            self.car_modes[cp_mode] = ecp_modes
+            if "car_drv" in self.impedance_share:
+                self.car_modes["car_drv"] = [mode + "_drv" for mode in ec_modes]
+        for mode, electric_modes in self.car_modes.items():
+            if mode in self.impedance_share:
+                car_imp_share = self.impedance_share[mode]
+                for electric_mode in electric_modes:
+                    self.impedance_share[electric_mode] = car_imp_share
         self.demand_share = specification["demand_share"]
         self.generation_zone_data = zone_datas[self.generation_area]
         self.attraction_zone_data = zone_datas[self.attraction_area]
@@ -163,23 +179,23 @@ class Purpose:
                         day_imp[mode][mtx_type] *= cost.cost_discount[self.name][mode]
                     except KeyError:
                         pass
-                if mtx_type == "time" and "car" in mode:
+                if mtx_type == "time" and (mode_impedance[mode] in car_classes + car_egress_classes):
                     day_imp[mode][mtx_type] += self.attraction_zone_data["avg_park_time"].values
-                if mtx_type == "cost" and "car" in mode:
+                if mtx_type == "cost" and (mode_impedance[mode] in car_classes + car_egress_classes):
                     try:
                         day_imp[mode][mtx_type] += (cost.activity_time[self.name] *
                                                     cost.share_paying[self.name] *
                                                     self.attraction_zone_data["avg_park_cost"].values)
                     except KeyError:
                         pass
-                if mtx_type == "cost" and mode == "car_drv":
+                if mtx_type == "cost" and mode_impedance[mode] in car_classes and mode not in pax_modes:
                     try:
                         day_imp[mode][mtx_type] *= (1 - cost.sharing_factor[self.name] *
                                                     (cost.car_drv_occupancy[self.name] - 1) /
                                                     cost.car_drv_occupancy[self.name])
                     except KeyError:
                         pass
-                if mtx_type == "cost" and mode == "car_pax":
+                if mtx_type == "cost" and mode in pax_modes:
                     try:
                         day_imp[mode][mtx_type] *= (cost.sharing_factor[self.name] /
                                                     cost.car_pax_occupancy[self.name])
@@ -290,12 +306,15 @@ class TourPurpose(Purpose):
         for mode in self.impedance_share:
             if mode not in self.demand_share:
                 self.demand_share[mode] = self.impedance_share[mode]
-        self.modes = list(self.model.mode_choice_param)
+        for mode, electric_modes in self.car_modes.items():
+            if mode in self.demand_share:
+                for electric_mode in electric_modes:
+                    self.demand_share[electric_mode] = self.demand_share[mode]
+        self.modes = list(self.impedance_share)
         self.intermodals = {key: intermodals[key] for key in self.modes if key in intermodals}
         self.connection_models: Dict[str, logit.LogitModel] = {}
         if "access_mode_choice" in specification:
             for mode in self.intermodals:
-                self.modes += self.intermodals[mode]
                 new_spec = copy(specification)
                 new_spec["mode_choice"] = new_spec["access_mode_choice"][mode]
                 self.connection_models[mode] = logit.LogitModel(

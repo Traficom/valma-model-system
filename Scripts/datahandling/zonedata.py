@@ -49,7 +49,8 @@ class ZoneData:
                  model_area: str = "domestic",
                  municipality_calibration: Dict[str, pandas.Series] = {},
                  extra_dummies: Dict[str, Sequence[str]] = {},
-                 car_dist_cost: Optional[float] = None):
+                 car_dist_cost: Optional[float] = None,
+                 electric_car_share: Optional[Dict] = None):
         self._values = {}
         self.share = ShareChecker(self)
         all_zone_numbers = numpy.array(zone_numbers)
@@ -76,12 +77,21 @@ class ZoneData:
             for number in self.zone_numbers}
         self.nr_zones = len(self.zone_numbers)
         self._municip_calib = municipality_calibration
-        self._add_transformations(data, extra_dummies, car_dist_cost)
+        self._add_transformations(
+            data, extra_dummies, car_dist_cost, electric_car_share)
 
     def _add_transformations(self,
                              data: pandas.DataFrame,
                              extra_dummies: Dict[str, Sequence[str]],
-                             car_dist_cost: float):
+                             car_dist_cost: float,
+                             electric_car_share: Dict):
+        car_shares = pandas.DataFrame(electric_car_share).T.reindex(
+            index=self.demand_aggs.mappings["county"].values).fillna(
+                electric_car_share["default"])
+        car_shares.index = self.zone_numbers
+        self.share["sh_bev"] = car_shares["bev"]
+        self.share["sh_phev"] = car_shares["phev"]
+        self.share["sh_icev"] = 1 - car_shares.sum(axis=1)
         self["car_density"].clip(upper=1, inplace=True)
         self.share["share_female"] = pandas.Series(
             0.5, self.zone_numbers, dtype=numpy.float32)

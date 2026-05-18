@@ -19,7 +19,9 @@ class EmmeAssignmentTest(unittest.TestCase):
         self.scenario_id = 19
         self.context.import_scenario(scenario_dir, self.scenario_id, "test")
         self.dist_cost = {
-            "car": 0.12,
+            "icev": 0.12,
+            "bev": 0.04,
+            "phev": 0.06,
             "trailer_truck": 0.5,
             "semi_trailer": 0.4,
             "truck": 0.3,
@@ -50,7 +52,9 @@ class EmmeAssignmentTest(unittest.TestCase):
         nr_zones = ass_model.nr_zones
         car_matrix = numpy.arange(nr_zones**2).reshape(nr_zones, nr_zones)
         demand = [
-            "car",
+            "icev",
+            "bev",
+            "phev",
             "transit",
             "bike",
             "trailer_truck",
@@ -83,7 +87,9 @@ class EmmeAssignmentTest(unittest.TestCase):
         nr_zones = ass_model.nr_zones
         car_matrix = numpy.arange(nr_zones**2).reshape(nr_zones, nr_zones)
         demand = [
-            "car",
+            "icev",
+            "bev",
+            "phev",
             "transit",
             "airplane",
             "pt_car_acc",

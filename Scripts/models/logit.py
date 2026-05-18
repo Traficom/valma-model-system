@@ -18,7 +18,7 @@ def log(a: numpy.ndarray):
     with numpy.errstate(divide="ignore"):
         return numpy.log(a)
 
-def divide(a, b):
+def divide(a, b) -> numpy.ndarray:
     return numpy.divide(a, b, out=numpy.zeros_like(a), where=b!=0)
 
 class LogitModel:
@@ -209,6 +209,28 @@ class LogitModel:
                 numpy.asarray(zdata[i]) + 1, b[i])
         return exps
 
+    def _calc_electric_car_shares(self,
+                                  ec_probs: Dict[str, Dict[str, numpy.ndarray]]
+                                  ) -> Dict[str, numpy.ndarray]:
+        probs = {}
+        for mode in self.mode_choice_param:
+            if mode in self.purpose.car_modes:
+                for vehicle_type in ec_probs:
+                    veh_share = numpy.asarray(
+                        self.generation_zone_data["sh_" + vehicle_type])
+                    if vehicle_type == "icev":
+                        new_mode = mode
+                    else:
+                        new_mode = f"{vehicle_type}_{mode.split('_')[1]}"
+                    probs[new_mode] = veh_share * ec_probs[vehicle_type][mode]
+            else:
+                probs[mode] = 0
+                for vehicle_type in ec_probs:
+                    veh_share = numpy.asarray(
+                        self.generation_zone_data["sh_" + vehicle_type])
+                    probs[mode] += veh_share * ec_probs[vehicle_type][mode]
+        return probs
+
 
 class ModeDestModel(LogitModel):
     """Nested logit model with mode choice in upper level.
@@ -312,17 +334,53 @@ class ModeDestModel(LogitModel):
             Mode (car/transit/bike/walk) : numpy 2-d matrix
                 Choice probabilities
         """
+        ec_impedance = defaultdict(dict)
+        for mode, electric_modes in self.purpose.car_modes.items():
+            for e_mode in electric_modes:
+                ec_impedance[e_mode.split("_")[0]][mode] = impedance.pop(e_mode)
         mode_exps, mode_expsum, dest_exps, dest_expsums = self._calc_utils(
             impedance)
+        logsum = pandas.Series(
+            log(mode_expsum), self.purpose.orig_zone_numbers,
+            name=self.purpose.name)
+        self.generation_zone_data._values[self.purpose.name] = logsum
         if calc_accessibility:
             self._calc_accessibility(mode_exps, mode_expsum)
         mode_probs = self._calc_mode_prob(mode_exps, mode_expsum)
+        if ec_impedance:
+            (
+                mode_probs, ec_dest_exps, ec_dest_expsums
+            ) = self._calc_electric_car_prob(
+                ec_impedance, mode_exps, mode_probs)
+            dest_exps.update(ec_dest_exps)
+            dest_expsums.update(ec_dest_expsums)
         try:
             self.soft_mode_probs = {
                 mode: mode_probs[mode] for mode in self.soft_mode_exps}
         except AttributeError:
             pass
         return self._calc_prob(mode_probs, dest_exps, dest_expsums)
+
+    def _calc_electric_car_prob(self, impedance: Dict[str, numpy.ndarray],
+                                mode_exps: Dict[str, numpy.ndarray],
+                                mode_probs: Dict[str, numpy.ndarray]):
+        dest_exps = {}
+        dest_expsums = {}
+        ec_mode_probs = {"icev": mode_probs}
+        for vehicle_type in impedance:
+            ec_mode_exps, _, ec_dest_exps, ec_dest_expsums = self._calc_utils(
+                impedance[vehicle_type])
+            mode_exps.update(ec_mode_exps)
+            ec_mode_probs[vehicle_type] = self._calc_mode_prob(
+                mode_exps, sum(mode_exps.values()))
+            for mode in self.purpose.car_modes:
+                for array_dict in (ec_dest_exps, ec_dest_expsums):
+                    new_mode = f"{vehicle_type}_{mode.split('_')[1]}"
+                    array_dict[new_mode] = array_dict.pop(mode)
+            dest_exps.update(ec_dest_exps)
+            dest_expsums.update(ec_dest_expsums)
+        mode_probs = self._calc_electric_car_shares(ec_mode_probs)
+        return mode_probs, dest_exps, dest_expsums
 
     def _calc_individual_prob(self, mod_modes: list[str], dummy: str,
                               mode_exps: Dict[str, numpy.ndarray]):
@@ -362,10 +420,6 @@ class ModeDestModel(LogitModel):
         except AttributeError:
             pass
         mode_expsum: numpy.ndarray = sum(mode_exps.values())
-        logsum = pandas.Series(
-            log(mode_expsum), self.purpose.orig_zone_numbers,
-            name=self.purpose.name)
-        self.generation_zone_data._values[self.purpose.name] = logsum
         return mode_exps, mode_expsum, dest_exps, dest_expsums
 
     def _calc_exps(self,
@@ -502,6 +556,26 @@ class DestModeModel(LogitModel):
             Mode (car/transit/bike/walk) : numpy 2-d matrix
                 Choice probabilities
         """
+        prob = self._calc_dummy_prob(impedance, store_logsum=True)
+
+        # Calculate electric car probability and add to prob
+        electric_modes = [{}, {}]
+        for mode, e_modes in self.purpose.car_modes.items():
+            for i, e_mode in enumerate(e_modes):
+                electric_modes[i][e_mode] = mode
+        ec_probs = {"icev": prob}
+        for mode_pairs in electric_modes:
+            for e_mode, mode in mode_pairs.items():
+                impedance[mode] = impedance[e_mode]
+            if mode_pairs:
+                ec_probs[e_mode.split("_")[0]] = self._calc_dummy_prob(impedance)
+        if electric_modes[0]:
+            prob = self._calc_electric_car_shares(ec_probs)
+
+        return prob
+
+    def _calc_dummy_prob(self, impedance: Dict[str, Dict[str, numpy.ndarray]],
+                         store_logsum: bool = False):
         dummies: set[str] = set()
         for mode in self.mode_choice_param:
             for i in self.mode_choice_param[mode]["individual_dummy"]:
@@ -514,7 +588,7 @@ class DestModeModel(LogitModel):
             tmp_prob = self._calc_prob(impedance, dummy)
             for mode in self.mode_choice_param:
                 prob[mode] += dummy_share * tmp_prob.pop(mode)
-        tmp_prob = self._calc_prob(impedance, store_logsum=True)
+        tmp_prob = self._calc_prob(impedance, store_logsum=store_logsum)
         for mode in self.mode_choice_param:
             prob[mode] += no_dummy_share * tmp_prob.pop(mode)
         return prob

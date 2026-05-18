@@ -369,7 +369,7 @@ class AssignmentPeriod(Period):
         car_time_attr = self.netfield("car_time")
         main_mode = network.mode(param.main_mode)
         car_modes = {
-            network.mode(param.assignment_modes["car"]),
+            network.mode(param.assignment_modes["icev"]),
             network.mode(param.assignment_modes["truck"])
         }
         park_and_ride_mode = network.mode(param.park_and_ride_mode)
