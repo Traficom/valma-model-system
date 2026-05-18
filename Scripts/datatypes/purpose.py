@@ -89,7 +89,7 @@ class Purpose:
     def dest_zone_numbers(self):
         return self.attraction_zone_data.zone_numbers
     
-    def transform_impedance(self, impedance):
+    def transform_impedance(self, impedance) -> Dict[str, Dict[str, numpy.ndarray]]:
         """Perform transformation from time period dependent matrices
         to aggregate impedance matrices for specific travel purpose.
 
@@ -393,23 +393,33 @@ class TourPurpose(Purpose):
             Mode (car/transit/bike/walk) : numpy 2-d matrix
                 Choice probabilities
         """
-        purpose_impedance = self.transform_impedance(impedance)
-
-        #If the trip is long-distance, calculate unimodal/intermodal
+        # If the trip is long-distance, calculate unimodal/intermodal
         # probability split for each main mode
         if "vrk" in impedance:
-            acc_splits = {}
+            acc_splits: Dict[str, Dict[str, numpy.ndarray]] = {}
+            purpose_impedance = {}
+            unhandled_modes = set(mode_impedance[mode] for mode in self.modes)
             matrixdata = MatrixData(self.resultdata.path / "Matrices")
             with matrixdata.open(
                     f"logsum_{self.name}", "vrk", list(self.orig_zone_numbers), m='w'
                     ) as mtx:
                 for main_mode, acc_modes in self.intermodals.items():
-                    mode_impedance = {mode: purpose_impedance.pop(mode)
-                        for mode in [main_mode] + acc_modes}
+                    transit_mode_group = [main_mode] + acc_modes
+                    unhandled_modes -= set(transit_mode_group)
+                    mode_impedances = self.transform_impedance(
+                        {"vrk": {mtx_type: {mode: mtxs[mode] for mode in mtxs
+                                            if mode in transit_mode_group}
+                                 for mtx_type, mtxs in impedance["vrk"].items()}})
                     acc_splits[main_mode], logsum = self.split_connection_mode(
-                        mode_impedance, main_mode)
+                        mode_impedances, main_mode)
                     purpose_impedance[main_mode] = {"logsum": logsum}
                     mtx[main_mode] = logsum
+            purpose_impedance.update(self.transform_impedance(
+                {"vrk": {mtx_type: {mode: mtxs[mode] for mode in mtxs
+                                    if mode in unhandled_modes}
+                         for mtx_type, mtxs in impedance["vrk"].items()}}))
+        else:
+            purpose_impedance = self.transform_impedance(impedance)
 
         # Calculate main mode probability after access mode probability
         # to have access mode logsum as variable
