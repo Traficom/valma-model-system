@@ -70,17 +70,9 @@ class TransitMode(AssignmentMode):
                 "spread_factor": 1,
                 "perception_factor": 1,
             },
-            "boarding_time": {
-                "global": None,
-                "at_nodes": None,
-                "on_lines": {
-                    "penalty": param.boarding_penalty_attr + self.name,
-                    "perception_factor": 1
-                },
-                "on_segments": param.extra_waiting_time,
-            },
-            # Boarding cost is defined for each journey level separately,
-            # so here we just set the default to zero.
+            # Boarding time and cost is defined for each journey level
+            # separately, so here we just set the default to zero.
+            "boarding_time": no_penalty,
             "boarding_cost": no_penalty,
             "in_vehicle_time": {
                 "perception_factor": param.in_vehice_weight_attr

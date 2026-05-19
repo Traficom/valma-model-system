@@ -590,7 +590,8 @@ class AssignmentPeriod(Period):
         # Definition of line specific boarding penalties
         network = self.emme_scenario.get_network()
         missing_penalties = set()
-        penalty_attr = param.boarding_penalty_attr
+        board_pen_attr = param.boarding_penalty_attr
+        bld_pen_attr = param.long_dist_boarding_penalty_attr
         weight_attr = param.in_vehice_weight_attr.replace("ut", "data")
         for line in network.transit_lines():
             try:
@@ -598,12 +599,15 @@ class AssignmentPeriod(Period):
             except KeyError:
                 line[weight_attr] = 1.0
             try:
-                boarding_penalty = param.boarding_penalty[line.mode.id]
+                board_pen = param.boarding_penalty[line.mode.id]
+                bld_pen = param.long_dist_boarding_penalty[line.mode.id]
             except KeyError:
-                boarding_penalty = 0
+                board_pen = 0
+                bld_pen = 0
                 missing_penalties.add(line.mode.id)
-            for transit_class, transfer_penalty in param.transfer_penalty.items():
-                line[penalty_attr + transit_class] = boarding_penalty + transfer_penalty
+            for transit_class, transfer_pen in param.transfer_penalty.items():
+                line[board_pen_attr + transit_class] = board_pen + transfer_pen
+                line[bld_pen_attr + transit_class] = bld_pen + transfer_pen
         if missing_penalties:
             missing_penalties_str: str = ", ".join(missing_penalties)
             log.warn("No boarding penalty found for transit modes " + missing_penalties_str)

@@ -217,6 +217,18 @@ boarding_penalty = {
     'j': 5, # Long-distance train
     'l': 5, # Airplane
 }
+long_dist_boarding_penalty = {
+    'b': 10, # Bus
+    'e': 30, # Coach bus
+    'g': 8, # Trunk bus
+    't': 5, # Tram
+    'p': 5, # Light rail
+    'm': 5, # Metro
+    'w': 5, # Ferry
+    'r': 5, # Commuter train
+    'j': 30, # Long-distance train
+    'l': 30, # Airplane
+}
 transfer_penalty = {
     "transit": 5,
     "airplane": 5,
@@ -513,6 +525,7 @@ ship_attrs = {
     "frequency": "ut2",
 }
 boarding_penalty_attr = "@boa_"
+long_dist_boarding_penalty_attr = "@bld_"
 dist_fare_attr = "@dist_fare"
 board_fare_attr = "@board_fare"
 board_long_dist_attr = "@board_long_dist"
