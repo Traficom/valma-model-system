@@ -109,8 +109,12 @@ class FreightMode(AssignmentMode):
         self.ntw_results_spec = {
             "type": "EXTENDED_TRANSIT_NETWORK_RESULTS",
             "analyzed_demand": self.demand.id,
-            "on_links": {},
-            "on_segments": {},
+            "on_links": {
+                "aux_transit_volumes": "@aux_comm_flow",
+            },
+            "on_segments": {
+                "transit_volumes": "@comm_flow",
+            },
         }
 
     def get_matrices(self):

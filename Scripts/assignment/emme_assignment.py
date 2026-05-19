@@ -198,20 +198,20 @@ class EmmeAssignmentModel(AssignmentModel):
                     overwrite=True, scenario=self.mod_scenario)
         for comm_class in commodity_classes:
             for ass_class in param.freight_modes:
-                attr_name = (comm_class + ass_class)[:17]
-                self.emme_project.create_extra_attribute(
-                    "TRANSIT_SEGMENT", '@' + attr_name,
+                attr_name = (comm_class + ass_class)
+                self.emme_project.create_network_field(
+                    "TRANSIT_SEGMENT", "REAL", '#' + attr_name,
                     "commodity flow", overwrite=True,
                     scenario=self.mod_scenario)
-                self.emme_project.create_extra_attribute(
-                    "LINK", '@a_' + attr_name,
+                self.emme_project.create_network_field(
+                    "LINK", "REAL", '#aux_' + attr_name,
                     "commodity flow", overwrite=True,
                     scenario=self.mod_scenario)
-                attr_name = (comm_class + "truck")[:17]
-                self.emme_project.create_extra_attribute(
-                        "LINK", '@' + attr_name,
-                        "commodity flow", overwrite=True,
-                        scenario=self.mod_scenario)
+            attr_name = (comm_class + "truck")
+            self.emme_project.create_network_field(
+                    "LINK", "REAL", '#' + attr_name,
+                    "commodity flow", overwrite=True,
+                    scenario=self.mod_scenario)
         self._create_attributes(
             self.mod_scenario,
             list(param.truck_classes) + list(param.freight_modes),
@@ -464,7 +464,7 @@ class EmmeAssignmentModel(AssignmentModel):
         if TYPE_CHECKING: scenario = cast(Scenario, scenario)
         for ass_class in assignment_classes:
             self.emme_project.create_extra_attribute(
-                "LINK", extra(ass_class), ass_class + " volume",
+                "LINK", f"@{ass_class}", f"{ass_class} volume",
                 overwrite=True, scenario=scenario)
         self.emme_project.create_extra_attribute(
             "LINK", param.aux_car_time_attr, "walk time",

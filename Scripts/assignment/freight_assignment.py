@@ -58,16 +58,21 @@ class FreightAssignmentPeriod(AssignmentPeriod):
         """
         for ass_class in param.freight_modes:
             spec = self.assignment_modes[ass_class].ntw_results_spec
-            attr_name = (commodity_class + ass_class)[:17]
-            spec["on_segments"]["transit_volumes"] = "@" + attr_name
-            spec["on_links"]["aux_transit_volumes"] = "@a_" + attr_name
             self.emme_project.network_results(
                 spec, self.emme_scenario, ass_class)
-        attr_name = (commodity_class + "truck")[:17]
+            network = self.emme_scenario.get_network()
+            for segment in network.transit_segments():
+                segment["#" + commodity_class + ass_class] = segment["@comm_flow"]
+            for link in network.links():
+                link["#" + commodity_class + ass_class] = link["@aux_comm_flow"]
+            self.emme_scenario.publish_network(network)
         for spec in self._car_spec.truck_specs():
-            spec["classes"][0]["results"]["link_volumes"] = "@" + attr_name
             spec["stopping_criteria"] = self.stopping_criteria["coarse"]
             self.emme_project.car_assignment(spec, self.emme_scenario)
+        network = self.emme_scenario.get_network()
+        for link in network.links():
+                link["#" + commodity_class + "truck"] = link["@truck_vrk"]
+        self.emme_scenario.publish_network(network)
         for tc in param.truck_classes:
             self.assignment_modes[tc].get_matrices()
 

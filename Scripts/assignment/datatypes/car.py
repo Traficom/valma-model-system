@@ -37,6 +37,10 @@ class VehicleMode(AssignmentMode):
         self.dist = self._create_matrix("dist")
         self.dist_unit_cost = dist_unit_cost
         self._include_toll_cost = include_toll_cost
+        self.volume_attr = assignment_period.netfield(name)
+        self.emme_project.create_network_field(
+            "LINK", "REAL", self.volume_attr, f"{name}_vol",
+            overwrite=True, scenario=self.emme_scenario)
         perception_factor = self.vot_inv
         if include_toll_cost:
             self.toll_cost = self._create_matrix("toll_cost")
@@ -57,7 +61,7 @@ class VehicleMode(AssignmentMode):
                 "perception_factor": perception_factor,
             },
             "results": {
-                "link_volumes": f"@{self.name}_{self.time_period}",
+                "link_volumes": f"@{self.name}",
                 "od_travel_times": {
                     "shortest_paths": self.gen_cost.id
                 }

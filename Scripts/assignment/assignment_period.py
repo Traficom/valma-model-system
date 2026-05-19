@@ -329,10 +329,10 @@ class AssignmentPeriod(Period):
         network = self.emme_scenario.get_network()
         for tc in param.transit_classes:
             if tc in self.assignment_modes:
-                link_attr = self.extra(tc)
                 mode: TransitMode = self.assignment_modes[tc]
                 for result, attr_name in mode.segment_results.items():
                     if result == "transit_volumes":
+                        link_attr = mode.link_vol_attr
                         for segment in network.transit_segments():
                             if segment.link is not None:
                                 segment.link[link_attr] += segment[attr_name]
@@ -638,6 +638,9 @@ class AssignmentPeriod(Period):
             link[param.aux_car_time_attr] = link.auto_time
             # Truck speed limited to 90 km/h
             link[truck_time_attr] = max(link.auto_time, link.length * 0.67)
+            for ass_class in param.car_and_van_classes:
+                if ass_class in self.assignment_modes:
+                    link[self.assignment_modes[ass_class].volume_attr] = link[f"@{ass_class}"]
         self.emme_scenario.publish_network(network)
         log.info("Car assignment performed for scenario {}".format(
             self.emme_scenario.id))
@@ -649,6 +652,12 @@ class AssignmentPeriod(Period):
             truck_spec["stopping_criteria"] = stopping_criteria
             self.emme_project.car_assignment(
                 truck_spec, self.emme_scenario)
+        network = self.emme_scenario.get_network()
+        for link in network.links():
+            for ass_class in param.truck_classes:
+                if ass_class in self.assignment_modes:
+                    link[self.assignment_modes[ass_class].volume_attr] = link[f"@{ass_class}"]
+        self.emme_scenario.publish_network(network)
         log.info("Truck assignment performed for scenario {}".format(
             self.emme_scenario.id))
 

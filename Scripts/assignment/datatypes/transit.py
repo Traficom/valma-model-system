@@ -36,8 +36,12 @@ class TransitMode(AssignmentMode):
         # Create extra attributes
         self.segment_results: Dict[str, str] = {}
         self.node_results: Dict[str, str] = {}
+        self.link_vol_attr = assignment_period.netfield(name)
         for scenario, tp in (
                 (day_scenario, "vrk"), (self.emme_scenario, self.time_period)):
+            self.emme_project.create_network_field(
+                "LINK", "REAL", self.link_vol_attr, f"{name}_vol",
+                overwrite=True, scenario=self.emme_scenario)
             for res, attr in param.segment_results.items():
                 attr_name = f"#{self.name}_{attr[1:]}_{tp}"
                 self.segment_results[res] = attr_name
