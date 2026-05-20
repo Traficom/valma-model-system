@@ -55,6 +55,7 @@ class ForeignExternalModel:
             # Remove zero values
             base_mtx = numpy.array(mtx[mode]).clip(0.000001, None)
             base_colsum = base_mtx.sum(1)
+            omx_zone_numbers = mtx.mapping("zone_number")
         # Calibrate generation
         production = calibrate(
             base_colsum, production_base, production_forecast)
@@ -62,7 +63,21 @@ class ForeignExternalModel:
         # Matrix balancing
         mock_attraction = base_mtx.sum(0)
         demand = fratar(production, mock_attraction, base_mtx)
-
+ 
+        # Destination zones for this purpose from zone data
+        desired_dest_zones = numpy.array(self.zone_numbers)[
+            self.purpose.dest_interval]
+ 
+        # Add zero columns for external centroids not in the OMX file
+        new_ncols = len(desired_dest_zones)
+        new_demand = numpy.zeros((demand.shape[0], new_ncols))
+        index_by_zone = {i: int(z) for i, z in omx_zone_numbers.items()}
+        for col_idx, zone in enumerate(desired_dest_zones):
+            src_col = index_by_zone.get(int(zone))
+            if src_col is not None:
+                new_demand[:, col_idx] = demand[:, src_col]
+        demand = new_demand
+       
         # Remove small values
         demand[demand < 0.0001] = 0
 
