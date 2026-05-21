@@ -258,9 +258,6 @@ class TravelPurpose(Purpose):
         attempt_calibration(specification)
         if "sec_dest" in specification:
             purpose = SecDestPurpose(*args)
-        elif (specification["dest"] == "source"
-            or specification["name"] == "oop"):
-            purpose = SimpleTourPurpose(*args)
         else:
             purpose = TourPurpose(*args)
         try:
@@ -519,20 +516,6 @@ class TourPurpose(TravelPurpose):
             if self.dest != "source":
                 yield Demand(self, mode, mtx)
         log.info(f"Demand calculated for {self.name}")
-
-
-class SimpleTourPurpose(TourPurpose):
-    """Purpose for simplified demand calculation, not part of agent model."""
-
-    def calc_basic_prob(self, impedance, is_last_iteration) -> Iterator[Demand]:
-        """Calculate purpose specific demand matrices.
-
-        Yields
-        -------
-        Demand
-                Mode-specific demand matrix for whole day
-        """
-        return self.calc_demand(impedance, is_last_iteration)
 
 
 class SecDestPurpose(TravelPurpose):
