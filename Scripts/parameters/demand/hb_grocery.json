@@ -87,6 +87,13 @@
             ]
         }
     },
+    "activity_time": 0.7,
+    "parking_cost_share": 1.0,
+    "car_cost_sharing": 1.0,
+    "occupancy": {
+        "car_drv": 1.53,
+        "car_pax": 2.395
+    },
     "distance_boundaries": {
         "car_drv": [
             0,
@@ -111,55 +118,33 @@
     },
     "destination_choice": {
         "car_drv": {
-            "attraction": {
-                "time*within_zone": -0.08698,
-                "cost*within_zone": -0.2208
-            },
+            "attraction": {},
             "impedance": {
                 "time": -0.08698,
                 "cost": -0.2208
             },
             "log": {
                 "attraction_size": 1,
-                "transform": -0.338
+                "cost": -0.338
             },
             "attraction_size": {
                 "wrk_shop": 207.88811,
                 "population": 1
-            },
-            "transform": {
-                "attraction": {
-                    "cost*within_zone": 1
-                },
-                "impedance": {
-                    "cost": 1
-                }
             }
         },
         "car_pax": {
-            "attraction": {
-                "time*within_zone": -0.08137,
-                "cost*within_zone": -0.2208
-            },
+            "attraction": {},
             "impedance": {
                 "time": -0.08137,
                 "cost": -0.2208
             },
             "log": {
                 "attraction_size": 1,
-                "transform": -0.338
+                "cost": -0.338
             },
             "attraction_size": {
                 "wrk_shop": 207.88811,
                 "population": 1
-            },
-            "transform": {
-                "attraction": {
-                    "cost*within_zone": 1
-                },
-                "impedance": {
-                    "cost": 1
-                }
             }
         },
         "transit": {
@@ -179,9 +164,7 @@
             }
         },
         "bike": {
-            "attraction": {
-                "dist*within_zone": -0.3946
-            },
+            "attraction": {},
             "impedance": {
                 "dist": -0.3946
             },
@@ -194,9 +177,7 @@
             }
         },
         "walk": {
-            "attraction": {
-                "dist*within_zone": -0.88
-            },
+            "attraction": {},
             "impedance": {
                 "dist": -0.88
             },

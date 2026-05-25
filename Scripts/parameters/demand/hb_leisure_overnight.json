@@ -89,6 +89,20 @@
                 ]
             }
     },
+    "activity_time": 8.9,
+    "parking_cost_share": 1.0,
+    "car_cost_sharing": 1.0,
+    "occupancy": {
+        "car_drv": 1.822,
+        "car_pax": 2.836
+    },
+    "tour_duration": {
+        "pt_car_acc": 9.0,
+        "pt_taxi_acc": 9.0,
+        "pt_taxi_egr": 9.0,
+        "airpl_car_acc": 9.0,
+        "airpl_car_egr": 9.0
+    },
     "distance_boundaries": {
         "walk": [
             0,

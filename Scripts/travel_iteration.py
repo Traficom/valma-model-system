@@ -19,8 +19,7 @@ from datahandling.zonedata import ZoneData
 from datahandling.matrixdata import MatrixData
 from demand.trips import DemandModel
 from demand.external import ExternalPurpose
-from datatypes.purpose import new_tour_purpose
-from datatypes.purpose import Purpose, TourPurpose, SecDestPurpose
+from datatypes.purpose import TravelPurpose, TourPurpose, SecDestPurpose
 from datatypes.demand import Demand
 import parameters.assignment as param
 import parameters.zone as zone_param
@@ -130,7 +129,7 @@ class ModelSystem:
                         if mode in specification["destination_choice"]:
                             (specification["destination_choice"][mode]
                                           ["attraction"][subarea]) = coeff
-            purpose = new_tour_purpose(
+            purpose = TravelPurpose(
                 specification, self._zone_datas, self.resultdata,
                 cost_data["cost_changes"])
             required_time_periods = sorted(
