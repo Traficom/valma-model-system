@@ -22,6 +22,11 @@
             "age_65_99": 0.0175
         }
     },
+    "sec_dest_rate": {
+        "car_drv": 1.0884,
+        "car_pax": 1.1081,
+        "transit": 1.0575
+    },
     "impedance_share": {
         "car_drv": {
             "aht": [
@@ -82,6 +87,13 @@
             ]
         }
     },
+    "activity_time": 7.2,
+    "parking_cost_share": 0.5,
+    "car_cost_sharing": 0.0,
+    "occupancy": {
+        "car_drv": 1.152,
+        "car_pax": 2.055
+    },
     "distance_boundaries": {
         "car_drv": [
             0,
@@ -110,7 +122,7 @@
             "impedance": {},
             "log": {
                 "attraction_size": 1,
-                "logsum": 0.8892
+                "logsum": 0.8662
             },
             "attraction_size": {
                 "workplaces": 1
@@ -119,84 +131,60 @@
     },
     "mode_choice": {
         "car_drv": {
-            "constant": -3.818,
+            "constant": -3.776,
             "generation": {},
-            "transform": {
-                "attraction": {
-                    "cost*within_zone": 1
-                },
-                "impedance": {
-                    "cost": 1
-                }
-            },
-            "attraction": {
-                "time*within_zone": -0.04073,
-                "cost*within_zone": -0.06477
-            },
+            "attraction": {},
             "impedance": {
-                "time": -0.04073,
-                "cost": -0.06477
+                "time": -0.03348,
+                "cost": -0.06475
             },
             "log": {
-                "transform": -0.2166
+                "cost": -0.2596
             },
             "individual_dummy": {
-                "sh_cars1_hh1": 4.562,
-                "sh_cars2_hh2": 4.562,
-                "sh_cars1_hh2": 3.089
+                "sh_cars1_hh1": 4.524,
+                "sh_cars2_hh2": 4.524,
+                "sh_cars1_hh2": 3.044
             }
         },
         "car_pax": {
-            "constant": -4.538,
+            "constant": -4.802,
             "generation": {},
-            "transform": {
-                "attraction": {
-                    "cost*within_zone": 1
-                },
-                "impedance": {
-                    "cost": 1
-                }
-            },
-            "attraction": {
-                "time*within_zone": -0.06982,
-                "cost*within_zone": -0.06477
-            },
+            "attraction": {},
             "impedance": {
-                "time": -0.06982,
-                "cost": -0.06477
+                "time": -0.07075,
+                "cost": -0.06475
             },
             "log": {
-                "transform": -0.2166
+                "cost": -0.2596
             },
             "individual_dummy": {
-                "sh_cars1_hh2": 0.9877,
-                "sh_cars2_hh2": 0.9877
+                "sh_cars1_hh2": 0.9644,
+                "sh_cars2_hh2": 0.9644
             }
         },
         "transit": {
-            "constant": -1.265,
+            "constant": -1.19,
             "generation": {},
             "attraction": {
                 "within_zone_inf": -1,
-                "sh_office": 1.147
+                "sh_office": 1.166
             },
             "impedance": {
-                "time": -0.01517,
-                "cost": -0.06477
+                "time": -0.01461,
+                "cost": -0.06475
             },
             "log": {
-                "cost": -0.2166
+                "cost": -0.2596
             },
             "individual_dummy": {}
         },
         "bike": {
-            "constant": -1.301,
+            "constant": -1.315,
             "generation": {},
-            "attraction": {
-                "dist*within_zone": -0.1555
-            },
+            "attraction": {},
             "impedance": {
-                "dist": -0.1555
+                "dist": -0.1579
             },
             "log": {},
             "individual_dummy": {}
@@ -204,11 +192,9 @@
         "walk": {
             "constant": 0,
             "generation": {},
-            "attraction": {
-                "dist*within_zone": -0.4751
-            },
+            "attraction": {},
             "impedance": {
-                "dist": -0.4751
+                "dist": -0.4794
             },
             "log": {},
             "individual_dummy": {}

@@ -29,6 +29,7 @@ class DepartureTimeTest(unittest.TestCase):
         dem.purpose = pur1
 
         dem.purpose.name = "wb_other"
+        dem.purpose.sec_dest_rates = {}
         dem.purpose.demand_share = {
             "car_drv": {
                 "aht":[
@@ -72,6 +73,7 @@ class DepartureTimeTest(unittest.TestCase):
 
         dem.purpose = Purpose()
         dem.purpose.name = "hb_work"
+        dem.purpose.sec_dest_rates = {}
         dem.purpose.demand_share = {
             "transit": {
                 "aht": [0.168710422485735, 0.0387468664988151],
@@ -92,6 +94,7 @@ class DepartureTimeTest(unittest.TestCase):
 
         dem.purpose = Purpose()
         dem.purpose.name = "hb_leisure"
+        dem.purpose.sec_dest_rates = {}
         dem.purpose.demand_share = {
             "transit": {
                 "aht": [0.168710422485735, 0.0387468664988151],

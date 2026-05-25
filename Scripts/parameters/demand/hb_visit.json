@@ -22,6 +22,11 @@
             "age_65_99": 0.1624
         }
     },
+    "sec_dest_rate": {
+        "car_drv": 1.1209,
+        "car_pax": 1.0806,
+        "transit": 1.0663
+    },
     "impedance_share": {
         "car_drv": {
             "aht": [
@@ -82,6 +87,13 @@
             ]
         }
     },
+    "activity_time": 2.4,
+    "parking_cost_share": 0.75,
+    "car_cost_sharing": 0.25,
+    "occupancy": {
+        "car_drv": 1.739,
+        "car_pax": 2.936
+    },
     "distance_boundaries": {
         "car_drv": [
             0,
@@ -106,55 +118,33 @@
     },
     "destination_choice": {
         "car_drv": {
-            "attraction": {
-                "time*within_zone": -0.01801,
-                "cost*within_zone": -0.06496
-            },
+            "attraction": {},
             "impedance": {
-                "time": -0.01801,
-                "cost": -0.06496
+                "time": -0.01655,
+                "cost": -0.03964
             },
             "log": {
                 "attraction_size": 1,
-                "transform": -0.7679
+                "cost": -0.8095
             },
             "attraction_size": {
                 "population": 1,
-                "area_leisure_buildings": 0.11533
-            },
-            "transform": {
-                "attraction": {
-                    "cost*within_zone": 1
-                },
-                "impedance": {
-                    "cost": 1
-                }
+                "area_leisure_buildings": 0.23645
             }
         },
         "car_pax": {
-            "attraction": {
-                "time*within_zone": -0.02439,
-                "cost*within_zone": -0.06496
-            },
+            "attraction": {},
             "impedance": {
-                "time": -0.02439,
-                "cost": -0.06496
+                "time": -0.02251,
+                "cost": -0.03964
             },
             "log": {
                 "attraction_size": 1,
-                "transform": -0.7679
+                "cost": -0.8095
             },
             "attraction_size": {
                 "population": 1,
-                "area_leisure_buildings": 0.11533
-            },
-            "transform": {
-                "attraction": {
-                    "cost*within_zone": 1
-                },
-                "impedance": {
-                    "cost": 1
-                }
+                "area_leisure_buildings": 0.23645
             }
         },
         "transit": {
@@ -162,87 +152,83 @@
                 "within_zone_inf": -1
             },
             "impedance": {
-                "time": -0.01419,
-                "cost": -0.06496
+                "time": -0.01084,
+                "cost": -0.03964
             },
             "log": {
                 "attraction_size": 1,
-                "cost": -0.7679
+                "cost": -0.8095
             },
             "attraction_size": {
                 "population": 1,
-                "area_leisure_buildings": 0.11533
+                "area_leisure_buildings": 0.23645
             }
         },
         "bike": {
-            "attraction": {
-                "dist*within_zone": -0.3382
-            },
+            "attraction": {},
             "impedance": {
-                "dist": -0.3382
+                "dist": -0.3173
             },
             "log": {
                 "attraction_size": 1
             },
             "attraction_size": {
                 "population": 1,
-                "area_leisure_buildings": 0.11533
+                "area_leisure_buildings": 0.23645
             }
         },
         "walk": {
-            "attraction": {
-                "dist*within_zone": -0.6848
-            },
+            "attraction": {},
             "impedance": {
-                "dist": -0.6848
+                "dist": -0.76
             },
             "log": {
                 "attraction_size": 1
             },
             "attraction_size": {
                 "population": 1,
-                "area_leisure_buildings": 0.11533
+                "area_leisure_buildings": 0.23645
             }
         }
     },
     "mode_choice": {
         "car_drv": {
-            "constant": 0.8996,
+            "constant": 16.46,
             "generation": {},
             "attraction": {},
             "impedance": {},
             "log": {
-                "logsum": 0.1966
+                "logsum": 0.0471
             },
             "individual_dummy": {}
         },
         "car_pax": {
-            "constant": -4.522,
+            "constant": -0.8013,
             "generation": {},
             "attraction": {},
             "impedance": {},
             "log": {
-                "logsum": 0.1966
+                "logsum": 0.0471
             },
             "individual_dummy": {}
         },
         "transit": {
-            "constant": -8.521,
+            "constant": -38.44,
             "generation": {},
             "attraction": {},
             "impedance": {},
             "log": {
-                "logsum": 0.1966
+                "logsum": 0.0471
             },
             "individual_dummy": {}
         },
         "bike": {
-            "constant": -4.775,
+            "constant": -20.89,
             "generation": {},
             "attraction": {},
             "impedance": {},
             "log": {
-                "logsum": 0.1966
+                "logsum": 0.0471
             },
             "individual_dummy": {}
         },
@@ -252,25 +238,25 @@
             "attraction": {},
             "impedance": {},
             "log": {
-                "logsum": 0.1966
+                "logsum": 0.0471
             },
             "individual_dummy": {}
         },
         "scaling": {
             "car_drv": {
-                "constant": 0.1966
+                "constant": 0.0471
             },
             "car_pax": {
-                "constant": 0.1966
+                "constant": 0.0471
             },
             "transit": {
-                "constant": 0.1966
+                "constant": 0.0471
             },
             "bike": {
-                "constant": 0.1966
+                "constant": 0.0471
             },
             "walk": {
-                "constant": 0.1966
+                "constant": 0.0471
             }
         }
     },

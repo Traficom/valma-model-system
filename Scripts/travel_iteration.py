@@ -19,8 +19,7 @@ from datahandling.zonedata import ZoneData
 from datahandling.matrixdata import MatrixData
 from demand.trips import DemandModel
 from demand.external import ExternalPurpose
-from datatypes.purpose import new_tour_purpose
-from datatypes.purpose import Purpose, TourPurpose, SecDestPurpose
+from datatypes.purpose import TravelPurpose, TourPurpose, SecDestPurpose
 from datatypes.demand import Demand
 import parameters.assignment as param
 import parameters.zone as zone_param
@@ -112,11 +111,9 @@ class ModelSystem:
         self.resultdata = ResultsData(results_path)
         self.resultmatrices = MatrixData(results_path / "Matrices" / submodel)
         parameters_path = Path(__file__).parent / "parameters" / "demand"
-        home_based_work_purposes = []
-        home_based_leisure_purposes = []
+        home_based_purposes = []
         sec_dest_purposes = []
-        other_work_purposes = []
-        other_leisure_purposes = []
+        other_purposes = []
         purpose_names = []
         for file in parameters_path.glob("*.json"):
             specification = json.loads(file.read_text("utf-8"))
@@ -132,7 +129,7 @@ class ModelSystem:
                         if mode in specification["destination_choice"]:
                             (specification["destination_choice"][mode]
                                           ["attraction"][subarea]) = coeff
-            purpose = new_tour_purpose(
+            purpose = TravelPurpose(
                 specification, self._zone_datas, self.resultdata,
                 cost_data["cost_changes"])
             required_time_periods = sorted(
@@ -142,23 +139,15 @@ class ModelSystem:
                 if isinstance(purpose, SecDestPurpose):
                     sec_dest_purposes.append(purpose)
                 elif purpose.orig == "home":
-                    if param.assignment_classes[purpose.name] == "work":
-                        home_based_work_purposes.append(purpose)
-                    else:
-                        home_based_leisure_purposes.append(purpose)
+                    home_based_purposes.append(purpose)
                 else:
-                    if param.assignment_classes[purpose.name] == "work":
-                        other_work_purposes.append(purpose)
-                    else:
-                        other_leisure_purposes.append(purpose)
+                    other_purposes.append(purpose)
         if len(purpose_names) != len(set(purpose_names)):
             msg = f"Duplicate tour purposes in demand parameters."
             log.error(msg)
             raise ValueError(msg)
         self.dm = self._init_demand_model(
-            home_based_work_purposes + other_work_purposes
-            + home_based_leisure_purposes + other_leisure_purposes
-            + sec_dest_purposes)
+            home_based_purposes + other_purposes + sec_dest_purposes)
         self.travel_modes = {mode: True for purpose in self.dm.tour_purposes
             for mode in purpose.modes}  # Dict instead of set, to preserve order
         self.ass_classes = set()
