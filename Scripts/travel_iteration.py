@@ -452,6 +452,8 @@ class ModelSystem:
 
     def _export_accessibility(self):
         for purpose in self.dm.tour_purposes:
+            if purpose.name == "hb_abroad_other":
+                continue
             for logsum in purpose.model.accessibility.values():
                 self.resultdata.print_data(logsum, f"accessibility.txt")
     
@@ -459,21 +461,21 @@ class ModelSystem:
         self.resultdata.print_data(
             self._zone_datas["domestic"].zone_values, "zonedata_input.txt")
         gen_tours_purpose = {purpose.name: purpose.generated_tours_all
-                             for purpose in self.dm.tour_purposes}
+                             for purpose in self.dm.tour_purposes if not purpose.name == "hb_abroad_other"}
         self.resultdata.print_data(
             gen_tours_purpose, "zone_generation_by_purpose.txt")
         attr_tours_purpose = {purpose.name: purpose.attracted_tours_all
-                              for purpose in self.dm.tour_purposes}
+                              for purpose in self.dm.tour_purposes if not purpose.name == "hb_abroad_other"}
         self.resultdata.print_data(
             attr_tours_purpose, "zone_attraction_by_purpose.txt")
         gen_dist_purpose = {
             purpose.name: purpose.generated_dist_all / purpose.generated_tours_all
-                              for purpose in self.dm.tour_purposes}
+                              for purpose in self.dm.tour_purposes if not purpose.name == "hb_abroad_other"}
         self.resultdata.print_data(
             gen_dist_purpose, "zone_generation_dist_by_purpose.txt")
         attr_dist_purpose = {
             purpose.name: purpose.attracted_dist_all / purpose.attracted_tours_all
-                              for purpose in self.dm.tour_purposes}
+                              for purpose in self.dm.tour_purposes if not purpose.name == "hb_abroad_other"}
         self.resultdata.print_data(
             attr_dist_purpose, "zone_attraction_dist_by_purpose.txt")
         tours, dists = self._get_mode_tours()
@@ -483,6 +485,8 @@ class ModelSystem:
         self.resultdata.print_data(tours, "zone_attraction_by_mode.txt")
         self.resultdata.print_data(dists, "zone_attraction_dist_by_mode.txt")
         for purpose in self.dm.tour_purposes:
+            if purpose.name == "hb_abroad_other":
+                continue
             self.resultdata.print_concat(
                 purpose.generation_mode_shares, "purpose_mode_shares.txt")
             self.resultdata.print_concat(
