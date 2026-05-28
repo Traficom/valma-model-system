@@ -10,7 +10,7 @@
     "struct": "mode>dest",
     "gen_model": "rate",
     "generation": {
-        "hb_work": 0.0674
+        "hb_work": 0.0611
     },
     "sec_dest_rate": {
         "car_drv": 1.1013,
