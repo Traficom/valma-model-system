@@ -111,7 +111,9 @@ class TruckMode(VehicleMode):
         self.add_analysis(f"@truck_time_{self.time_period}", self.time.id)
 
     def get_matrices(self):
-        cost = self.gen_cost.data / self.vot_inv
+        cost = self.dist_unit_cost*self.dist.data + self.time.data/self.vot_inv
+        if self._include_toll_cost:
+            cost += self.toll_cost.data
         m = {"cost": cost, **self.time.item, **self.dist.item}
         if self._include_toll_cost:
             m.update(self.toll_cost.item)
