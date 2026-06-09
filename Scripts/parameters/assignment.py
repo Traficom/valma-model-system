@@ -161,9 +161,20 @@ freight_terminal_cost = {
     'W': 0
 }
 in_vehicle_weight = {
-    '3': 0.6,
-    '11': 0.8,
-    '12': 0.8
+    '1': 1, # Bus
+    '2': 0.8, # Tram
+    '3': 0.8, # Long-distance train
+    '4': 0.8, # Metro
+    '5': 1, # Ferry
+    '6': 1, # Airplane
+    '7': 0.8, # Light rail
+    '8': 1, # Long distance bus
+    '9': 1, # Local train
+    '10': 1, # Trunk bus
+    '11': 1, # Regional train
+    '12': 1, # Railbus
+    '13': 1, # Long-distance day Ferry
+    '14': 1, # Long-distance night Ferry
 }
 # Boarding penalties for different transit modes
 boarding_penalty = {
