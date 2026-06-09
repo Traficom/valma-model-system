@@ -171,27 +171,29 @@ in_vehicle_weight = {
 }
 # Boarding penalties for different transit modes
 boarding_penalty = {
-    'b': 3, # Bus
-    'g': 3, # Trunk bus
-    'e': 8, # Coach bus
-    't': 0, # Tram
-    'p': 0, # Light rail
-    'm': 0, # Metro
-    'w': 0, # Ferry
-    'r': 2, # Commuter train
-    'j': 2, # Long-distance train
+    'b': 10, # Bus
+    'g': 8, # Trunk bus
+    'e': 10, # Coach bus
+    't': 5, # Tram
+    'p': 5, # Light rail
+    'm': 5, # Metro
+    'w': 5, # Ferry
+    'r': 5, # Commuter train
+    'j': 5, # Long-distance train
+    'l': 5, # Airplane
 }
 # Boarding penalties for long-distance trips
 long_boarding_penalty = {
-    'b': 3, # Bus
-    'g': 3, # Trunk bus
-    'e': 8, # Coach bus
-    't': 0, # Tram
-    'p': 0, # Light rail
-    'm': 0, # Metro
-    'w': 0, # Ferry
-    'r': 2, # Commuter train
-    'j': 2, # Long-distance train
+    'b': 10, # Bus
+    'g': 8, # Trunk bus
+    'e': 10, # Coach bus
+    't': 5, # Tram
+    'p': 5, # Light rail
+    'm': 5, # Metro
+    'w': 5, # Ferry
+    'r': 5, # Commuter train
+    'j': 5, # Long-distance train
+    'l': 5, # Airplane
 }
 transfer_penalty = {
     "transit": 5,
