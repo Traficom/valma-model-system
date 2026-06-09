@@ -221,19 +221,6 @@ boarding_penalty = {
     'j': 5, # Long-distance train
     'l': 5, # Airplane
 }
-# Boarding penalties for long-distance trips
-long_boarding_penalty = {
-    'b': 10, # Bus
-    'e': 10, # Coach bus
-    'g': 8, # Trunk bus
-    't': 5, # Tram
-    'p': 5, # Light rail
-    'm': 5, # Metro
-    'w': 5, # Ferry
-    'r': 5, # Commuter train
-    'j': 5, # Long-distance train
-    'l': 5, # Airplane
-}
 transfer_penalty = {
     "transit": 5,
     "airplane": 5,
