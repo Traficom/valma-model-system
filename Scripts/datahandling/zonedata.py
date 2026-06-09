@@ -28,7 +28,7 @@ class ZoneData:
             and assignment zones
     municipality_calibration : dict
         key : str
-            Transport mode (car_work/bike/...)
+            Transport mode (car/bike/...)
         value : pandas.Series
             Municipality-pair calibration factors
     extra_dummies : dict
@@ -39,6 +39,8 @@ class ZoneData:
     car_dist_cost : float
         Car cost (eur) per km
     """
+    beeline_dist: numpy.ndarray
+
     def __init__(self, *args, **kwargs):
         self._init_data(*args, **kwargs)
 
@@ -53,24 +55,24 @@ class ZoneData:
         all_zone_numbers = numpy.array(zone_numbers)
         self.all_zone_numbers = all_zone_numbers
         area = param.purpose_areas[model_area]
+        self.zone_slice = slice(*all_zone_numbers.searchsorted(area))
         self.zone_numbers = pandas.Index(
-            all_zone_numbers[slice(*all_zone_numbers.searchsorted(area))],
-            name="analysis_zone_id")
+            all_zone_numbers[self.zone_slice], name="analysis_zone_id")
         Zone.counter = 0
         data, mapping = read_zonedata(
             data_path, self.zone_numbers, zone_mapping, data_type)
         self.mapping = mapping
-        agg_keys = [key for key in data if "aggregate_results_" in key]
-        aggs = data[agg_keys].rename(
-            columns=lambda x : x.replace("aggregate_results_", ""))
-        self.aggregations = ZoneAggregations(aggs)
+        demand_aggs = ["municipality", "county", "submodel", "calibration_area"]
+        result_aggs = demand_aggs + [key for key in data if "aggregate_results_" in key]
+        self.demand_aggs = ZoneAggregations(data[demand_aggs])
+        self.result_aggs = ZoneAggregations(data[result_aggs])
         for col in data:
-            if col not in agg_keys:
+            if col not in demand_aggs + result_aggs:
                 if col.startswith("sh_"):
                     self.share[col] = data[col]
                 else:
                     self[col] = data[col]
-        self.zones = {number: Zone(number, self.aggregations)
+        self.zones = {number: Zone(number, self.demand_aggs)
             for number in self.zone_numbers}
         self.nr_zones = len(self.zone_numbers)
         self._municip_calib = municipality_calibration
@@ -93,10 +95,20 @@ class ZoneData:
             "hh3": 4.13,  # Average size of 3+ households
         }
         hh_pop = sum(avg_hh_size[hh] * self[f"sh_{hh}"] for hh in avg_hh_size)
+        househoulds = 0
         for hh, avg_size in avg_hh_size.items():
             self.share[f"sh_pop_{hh}"] = divide(
                 avg_size*self[f"sh_{hh}"], hh_pop)
-            self[hh] = self[f"sh_pop_{hh}"] * self["population"] / avg_size
+            househoulds += self[f"sh_pop_{hh}"] * self["population"] / avg_size
+        self["households"] = househoulds
+
+        # Calculate household license shares
+        self._calc_household_shares(share="sh")
+        # Calculate population license shares
+        self._calc_household_shares(share="sh_pop")
+
+        # Convert household shares to population shares
+        # These fixed shares are used only in long-dist models
         self.share["sh_cars1_hh1"] = divide(self["sh_cars1_hh1"], hh_pop)
         self.share["sh_cars1_hh2"] = divide(
             (avg_hh_size["hh2"]*self["sh_cars1_hh2"]
@@ -109,48 +121,82 @@ class ZoneData:
         self.share["sh_car"] = (self["sh_cars1_hh1"]
                                 + self["sh_cars1_hh2"]
                                 + self["sh_cars2_hh2"])
+
         self["pop_density"] = divide(data["population"], data["land_area"])
         self["log_pop_density"] = numpy.log(self["pop_density"]+1)
 
-        # Create diagonal matrix
-        self["within_zone"] = numpy.full((self.nr_zones, self.nr_zones), 0.0)
-        self["within_zone"][numpy.diag_indices(self.nr_zones)] = 1.0
         # Two-way intrazonal distances from building distances
         self["dist"] = data["avg_building_distance"] * 2
         self["time"] = self["dist"] / (20/60) # 20 km/h
         self["cost"] = car_dist_cost * self["dist"]
-        # Unavailability of intrazonal tours
-        self["within_zone_inf"] = numpy.full((self.nr_zones, self.nr_zones), 0.0)
-        self["within_zone_inf"][numpy.diag_indices(self.nr_zones)] = numpy.inf
-        # Create matrix where value is True if origin and destination is in
-        # same municipality
-        municipalities = self.aggregations.mappings["municipality"].values
-        within_municipality = municipalities[:, numpy.newaxis] == municipalities
-        self["within_municipality"] = within_municipality
-        self["outside_municipality"] = ~within_municipality
+
         dummies = {
             "zone": {},
-            "subarea": {
-                "Helsingin_kantakaupunki",
-                "Tampereen_kantakaupunki",
-            },
-            "county": {
-                "Lappi",
-            },
             "municipality": {},
+            "county": {"Lappi"},
             "submodel": {},
+            "calibration_area": {}
         }
         for division_type in dummies:
             dummies[division_type].update(extra_dummies.get(division_type, []))
             for dummy in dummies[division_type]:
                 self[dummy] = self.dummy(division_type, dummy)
 
+    def _calc_household_shares(self, share: str = "sh"):
+        """Calculate household adult, childen and license shares.
+
+        Parameters
+        ----------
+        share : str
+            Whether to calculate household ("sh") or population ("sh_pop")
+            shares
+        """
+        # Calculate household adult number share
+        avg_two_adult_share = {
+            "hh2": 0.926,
+            "hh3": 0.949,
+        }
+        singles_no_children = self[f"{share}_hh1"]
+        singles_children = sum(
+            (1-avg_two_adult_share[hh]) * self[f"{share}_{hh}"]
+            for hh in avg_two_adult_share)
+        couples_no_children = avg_two_adult_share["hh2"] * self[f"{share}_hh2"]
+        couples_children = avg_two_adult_share["hh3"] * self[f"{share}_hh3"]
+        couples = couples_no_children + couples_children
+        singles = singles_no_children + singles_children
+
+        # Simple combinatorial household license share calculations assuming
+        # no correlation between license distribution in population and
+        # household size.
+        # They represent
+        # - shares of households ("sh") or
+        # - shares of population living in households ("sh_pop"),
+        # with given number of *adults* and licenses.
+        sh_lic = self["sh_adult_license"]
+        self.share[f"{share}_hh1_lic1"] = sh_lic * singles
+        self.share[f"{share}_hh2_lic1"] = 2 * sh_lic * (1-sh_lic) * couples
+        self.share[f"{share}_hh2_lic2"] = sh_lic**2 * couples
+
+        if share == "sh_pop":
+            # Share of population in 1-adult households that
+            # have / do not have children
+            self.share["sh_hh_1_adult_children"] = divide(
+                singles_children, singles)
+            self.share["sh_hh_1_adult_no_children"] = divide(
+                singles_no_children, singles)
+            # Share of population in 2-adult households that
+            # have / do not have children
+            self.share["sh_hh_2_adults_children"] = divide(
+                couples_children, couples)
+            self.share["sh_hh_2_adults_no_children"] = divide(
+                couples_no_children, couples)
+
     def dummy(self, division_type, name, bounds=slice(None)):
         if division_type == "zone":
             dummy = pandas.Series(
                 self.zone_numbers == int(name), self.zone_numbers)
         else:
-            dummy = self.aggregations.mappings[division_type][bounds] == name
+            dummy = self.demand_aggs.mappings[division_type][bounds] == name
         if not dummy.any():
             log.warn(f"Dummy variable {name} not found in {division_type}")
         return dummy
@@ -159,9 +205,6 @@ class ZoneData:
     def zone_values(self):
         return {key: val for key, val in self._values.items()
             if isinstance(val, pandas.Series)}
-
-    def __getitem__(self, key):
-        return self._values[key]
 
     def __setitem__(self, key: str, data: pandas.Series):
         try:
@@ -209,35 +252,34 @@ class ZoneData:
         """
         return self.zones[zone_number].index
 
-    def get_data(self, key: str, bounds: slice, generation: bool=False) -> Union[pandas.Series, numpy.ndarray]:
-        """Get data of correct shape for zones included in purpose.
-        
-        Parameters
-        ----------
-        key : str
-            Key describing the data (e.g., "population")
-        bounds : slice
-            Slice that describes the lower and upper bounds of purpose
-        generation : bool, optional
-            If set to True, returns data only for zones in purpose,
-            otherwise returns data for all zones
-        
-        Returns
-        -------
-        pandas Series or numpy 2-d matrix
-        """
+    def __getitem__(self, key: str) -> Union[pandas.Series, numpy.ndarray]:
         try:
-            val = self._values[key]
+            return self._values[key]
         except KeyError as err:
             keyl: List[str] = key.split('*')
+            mun_idx = self.demand_aggs.mappings["municipality"].to_numpy()
             if (len(keyl) == 2):
                 # If parameter is two-fold, they will be multiplied
-                return (self.get_data(keyl[0], bounds, generation)
-                        * self.get_data(keyl[1], bounds, generation))
+                return numpy.asarray(self[keyl[0]]) * numpy.asarray(self[keyl[1]])
+            elif "within_zone" in key:
+                mtx = numpy.zeros(
+                    (self.nr_zones, self.nr_zones), dtype=numpy.float32)
+                numpy.fill_diagonal(mtx, numpy.inf if "inf" in key else 1.0)
+                return mtx
+            elif key == "within_municipality":
+                # Create matrix with True if origin and destination
+                # is in same municipality
+                return mun_idx[:, numpy.newaxis] == mun_idx
+            elif key == "outside_municipality":
+                return mun_idx[:, numpy.newaxis] != mun_idx
             elif "beeline" in key:
-                beeline, lower, upper, _ = key.split('_')
-                mtx = self[beeline]
-                return (mtx > int(lower)) & (mtx <= int(upper))[bounds, :]
+                mtx = self.beeline_dist[self.zone_slice, self.zone_slice]
+                try:  # If key contains km interval (e.g., "beeline_10_100_km")
+                    _, lower, upper, _ = key.split('_')
+                except ValueError:
+                    return mtx
+                else:
+                    return (mtx > int(lower)) & (mtx <= int(upper))
             elif "municipality_calibration" in key:
                 try:
                     # Try to find mode-specific calibration matrix
@@ -245,25 +287,20 @@ class ZoneData:
                 except KeyError:
                     return 0
                 else:
-                    idx = self.aggregations.mappings["municipality"].values
                     return calib.unstack("attraction").reindex(
-                        index=idx, columns=idx, fill_value=0.0).values[bounds, :]
+                        index=mun_idx, columns=mun_idx, fill_value=0.0
+                    ).to_numpy(numpy.float32)
             else:
                 raise KeyError(err)
-        if val.ndim == 1: # If not a compound (i.e., matrix)
-            if generation:  # Return values for purpose zones
-                return val[bounds].values
-            else:  # Return values for all zones
-                return val.values
-        else:  # Return matrix (purpose zones -> all zones)
-            return val[bounds, :]
 
     @property
     def is_in_submodel(self) -> pandas.Series:
         """Boolean mapping of zones, whether in proper sub-model area."""
-        mapping = self.aggregations.mappings["submodel"]
+        mapping = self.demand_aggs.mappings["submodel"]
         submodels = mapping.drop_duplicates()
         for submodel in submodels:
+            if submodel is None:
+                continue
             if self.mapping.name == submodel.lower().replace('-', '_'):
                 return mapping == submodel
         else:

@@ -17,21 +17,22 @@ demand_share: Dict[str,Dict[str,Any]] = {
             "iht": (0.066, 0),
         },
         "van": {
-            # As shares of car traffic
-            # On top of this, the trucks sum is added
-            "aht": (0.054, 0),
-            "pt": (0.07, 0),
-            "iht": (0.044, 0),
+            # Vans are calculated by multiplying car demand with this share.
+            # This is a ratio of total mileage by vans / car driver (Statfi).
+            # Peaks are calculated by assuming that vans have even demand distribution through day.
+            "aht": (0.10, 0),
+            "pt": (0.17, 0),
+            "iht": (0.08, 0),
         },
     },
     "external": {
-        "car_work": {
+        "car": {
             "aht": (0.321, 0.0),
             "pt": (0.403, 0.0),
             "iht": (0.277, 0.0),
             "it": (0.0, 0.0),
         },
-        "car_leisure": {
+        "car_drv": {
             "aht": (0.0601, 0.0),
             "pt": (0.691, 0.0),
             "iht": (0.249, 0.0),
@@ -43,13 +44,7 @@ demand_share: Dict[str,Dict[str,Any]] = {
             "iht": (0.270, 0.0),
             "it": (0.203, 0.0),
         },
-        "transit_work": {
-            "aht": (0.200, 0.0),
-            "pt": (0.327, 0.0),
-            "iht": (0.270, 0.0),
-            "it": (0.203, 0.0),
-        },
-        "transit_leisure": {
+        "transit": {
             "aht": (0.200, 0.0),
             "pt": (0.327, 0.0),
             "iht": (0.270, 0.0),

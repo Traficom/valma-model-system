@@ -87,6 +87,7 @@ class EmmeAssignmentModel(AssignmentModel):
             raise ValueError(f"EMME project has no scenario {first_scenario_id}")
 
     def prepare_network(self, car_dist_unit_cost: Dict[str, float],
+                        car_time_unit_cost: Dict[str, float],
                         car_time_files: Optional[List[Path]] = None):
         """Create matrices, extra attributes and calc background variables.
 
@@ -94,9 +95,14 @@ class EmmeAssignmentModel(AssignmentModel):
         ----------
         dist_unit_cost : dict
             key : str
-                Assignment class (car_work/truck/...)
+                Assignment class (car/truck/...)
             value : float
                 Car cost per km in euros
+        time_unit_cost : dict
+            key : str
+                Assignment class (car_work/truck/...)
+            value : float
+                Value of time in euros per hour for truck modes
         car_time_files : list (optional)
             List of paths, where car time data is stored.
             If set, traffic assignment is all-or-nothing with speeds stored
@@ -148,7 +154,8 @@ class EmmeAssignmentModel(AssignmentModel):
                 ap.emme_scenario, ass_classes, ap.extra, ap.netfield)
             self._create_transit_attributes(ap.emme_scenario, ap.extra)
             ap.prepare(
-                car_dist_unit_cost, self.day_scenario, self.save_matrices)
+                car_dist_unit_cost, car_time_unit_cost, self.day_scenario,
+                self.save_matrices)
             log.debug(
                 f"Created extra attrs for scen {ap.emme_scenario}, {ap.name}")
         self._init_functions()
@@ -156,6 +163,7 @@ class EmmeAssignmentModel(AssignmentModel):
         self.emme_project.set_extra_function_parameters(el1=param.ferry_wait_attr)
 
     def prepare_freight_network(self, car_dist_unit_cost: Dict[str, float],
+                                car_time_unit_cost: Dict[str, float],
                                 commodity_classes: List[str]):
         """Create matrices, extra attributes and calc background variables.
 
@@ -163,9 +171,14 @@ class EmmeAssignmentModel(AssignmentModel):
         ----------
         dist_unit_cost : dict
             key : str
-                Assignment class (car_work/truck/...)
+                Assignment class (car/truck/...)
             value : float
                 Car cost per km in euros
+        time_unit_cost : dict
+            key : str
+                Assignment class (car_work/truck/...)
+            value : float
+                Value of time in euros per hour for the assignment class
         commodity_classes : list of str
             Class names for which we want extra attributes
         """
@@ -203,7 +216,8 @@ class EmmeAssignmentModel(AssignmentModel):
             self.mod_scenario,
             list(param.truck_classes) + list(param.freight_modes),
             self._extra, self._netfield)
-        self.freight_network.prepare(car_dist_unit_cost, self.save_matrices)
+        self.freight_network.prepare(
+            car_dist_unit_cost, car_time_unit_cost, self.save_matrices)
         self._init_functions()
         self.emme_project.set_extra_function_parameters(el1=param.ferry_wait_attr)
 

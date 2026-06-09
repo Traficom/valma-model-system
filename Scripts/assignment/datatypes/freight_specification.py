@@ -1,15 +1,37 @@
 from __future__ import annotations
-from typing import Any, Dict
+from typing import TYPE_CHECKING, Any, Dict
 
 import parameters.assignment as param
 from assignment.datatypes.assignment_mode import AssignmentMode
+if TYPE_CHECKING:
+    from assignment.assignment_period import AssignmentPeriod
 
 
 class FreightMode(AssignmentMode):
-    def __init__(self, *args, **kwargs):
-        AssignmentMode.__init__(self, *args, **kwargs)
-        self._include_toll_cost = self.emme_scenario.extra_attribute(
-            "@toll_cost_vrk") is not None
+    def __init__(self, name: str, assignment_period: AssignmentPeriod,
+                 dist_unit_cost: float, time_unit_cost: float,
+                 include_toll_cost: bool, save_matrices: bool = False):
+        """Initialize car mode.
+
+        Parameters
+        ----------
+        name : str
+            Mode name
+        assignment_period : AssignmentPeriod
+            Assignment period to link to the mode
+        dist_unit_cost : float
+            Length multiplier to calculate link cost for truck access
+        time_unit_cost : float
+            Value of time in euros per hour for truck access
+        include_toll_cost : bool
+            Whether network links have "hinta" attribute defined
+        save_matrices : bool (optional)
+            Whether matrices will be saved in Emme format for all time periods
+        """
+        AssignmentMode.__init__(self, name, assignment_period, save_matrices)
+        self._dist_unit_cost = dist_unit_cost
+        self._time_unit_cost = time_unit_cost
+        self._include_toll_cost = include_toll_cost
         self.dist = self._create_matrix("dist")
         self.aux_dist = self._create_matrix("aux_dist")
         self.time = self._create_matrix("time")
@@ -118,10 +140,12 @@ class FreightMode(AssignmentMode):
             **self.dist.item,
             **self.aux_dist.item,
             **self.time.item,
-            **self.aux_time.item,
             **self.canal_cost.item,
         }
+        aux_cost = (self._time_unit_cost*self.aux_time.data/60
+                    + self._dist_unit_cost*self.aux_dist.data)
         if self._include_toll_cost:
-            mtxs.update(self.toll_cost.item)
+            aux_cost += self.toll_cost.data
+        mtxs["aux_cost"] = aux_cost
         self._soft_release_matrices()
         return mtxs

@@ -19,11 +19,11 @@ from datahandling.zonedata import ZoneData
 from datahandling.matrixdata import MatrixData
 from demand.trips import DemandModel
 from demand.external import ExternalPurpose
-from datatypes.purpose import new_tour_purpose
-from datatypes.purpose import Purpose, TourPurpose, SecDestPurpose
+from datatypes.purpose import TravelPurpose, TourPurpose, SecDestPurpose
 from datatypes.demand import Demand
 import parameters.assignment as param
 import parameters.zone as zone_param
+from utils.validate_assignment import validate_assignment
 
 
 class ModelSystem:
@@ -66,8 +66,8 @@ class ModelSystem:
                  results_path: Path,
                  assignment_model: AssignmentModel,
                  submodel: str,
-                 mode_dest_calibration_path: Optional[Path] = None,
-                 municipality_calibration_path: Optional[Path] = None,
+                 mode_dest_calibration_path: Optional[str] = None,
+                 municipality_calibration_path: Optional[str] = None,
                  long_dist_matrices_path: Optional[Path] = None,
                  freight_matrices_path: Optional[Path] = None):
         self.ass_model = cast(Union[MockAssignmentModel,EmmeAssignmentModel], assignment_model) #type checker hint
@@ -80,41 +80,40 @@ class ModelSystem:
         self.freight_matrices = (MatrixData(freight_matrices_path)
             if freight_matrices_path is not None else None)
         cost_data: dict = json.loads(cost_data_path.read_text("utf-8"))
-        self.car_dist_cost = cost_data["car_cost"]
+        self.car_dist_cost = cost_data["vehicle_km_cost"]
+        self.car_time_cost = cost_data["vehicle_hour_cost"]
         self.transit_cost = {data.pop("id"): data for data
             in cost_data["transit_cost"].values()}
         if mode_dest_calibration_path is None:
             mode_dummies = {}
             dest_dummies = {}
         else:
-            calibration_data: dict = json.loads(
-                mode_dest_calibration_path.read_text("utf-8"))
+            path = Path(mode_dest_calibration_path)
+            calibration_data: dict = json.loads(path.read_text("utf-8"))
             mode_dummies = calibration_data["mode_choice_calibration"]
             dest_dummies = calibration_data["destination_choice_calibration"]
         extra_dummies = {**mode_dummies, **dest_dummies}
         if municipality_calibration_path is None:
             municip_calib = {}
         else:
-            municip_calib = pandas.read_csv(
-                municipality_calibration_path, sep="\t",
+            path = Path(municipality_calibration_path)
+            municip_calib = pandas.read_csv(path, sep="\t",
                 index_col=["generation", "attraction"]).to_dict("series")
         self._zone_datas = {
             model_area: ZoneData(
                 zone_data_path, self.zone_numbers, submodel,
                 model_area=model_area, municipality_calibration=municip_calib,
                 extra_dummies=extra_dummies,
-                car_dist_cost=self.car_dist_cost["car_work"]
+                car_dist_cost=self.car_dist_cost["car"]
             ) for model_area in ["domestic"]}
 
         # Output data
         self.resultdata = ResultsData(results_path)
         self.resultmatrices = MatrixData(results_path / "Matrices" / submodel)
         parameters_path = Path(__file__).parent / "parameters" / "demand"
-        home_based_work_purposes = []
-        home_based_leisure_purposes = []
+        home_based_purposes = []
         sec_dest_purposes = []
-        other_work_purposes = []
-        other_leisure_purposes = []
+        other_purposes = []
         purpose_names = []
         for file in parameters_path.glob("*.json"):
             specification = json.loads(file.read_text("utf-8"))
@@ -130,7 +129,7 @@ class ModelSystem:
                         if mode in specification["destination_choice"]:
                             (specification["destination_choice"][mode]
                                           ["attraction"][subarea]) = coeff
-            purpose = new_tour_purpose(
+            purpose = TravelPurpose(
                 specification, self._zone_datas, self.resultdata,
                 cost_data["cost_changes"])
             required_time_periods = sorted(
@@ -140,25 +139,20 @@ class ModelSystem:
                 if isinstance(purpose, SecDestPurpose):
                     sec_dest_purposes.append(purpose)
                 elif purpose.orig == "home":
-                    if param.assignment_classes[purpose.name] == "work":
-                        home_based_work_purposes.append(purpose)
-                    else:
-                        home_based_leisure_purposes.append(purpose)
+                    home_based_purposes.append(purpose)
                 else:
-                    if param.assignment_classes[purpose.name] == "work":
-                        other_work_purposes.append(purpose)
-                    else:
-                        other_leisure_purposes.append(purpose)
+                    other_purposes.append(purpose)
         if len(purpose_names) != len(set(purpose_names)):
             msg = f"Duplicate tour purposes in demand parameters."
             log.error(msg)
             raise ValueError(msg)
         self.dm = self._init_demand_model(
-            home_based_work_purposes + other_work_purposes
-            + home_based_leisure_purposes + other_leisure_purposes
-            + sec_dest_purposes)
+            home_based_purposes + other_purposes + sec_dest_purposes)
         self.travel_modes = {mode: True for purpose in self.dm.tour_purposes
             for mode in purpose.modes}  # Dict instead of set, to preserve order
+        self.ass_classes = set()
+        for mode in self.travel_modes.keys():
+            self.ass_classes.add(param.mode_impedance[mode])
         self.external_purpose = ExternalPurpose(numpy.array(self.zone_numbers))
         self.mode_share: List[Dict[str,Any]] = []
         self.convergence = []
@@ -182,7 +176,7 @@ class ModelSystem:
                     Impedance type (time/cost/dist)
                 value : dict
                     key : str
-                        Assignment class (car_work/transit/...)
+                        Assignment class (car_drv/transit/...)
                     value : numpy.ndarray
                         Impedance (float 2-d matrix)
         is_last_iteration : bool (optional)
@@ -201,13 +195,8 @@ class ModelSystem:
                             purpose, mode, purpose_impedance)
                 else:
                     self._distribute_sec_dests(
-                        purpose, "car_leisure", purpose_impedance)
+                        purpose, "car_drv", purpose_impedance)
             else:
-                if param.assignment_classes[purpose.name] == "leisure":
-                    for tp_imp in previous_iter_impedance.values():
-                        for imp in tp_imp.values():
-                            for mode in ("car_work", "transit_work"):
-                                imp.pop(mode, None)
                 for mode_demand in purpose.calc_demand(
                         previous_iter_impedance, is_last_iteration):
                     self.dtm.add_demand(mode_demand)
@@ -267,15 +256,16 @@ class ModelSystem:
             List can be empty, if car times are already stored on network.
         """
         # create attributes and background variables to network
-        self.ass_model.prepare_network(self.car_dist_cost, car_time_files)
+        self.ass_model.prepare_network(
+            self.car_dist_cost, self.car_time_cost, car_time_files)
         self.dtm = dt.DirectDepartureTimeModel(self.ass_model)
 
         self.ass_model.calc_transit_cost(self.transit_cost)
-        Purpose.distance = self.ass_model.beeline_dist
+        ZoneData.beeline_dist = self.ass_model.beeline_dist
         if not isinstance(self.ass_model, MockAssignmentModel):
             with self.resultmatrices.open(
                     "beeline", "", self.ass_model.zone_numbers, m="w") as mtx:
-                mtx["all"] = Purpose.distance
+                mtx["all"] = ZoneData.beeline_dist
         for ap in self.ass_model.assignment_periods:
             tp = ap.name
             log.info(f"Initializing assignment for period {tp}...")
@@ -299,11 +289,6 @@ class ModelSystem:
             self._add_external_demand(
                 self.freight_matrices, param.truck_classes)
 
-        # Add beeline distance dummy
-        zd = self._zone_datas["domestic"]
-        idx = numpy.isin(self.zone_numbers, zd.zone_numbers)
-        zd["beeline"] = Purpose.distance[numpy.ix_(idx, idx)]
-
         # Perform traffic assignment and get result impedance,
         # for each time period
         impedance = {}
@@ -313,7 +298,9 @@ class ModelSystem:
             ap.assign_trucks_init()
             impedance[tp] = (ap.end_assign(not is_car_end_assignment)
                              if is_end_assignment
-                             else ap.assign(self.travel_modes))
+                             else ap.assign(self.ass_classes))
+            validate_assignment(impedance[tp], tp, self.ass_classes, 
+                                self.zone_numbers, self.resultdata)
             if is_end_assignment:
                 if not isinstance(self.ass_model, MockAssignmentModel):
                     self._save_to_omx(impedance[tp], tp)
@@ -354,7 +341,7 @@ class ModelSystem:
                     Impedance (float 2-d matrix)
         """
         impedance = {}
-        self.dtm.init_demand({**self.travel_modes, "van": True})
+        self.dtm.init_demand(self.ass_classes | {"van"})
 
         self.dm.calculate_car_ownership(previous_iter_impedance)
 
@@ -406,7 +393,7 @@ class ModelSystem:
             tp = ap.name
             log.info(f"--- ASSIGNING PERIOD {tp.upper()} ---")
             impedance[tp] = (ap.end_assign() if iteration=="last"
-                             else ap.assign(self.travel_modes))
+                             else ap.assign(self.ass_classes))
             if iteration=="last":
                 if not isinstance(self.ass_model, MockAssignmentModel):
                     self._save_to_omx(impedance[tp], tp)

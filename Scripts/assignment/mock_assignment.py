@@ -7,7 +7,6 @@ if TYPE_CHECKING:
 
 
 import utils.log as log
-from utils.validate_assignment import divide_matrices, output_od_los
 import parameters.assignment as param
 import parameters.zone as zone_param
 from assignment.abstract_assignment import AssignmentModel, Period
@@ -121,7 +120,7 @@ class MockPeriod(Period):
         -------
         dict
             Type (time/cost/dist) : dict
-                Assignment class (car_work/transit_leisure/...) : numpy 2-d matrix
+                Assignment class (car/transit/...) : numpy 2-d matrix
         """
         mtxs = self._get_impedances(modes)
         for ass_cl in param.car_classes + param.transit_classes:
@@ -139,7 +138,7 @@ class MockPeriod(Period):
         -------
         dict
             Type (time/cost/dist) : dict
-                Assignment class (car_work/transit_leisure/...) : numpy 2-d matrix
+                Assignment class (car/transit/...) : numpy 2-d matrix
         """
         return self._get_impedances(self._end_assignment_classes)
 
@@ -150,16 +149,6 @@ class MockPeriod(Period):
             if mtx_type not in ("toll_cost", "train_users")]
         mtxs = {mtx_type: self._get_matrices(mtx_type, assignment_classes)
             for mtx_type in impedance_output}
-        for mtx_type in mtxs:
-            for mode, mtx in mtxs[mtx_type].items():
-                output_od_los(mtx, self.mapping, mtx_type, mode)
-        for mode in mtxs["time"]:
-            try:
-                divide_matrices(
-                    mtxs["dist"][mode], mtxs["time"][mode]/60,
-                    f"OD speed (km/h) {mode}")
-            except KeyError:
-                pass
         return mtxs
 
     def _get_matrices(self,
@@ -178,7 +167,7 @@ class MockPeriod(Period):
         Return
         ------
         dict
-            Subtype (car_work/truck/inv_time/...) : numpy 2-d matrix
+            Subtype (car/truck/inv_time/...) : numpy 2-d matrix
                 Matrix of the specified type
         """
         with self.matrices.open(
@@ -223,7 +212,7 @@ class WholeDayPeriod(MockPeriod):
         -------
         dict
             Type (time/cost/dist) : dict
-                Assignment class (car_work/transit_leisure/...) : numpy 2-d matrix
+                Assignment class (car/transit/...) : numpy 2-d matrix
         """
         return self._get_impedances(self.assignment_modes)
 
@@ -243,7 +232,7 @@ class OffPeakPeriod(MockPeriod):
         -------
         dict
             Type (time/cost/dist) : dict
-                Assignment class (car_work/transit_leisure/...) : numpy 2-d matrix
+                Assignment class (car/transit/...) : numpy 2-d matrix
         """
         self._end_assignment_classes.add("walk")
         return self._get_impedances(self._end_assignment_classes)
@@ -263,7 +252,7 @@ class TransitAssignmentPeriod(OffPeakPeriod):
         -------
         dict
             Type (time/cost/dist) : dict
-                Assignment class (transit_work/transit_leisure) : numpy 2-d matrix
+                Assignment class (transit) : numpy 2-d matrix
         """
         mtxs = self._get_impedances(param.local_transit_classes)
         del mtxs["dist"]

@@ -11,9 +11,10 @@ import utils.log as log
 import parameters.zone as param
 import models.logit as logit
 from parameters.assignment import (
-    assignment_classes,
     intermodals,
-    mixed_mode_classes)
+    mixed_mode_classes,
+    mode_impedance
+)
 import parameters.cost as cost
 import models.generation as generation
 from datatypes.demand import Demand
@@ -22,50 +23,48 @@ from utils.freight_costs import calc_cost, get_foreign_ship_cost
 from utils.calibrate import attempt_calibration
 from models.logistics import (LogisticsModule, TradeRouteModule,
                               run_logistics_model, run_trade_model)
+from parameters.marine_ship import leg_names
 
 
 class Purpose:
     """Generic container class without methods.
-    
-    Sets the purpose zone bounds.
 
-    Parameters
-    ----------
-    specification : dict
-        "name" : str
-            Tour purpose name
-        "orig" : str
-            Origin of the tours
-        "dest" : str
-            Destination of the tours
-        "area" : str
-            Model area
-        "impedance_share" : dict
-            Impedance shares
-    zone_datas : Dict
-        key : str
-            Model area (domestic/foreign)
-        val : ZoneData
-            Data used for all demand calculations
-    resultdata : ResultsData (optional)
-        Writer object to result directory
-    mtx_adjustment : dict (optional)
-        Dict of matrix adjustments for testing elasticities
+    The subclasses contain tour-purpose-specific or goods-type-specific
+    methods for calculating demand.
     """
-    distance: numpy.ndarray
 
     def __init__(self, 
                  specification: Dict[str,Optional[str]],
                  zone_datas: Dict[str, ZoneData],
-                 resultdata: Optional[ResultsData] = None,
-                 mtx_adjustment: Optional[Dict] = None):
+                 resultdata: ResultsData):
+        """Set the purpose zone bounds.
+
+        Parameters
+        ----------
+        specification : dict
+            "name" : str
+                Tour purpose name
+            "orig" : str
+                Origin of the tours
+            "dest" : str
+                Destination of the tours
+            "generation_area" : str
+                Model area for tour generation
+            "attraction_area" : str
+                Model area for tour attraction
+        zone_datas : Dict
+            key : str
+                Model area (domestic/foreign)
+            val : ZoneData
+                Data used for all demand calculations
+        resultdata : ResultsData
+            Writer object to result directory
+        """
         self.name = specification["name"]
         self.orig = specification["orig"]
         self.dest = specification["dest"]
         self.generation_area = specification["generation_area"]
         self.attraction_area = specification["attraction_area"]
-        self.impedance_share = specification["impedance_share"]
-        self.demand_share = specification["demand_share"]
         self.generation_zone_data = zone_datas[self.generation_area]
         self.attraction_zone_data = zone_datas[self.attraction_area]
         zone_numbers = self.generation_zone_data.all_zone_numbers
@@ -74,11 +73,6 @@ class Purpose:
         self.dest_interval = slice(*zone_numbers.searchsorted(
             param.purpose_areas[self.attraction_area]))
         self.resultdata = resultdata
-        self.mtx_adjustment = mtx_adjustment
-        self.generated_tours: Dict[str, numpy.array] = {}
-        self.generated_distance: Dict[str, numpy.array] = {}
-        self.attracted_tours: Dict[str, numpy.array] = {}
-        self.attracted_distance: Dict[str, numpy.array] = {}
 
     @property
     def orig_zone_numbers(self):
@@ -87,7 +81,77 @@ class Purpose:
     @property
     def dest_zone_numbers(self):
         return self.attraction_zone_data.zone_numbers
-    
+
+
+class TravelPurpose(Purpose):
+
+    def __init__(self,
+                 specification,
+                 zone_datas,
+                 resultdata = None,
+                 mtx_adjustment = None):
+        """Create purpose for two-way tour or for secondary destination of tour.
+
+        Parameters
+        ----------
+        specification : dict
+            "name" : str
+                Tour purpose name (hw/oo/hop/sop/...)
+            "orig" : str
+                Origin of the tours (home/source)
+            "dest" : str
+                Destination of the tours (work/other/source/...)
+            "generation_area" : str
+                Model area (domestic/foreign)
+            "attraction_area" : str
+                Model area (domestic/foreign)
+            "struct" : str
+                Model structure (dest>mode/mode>dest)
+            "impedance_share" : dict
+                Impedance shares
+            "demand_share" : dict
+                Demand shares
+            "discount" : dict
+                Discount factors for LOS components
+            "activity_time" : dict
+                Time spent at activity in minutes when parking at destination
+            "parking_cost_share" : float
+                Share of drivers paying for parking at destination
+            "occupancy" : dict
+                "car_drv" : float
+                    Average occupancy of car driver trips
+                "car_pax" : float
+                    Average occupancy of car passenger trips
+            "car_cost_sharing" : float
+                Share of car cost that is shared among passengers
+            "tour_duration" : dict
+                Average tour duration in days for park-and-ride modes
+            "destination_choice" : dict
+                Destionation choice parameters
+            "mode_choice" dict
+                Mode choice parameters
+        zone_data : ZoneData
+            Data used for all demand calculations
+        resultdata : ResultData
+            Writer object for result directory
+        mtx_adjustment : dict (optional)
+            Dict of matrix adjustments for testing elasticities
+        """
+        Purpose.__init__(self, specification, zone_datas, resultdata)
+        self.impedance_share = specification["impedance_share"]
+        self.demand_share = specification["demand_share"]
+        self.discount = specification.get("discount", {})
+        self.activity_time = specification["activity_time"]
+        self.park_cost_share = specification["parking_cost_share"]
+        self.occupancy = specification["occupancy"]
+        self.cost_share = specification["car_cost_sharing"]
+        self.tour_duration = specification.get("tour_duration", {})
+        self.mtx_adjustment = mtx_adjustment
+        self.generated_tours: Dict[str, numpy.array] = {}
+        self.generated_distance: Dict[str, numpy.array] = {}
+        self.attracted_tours: Dict[str, numpy.array] = {}
+        self.attracted_distance: Dict[str, numpy.array] = {}
+
     def transform_impedance(self, impedance):
         """Perform transformation from time period dependent matrices
         to aggregate impedance matrices for specific travel purpose.
@@ -102,7 +166,7 @@ class Purpose:
                     Impedance type (time/cost/dist)
                 value : dict
                     key : str
-                        Assignment class (car_work/transit/...)
+                        Assignment class (car/transit/...)
                     value : numpy.ndarray
                         Impedance (float 2-d matrix)
 
@@ -122,7 +186,7 @@ class Purpose:
         day_imp = defaultdict(lambda: defaultdict(float))
         for mode in self.impedance_share:
             share_sum = 0
-            ass_class = mode.replace("pax", assignment_classes[self.name])
+            ass_class = mode_impedance[mode]
             for time_period in self.impedance_share[mode]:
                 for mtx_type in impedance[time_period]:
                     if ass_class in impedance[time_period][mtx_type]:
@@ -155,120 +219,59 @@ class Purpose:
                     except KeyError:
                         pass
         # Apply discounts and transformations to LOS matrices
+        for mode in self.discount:
+            for mtx_type in self.discount[mode]:
+                day_imp[mode][mtx_type] *= self.discount[mode][mtx_type]
+        zd = self.attraction_zone_data
         for mode in day_imp:
             for mtx_type in day_imp[mode]:
-                if mtx_type == "cost":
-                    try:
-                        day_imp[mode][mtx_type] *= cost.cost_discount[self.name][mode]
-                    except KeyError:
-                        pass
-                if mtx_type == "time" and "car" in mode:
-                    day_imp[mode][mtx_type] += self.attraction_zone_data["avg_park_time"].values
-                if mtx_type == "cost" and "car" in mode:
-                    try:
-                        day_imp[mode][mtx_type] += (cost.activity_time[self.name] *
-                                                    cost.share_paying[self.name] *
-                                                    self.attraction_zone_data["avg_park_cost"].values)
-                    except KeyError:
-                        pass
-                if mtx_type == "cost" and mode in ["car_work", "car_leisure"]:
-                    try:
-                        day_imp[mode][mtx_type] *= (1 - cost.sharing_factor[self.name] *
-                                                    (cost.car_drv_occupancy[self.name] - 1) /
-                                                    cost.car_drv_occupancy[self.name])
-                    except KeyError:
-                        pass
-                if mtx_type == "cost" and mode == "car_pax":
-                    try:
-                        day_imp[mode][mtx_type] *= (cost.sharing_factor[self.name] /
-                                                    cost.car_pax_occupancy[self.name])
-                    except KeyError:
-                        pass
-                airpl_access_modes = ["airpl_car_acc", "airpl_taxi_acc", "airpl_car_egr"]
-                transit_access_modes = ["pt_car_acc", "pt_taxi_acc", "pt_taxi_egr"]
-                if mtx_type == "time" and mode in airpl_access_modes:
-                    day_imp[mode][mtx_type] -= day_imp[mode]["car_time"] * 1.5
-                if mtx_type == "time" and mode in transit_access_modes:
-                    day_imp[mode][mtx_type] -= day_imp[mode]["car_time"] * 6.5
-            try:
-                vot = cost.vot[self.name][mode]
-                day_imp[mode]["gen_cost"] = day_imp[mode]["cost"] + (day_imp[mode]["time"]/60) * vot
+                if mtx_type in ("time", "cost", "dist"):
+                    # Get intra-zonal impendances from zone data
+                    numpy.fill_diagonal(day_imp[mode][mtx_type], zd[mtx_type])
+            if "car" in mode:
+                day_imp[mode]["time"] += numpy.asarray(zd["avg_park_time"])
+                day_imp[mode]["cost"] += (self.activity_time * self.park_cost_share
+                                          * numpy.asarray(zd["avg_park_cost"]))
+        if self.occupancy:
+            if "car_drv" in day_imp:
+                day_imp["car_drv"]["cost"] *= (1 - self.cost_share
+                                               * (self.occupancy["car_drv"]-1)
+                                               / self.occupancy["car_drv"])
+            day_imp["car_pax"]["cost"] *= (self.cost_share
+                                           / self.occupancy["car_pax"])
+        for mode in day_imp:
+            if "vrk" in self.impedance_share[mode] and mode != "walk":
+                vot = cost.value_of_time[mode_impedance[mode]]
+                day_imp[mode]["gen_cost"] = (day_imp[mode].pop("cost")
+                                             + vot*day_imp[mode].pop("time")/60)
                 log.info(f"Generalized cost calculated for {self.name} {mode}.")
-            except KeyError:
-                pass
             if mode in mixed_mode_classes:
                 day_imp[mode]["park_cost"] = (day_imp[mode]["park_cost"]
-                                              * cost.tour_duration[mode][self.name]
-                                              / cost.tour_duration[mode]["avg"])
+                                              * self.tour_duration[mode]
+                                              / cost.avg_tour_duration[mode])
         return day_imp
 
-def new_tour_purpose(*args):
-    """Create purpose for two-way tour or for secondary destination of tour.
-
-    Parameters
-    ----------
-    specification : dict
-        "name" : str
-            Tour purpose name (hw/oo/hop/sop/...)
-        "orig" : str
-            Origin of the tours (home/source)
-        "dest" : str
-            Destination of the tours (work/other/source/...)
-        "generation_area" : str
-            Model area (domestic/foreign)
-        "struct" : str
-            Model structure (dest>mode/mode>dest)
-        "impedance_share" : dict
-            Impedance shares
-        "impedance_transform" : dict
-            Impedance transformations
-        "destination_choice" : dict
-            Destionation choice parameters
-        "mode_choice" dict
-            Mode choice parameters
-    zone_data : ZoneData
-        Data used for all demand calculations
-    resultdata : ResultData
-        Writer object for result directory
-    mtx_adjustment : dict (optional)
-        Dict of matrix adjustments for testing elasticities
-    """
-    specification = args[0]
-    attempt_calibration(specification)
-    if "sec_dest" in specification:
-        purpose = SecDestPurpose(*args)
-    elif (specification["dest"] == "source"
-          or specification["name"] == "oop"):
-        purpose = SimpleTourPurpose(*args)
-    else:
-        purpose = TourPurpose(*args)
-    try:
-        purpose.sources = specification["source"]
-    except KeyError:
-        pass
-    return purpose
+    def __new__(cls, *args):
+        if cls is not TravelPurpose:
+            return super(TravelPurpose, cls).__new__(cls)
+        specification = args[0]
+        attempt_calibration(specification)
+        if "sec_dest" in specification:
+            purpose = SecDestPurpose(*args)
+        else:
+            purpose = TourPurpose(*args)
+        try:
+            purpose.sources = specification["source"]
+        except KeyError:
+            pass
+        return purpose
 
 
-class TourPurpose(Purpose):
-    """Standard two-way tour purpose.
-
-    Parameters
-    ----------
-    specification : dict
-        See `new_tour_purpose()`
-    zone_datas : Dict
-        key : str
-            Model area (domestic/foreign)
-        val : ZoneData
-            Data used for all demand calculations
-    resultdata : ResultData
-        Writer object for result directory
-    mtx_adjustment : dict (optional)
-        Dict of matrix adjustments for testing elasticities
-    """
+class TourPurpose(TravelPurpose):
+    """Standard two-way tour purpose."""
 
     def __init__(self, specification, zone_datas, resultdata, mtx_adjustment):
-        Purpose.__init__(
+        TravelPurpose.__init__(
             self, specification, zone_datas, resultdata, mtx_adjustment)
         if (self.orig == "home" and 
             specification["gen_model"] == "rate"):
@@ -285,7 +288,8 @@ class TourPurpose(Purpose):
                 self.bounds, resultdata)
         else:
             log.error(f"Tour generation model not defined for {self.name}")
-        args = (self, specification, self.attraction_zone_data, resultdata)
+        args = (self, specification, self.generation_zone_data,
+                self.attraction_zone_data, resultdata)
         if specification["struct"] == "mode>dest":
             self.model = logit.ModeDestModel(*args)
         elif specification["struct"] == "dest>mode":
@@ -304,18 +308,20 @@ class TourPurpose(Purpose):
                 new_spec = copy(specification)
                 new_spec["mode_choice"] = new_spec["access_mode_choice"][mode]
                 self.connection_models[mode] = logit.LogitModel(
-                    self, new_spec, self.generation_zone_data, resultdata)
+                    self, new_spec, self.generation_zone_data,
+                    self.attraction_zone_data, resultdata)
         self.histograms = {mode: TourLengthHistogram(self.name)
             for mode in self.modes}
-        self.orig_mappings = self.generation_zone_data.aggregations.mappings
-        self.dest_mappings = self.attraction_zone_data.aggregations.mappings
+        self.orig_mappings = self.generation_zone_data.result_aggs.mappings
+        self.dest_mappings = self.attraction_zone_data.result_aggs.mappings
         self.aggregates = {name: {} for name in self.dest_mappings}
         self.within_zone_tours = {}
         self.sec_dest_purpose: SecDestPurpose = None
+        self.sec_dest_rates = specification["sec_dest_rate"]
 
     @property
     def dist(self):
-        return self.distance[self.bounds, self.dest_interval]
+        return ZoneData.beeline_dist[self.bounds, self.dest_interval]
     
     @property
     def generated_tours_all(self):
@@ -481,14 +487,11 @@ class TourPurpose(Purpose):
         Demand
                 Mode-specific demand matrix for whole day
         """
-        prob = self.calc_prob(impedance, is_last_iteration)
-        self.gen_model.init_tours()
         self.gen_model.add_tours()
+        prob = self.calc_prob(impedance, is_last_iteration)
         tours = self.gen_model.get_tours()
-        if prob is None:
-            prob = self.model.calc_prob_again()
-        orig_agg = self.generation_zone_data.aggregations
-        dest_agg = self.attraction_zone_data.aggregations
+        orig_agg = self.generation_zone_data.result_aggs
+        dest_agg = self.attraction_zone_data.result_aggs
         for mode in self.modes:
             mtx = (prob.pop(mode) * tours).T
             try:
@@ -515,38 +518,12 @@ class TourPurpose(Purpose):
         log.info(f"Demand calculated for {self.name}")
 
 
-class SimpleTourPurpose(TourPurpose):
-    """Purpose for simplified demand calculation, not part of agent model."""
-
-    def calc_basic_prob(self, impedance, is_last_iteration) -> Iterator[Demand]:
-        """Calculate purpose specific demand matrices.
-
-        Yields
-        -------
-        Demand
-                Mode-specific demand matrix for whole day
-        """
-        return self.calc_demand(impedance, is_last_iteration)
-
-
-class SecDestPurpose(Purpose):
-    """Purpose for secondary destination of tour.
-
-    Parameters
-    ----------
-    specification : dict
-        See `new_tour_purpose()`
-    zone_data : ZoneData
-        Data used for all demand calculations
-    resultdata : ResultData
-        Writer object to result directory
-    mtx_adjustment : dict (optional)
-        Dict of matrix adjustments for testing elasticities
-    """
+class SecDestPurpose(TravelPurpose):
+    """Purpose for secondary destination of tour."""
 
     def __init__(self, specification, zone_data, resultdata, mtx_adjustment):
         args = (self, specification, zone_data, resultdata)
-        Purpose.__init__(*args, mtx_adjustment)
+        TravelPurpose.__init__(*args, mtx_adjustment)
         self.gen_model = generation.SecDestGeneration(
             self, resultdata, specification["generation"])
         self.model = logit.SecDestModel(*args)
@@ -673,13 +650,12 @@ class FreightPurpose(Purpose):
         self.costdata = costdata
         self.model_category = list(zone_data)[0]
         self.modes: List[str] = list(specification["mode_choice"])
-
+        args = (self, specification, self.generation_zone_data,
+                self.attraction_zone_data, resultdata)
         if specification["struct"] == "dest>mode":
-            self.model = logit.DestModeModel(self, specification, zone_data[self.model_category], 
-                                             resultdata)
+            self.model = logit.DestModeModel(*args)
         elif specification["struct"] == "mode>dest":
-            self.model = logit.ModeDestModel(self, specification, zone_data[self.model_category], 
-                                             resultdata)
+            self.model = logit.ModeDestModel(*args)
         else:
             self.model = None
         self.route_params = specification.get("route_choice", None)
@@ -757,27 +733,29 @@ class FreightPurpose(Purpose):
         fin_zones = numpy.isin(all_zones, numpy.union1d(self.orig_zone_numbers, 
                                                         fin_port_zones))
         cluster_zones = ~fin_zones & ~cluster_borders
-
+        
         masks = (fin_zones, fin_borders, cluster_borders, cluster_zones)
-        leg_modes = (
-            ("truck", "freight_train"),  # finland domestic leg
-            ("truck", "freight_train"),  # international land leg
-            ("truck",)  # foreign domestic leg
-        )
         if not self.is_export:
             masks = masks[::-1]
-            leg_modes = leg_modes[::-1]
 
         costs = self.get_costs(impedance)
-        impedance_legs = {l: {} for l in ["leg_one", "leg_two", "leg_three"]}
+        impedance_legs = {l: {} for l in leg_names}
         for i, imp_leg in enumerate(impedance_legs.values()):
-            for mode in leg_modes[i]:
-                imp_leg[mode] = {imp_type: mtx[numpy.ix_(masks[i], masks[i+1])]
-                                 for imp_type, mtx in costs[mode].items()}
+            imp_leg["truck"] = {imp_type: mtx[numpy.ix_(masks[i], masks[i+1])]
+                                for imp_type, mtx in costs["truck"].items()}
         ship_costs = get_foreign_ship_cost(
             self.costdata, ship_imps, self.model_category, fin_border_ids,
             self.is_export)
         impedance_legs["leg_two"].update(ship_costs)
+
+        # Retain leg two truck cost only for designated land border pairs
+        mask = pandas.DataFrame(True, index=fin_port_zones, columns=cluster_port_zones)
+        for fin_border, cluster_border in param.land_border_pairs.values():
+            if fin_border in fin_port_zones and cluster_border in cluster_port_zones:
+                mask.at[fin_border, cluster_border] = False
+        if not self.is_export:
+            mask = mask.T
+        impedance_legs["leg_two"]["truck"]["cost"][mask.to_numpy()] = numpy.inf
         return impedance_legs
 
     def get_costs(self, impedance: dict):
@@ -819,6 +797,58 @@ class FreightPurpose(Purpose):
                     / costdata["avg_load"] / 365)
         vehicles += vehicles.T * costdata["empty_share"]
         return vehicles
+
+    def calc_trade_mode_share(self, dom_demand: dict, trade_demand: dict,
+                              fin_borders: list):
+        """Calculate mode share of trade demand on its domestic leg 
+        among freight land mode alternatives.
+
+        Parameters
+        ----------
+        dom_demand : dict
+            Mode (truck/train/...) : domestic demand numpy 2d array
+        trade_demand : dict
+            Foreign purpose name : str
+                Leg (one/two/three) : str
+                    Mode (truck/container_ship...) : trade demand numpy 2d array
+        fin_borders : list[int]
+            Finnish border centroid ids
+
+        Returns
+        -------
+        dict
+            Foreign purpose name : str
+                Mode (truck/freight_train) : trade demand domestic leg numpy 2d array
+        """
+        demand_sum = sum(dom_demand[mode] for mode in dom_demand
+                         if mode in ["truck", "freight_train"])
+        truck_share = numpy.zeros_like(demand_sum)
+        numpy.divide(dom_demand["truck"], demand_sum, out=truck_share,
+                     where=demand_sum > 0.0)
+        train_share = numpy.ones_like(truck_share) - truck_share
+        
+        # Extracts trade purposes with same name as self.name
+        # e.g. if self is kemlaa, extracts kemlaa_export and kemlaa_import
+        purpose_trade_demand = {
+            k: v for k, v in trade_demand.items()
+            if k.startswith(f"{self.name}_")
+        }
+        
+        dom_leg_demand = {}
+        for purpose in purpose_trade_demand:
+            demand_full = pandas.DataFrame(
+                0, index=self.orig_zone_numbers, columns=self.orig_zone_numbers,
+                dtype=numpy.float32
+            )
+            if purpose.endswith("_export"):
+                demand_full.loc[:, fin_borders] = purpose_trade_demand[purpose]["leg_one"]["truck"]
+            else:
+                demand_full.loc[fin_borders, :] = purpose_trade_demand[purpose]["leg_three"]["truck"]
+            dom_leg_demand[purpose] = {"truck": demand_full.values * truck_share}
+            train_demand = demand_full.values * train_share
+            if numpy.sum(train_demand) > 0.0:
+                dom_leg_demand[purpose]["freight_train"] = train_demand
+        return dom_leg_demand
 
     def run_logistics_module(self, demand_truck: numpy.ndarray, impedance: numpy.ndarray, 
                              zone_index_map: dict, iterations: int) -> tuple:
@@ -881,8 +911,9 @@ class FreightPurpose(Purpose):
 
         Returns
         -------
-        __type__
-            _description_
+        dict
+            Leg name (one/two/three) : Mode
+                Name (truck/container_ship...) : numpy 2d array
         """
         impedance_legs = self.form_impedance_legs(
             impedance, ship_imps, fin_border_ids, cluster_border_ids)
@@ -893,9 +924,11 @@ class FreightPurpose(Purpose):
         if mapping_name == "municipality_center":
             df = pandas.DataFrame(demand, trade_mappings["finland_zone_number"])
             demand = df.groupby(self.generation_zone_data.mapping).sum().to_numpy()
+        demand = demand.T if not self.is_export else demand
 
-        port_indices = numpy.arange(len(fin_border_ids))
-
-        route_model = TradeRouteModule(impedance_legs, self.route_params, port_indices)
+        # Finland border control point key - zone index
+        border_indices = {key: idx for idx, key in enumerate(fin_border_ids)}
+        route_model = TradeRouteModule(impedance_legs, self.route_params, 
+                                       border_indices, self.is_export)
         trade_demand = run_trade_model(route_model, demand)
         return trade_demand

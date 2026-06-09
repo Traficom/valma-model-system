@@ -2,6 +2,7 @@ import numpy
 from typing import Dict, Iterable
 import utils.log as log
 from parameters.marine_ship import port_draught_limit, ship_draught_speed
+from parameters.cost import truck_overhead_cost
 
 
 def calc_cost(mode: str, unit_costs: Dict[str, Dict],
@@ -62,8 +63,11 @@ def calc_road_cost(unit_costs: Dict[str, Dict],
     """
     mode_cost = {}
     for mode, params in unit_costs["truck"].items():
-        mode_cost[mode] = ((sum(impedance[k] * params[k] for k in impedance) 
-                           + params["terminal_cost"])
+        mode_cost[mode] = (((1+params["empty_share"])
+                            * truck_overhead_cost
+                            * impedance["cost"]
+                            / params["avg_load"]
+                            + params["terminal_cost"])
                            * params[f"{model_category}_distribution"])
     return sum(mode_cost.values())
 
@@ -172,9 +176,7 @@ def get_aux_cost(unit_costs: Dict[str, Dict],
         impedance type cost : numpy 2d matrix
     """
     impedance_aux = {
-        "dist": impedance["aux_dist"],
-        "time": impedance["aux_time"],
-        "toll_cost": impedance["toll_cost"]
+        "cost": impedance["aux_cost"],
     }
     aux_cost = numpy.where(
         (impedance["aux_dist"] > (impedance["dist"]*2))

@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Dict
 
 import parameters.assignment as param
-from parameters.cost import tour_duration
+from parameters.cost import avg_tour_duration, value_of_time
 from assignment.datatypes.assignment_mode import AssignmentMode
 from assignment.datatypes.journey_level import JourneyLevel
 if TYPE_CHECKING:
@@ -30,7 +30,7 @@ class TransitMode(AssignmentMode):
             Whether extra LOS-component matrices will be saved in Emme format
         """
         AssignmentMode.__init__(self, name, assignment_period, save_matrices)
-        self.vot_inv = param.vot_inv[param.vot_classes[self.name]]
+        self.vot_inv = 60 / value_of_time[self.name]
         self._create_matrices()
 
         # Create extra attributes
@@ -122,7 +122,7 @@ class TransitMode(AssignmentMode):
         }
         is_park_and_ride = self._add_park_and_ride()
         self.transit_spec["journey_levels"] = [JourneyLevel(
-                level, self.name, is_park_and_ride).spec
+                level, self.name, is_park_and_ride)
             for level in range(7)]
         result_specs = self._add_matrix_specs(modes)
         for matrix_subset, spec in zip(
@@ -236,8 +236,6 @@ class MixedMode(TransitMode):
         TransitMode._create_matrices(self)
         self.car_time = self._create_matrix("car_time")
         self.car_dist = self._create_matrix("car_dist")
-        self.loc_time = self._create_matrix("loc_time")
-        self.aux_time = self._create_matrix("aux_time")
         self.park_cost = self._create_matrix("park_cost")
 
     def _add_park_and_ride(self):
@@ -268,14 +266,7 @@ class MixedMode(TransitMode):
         return True
 
     def _add_matrix_specs(self, modes):
-        local_transit_modes = [mode for mode in param.local_transit_modes
-            if mode not in param.long_dist_transit_modes[self.name]]
         specs = [
-            {
-                "modes": local_transit_modes + param.aux_modes,
-                "perceived_aux_transit_times": self.aux_time.id,
-                "perceived_in_vehicle_times": self.loc_time.id,
-            },
             {
                 "modes": [param.park_and_ride_mode],
                 "distance": self.car_dist.id,
@@ -296,7 +287,7 @@ class MixedMode(TransitMode):
 
     def _set_link_parking_costs(self):
         network = self.emme_scenario.get_network()
-        avg_days = tour_duration[self.name]["avg"]
+        avg_days = avg_tour_duration[self.name]
         for node in network.nodes():
             parking_cost = node[param.park_cost_attr_n]
             if parking_cost > 0:
@@ -317,7 +308,8 @@ class MixedMode(TransitMode):
         car_cost = self.dist_unit_cost * self.car_dist.data
         mtxs = TransitMode.get_matrices(self)
         mtxs["cost"] += car_cost
-        mtxs["transfer_time"] = self.loc_time.data + self.aux_time.data
+        car_time_correction = 1.5 if "airpl" in self.name else 6.5
+        mtxs["time"] -= car_time_correction * self.car_time.data
         return mtxs
 
     def _save_link_results(self, network):

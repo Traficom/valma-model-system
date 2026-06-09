@@ -1,12 +1,16 @@
 {
-    "car_cost": {
-        "car_work": 0.12,
-        "car_leisure": 0.12,
+    "vehicle_km_cost": {
+        "car": 0.12,
         "car_electric": 0.04,
         "van": 0.20,
         "truck": 0.23,
         "semi_trailer": 0.35,
         "trailer_truck": 0.44
+    },
+    "vehicle_hour_cost": {
+        "truck": 31.96,
+        "semi_trailer": 35.11,
+        "trailer_truck": 36.0
     },
     "transit_cost": {
         "HSL": {
@@ -37,7 +41,7 @@
     },
     "cost_changes": {
         "cost": {
-            "car_work": 1.0,
+            "car_drv": 1.0,
             "car_pax": 1.0
         }
     },
@@ -45,9 +49,6 @@
         "kemiat": {
             "truck": {
                 "truck": {
-                    "time": 0.35,
-                    "dist": 0.26,
-                    "toll_cost": 1.0,
                     "terminal_cost": 14.0,
                     "domestic_distribution": 0.2,
                     "foreign_distribution": 0.1,
@@ -55,9 +56,6 @@
                     "empty_share": 0.5
                 },
                 "semi_trailer": {
-                    "time": 0.11,
-                    "dist": 0.10,
-                    "toll_cost": 1.0,
                     "terminal_cost": 8.0,
                     "domestic_distribution": 0.3,
                     "foreign_distribution": 0.4,
@@ -65,9 +63,6 @@
                     "empty_share": 0.5
                 },
                 "trailer_truck": {
-                    "time": 0.06,
-                    "dist": 0.05,
-                    "toll_cost": 1.0,
                     "terminal_cost": 5.0,
                     "domestic_distribution": 0.5,
                     "foreign_distribution": 0.5,

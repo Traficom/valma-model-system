@@ -36,34 +36,31 @@ class GenerationModel:
                 Generation factor
         """
         self.resultdata = resultdata
-        self.zone_data = purpose.attraction_zone_data
+        self.zone_data = purpose.generation_zone_data
         self.purpose = purpose
         self.param = param
 
-    def init_tours(self):
-        """Initialize `tours` vector to 0."""
-        self.tours = pandas.Series(
-            0.0, self.purpose.orig_zone_numbers, dtype=numpy.float32)
-
     def add_tours(self):
-        """Generate and add tours to zone vector."""
-        shares = {
-            "has_car": self.zone_data["sh_car"],
-            "no_car": 1 - self.zone_data["sh_car"]
-        }
-        for car_availibility, b in self.param.items():
-            tours = sum(b[i]*self.zone_data[i][self.purpose.bounds] for i in b)
-            self.tours += shares[car_availibility] * tours
+        pass
 
     def get_tours(self):
-        """Get vector of tour numbers per zone.
-        
+        """Generate vector of tour numbers per zone.
+
         Returns
         -------
         numpy.ndarray
             Vector of tour numbers per zone
         """
-        return self.tours.values
+        all_tours = numpy.zeros(
+            len(self.purpose.orig_zone_numbers), dtype=numpy.float32)
+        shares = {
+            "has_car": numpy.asarray(self.zone_data["sh_car"]),
+            "no_car": 1 - numpy.asarray(self.zone_data["sh_car"])
+        }
+        for car_availibility, b in self.param.items():
+            tours = sum(b[i]*numpy.asarray(self.zone_data[i]) for i in b)
+            all_tours += shares[car_availibility] * tours
+        return all_tours
 
 class LogitTourGeneration(GenerationModel):
     """Tours are created in `model.logit.GenerationLogit."""
@@ -92,25 +89,32 @@ class LogitTourGeneration(GenerationModel):
         self.zone_data = zone_data
         self.gen_model = GenerationLogit(parameters, zone_data, bounds, resultdata)
 
-    def add_tours(self):
+    def get_tours(self):
+        """Generate vector of tour numbers per zone.
+
+        Returns
+        -------
+        numpy.ndarray
+            Vector of tour numbers per zone
+        """
         prob = self.gen_model.calc_prob()
+        all_tours = numpy.zeros(
+            len(self.purpose.orig_zone_numbers), dtype=numpy.float32)
         for nr in range(2):
             # Each combination is a tuple of tours performed during a day
-            nr_tours: pandas.Series = (nr * prob[str(nr)] * 
-                                       self.zone_data["population"])
-            self.tours += nr_tours
+            nr_tours = (nr * prob[str(nr)]
+                        * numpy.asarray(self.zone_data["population"]))
+            all_tours += nr_tours
+        return all_tours
 
 class NonHomeGeneration(GenerationModel):
     """For calculating numbers of non-home tours starting in each zone."""
 
     def add_tours(self):
-        pass
-    
-    def get_tours(self):
         """Generate vector of tour numbers from attracted source tours.
 
         Assumes that home-based tours have been assigned destinations.
-        
+
         Returns
         -------
         numpy.ndarray
@@ -121,12 +125,15 @@ class NonHomeGeneration(GenerationModel):
             b = self.param[source.name]
             for mode in source.attracted_tours:
                 mode_tours[mode] += b * source.attracted_tours[mode]
-        tours = sum(mode_tours.values())
+        self.tours = sum(mode_tours.values())
         for mode in mode_tours:
             key = f"{self.purpose.name}_parent_{mode}_share"
             self.zone_data.share[key] = pandas.Series(
-                divide(mode_tours[mode], tours), self.purpose.orig_zone_numbers)
-        return tours
+                divide(mode_tours[mode], self.tours),
+                self.purpose.orig_zone_numbers)
+
+    def get_tours(self):
+        return self.tours
 
 
 class SecDestGeneration(GenerationModel):

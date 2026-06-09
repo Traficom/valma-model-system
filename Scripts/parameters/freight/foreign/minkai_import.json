@@ -1,0 +1,84 @@
+{
+    "name": "minkai_import",
+    "orig": "null",
+    "dest": "null",
+    "generation_area": "foreign",
+    "attraction_area": "domestic",
+    "struct": "import",
+    "impedance_share": {},
+    "distance_boundaries": {
+        "truck": [
+            0,
+            9999
+        ],
+        "freight_train": [
+            0,
+            9999
+        ],
+        "ship": [
+            0,
+            9999
+        ]
+    },
+    "destination_choice": {},
+    "mode_choice": {
+        "truck": {},
+        "freight_train": {}
+    },
+    "demand_share": {},
+    "route_choice": {
+        "constant": {
+            "truck": {
+                "west": {
+                    "border_points": ["FIKIL", "FITOR"],
+                    "dummy": 5.437
+                },
+                "east": {
+                    "border_points": ["FIVAI", "FIVAL", "FIVAR"],
+                    "dummy": 5.437
+                }
+            },
+            "container_ship": {
+                "first_class": {
+                    "border_points": ["FIRAU", "FIHMN", "FIHEL"],
+                    "dummy": 0
+                },
+                "second_class": {
+                    "border_points": ["FIOUL", "FIKEM"],
+                    "dummy": 0
+                }
+            },
+            "general_cargo": {
+                "raahe" : {
+                    "border_points": ["FIRAA"],
+                    "dummy": 4.558
+                },
+                "first_class": {
+                    "border_points": ["FIKOK", "FIKEM", "FIRAU", "FIHMN"],
+                    "dummy": 2.731
+                },
+                "second_class": {
+                    "border_points": ["FIUKI", "FITKU", "FIPOR", "FIKAS", "FIINK", "FIHEL"],
+                    "dummy": 1.629
+                }
+            },
+            "roro_vessel": {
+                "first_class": {
+                    "border_points": ["FIHKO", "FIHEL"],
+                    "dummy": 2.465
+                },
+                "second_class": {
+                    "border_points": ["FIVAA", "FIUKI", "FITKU", "FIRAU", "FIHMN"],
+                    "dummy": -1.456
+                }
+            }
+        },
+        "impedance": {
+            "cost": {
+                "leg_one": -0.002589,
+                "leg_two": -0.002589,
+                "leg_three": -0.03479
+            }
+        }
+    }
+}

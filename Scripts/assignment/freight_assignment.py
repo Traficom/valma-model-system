@@ -16,8 +16,9 @@ class FreightAssignmentPeriod(AssignmentPeriod):
         for criteria in self.stopping_criteria.values():
                 criteria["max_iterations"] = 0
 
-    def prepare(self, dist_unit_cost: Dict[str, float], save_matrices: bool):
-        self._prepare_cars(dist_unit_cost, save_matrices)
+    def prepare(self, dist_unit_cost: Dict[str, float],
+                time_unit_cost: Dict[str, float], save_matrices: bool):
+        self._prepare_cars(dist_unit_cost, time_unit_cost, save_matrices)
         network = self.emme_scenario.get_network()
         for line in network.transit_lines():
             mode = line.mode.id
@@ -28,8 +29,11 @@ class FreightAssignmentPeriod(AssignmentPeriod):
                     line[cost_attrs[mode]] = cost
                     break
         self.emme_scenario.publish_network(network)
+        include_toll_cost = self.emme_scenario.network_field(
+            "LINK", self.netfield("hinta")) is not None
         self.assignment_modes.update({ass_class: FreightMode(
-                ass_class, self, save_matrices)
+                ass_class, self, dist_unit_cost["truck"],
+                time_unit_cost["truck"], include_toll_cost, save_matrices)
             for ass_class in param.freight_modes})
 
     def assign(self):
@@ -40,8 +44,8 @@ class FreightAssignmentPeriod(AssignmentPeriod):
         self._assign_freight()
         mtxs = {tc: self.assignment_modes[tc].get_matrices()
                 for tc in param.truck_classes + tuple(param.freight_modes)}
-        impedance_types = ("time", "dist", "aux_time", "aux_dist",
-                           "toll_cost", "canal_cost")
+        impedance_types = ("time", "dist", "cost", "aux_cost", "aux_dist",
+                           "canal_cost")
         impedance = {mode: {mtx_type: mtxs[mode][mtx_type]
                             for mtx_type in impedance_types if mtx_type in mtxs[mode]}
                     for mode in mtxs}

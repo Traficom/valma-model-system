@@ -20,6 +20,7 @@ class OffPeakPeriod(AssignmentPeriod):
     """
 
     def prepare(self, dist_unit_cost: Dict[str, float],
+                time_unit_cost: Dict[str, float],
                 day_scenario: int, save_matrices: bool):
         """Prepare network for assignment.
 
@@ -30,15 +31,20 @@ class OffPeakPeriod(AssignmentPeriod):
         ----------
         dist_unit_cost : dict
             key : str
-                Assignment class (car_work/truck/...)
+                Assignment class (car/truck/...)
             value : float
                 Length multiplier to calculate link cost
+        time_unit_cost : dict
+            key : str
+                Assignment class (car_work/truck/...)
+            value : float
+                Value of time in euros per hour for truck modes
         day_scenario : int
             EMME scenario linked to the whole day
         save_matrices : bool
             Whether matrices will be saved in Emme format for all time periods.
         """
-        self._prepare_cars(dist_unit_cost, save_matrices)
+        self._prepare_cars(dist_unit_cost, time_unit_cost, save_matrices)
         self._prepare_walk_and_bike(save_matrices=True)
         self._end_assignment_classes.add("walk")
         self._prepare_other(day_scenario, save_matrices)
@@ -92,7 +98,7 @@ class OffPeakPeriod(AssignmentPeriod):
         -------
         dict
             Type (time/cost/dist) : dict
-                Assignment class (car_work/transit/...) : numpy 2-d matrix
+                Assignment class (car/transit/...) : numpy 2-d matrix
         """
         if not self._separate_emme_scenarios:
             self._calc_background_traffic(include_trucks=True)
@@ -122,6 +128,7 @@ class TransitAssignmentPeriod(OffPeakPeriod):
 
 
     def prepare(self, dist_unit_cost: Dict[str, float],
+                time_unit_cost: Dict[str, float],
                 day_scenario: int, save_matrices: bool):
         """Prepare network for assignment.
 
@@ -132,18 +139,23 @@ class TransitAssignmentPeriod(OffPeakPeriod):
         ----------
         dist_unit_cost : dict
             key : str
-                Assignment class (car_work/truck/...)
+                Assignment class (car/truck/...)
             value : float
                 Length multiplier to calculate link cost
+        time_unit_cost : dict
+            key : str
+                Assignment class (car_work/truck/...)
+            value : float
+                Value of time in euros per hour for truck modes
         day_scenario : int
             EMME scenario linked to the whole day
         save_matrices : bool
             Whether matrices will be saved in Emme format for all time periods.
         """
         self._prepare_cars(
-            dist_unit_cost, save_matrices=False, car_classes=["car_leisure"],
-            truck_classes=[])
-        self.car_mode = self.assignment_modes.pop("car_leisure")
+            dist_unit_cost, time_unit_cost, save_matrices=False,
+            car_classes=["car"], truck_classes=[])
+        self.car_mode = self.assignment_modes.pop("car")
         self._prepare_other(day_scenario, save_matrices)
 
     def init_assign(self):
@@ -164,7 +176,7 @@ class TransitAssignmentPeriod(OffPeakPeriod):
         -------
         dict
             Type (time/cost/dist) : dict
-                Assignment class (transit_work/transit_leisure) : numpy 2-d matrix
+                Assignment class (transit) : numpy 2-d matrix
         """
         mtxs = self._get_impedances(param.local_transit_classes)
         del mtxs["dist"]
@@ -187,7 +199,7 @@ class TransitAssignmentPeriod(OffPeakPeriod):
         -------
         dict
             Type (time/cost/dist) : dict
-                Assignment class (transit_work/...) : numpy 2-d matrix
+                Assignment class (transit/...) : numpy 2-d matrix
         """
         if not assign_transit:
             return {}

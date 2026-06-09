@@ -1,0 +1,77 @@
+{
+    "name": "tekst_import",
+    "orig": "null",
+    "dest": "null",
+    "generation_area": "foreign",
+    "attraction_area": "domestic",
+    "struct": "import",
+    "impedance_share": {},
+    "distance_boundaries": {
+        "truck": [
+            0,
+            9999
+        ],
+        "freight_train": [
+            0,
+            9999
+        ],
+        "ship": [
+            0,
+            9999
+        ]
+    },
+    "destination_choice": {},
+    "mode_choice": {
+        "truck": {},
+        "freight_train": {}
+    },
+    "demand_share": {},
+    "route_choice": {
+        "constant": {
+            "truck": {
+                "west": {
+                    "border_points": ["FIKIL", "FITOR"],
+                    "dummy": 7.1
+                }
+            },
+            "container_ship": {
+                "first_class": {
+                    "border_points": ["FIRAU", "FIHMN", "FIHEL"],
+                    "dummy": 7.234
+                },
+                "second_class": {
+                    "border_points": ["FIOUL", "FIKEM"],
+                    "dummy": 1.297
+                }
+            },
+            "general_cargo": {
+                "first_class": {
+                    "border_points": ["FIRAA", "FIKOK", "FIKEM", "FIRAU", "FIHMN"],
+                    "dummy": -0.4476
+                },
+                "second_class": {
+                    "border_points": ["FIUKI", "FITKU", "FIPOR", "FIKAS", "FIINK", "FIHEL"],
+                    "dummy": 0.7174
+                }
+            },
+            "roro_vessel": {
+                "first_class": {
+                    "border_points": ["FIHKO", "FIHEL"],
+                    "dummy": 6.767
+                },
+                "second_class": {
+                    "border_points": ["FIVAA", "FIUKI", "FITKU", "FIRAU", "FIHMN"],
+                    "dummy": 5.401
+                }
+            }
+        },
+        "impedance": {
+            "cost": {
+                "leg_one": -0.001501,
+                "leg_two": -0.001501,
+                "leg_three": -3.849e-08
+            },
+            "frequency": 0.00028
+        }
+    }
+}
