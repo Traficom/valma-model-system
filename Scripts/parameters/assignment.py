@@ -153,58 +153,6 @@ freight_terminal_cost = {
     'J': 0,
     'W': 0
 }
-in_vehicle_weight = {
-    '1': 1, # Bus
-    '2': 0.8, # Tram
-    '3': 0.8, # Long-distance train
-    '4': 0.8, # Metro
-    '5': 1, # Ferry
-    '6': 1, # Airplane
-    '7': 0.8, # Light rail
-    '8': 1, # Long distance bus
-    '9': 1, # Local train
-    '10': 1, # Trunk bus
-    '11': 1, # Regional train
-    '12': 1, # Railbus
-    '13': 1, # Long-distance day Ferry
-    '14': 1, # Long-distance night Ferry
-}
-# Boarding penalties for different transit modes
-boarding_penalty = {
-    'b': 10, # Bus
-    'g': 8, # Trunk bus
-    'e': 10, # Coach bus
-    't': 5, # Tram
-    'p': 5, # Light rail
-    'm': 5, # Metro
-    'w': 5, # Ferry
-    'r': 5, # Commuter train
-    'j': 5, # Long-distance train
-    'l': 5, # Airplane
-}
-# Boarding penalties for long-distance trips
-long_boarding_penalty = {
-    'b': 10, # Bus
-    'g': 8, # Trunk bus
-    'e': 10, # Coach bus
-    't': 5, # Tram
-    'p': 5, # Light rail
-    'm': 5, # Metro
-    'w': 5, # Ferry
-    'r': 5, # Commuter train
-    'j': 5, # Long-distance train
-    'l': 5, # Airplane
-}
-transfer_penalty = {
-    "transit": 5,
-    "airplane": 5,
-    "pt_car_acc": 5,
-    "pt_taxi_acc": 5,
-    "airpl_car_acc": 5,
-    "pt_car_egr": 5,
-    "pt_taxi_egr": 5,
-    "airpl_car_egr": 5,
-}
 # Headway standard deviation function parameters for different transit modes
 headway_sd_func = {
     'b': {
@@ -243,6 +191,58 @@ stopping_criteria = {
         "best_relative_gap": 0.01,
         "normalized_gap": 0.005,
     },
+}
+in_vehicle_weight = {
+    '1': 1, # Bus
+    '2': 0.8, # Tram
+    '3': 0.8, # Long-distance train
+    '4': 0.8, # Metro
+    '5': 1, # Ferry
+    '6': 1, # Airplane
+    '7': 0.8, # Light rail
+    '8': 1, # Long distance bus
+    '9': 1, # Local train
+    '10': 1, # Trunk bus
+    '11': 1, # Regional train
+    '12': 1, # Railbus
+    '13': 1, # Long-distance day Ferry
+    '14': 1, # Long-distance night Ferry
+}
+# Boarding penalties for different transit modes
+boarding_penalty = {
+    'b': 10, # Bus
+    'e': 10, # Coach bus
+    'g': 8, # Trunk bus
+    't': 5, # Tram
+    'p': 5, # Light rail
+    'm': 5, # Metro
+    'w': 5, # Ferry
+    'r': 5, # Commuter train
+    'j': 5, # Long-distance train
+    'l': 5, # Airplane
+}
+# Boarding penalties for long-distance trips
+long_boarding_penalty = {
+    'b': 10, # Bus
+    'e': 10, # Coach bus
+    'g': 8, # Trunk bus
+    't': 5, # Tram
+    'p': 5, # Light rail
+    'm': 5, # Metro
+    'w': 5, # Ferry
+    'r': 5, # Commuter train
+    'j': 5, # Long-distance train
+    'l': 5, # Airplane
+}
+transfer_penalty = {
+    "transit": 5,
+    "airplane": 5,
+    "pt_car_acc": 5,
+    "pt_taxi_acc": 5,
+    "airpl_car_acc": 5,
+    "pt_car_egr": 5,
+    "pt_taxi_egr": 5,
+    "airpl_car_egr": 5,
 }
 extra_waiting_time = {
     "penalty": "@wait_time_dev",
