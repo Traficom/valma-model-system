@@ -21,3 +21,5 @@ avg_tour_duration = {
     "pt_taxi_egr": 2.18,
     "airpl_car_egr": 2.39,
 }
+
+truck_overhead_cost = 1.15
