@@ -193,6 +193,16 @@ long_boarding_penalty = {
     'r': 2, # Commuter train
     'j': 2, # Long-distance train
 }
+transfer_penalty = {
+    "transit": 5,
+    "airplane": 5,
+    "pt_car_acc": 5,
+    "pt_taxi_acc": 5,
+    "airpl_car_acc": 5,
+    "pt_car_egr": 5,
+    "pt_taxi_egr": 5,
+    "airpl_car_egr": 5,
+}
 # Headway standard deviation function parameters for different transit modes
 headway_sd_func = {
     'b': {
@@ -231,41 +241,6 @@ stopping_criteria = {
         "best_relative_gap": 0.01,
         "normalized_gap": 0.005,
     },
-}
-# Specification for the transit assignment
-in_vehicle_weight = {
-    'b': 1, # Bus
-    'g': 1, # Trunk bus
-    'e': 1, # Coach bus
-    't': 0.8, # Tram
-    'p': 0.8, # Light rail
-    'm': 0.8, # Metro
-    'w': 1, # Ferry
-    'r': 0.8, # Commuter train
-    'j': 0.7, # Long-distance train
-    'l': 1, # Airplane
-}
-boarding_penalty = {
-    'b': 10, # Bus
-    'e': 10, # Coach bus
-    'g': 8, # Trunk bus
-    't': 5, # Tram
-    'p': 5, # Light rail
-    'm': 5, # Metro
-    'w': 5, # Ferry
-    'r': 5, # Commuter train
-    'j': 5, # Long-distance train
-    'l': 5, # Airplane
-}
-transfer_penalty = {
-    "transit": 5,
-    "airplane": 5,
-    "pt_car_acc": 5,
-    "pt_taxi_acc": 5,
-    "airpl_car_acc": 5,
-    "pt_car_egr": 5,
-    "pt_taxi_egr": 5,
-    "airpl_car_egr": 5,
 }
 extra_waiting_time = {
     "penalty": "@wait_time_dev",
