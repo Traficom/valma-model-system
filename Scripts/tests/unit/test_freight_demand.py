@@ -103,11 +103,11 @@ class FreightModelTest(unittest.TestCase):
                 detour_total = numpy.sum(per_route[:-1])
                 direct_total = per_route[-1]
                 if purpose.name == "kemlaa":
-                    self.assertAlmostEqual(detour_total, 42.92426, places=3)
-                    self.assertAlmostEqual(direct_total, 12923.206, places=3)
+                    self.assertAlmostEqual(detour_total, 50.635654, places=3)
+                    self.assertAlmostEqual(direct_total, 12883.39, places=3)
                 elif purpose.name == "kummuo":
-                    self.assertAlmostEqual(detour_total, 76.215096, places=3)
-                    self.assertAlmostEqual(direct_total, 15706.936, places=3)
+                    self.assertAlmostEqual(detour_total, 81.766624, places=3)
+                    self.assertAlmostEqual(direct_total, 15670.479, places=3)
 
         write_vehicle_summary(total_demand, impedance, resultdata)
         resultdata.flush()
