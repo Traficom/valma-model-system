@@ -772,9 +772,18 @@ class FreightPurpose(Purpose):
         dict
             Mode (truck/freight_train/...) : cost : numpy.ndarray
         """
-        return {mode: {"cost": calc_cost(mode, self.costdata, impedance[mode],
-                                         self.model_category)}
-                for mode in self.modes}
+        costs = {}
+        for mode in self.modes:
+            mode_costs = calc_cost(mode, self.costdata, impedance[mode], 
+                                   self.model_category)
+            main_cost, aux_cost = (mode_costs if isinstance(mode_costs, tuple) 
+                                   else mode_costs, None)
+            if "aux_cost" in self.model.mode_choice_param[mode]["impedance"]:
+                costs[mode]["cost"] = main_cost
+                costs[mode]["aux_cost"] = aux_cost
+            else:
+                costs[mode]["cost"] = sum(main_cost)
+        return costs
 
     def calc_vehicles(self, matrix: numpy.ndarray, ass_class: str):
         """Calculate vehicle matrix from ton matrix using ton-to-vehicles 

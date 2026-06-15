@@ -51,7 +51,7 @@
             "attraction": {},
             "impedance": {
                 "cost": -0.3088,
-				"cost_aux": -0.2463
+				"aux_cost": -0.2463
             },
             "log": {},
             "individual_dummy": {},
@@ -62,7 +62,7 @@
             "attraction": {},
             "impedance": {
                 "cost": -0.7799,
-				"cost_aux": -0.6487
+				"aux_cost": -0.6487
             },
             "log": {},
             "individual_dummy": {},

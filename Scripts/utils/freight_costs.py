@@ -99,7 +99,7 @@ def calc_rail_cost(unit_costs: Dict[str, Dict],
                            + params["terminal_cost"])
     rail_cost = mode_cost["diesel_train"]
     rail_aux_cost = get_aux_cost(unit_costs, impedance, model_category)
-    return rail_cost + rail_aux_cost
+    return rail_cost, rail_aux_cost
 
 def get_domestic_ship_cost(unit_costs: Dict[str, Dict],
                            impedance: Dict[str, numpy.ndarray],
@@ -125,7 +125,7 @@ def get_domestic_ship_cost(unit_costs: Dict[str, Dict],
     ship_params = unit_costs["ship"]["domestic_vessel"]
     ship_cost = calc_ship_cost(ship_params, impedance, model_category)
     ship_aux_cost = get_aux_cost(unit_costs, impedance, model_category)
-    return ship_cost + ship_aux_cost
+    return ship_cost, ship_aux_cost
 
 def calc_ship_cost(unit_costs: Dict[str, float], 
                    impedance: Dict[str, numpy.ndarray],
