@@ -687,7 +687,7 @@ class FreightPurpose(Purpose):
             Mode (truck/train/...) : calculated demand (numpy 2d matrix)
         """
         costs = self.get_costs(impedance)
-        self.dist = costs["truck"]["cost"]
+        self.dist = costs[self.modes[0]]["cost"]
         nr_zones = self.attraction_zone_data.nr_zones
         probs = self.model.calc_prob(costs)
         generation = numpy.tile(self.generation_zone_data[f"gen_{self.name}"], (nr_zones, 1))

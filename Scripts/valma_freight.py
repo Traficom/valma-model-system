@@ -84,7 +84,6 @@ def main(args):
     for purpose in purposes.values():
         log.info(f"Calculating demand for purpose: {purpose.name}")
         demand = purpose.calc_traffic(impedance)
-        demand_trade = purpose.calc_trade_mode_share(demand, trade_demand, fin_border_ids)
         if purpose.route_params and args.logistics_iterations > 0:
             demand["truck"], _ = purpose.run_logistics_module(demand["truck"], impedance, 
                                                               ass_model.mapping, 
@@ -95,14 +94,16 @@ def main(args):
             store_demand.store(mode, demand[mode], omx_filename, purpose.name)
         if purpose.name in args.specify_commodity_names:
             ass_model.freight_network.save_network_volumes(purpose.name)
-        ass_model.freight_network.output_traversal_matrix(set(demand), resultdata.path)
-        aux_demand = transform_traversal_data(resultdata.path, zonedata.zone_numbers)
-        for mode in param.truck_classes:
-            ton_demand = demand["truck"] + sum(aux_demand.values())
-            total_demand[mode] += purpose.calc_vehicles(ton_demand, mode)
+        if "truck" in demand:
+            ass_model.freight_network.output_traversal_matrix(set(demand), resultdata.path)
+            aux_demand = transform_traversal_data(resultdata.path, zonedata.zone_numbers)
+            for mode in param.truck_classes:
+                ton_demand = demand["truck"] + sum(aux_demand.values())
+                total_demand[mode] += purpose.calc_vehicles(ton_demand, mode)
+            demand_trade = purpose.calc_trade_mode_share(demand, trade_demand, fin_border_ids)
+            write_domestic_leg_summary(demand_trade, impedance, resultdata)
         write_purpose_summary(purpose, demand, aux_demand, impedance, resultdata)
         write_zone_summary(purpose.name, zonedata.zone_numbers, demand, resultdata)
-        write_domestic_leg_summary(demand_trade, impedance, resultdata)
     write_vehicle_summary(total_demand, impedance, resultdata)
     resultdata.flush()
     
