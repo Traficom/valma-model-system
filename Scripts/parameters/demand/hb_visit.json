@@ -177,9 +177,7 @@
             }
         },
         "bike": {
-            "attraction": {
-                "dist*within_zone": -0.3191
-            },
+            "attraction": {},
             "impedance": {
                 "dist": -0.3191
             },
@@ -196,9 +194,7 @@
             }
         },
         "walk": {
-            "attraction": {
-                "dist*within_zone": -0.7632
-            },
+            "attraction": {},
             "impedance": {
                 "dist": -0.7632
             },

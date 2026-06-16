@@ -395,6 +395,8 @@ def read_zonedata(path: Path,
     )[data_type]
     aggs = {}
     shares: Dict[str, Dict[str, List[str]]] = {}
+    optional_agg = [key for key in list(data.columns.values) if "aggregate_results_" in key]
+    zone_variables["first"].extend(optional_agg)
     for func, cols in zone_variables.items():
         for col in cols:
             try:
