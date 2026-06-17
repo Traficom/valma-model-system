@@ -772,17 +772,15 @@ class FreightPurpose(Purpose):
         dict
             Mode (truck/freight_train/...) : cost : numpy.ndarray
         """
-        costs = {}
-        for mode in self.modes:
-            mode_costs = calc_cost(mode, self.costdata, impedance[mode], 
-                                   self.model_category)
-            if self.model and "aux_cost" in self.model.mode_choice_param[mode]["impedance"]:
-                costs[mode] = {"cost": mode_costs[0]}
-                costs[mode]["aux_cost"] = mode_costs[1]
-            else:
-                if isinstance(mode_costs, tuple):
-                    mode_costs = sum(mode_costs)
-                costs[mode] = {"cost": mode_costs}
+        costs = {mode: {"cost": calc_cost(mode, self.costdata, impedance[mode],
+                                          self.model_category)}
+                for mode in self.modes}
+        for mode in costs:
+            if isinstance(costs[mode]["cost"], dict):
+                if self.model and "aux_cost" in self.model.mode_choice_param[mode]["impedance"]:
+                    costs[mode] = costs[mode]["cost"]
+                else:
+                    costs[mode]["cost"] = sum(costs[mode]["cost"].values())
         return costs
 
     def calc_vehicles(self, matrix: numpy.ndarray, ass_class: str):
