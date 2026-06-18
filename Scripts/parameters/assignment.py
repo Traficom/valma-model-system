@@ -206,38 +206,38 @@ in_vehicle_weight = {
     'l': 1, # Airplane
 }
 boarding_penalty = {
-    'b': 10, # Bus
-    'e': 10, # Coach bus
-    'g': 8, # Trunk bus
-    't': 5, # Tram
-    'p': 5, # Light rail
-    'm': 5, # Metro
-    'w': 5, # Ferry
-    'r': 5, # Commuter train
-    'j': 5, # Long-distance train
-    'l': 5, # Airplane
+    'b': 5, # Bus
+    'e': 5, # Coach bus
+    'g': 3, # Trunk bus
+    't': 0, # Tram
+    'p': 0, # Light rail
+    'm': 0, # Metro
+    'w': 0, # Ferry
+    'r': 0, # Commuter train
+    'j': 0, # Long-distance train
+    'l': 0, # Airplane
 }
 long_dist_boarding_penalty = {
-    'b': 10, # Bus
-    'e': 30, # Coach bus
-    'g': 8, # Trunk bus
-    't': 5, # Tram
-    'p': 5, # Light rail
-    'm': 5, # Metro
-    'w': 5, # Ferry
-    'r': 5, # Commuter train
-    'j': 30, # Long-distance train
-    'l': 30, # Airplane
+    'b': 5, # Bus
+    'e': 25, # Coach bus
+    'g': 3, # Trunk bus
+    't': 0, # Tram
+    'p': 0, # Light rail
+    'm': 0, # Metro
+    'w': 0, # Ferry
+    'r': 0, # Commuter train
+    'j': 25, # Long-distance train
+    'l': 25, # Airplane
 }
 transfer_penalty = {
-    "transit": 5,
-    "airplane": 5,
-    "pt_car_acc": 5,
-    "pt_taxi_acc": 5,
-    "airpl_car_acc": 5,
-    "pt_car_egr": 5,
-    "pt_taxi_egr": 5,
-    "airpl_car_egr": 5,
+    "transit": 10,
+    "airplane": 10,
+    "pt_car_acc": 10,
+    "pt_taxi_acc": 10,
+    "airpl_car_acc": 10,
+    "pt_car_egr": 10,
+    "pt_taxi_egr": 10,
+    "airpl_car_egr": 10,
 }
 extra_waiting_time = {
     "penalty": "@wait_time_dev",
