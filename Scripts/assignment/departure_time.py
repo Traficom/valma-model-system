@@ -168,7 +168,7 @@ class DepartureTimeModel:
         if time_period in param.demand_share["freight"]["van"]:
             n = nr_zones
             mtx = self.demand[time_period]
-            car_demand = mtx["car"][0:n, 0:n] / volume_factors["car][time_period]
+            car_demand = mtx["car"][0:n, 0:n] / volume_factors["car"][time_period]
             share = param.demand_share["freight"]["van"][time_period]
             self._add_2d_demand(share, "van", time_period, car_demand, (0, 0))
 
