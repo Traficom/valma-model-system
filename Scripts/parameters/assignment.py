@@ -217,6 +217,7 @@ boarding_penalty = {
     'p': 5, # Light rail
     'm': 5, # Metro
     'w': 5, # Ferry
+    'd': 10, # Long-distance ferry
     'r': 5, # Commuter train
     'j': 5, # Long-distance train
     'l': 5, # Airplane
@@ -433,7 +434,7 @@ local_transit_modes = [
     'e',
 ]
 long_dist_transit_modes = {
-    "transit": ['e', 'j'],
+    "transit": ['e', 'j', 'd'],
     "airplane": ['l'],
     "pt_car_acc": ['j'],
     "pt_taxi_acc": ['e', 'j'],
