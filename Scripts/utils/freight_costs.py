@@ -25,16 +25,18 @@ def calc_cost(mode: str, unit_costs: Dict[str, Dict],
 
     Returns
     ----------
-    road_cost : numpy.ndarray
+    Dict[str, numpy.ndarray]
         impedance type cost : numpy 2d matrix
     """
     match mode:
         case "truck":
-            return calc_road_cost(unit_costs, impedance, model_category)
+            return {"cost": calc_road_cost(unit_costs, impedance, model_category)}
         case "freight_train":
-            return calc_rail_cost(unit_costs, impedance, model_category)
+            rail_cost, aux_cost = calc_rail_cost(unit_costs, impedance, model_category)
+            return {"cost": rail_cost, "aux_cost": aux_cost}
         case "ship":
-            return get_domestic_ship_cost(unit_costs, impedance, model_category)
+            ship_cost, aux_cost = get_domestic_ship_cost(unit_costs, impedance, model_category)
+            return {"cost": ship_cost, "aux_cost": aux_cost}
         case _:
             msg = f"Unknown mode {mode}"
             log.error(msg)
@@ -73,7 +75,7 @@ def calc_road_cost(unit_costs: Dict[str, Dict],
 
 def calc_rail_cost(unit_costs: Dict[str, Dict],
                    impedance: Dict[str, numpy.ndarray],
-                   model_category: str) -> Dict[str, numpy.ndarray]:
+                   model_category: str):
     """Calculate freight rail based costs.
 
     Parameters
@@ -89,8 +91,8 @@ def calc_rail_cost(unit_costs: Dict[str, Dict],
 
     Returns
     ----------
-    Dict[str, numpy.ndarray]
-        cost (transit/aux) : numpy 2d matrix
+    Tuple[numpy.ndarray, numpy.ndarray]
+        Transit and auxiliary cost 2d matrices
     """
     mode_cost = {}
     for mode, params in unit_costs["freight_train"].items():
@@ -99,11 +101,11 @@ def calc_rail_cost(unit_costs: Dict[str, Dict],
                            + params["terminal_cost"])
     rail_cost = mode_cost["diesel_train"]
     rail_aux_cost = get_aux_cost(unit_costs, impedance, model_category)
-    return {"cost": rail_cost, "aux_cost": rail_aux_cost}
+    return rail_cost, rail_aux_cost
 
 def get_domestic_ship_cost(unit_costs: Dict[str, Dict],
                            impedance: Dict[str, numpy.ndarray],
-                           model_category: str) -> Dict[str, numpy.ndarray]:
+                           model_category: str):
     """Fetch domestic freight ship based costs. 
 
     Parameters
@@ -119,13 +121,13 @@ def get_domestic_ship_cost(unit_costs: Dict[str, Dict],
 
     Returns
     ----------
-    Dict[str, numpy.ndarray]
-        cost (transit/aux) : numpy 2d matrix
+    Tuple[numpy.ndarray, numpy.ndarray]
+        Transit and auxiliary cost 2d matrices
     """
     ship_params = unit_costs["ship"]["domestic_vessel"]
     ship_cost = calc_ship_cost(ship_params, impedance, model_category)
     ship_aux_cost = get_aux_cost(unit_costs, impedance, model_category)
-    return {"cost": ship_cost, "aux_cost": ship_aux_cost}
+    return ship_cost, ship_aux_cost
 
 def calc_ship_cost(unit_costs: Dict[str, float], 
                    impedance: Dict[str, numpy.ndarray],
