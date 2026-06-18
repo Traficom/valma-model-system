@@ -192,20 +192,23 @@ stopping_criteria = {
         "normalized_gap": 0.005,
     },
 }
-# Specification for the transit assignment
 in_vehicle_weight = {
-    'b': 1, # Bus
-    'g': 1, # Trunk bus
-    'e': 1, # Coach bus
-    't': 0.8, # Tram
-    'p': 0.8, # Light rail
-    'm': 0.8, # Metro
-    'w': 1, # Ferry
-    'd': 1, # Long-distance ferry
-    'r': 0.8, # Commuter train
-    'j': 0.7, # Long-distance train
-    'l': 1, # Airplane
+    '1': 1, # Bus
+    '2': 0.8, # Tram
+    '3': 0.8, # Long-distance train
+    '4': 0.8, # Metro
+    '5': 1, # Ferry
+    '6': 1, # Airplane
+    '7': 0.8, # Light rail
+    '8': 1, # Long distance bus
+    '9': 1, # Local train
+    '10': 1, # Trunk bus
+    '11': 1, # Regional train
+    '12': 1, # Railbus
+    '13': 1, # Long-distance day Ferry
+    '14': 1, # Long-distance night Ferry
 }
+# Boarding penalties for different transit modes
 boarding_penalty = {
     'b': 10, # Bus
     'e': 10, # Coach bus
