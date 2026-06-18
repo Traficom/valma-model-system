@@ -687,7 +687,7 @@ class FreightPurpose(Purpose):
             Mode (truck/train/...) : calculated demand (numpy 2d matrix)
         """
         costs = self.get_costs(impedance)
-        self.dist = costs["truck"]["cost"]
+        self.dist = costs[self.modes[0]]["cost"]
         nr_zones = self.attraction_zone_data.nr_zones
         probs = self.model.calc_prob(costs)
         generation = numpy.tile(self.generation_zone_data[f"gen_{self.name}"], (nr_zones, 1))
@@ -772,9 +772,12 @@ class FreightPurpose(Purpose):
         dict
             Mode (truck/freight_train/...) : cost : numpy.ndarray
         """
-        return {mode: {"cost": calc_cost(mode, self.costdata, impedance[mode],
-                                         self.model_category)}
+        costs = {mode: calc_cost(mode, self.costdata, impedance[mode], self.model_category)
                 for mode in self.modes}
+        for mode, mode_costs in costs.items():
+            if not self.model or "aux_cost" not in self.model.mode_choice_param[mode]["impedance"]:
+                mode_costs["cost"] += mode_costs.pop("aux_cost", 0)
+        return costs
 
     def calc_vehicles(self, matrix: numpy.ndarray, ass_class: str):
         """Calculate vehicle matrix from ton matrix using ton-to-vehicles 

@@ -60,7 +60,7 @@ def main(args):
     trade_demand = {}
     marine_export = ass_model.freight_network.read_ship_impedances(True)
     marine_import = ass_model.freight_network.read_ship_impedances(False)
-    for purpose in purposes.values():
+    for purpose in foreign_purposes.values():
         log.info(f"Calculating trade route for purpose: {purpose.name}")
         marine_data = marine_export if purpose.is_export else marine_import
         demand = purpose.run_trade_route_module(impedance, *marine_data,
@@ -95,20 +95,21 @@ def main(args):
         if purpose.name in args.specify_commodity_names:
             ass_model.freight_network.save_network_volumes(purpose.name)
         
-        # Calc aux tons and transform tons to vehicles
-        ass_model.freight_network.output_traversal_matrix(set(demand), resultdata.path)
-        aux_demand = transform_traversal_data(resultdata.path, zonedata.zone_numbers)
-        domestic_tons = demand["truck"] + sum(aux_demand.values())
-        dom_leg_tons = purpose.calc_trade_mode_share(
-            demand, trade_demand, fin_border_ids)
-        for mode in param.truck_classes:
-            total_demand[mode] += purpose.calc_vehicles(domestic_tons, mode)
-            for foreign_purpose in dom_leg_tons:
-                total_demand[mode] += foreign_purposes[foreign_purpose].calc_vehicles(
-                    dom_leg_tons[foreign_purpose]["truck"], mode)
+        if "truck" in demand:
+            # Calc aux tons and transform tons to vehicles
+            ass_model.freight_network.output_traversal_matrix(set(demand), resultdata.path)
+            aux_demand = transform_traversal_data(resultdata.path, zonedata.zone_numbers)
+            domestic_tons = demand["truck"] + sum(aux_demand.values())
+            dom_leg_tons = purpose.calc_trade_mode_share(
+                demand, trade_demand, fin_border_ids)
+            for mode in param.truck_classes:
+                total_demand[mode] += purpose.calc_vehicles(domestic_tons, mode)
+                for foreign_purpose in dom_leg_tons:
+                    total_demand[mode] += foreign_purposes[foreign_purpose].calc_vehicles(
+                        dom_leg_tons[foreign_purpose]["truck"], mode)
+            write_domestic_leg_summary(dom_leg_tons, impedance, resultdata)
         write_purpose_summary(purpose, demand, aux_demand, impedance, resultdata)
         write_zone_summary(purpose.name, zonedata.zone_numbers, demand, resultdata)
-        write_domestic_leg_summary(dom_leg_tons, impedance, resultdata)
     write_vehicle_summary(total_demand, impedance, resultdata)
     resultdata.flush()
     
