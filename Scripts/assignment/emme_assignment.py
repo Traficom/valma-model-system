@@ -351,12 +351,11 @@ class EmmeAssignmentModel(AssignmentModel):
                     linklengths[param.railtypes[linktype]] += link.length
                 else:
                     linklengths[param.roadtypes[vdf]] += link.length / 2
-        resultdata.print_line("\nVehicle kilometres", "result_summary")
-        resultdata.print_concat(vdf_kms, "vehicle_kms_vdfs.txt")
+        resultdata.print_concat(vdf_kms, "vehicle_kilometers_by_road_class.txt")
         for ass_class in ass_classes:
             resultdata.print_line(
                 "{}:\t{:1.0f}".format(ass_class, kms[ass_class]),
-                "result_summary")
+                "vehicle_kilometers_by_mode")
         resultdata.print_data(linklengths, "link_lengths.txt")
 
         # Export link, node and segnment extra attributes to GeoPackage file
