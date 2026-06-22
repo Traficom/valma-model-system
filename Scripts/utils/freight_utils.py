@@ -2,9 +2,10 @@ import json
 import numpy
 from pathlib import Path
 from typing import Dict
-from pandas import DataFrame, concat
+from pandas import DataFrame
 
 import utils.log as log
+from parameters.assignment import truck_classes
 from datatypes.purpose import FreightPurpose
 from datahandling.zonedata import FreightZoneData
 from datahandling.resultdata import ResultsData
@@ -53,6 +54,35 @@ def create_purposes(parameters_path: Path, zonedata: FreightZoneData,
                                                             zone_data, resultdata,
                                                             purpose_cost)
     return purposes
+
+def update_diagonal_cost(impedance: dict) -> dict:
+    """Updates diagonal (own zone) impedance values
+
+    Parameters
+    ----------
+    impedance : dict
+        Mode (truck/train/...) : dict
+            Type (cost/time/dist...) : numpy 2d matrix
+    
+    Returns
+    -------
+    dict
+        Mode (truck/train/...) : dict
+            Type (cost/time/dist...) : numpy 2d matrix
+    """
+    for mode in impedance:
+        if mode in truck_classes:
+            diag_values = {
+                imp_type: numpy.min(
+                    numpy.where(impedance[mode][imp_type] > 0, 
+                    impedance[mode][imp_type], numpy.inf), axis=1)
+                for imp_type in ("cost", "dist")
+            }
+        else:
+            diag_values = {mtx: numpy.inf for mtx in ("time", "aux_cost")}
+        for imp_type in diag_values:
+            numpy.fill_diagonal(impedance[mode][imp_type], diag_values[imp_type])
+    return impedance
 
 def write_leg2_summary(purpose: FreightPurpose, demand: dict, 
                        _, fin_border_ids: dict, cluster_border_ids: dict,
