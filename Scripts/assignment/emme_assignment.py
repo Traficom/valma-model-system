@@ -270,13 +270,12 @@ class EmmeAssignmentModel(AssignmentModel):
         network = self.day_scenario.get_network()
         networks = {ap.name: ap.emme_scenario.get_network()
             for ap in self.assignment_periods}
-        for res in param.segment_results:
-            self._transit_segment_24h(
-                network, networks, param.segment_results[res])
-            if res != "transit_volumes":
-                self._node_24h(network, networks, param.segment_results[res])
+        for result in param.segment_results:
+            self._transit_segment_24h(network, networks, result)
+            if result != "transit_volumes":
+                self._node_24h(network, networks, result)
             log.info("Attribute {} aggregated to 24h (scenario {})".format(
-                res, self.day_scenario.id))
+                result, self.day_scenario.id))
         self._link_24h(network, networks)
         self.day_scenario.publish_network(network)
         log.info("Link attributes aggregated to 24h (scenario {})".format(
@@ -522,22 +521,20 @@ class EmmeAssignmentModel(AssignmentModel):
             value : inro.emme.network.Network.Network
                 Time-period networks
         """
-        attrs = set()
-        extras = {}
+        day_attrs = {}
+        hour_attrs = {}
         for ap in self.assignment_periods:
-            extras[ap.name] = {}
-            for tc in ap.assignment_modes.values():
-                extras[ap.name][tc.name] = tc.volume_attr
-                attrs.add(tc.name)
-        extra = {}
-        for attr in attrs:
-            extra[attr] = self._netfield(attr)
+            hour_attrs[ap.name] = {}
+            for mode in ap.assignment_modes.values():
+                hour_attrs[ap.name][mode.name] = mode.volume_attr
+                day_attrs[mode.name] = self._netfield(mode.name)
+        for attr in day_attrs:
             self.emme_project.create_network_field(
-                "LINK", "REAL", extra[attr], f"{attr}_vol",
+                "LINK", "REAL", day_attrs[attr], f"{attr}_vol",
                 overwrite=True, scenario=self.day_scenario)
         # save link volumes to result network
         for link in network.links():
-            sum24.sum_24h(link, networks, extras, extra, sum24.get_link)
+            sum24.sum_24h(link, networks, hour_attrs, day_attrs, sum24.get_link)
         return network
 
     def _node_24h(self, network: Network, networks: Dict[str, Network],
@@ -557,12 +554,22 @@ class EmmeAssignmentModel(AssignmentModel):
         attr : str
             Attribute name that is usually in param.segment_results
         """
-        attrs = {transit_class: f"node_{transit_class}_{attr[1:]}"
-            for transit_class in self.simple_transit_classes}
-        netfields = self._netfields(attrs)
+        day_attrs = {}
+        hour_attrs = {}
+        for ap in self.assignment_periods:
+            hour_attrs[ap.name] = {}
+            for tc in self.simple_transit_classes:
+                mode = ap.assignment_modes[tc]
+                hour_attrs[ap.name][tc] = mode.node_results[attr]
+                day_attrs[tc] = self._netfield(
+                    f"node_{tc}_{param.segment_results[attr][1:]}")
+        for tc in day_attrs:
+            self.emme_project.create_network_field(
+                "NODE", "REAL", day_attrs[tc], tc,
+                overwrite=True, scenario=self.day_scenario)
         # save node volumes to result network
         for node in network.nodes():
-            sum24.sum_24h(node, networks, *netfields, sum24.get_node)
+            sum24.sum_24h(node, networks, hour_attrs, day_attrs, sum24.get_node)
         return network
 
     def _transit_segment_24h(self, network: Network,
@@ -582,16 +589,20 @@ class EmmeAssignmentModel(AssignmentModel):
         attr : str
             Attribute name that is usually in param.segment_results
         """
-        attrs = {transit_class: transit_class + '_' + attr[1:]
-            for transit_class in self.simple_transit_classes}
-        netfields = self._netfields(attrs)
+        day_attrs = {}
+        hour_attrs = {}
+        for ap in self.assignment_periods:
+            hour_attrs[ap.name] = {}
+            for tc in self.simple_transit_classes:
+                mode = ap.assignment_modes[tc]
+                hour_attrs[ap.name][tc] = mode.segment_results[attr]
+                day_attrs[tc] = self._netfield(
+                    f"{tc}_{param.segment_results[attr][1:]}")
+        for tc in day_attrs:
+            self.emme_project.create_network_field(
+                "TRANSIT_SEGMENT", "REAL", day_attrs[tc], tc,
+                overwrite=True, scenario=self.day_scenario)
         # save segment volumes to result network
         for segment in network.transit_segments():
-            sum24.sum_24h(segment, networks, *netfields, sum24.get_segment)
+            sum24.sum_24h(segment, networks, hour_attrs, day_attrs, sum24.get_segment)
         return network
-
-    def _netfields(self, attrs: Dict[str, str]):
-        extras = {ap.name: {attr: ap.netfield(attrs[attr]) for attr in attrs}
-            for ap in self.assignment_periods}
-        extra = {attr: self._netfield(attrs[attr]) for attr in attrs}
-        return extras, extra

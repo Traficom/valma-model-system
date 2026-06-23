@@ -256,7 +256,6 @@ class AssignmentPeriod(Period):
             self._assign_transit(
                 param.simple_transit_classes, calc_network_results=True,
                 delete_strat_files=self._delete_strat_files)
-            self._calc_transit_link_results()
         else:
             self._end_assignment_classes -= set(param.transit_classes)
         mtxs = self._get_impedances(self._end_assignment_classes)
@@ -730,30 +729,6 @@ class AssignmentPeriod(Period):
             if delete_strat_files:
                 self._strategy_paths[transit_class].unlink(missing_ok=True)
             log.info(f"Transit class {transit_class} assigned")
-
-    def _calc_transit_link_results(self):
-        volax_attr = self.netfield("aux_transit")
-        self.emme_project.create_network_field(
-            "LINK", "REAL", volax_attr, "aux transit volume",
-            overwrite=True, scenario=self.emme_scenario)
-        network = self.emme_scenario.get_network()
-        for link in network.links():
-            link[volax_attr] = link.aux_transit_volume
-        # Calculate and sum transit results to link and nodes
-        for tc in param.transit_classes:
-            if tc in self.assignment_modes:
-                mode: TransitMode = self.assignment_modes[tc]
-                for result, attr_name in mode.segment_results.items():
-                    if result == "transit_volumes":
-                        link_attr = mode.volume_attr
-                        for segment in network.transit_segments():
-                            if segment.link is not None:
-                                segment.link[link_attr] += segment[attr_name]
-                    else:
-                        nodeattr = mode.node_results[result]
-                        for segment in network.transit_segments():
-                            segment.i_node[nodeattr] += segment[attr_name]
-        self.emme_scenario.publish_network(network)
 
     @property
     def _strategy_paths(self) -> Dict[str, Path]:
