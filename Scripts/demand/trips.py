@@ -84,6 +84,13 @@ class DemandModel:
                               + zd["sh_cars1_hh2"]
                               + zd["sh_cars2_hh2"])
         result = {"cars": numpy.zeros_like(zd["population"])}
+        hh_cars1_adult1 = zd["sh_hh1_lic1"] * prob["hh1_lic1"]["1"]
+        result["sh_cars1_hh1"] = (zd["sh_hh_1_adult_no_children"]
+                                  * hh_cars1_adult1)
+        result["sh_cars1_hh2"] = (zd["sh_hh_1_adult_children"]*hh_cars1_adult1
+                                  + zd["sh_hh2_lic1"]*prob["hh2_lic1"]["1"]
+                                  + zd["sh_hh2_lic2"]*prob["hh2_lic2"]["1"])
+        result["sh_cars2_hh2"] = zd["sh_hh2_lic2"]*prob["hh2_lic2"]["2"]
         for n_cars in range(3):
             result[f"sh_cars{n_cars}"] = numpy.zeros_like(zd["population"])
             for hh_type in prob:
