@@ -110,10 +110,10 @@ class FreightMode(AssignmentMode):
             "type": "EXTENDED_TRANSIT_NETWORK_RESULTS",
             "analyzed_demand": self.demand.id,
             "on_links": {
-                "aux_transit_volumes": "@aux_comm_flow",
+                "aux_transit_volumes": param.aux_commodity_flow_attr,
             },
             "on_segments": {
-                "transit_volumes": "@comm_flow",
+                "transit_volumes": param.commodity_flow_attr,
             },
         }
 

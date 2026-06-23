@@ -167,8 +167,7 @@ class EmmeAssignmentTest:
     def test_freight_assignment(self):
         purposes = ["marita", "kalevi"]
         self.ass_model.prepare_freight_network(self.costdata["vehicle_km_cost"],
-                                               self.costdata["vehicle_hour_cost"],
-                                               purposes)
+                                               self.costdata["vehicle_hour_cost"])
         temp_impedance = self.ass_model.freight_network.assign()
         nr_zones = self.ass_model.nr_zones
         freight_modes = ["truck", "freight_train", "ship"]

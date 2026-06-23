@@ -162,8 +162,7 @@ class EmmeAssignmentModel(AssignmentModel):
         self.emme_project.set_extra_function_parameters(el1=param.ferry_wait_attr)
 
     def prepare_freight_network(self, car_dist_unit_cost: Dict[str, float],
-                                car_time_unit_cost: Dict[str, float],
-                                commodity_classes: List[str]):
+                                car_time_unit_cost: Dict[str, float]):
         """Create matrices, extra attributes and calc background variables.
 
         Parameters
@@ -178,8 +177,6 @@ class EmmeAssignmentModel(AssignmentModel):
                 Assignment class (car_work/truck/...)
             value : float
                 Value of time in euros per hour for the assignment class
-        commodity_classes : list of str
-            Class names for which we want extra attributes
         """
         self.freight_network = FreightAssignmentPeriod(
             "vrk", self.mod_scenario.number, self.emme_project)
@@ -191,32 +188,16 @@ class EmmeAssignmentModel(AssignmentModel):
             "TRANSIT_LINE", param.terminal_cost_attr, "terminal cost",
             overwrite=True, scenario=self.mod_scenario)
         self.emme_project.create_extra_attribute(
-            "LINK", "@aux_comm_flow", "commodity flow",
+            "LINK", param.aux_commodity_flow_attr, "commodity flow",
             overwrite=True, scenario=self.mod_scenario)
         self.emme_project.create_extra_attribute(
-            "TRANSIT_SEGMENT", "@comm_flow", "commodity flow",
+            "TRANSIT_SEGMENT", param.commodity_flow_attr, "commodity flow",
             overwrite=True, scenario=self.mod_scenario)
         for ass_class in param.freight_modes.values():
             for attr in ass_class.values():
                 self.emme_project.create_extra_attribute(
                     "TRANSIT_LINE", attr, "terminal cost",
                     overwrite=True, scenario=self.mod_scenario)
-        for comm_class in commodity_classes:
-            for ass_class in param.freight_modes:
-                attr_name = (comm_class + ass_class)
-                self.emme_project.create_network_field(
-                    "TRANSIT_SEGMENT", "REAL", '#' + attr_name,
-                    "commodity flow", overwrite=True,
-                    scenario=self.mod_scenario)
-                self.emme_project.create_network_field(
-                    "LINK", "REAL", '#aux_' + attr_name,
-                    "commodity flow", overwrite=True,
-                    scenario=self.mod_scenario)
-            attr_name = (comm_class + "truck")
-            self.emme_project.create_network_field(
-                    "LINK", "REAL", '#' + attr_name,
-                    "commodity flow", overwrite=True,
-                    scenario=self.mod_scenario)
         self._create_attributes(
             self.mod_scenario,
             list(param.truck_classes) + list(param.freight_modes),

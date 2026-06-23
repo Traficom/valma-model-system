@@ -60,18 +60,30 @@ class FreightAssignmentPeriod(AssignmentPeriod):
             spec = self.assignment_modes[ass_class].ntw_results_spec
             self.emme_project.network_results(
                 spec, self.emme_scenario, ass_class)
+            seg_attr = "#" + commodity_class + ass_class
+            self.emme_project.create_network_field(
+                    "TRANSIT_SEGMENT", "REAL", seg_attr, "commodity flow",
+                    overwrite=True, scenario=self.emme_scenario)
+            link_attr = "#aux_" + commodity_class + ass_class
+            self.emme_project.create_network_field(
+                    "LINK", "REAL", link_attr, "aux commodity flow",
+                    overwrite=True, scenario=self.emme_scenario)
             network = self.emme_scenario.get_network()
             for segment in network.transit_segments():
-                segment["#" + commodity_class + ass_class] = segment["@comm_flow"]
+                segment[seg_attr] = segment[param.commodity_flow_attr]
             for link in network.links():
-                link["#aux_" + commodity_class + ass_class] = link["@aux_comm_flow"]
+                link[link_attr] = link[param.aux_commodity_flow_attr]
             self.emme_scenario.publish_network(network)
         for spec in self._car_spec.truck_specs():
             spec["stopping_criteria"] = self.stopping_criteria["coarse"]
             self.emme_project.car_assignment(spec, self.emme_scenario)
+        link_attr = "#" + commodity_class + "truck"
+        self.emme_project.create_network_field(
+            "LINK", "REAL", link_attr, "truck commodity flow",
+            overwrite=True, scenario=self.emme_scenario)
         network = self.emme_scenario.get_network()
         for link in network.links():
-                link["#" + commodity_class + "truck"] = link["@truck"]
+                link[link_attr] = link["@truck"]
         self.emme_scenario.publish_network(network)
         for tc in param.truck_classes:
             self.assignment_modes[tc].get_matrices()
