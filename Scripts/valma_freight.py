@@ -14,7 +14,7 @@ from assignment.emme_bindings.emme_project import EmmeProject
 from datahandling.matrixdata import MatrixData
 
 from utils.freight_utils import (
-    create_purposes, StoreDemand,
+    create_purposes, StoreDemand, update_diagonal_cost,
     write_leg2_summary, write_domestic_leg_summary, write_purpose_summary, 
     write_zone_summary, write_vehicle_summary
 )
@@ -55,7 +55,8 @@ def main(args):
     store_demand = StoreDemand(ass_model.freight_network, resultmatrices, 
                                zonedata.all_zone_numbers, zonedata.zone_numbers)
     impedance = ass_model.freight_network.assign()
-    
+    impedance = update_diagonal_cost(impedance)
+
     log.info("Reads marine ship impedances from network")
     trade_demand = {}
     marine_export = ass_model.freight_network.read_ship_impedances(True)

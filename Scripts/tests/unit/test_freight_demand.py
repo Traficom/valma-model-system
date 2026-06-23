@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-from pathlib import Path
 import json
 import numpy
 import unittest
 import openmatrix as omx
+from copy import deepcopy
 
 import parameters.assignment as param
 from datahandling.resultdata import ResultsData
 from datahandling.zonedata import FreightZoneData
 from utils.freight_utils import (
-    create_purposes, write_leg2_summary, write_purpose_summary, 
+    create_purposes, write_leg2_summary, write_purpose_summary, update_diagonal_cost,
     write_zone_summary, write_vehicle_summary, write_domestic_leg_summary
 )
 from tests.integration.test_data_handling import (
@@ -61,8 +61,9 @@ class FreightModelTest(unittest.TestCase):
                 "canal_cost": numpy.zeros([len(ZONE_NUMBERS), len(ZONE_NUMBERS)])
             }
         }
-        impedance["semi_trailer"] = impedance["truck"]
-        impedance["trailer_truck"] = impedance["truck"]
+        impedance["semi_trailer"] = deepcopy(impedance["truck"])
+        impedance["trailer_truck"] = deepcopy(impedance["truck"])
+        impedance = update_diagonal_cost(impedance)
 
         # Run test foreign trade choice model
         trade_demand, foreign_purposes, fin_borders = self.run_trade_route_choice(
@@ -120,11 +121,11 @@ class FreightModelTest(unittest.TestCase):
                 detour_total = numpy.sum(per_route[:-1])
                 direct_total = per_route[-1]
                 if purpose.name == "kemlaa":
-                    self.assertAlmostEqual(detour_total, 50.635654, places=3)
-                    self.assertAlmostEqual(direct_total, 12883.39, places=3)
+                    self.assertAlmostEqual(detour_total, 19.52376, places=3)
+                    self.assertAlmostEqual(direct_total, 12913.464, places=3)
                 elif purpose.name == "kummuo":
-                    self.assertAlmostEqual(detour_total, 81.766624, places=3)
-                    self.assertAlmostEqual(direct_total, 15670.479, places=3)
+                    self.assertAlmostEqual(detour_total, 26.133245, places=3)
+                    self.assertAlmostEqual(direct_total, 15725.467, places=3)
 
         write_vehicle_summary(total_demand, impedance, resultdata)
         resultdata.flush()
