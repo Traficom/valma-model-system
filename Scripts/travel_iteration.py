@@ -530,3 +530,21 @@ class ModelSystem:
         for orig in origs:
             demand = purpose.distribute_tours(mode, impedance[mode], orig)
             container.add_demand(demand)
+
+
+    def run_car_ownership(self, base_impedance):
+        """Calculate only car ownership.
+
+        Parameters
+        ----------
+        base_impedance : dict
+            key : str
+                Assignment class (car/transit/bike/walk)
+            value : dict
+                key : str
+                    Impedance type (time/cost/dist)
+                value : numpy.ndarray
+                    Impedance (float 2-d matrix)
+        """
+        self.dm.individual_car_ownership(base_impedance)
+        self.resultdata.flush()

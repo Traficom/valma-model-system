@@ -656,3 +656,39 @@ class GenerationLogit(LogitModel):
                 with_dummy = dummy_share * ind_prob
                 prob[nr] += with_dummy
         return prob
+    
+    def calc_segment_prob(self, segment: str):
+
+
+        """Calculate tour generation probabilities with individual dummies included.
+        Uses results from previously run `calc_basic_prob()`.
+
+        Parameters
+        ----------
+        segment : str
+            Agent/segment
+        zone : int (optional)
+            Index of zone where the agent lives, if no zone index is given,
+            calculation is done for all zones
+
+        Returns
+        -------
+        dict
+            key : int
+                Number of cars in household (0, 1, 2(+))
+            value : numpy.ndarray
+                Choice probabilities
+        """
+        self.calc_basic_prob()
+        prob = {}
+        exps = {}
+        nr_expsum = 0
+        for nr in self.param:
+            exps[nr] = self.exps[nr]
+            b = self.param
+            if segment in b[nr]["individual_dummy"]:
+                exps[nr] *= numpy.exp(b[nr]["individual_dummy"][segment])
+            nr_expsum += exps[nr]
+        for nr in self.param:
+            prob[nr] = exps[nr] / nr_expsum
+        return prob
