@@ -1,4 +1,5 @@
 from __future__ import annotations
+from unicodedata import name
 import numpy # type: ignore
 import pandas # type: ignore
 import copy
@@ -322,26 +323,6 @@ class AssignmentPeriod(Period):
                     if line.mode.id in long_dist_transit_modes else 0)
         self.emme_scenario.publish_network(network)
 
-    def transit_results_links_nodes(self):
-        """
-        Calculate and sum transit results to link and nodes.
-        """
-        network = self.emme_scenario.get_network()
-        for tc in param.transit_classes:
-            if tc in self.assignment_modes:
-                mode: TransitMode = self.assignment_modes[tc]
-                for result, attr_name in mode.segment_results.items():
-                    if result == "transit_volumes":
-                        link_attr = mode.link_vol_attr
-                        for segment in network.transit_segments():
-                            if segment.link is not None:
-                                segment.link[link_attr] += segment[attr_name]
-                    else:
-                        nodeattr = mode.node_results[result]
-                        for segment in network.transit_segments():
-                            segment.i_node[nodeattr] += segment[attr_name]
-        self.emme_scenario.publish_network(network)
-
     def get_car_times(self) -> Dict[str, float]:
         """Get dict of link car travel times for links within sub-model.
 
@@ -534,12 +515,16 @@ class AssignmentPeriod(Period):
 
     def _calc_background_traffic(self, include_trucks: bool = False):
         """Calculate background traffic (buses)."""
+        bus_vol_attr = self.netfield("bus")
+        self.emme_project.create_network_field(
+            "LINK", "REAL", bus_vol_attr, f"{bus_vol_attr}_vol",
+            overwrite=True, scenario=self.emme_scenario)
         network = self.emme_scenario.get_network()
         # emme api has name "data3" for ul3
         background_traffic = param.background_traffic_attr.replace(
             "ul", "data")
         # calc @bus and data3
-        heavy = [self.extra(ass_class) for ass_class in param.truck_classes]
+        heavy = [self.netfield(ass_class) for ass_class in param.truck_classes]
         for link in network.links():
             if link.type > 100: # If car or bus link
                 freq = 0
@@ -547,7 +532,7 @@ class AssignmentPeriod(Period):
                     segment_hdw = segment.line[self.netfield("hdw")]
                     if 0 < segment_hdw < 900:
                         freq += 60 / segment_hdw
-                link[self.extra("bus")] = freq
+                link[bus_vol_attr] = freq
                 link[background_traffic] = 0 if link["#buslane"] else freq
                 if include_trucks:
                     for ass_class in heavy:
@@ -748,13 +733,27 @@ class AssignmentPeriod(Period):
             log.info(f"Transit class {transit_class} assigned")
 
     def _calc_transit_link_results(self):
-        volax_attr = self.extra("aux_transit")
+        volax_attr = self.netfield("aux_transit")
+        self.emme_project.create_network_field(
+            "LINK", "REAL", volax_attr, "aux transit volume",
+            overwrite=True, scenario=self.emme_scenario)
         network = self.emme_scenario.get_network()
         for link in network.links():
             link[volax_attr] = link.aux_transit_volume
-        time_attr = self.extra(param.uncongested_transit_time)
-        for segment in network.transit_segments():
-            segment[time_attr] = segment.transit_time
+        # Calculate and sum transit results to link and nodes
+        for tc in param.transit_classes:
+            if tc in self.assignment_modes:
+                mode: TransitMode = self.assignment_modes[tc]
+                for result, attr_name in mode.segment_results.items():
+                    if result == "transit_volumes":
+                        link_attr = mode.volume_attr
+                        for segment in network.transit_segments():
+                            if segment.link is not None:
+                                segment.link[link_attr] += segment[attr_name]
+                    else:
+                        nodeattr = mode.node_results[result]
+                        for segment in network.transit_segments():
+                            segment.i_node[nodeattr] += segment[attr_name]
         self.emme_scenario.publish_network(network)
 
     @property

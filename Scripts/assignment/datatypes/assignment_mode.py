@@ -41,6 +41,10 @@ class AssignmentMode(ABC):
         self.emme_scenario = assignment_period.emme_scenario
         self.emme_project = assignment_period.emme_project
         self.time_period = assignment_period.name
+        self.volume_attr = assignment_period.netfield(name)
+        self.emme_project.create_network_field(
+            "LINK", "REAL", self.volume_attr, f"{self.name}_vol",
+            overwrite=True, scenario=self.emme_scenario)
         self._save_matrices = save_matrices
         self._matrices: Dict[str, EmmeMatrix] = {}
         self.demand = PermanentEmmeMatrix(
@@ -114,7 +118,7 @@ class BikeMode(SoftMode):
                         "od_travel_times": {
                             "shortest_paths": self.time.id,
                         },
-                        "link_volumes": f"@{self.name}_{self.time_period}",
+                        "link_volumes": self.volume_attr,
                     },
                     "path_analyses": [
                         PathAnalysis(LENGTH_ATTR, self.dist.id).spec,

@@ -64,14 +64,14 @@ class FreightAssignmentPeriod(AssignmentPeriod):
             for segment in network.transit_segments():
                 segment["#" + commodity_class + ass_class] = segment["@comm_flow"]
             for link in network.links():
-                link["#" + commodity_class + ass_class] = link["@aux_comm_flow"]
+                link["#aux_" + commodity_class + ass_class] = link["@aux_comm_flow"]
             self.emme_scenario.publish_network(network)
         for spec in self._car_spec.truck_specs():
             spec["stopping_criteria"] = self.stopping_criteria["coarse"]
             self.emme_project.car_assignment(spec, self.emme_scenario)
         network = self.emme_scenario.get_network()
         for link in network.links():
-                link["#" + commodity_class + "truck"] = link["@truck_vrk"]
+                link["#" + commodity_class + "truck"] = link["@truck"]
         self.emme_scenario.publish_network(network)
         for tc in param.truck_classes:
             self.assignment_modes[tc].get_matrices()
