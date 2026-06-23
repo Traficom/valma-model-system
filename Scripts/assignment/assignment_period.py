@@ -1,5 +1,4 @@
 from __future__ import annotations
-from unicodedata import name
 import numpy # type: ignore
 import pandas # type: ignore
 import copy
