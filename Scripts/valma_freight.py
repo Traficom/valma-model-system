@@ -14,8 +14,8 @@ from assignment.emme_bindings.emme_project import EmmeProject
 from datahandling.matrixdata import MatrixData
 
 from utils.freight_utils import (
-    create_purposes, StoreDemand, update_diagonal_cost, write_cluster_border_summary,
-    write_leg2_summary, write_domestic_leg_summary, write_purpose_summary, 
+    create_purposes, StoreDemand, update_diagonal_cost, write_trade_route_summary, 
+    write_domestic_leg_summary, write_purpose_summary, 
     write_zone_summary, write_vehicle_summary
 )
 from datahandling.traversaldata import transform_traversal_data
@@ -67,9 +67,9 @@ def main(args):
         marine_data = marine_export if purpose.is_export else marine_import
         demand = purpose.run_trade_route_module(impedance, *marine_data,
                                                 trade_demand_file)
-        write_leg2_summary(purpose, demand, *marine_data, resultdata)
-        write_cluster_border_summary(purpose, demand, clusters, 
-                                     *marine_data, resultdata)
+        write_trade_route_summary(purpose, demand, *marine_data, resultdata)
+        write_trade_route_summary(purpose, demand, *marine_data, resultdata, 
+                                  clusters)
         trade_demand[purpose.name] = demand
     resultdata.flush()
     fin_border_ids = list(marine_export[1].values())

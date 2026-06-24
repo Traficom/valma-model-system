@@ -10,9 +10,9 @@ import parameters.assignment as param
 from datahandling.resultdata import ResultsData
 from datahandling.zonedata import FreightZoneData
 from utils.freight_utils import (
-    create_purposes, write_leg2_summary, write_purpose_summary, update_diagonal_cost,
-    write_zone_summary, write_vehicle_summary, write_domestic_leg_summary,
-    write_cluster_border_summary
+    create_purposes, write_trade_route_summary, write_purpose_summary, 
+    update_diagonal_cost, write_zone_summary, write_vehicle_summary, 
+    write_domestic_leg_summary,
 )
 from tests.integration.test_data_handling import (
     TEST_DATA_PATH,
@@ -163,11 +163,10 @@ class FreightModelTest(unittest.TestCase):
         for purpose in purposes.values():
             demand = purpose.run_trade_route_module(
                 impedance, *marine_attr, TRADE_DEMAND_PATH)
-            write_leg2_summary(purpose, demand, marine_modes, 
-                               fin_border, cluster_border, resultdata)
-            write_cluster_border_summary(purpose, demand, network_clusters, 
-                                         marine_modes, fin_border, 
-                                         cluster_border, resultdata)
+            write_trade_route_summary(purpose, demand, marine_modes, 
+                                      fin_border, cluster_border, resultdata)
+            write_trade_route_summary(purpose, demand, marine_modes, fin_border, 
+                                      cluster_border, resultdata, network_clusters)
             trade_demand[purpose.name] = demand
         resultdata.flush()
         return trade_demand, purposes, list(fin_border.values())
