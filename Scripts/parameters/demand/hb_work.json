@@ -122,7 +122,7 @@
             "impedance": {},
             "log": {
                 "attraction_size": 1,
-                "logsum": 0.8662
+                "logsum": 0.8764
             },
             "attraction_size": {
                 "workplaces": 1
@@ -131,60 +131,60 @@
     },
     "mode_choice": {
         "car_drv": {
-            "constant": -3.776,
+            "constant": -3.789,
             "generation": {},
             "attraction": {},
             "impedance": {
-                "time": -0.03348,
-                "cost": -0.06475
+                "time": -0.03444,
+                "cost": -0.06022
             },
             "log": {
-                "cost": -0.2596
+                "cost": -0.2431
             },
             "individual_dummy": {
-                "sh_cars1_hh1": 4.524,
-                "sh_cars2_hh2": 4.524,
-                "sh_cars1_hh2": 3.044
+                "sh_cars1_hh1": 4.53,
+                "sh_cars2_hh2": 4.53,
+                "sh_cars1_hh2": 3.033
             }
         },
         "car_pax": {
-            "constant": -4.802,
+            "constant": -4.73,
             "generation": {},
             "attraction": {},
             "impedance": {
-                "time": -0.07075,
-                "cost": -0.06475
+                "time": -0.06975,
+                "cost": -0.06022
             },
             "log": {
-                "cost": -0.2596
+                "cost": -0.2431
             },
             "individual_dummy": {
-                "sh_cars1_hh2": 0.9644,
-                "sh_cars2_hh2": 0.9644
+                "sh_cars1_hh2": 0.9637,
+                "sh_cars2_hh2": 0.9637
             }
         },
         "transit": {
-            "constant": -1.19,
+            "constant": -1.263,
             "generation": {},
             "attraction": {
                 "within_zone_inf": -1,
-                "sh_office": 1.166
+                "sh_office": 1.161
             },
             "impedance": {
-                "time": -0.01461,
-                "cost": -0.06475
+                "time": -0.01464,
+                "cost": -0.06022
             },
             "log": {
-                "cost": -0.2596
+                "cost": -0.2431
             },
             "individual_dummy": {}
         },
         "bike": {
-            "constant": -1.315,
+            "constant": -1.366,
             "generation": {},
             "attraction": {},
             "impedance": {
-                "dist": -0.1579
+                "dist": -0.1557
             },
             "log": {},
             "individual_dummy": {}
@@ -194,7 +194,7 @@
             "generation": {},
             "attraction": {},
             "impedance": {
-                "dist": -0.4794
+                "dist": -0.5103
             },
             "log": {},
             "individual_dummy": {}
