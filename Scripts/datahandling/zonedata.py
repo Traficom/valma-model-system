@@ -126,9 +126,10 @@ class ZoneData:
         self["log_pop_density"] = numpy.log(self["pop_density"]+1)
 
         # Two-way intrazonal distances from building distances
-        self["dist"] = data["avg_building_distance"] * 2
-        self["time"] = self["dist"] / (20/60) # 20 km/h
-        self["cost"] = car_dist_cost * self["dist"]
+        self["dist_walk"] = data["intra_dist_walk"] * 2
+        self["dist_bike"] = data["intra_dist_bike"] * 2
+        self["time_car"] = data["intra_dist_car"] / (20/60) # 20 km/h
+        self["cost_car"] = car_dist_cost * data["intra_dist_car"]
 
         dummies = {
             "zone": {},
