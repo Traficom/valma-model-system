@@ -11,23 +11,24 @@ from datahandling.resultdata import ResultsData
 from datahandling.zonedata import FreightZoneData
 from utils.freight_utils import (
     create_purposes, write_leg2_summary, write_purpose_summary, update_diagonal_cost,
-    write_zone_summary, write_vehicle_summary, write_domestic_leg_summary
+    write_zone_summary, write_vehicle_summary, write_domestic_leg_summary,
+    write_cluster_border_summary
 )
 from tests.integration.test_data_handling import (
     TEST_DATA_PATH,
     RESULTS_PATH,
     COSTDATA_PATH,
     BASE_MATRICES_PATH,
+    INTERNAL_ZONES,
+    EXTERNAL_ZONES
 )
+from parameters.zone import clusters
 
 TEST_MATRICES = RESULTS_PATH / "Matrices" / "koko_suomi"
 TEST_ZONE_DATA_PATH = TEST_DATA_PATH / "Scenario_input_data" / "freight_zonedata.gpkg"
 TRADE_DEMAND_PATH = BASE_MATRICES_PATH / "koko_suomi" / "trade_demand.omx"
 PARAMETERS_PATH = TEST_DATA_PATH.parent.parent / "parameters" / "freight"
-ZONE_NUMBERS = [202, 1344, 1755, 2037, 2129, 2224, 2333, 2413, 2519, 2621,
-                2707, 2814, 2918, 3000, 3003, 3203, 3302, 3416, 3639, 3705,
-                3800, 4013, 4102, 4202, 7043, 8284, 12614, 17278, 19401, 23678,
-                50107, 50127, 50201, 50205]
+ZONE_NUMBERS = INTERNAL_ZONES + EXTERNAL_ZONES
 
 
 class FreightModelTest(unittest.TestCase):
@@ -154,6 +155,9 @@ class FreightModelTest(unittest.TestCase):
         ship_imps["roro_vessel"]["dist"][0][0] = 126
         ship_imps["roro_vessel"]["frequency"][0][0] = 162
         marine_attr = (ship_imps, fin_border, cluster_border)
+        network_clusters = set(ZONE_NUMBERS) & set(clusters.values())
+        network_clusters = {key: value for key, value in clusters.items() 
+                            if value in network_clusters}
 
         trade_demand = {}
         for purpose in purposes.values():
@@ -161,6 +165,9 @@ class FreightModelTest(unittest.TestCase):
                 impedance, *marine_attr, TRADE_DEMAND_PATH)
             write_leg2_summary(purpose, demand, marine_modes, 
                                fin_border, cluster_border, resultdata)
+            write_cluster_border_summary(purpose, demand, network_clusters, 
+                                         marine_modes, fin_border, 
+                                         cluster_border, resultdata)
             trade_demand[purpose.name] = demand
         resultdata.flush()
         return trade_demand, purposes, list(fin_border.values())

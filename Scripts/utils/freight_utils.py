@@ -112,6 +112,35 @@ def write_leg2_summary(purpose: FreightPurpose, demand: dict,
     filename = "freight_leg2_summary.txt"
     resultdata.print_concat(DataFrame(df_data), filename)
 
+def write_cluster_border_summary(purpose: FreightPurpose, demand: dict, 
+                                 clusters: dict, _, __, cluster_border_ids: dict, 
+                                 resultdata: ResultsData):
+    """Write summary for routed tons between cluster and foreign border point. 
+    Summary file includes commodity name, type (export/import), mode name, 
+    foreign cluster, border crossing point abroad and transported tons.
+    Summary only includes non-zero demand pairs.
+    """
+    commodity, trade_type = purpose.name.split("_")
+    cluster_indices = {i: key for i, key in enumerate(clusters)}
+    cluster_border_indices = {i: key for i, key in enumerate(cluster_border_ids)}
+    leg_name = "leg_three" if purpose.is_export else "leg_one"
+    df_data = []
+    for mode in demand[leg_name]:
+        mtx = numpy.round(demand[leg_name][mode], 5)
+        for row, col in zip(*numpy.nonzero(mtx)):
+            cluster_idx = col if purpose.is_export else row
+            foreign_border_idx = row if purpose.is_export else col
+            df_data.append({
+                "Commodity": commodity,
+                "Type": trade_type,
+                "Mode": mode,
+                "Cluster": cluster_indices[cluster_idx],
+                "Foreign border": cluster_border_indices[foreign_border_idx],
+                "Tons (t/annual)": mtx[row, col]
+            })
+    filename = "freight_cluster_border_summary.txt"
+    resultdata.print_concat(DataFrame(df_data), filename)
+
 def write_domestic_leg_summary(demand_trade: dict, impedance: dict,
                                resultdata: ResultsData):
     """Write summary for trade demand's domestic leg including transported
