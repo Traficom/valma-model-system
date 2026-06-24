@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING, Dict
 from collections import defaultdict
 
 import parameters.assignment as param
-from parameters.cost import tour_duration, value_of_time
+from parameters.cost import avg_tour_duration, value_of_time
 from assignment.datatypes.assignment_mode import AssignmentMode
 from assignment.datatypes.journey_level import JourneyLevel
 if TYPE_CHECKING:
@@ -308,7 +308,7 @@ class MixedMode(TransitMode):
 
     def _set_link_parking_costs(self):
         network = self.emme_scenario.get_network()
-        avg_days = tour_duration[self.name]["avg"]
+        avg_days = avg_tour_duration[self.name]
         for node in network.nodes():
             parking_cost = node[param.park_cost_attr_n]
             if parking_cost > 0:

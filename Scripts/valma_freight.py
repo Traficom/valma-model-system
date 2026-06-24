@@ -14,7 +14,7 @@ from assignment.emme_bindings.emme_project import EmmeProject
 from datahandling.matrixdata import MatrixData
 
 from utils.freight_utils import (
-    create_purposes, StoreDemand,
+    create_purposes, StoreDemand, update_diagonal_cost,
     write_leg2_summary, write_domestic_leg_summary, write_purpose_summary, 
     write_zone_summary, write_vehicle_summary
 )
@@ -44,20 +44,21 @@ def main(args):
     resultmatrices = MatrixData(result_data_folder / "Matrices" / "koko_suomi")
     costdata = json.loads(cost_data_file.read_text("utf-8"))
     
-    # Set purposes and fetch impedances
-    purposes = create_purposes(parameters_path / "foreign", zonedata, 
-                               resultdata, costdata["freight"])
+    # Set foreign purposes and fetch impedances
+    foreign_purposes = create_purposes(parameters_path / "foreign", zonedata, 
+                                       resultdata, costdata["freight"])
     ass_model.prepare_freight_network(
         costdata["vehicle_km_cost"], costdata["vehicle_hour_cost"])
     store_demand = StoreDemand(ass_model.freight_network, resultmatrices, 
                                zonedata.all_zone_numbers, zonedata.zone_numbers)
     impedance = ass_model.freight_network.assign()
-    
-    log.info("Read marine ship impedances from network")
+    impedance = update_diagonal_cost(impedance)
+
+    log.info("Reads marine ship impedances from network")
     trade_demand = {}
     marine_export = ass_model.freight_network.read_ship_impedances(True)
     marine_import = ass_model.freight_network.read_ship_impedances(False)
-    for purpose in purposes.values():
+    for purpose in foreign_purposes.values():
         log.info(f"Calculating trade route for purpose: {purpose.name}")
         marine_data = marine_export if purpose.is_export else marine_import
         demand = purpose.run_trade_route_module(impedance, *marine_data,
@@ -68,7 +69,7 @@ def main(args):
     fin_border_ids = list(marine_export[1].values())
     marine_export, marine_import = None, None
 
-    # prepare domestic model by splicing impedances and initializing final demand matrix 
+    # Prepare domestic model by splicing impedances and initializing final demand matrix 
     for ass_class in list(impedance):
         for mtx_type, mtx in impedance[ass_class].items():
             impedance[ass_class][mtx_type] = mtx[:zonedata.nr_zones, :zonedata.nr_zones]
@@ -81,7 +82,6 @@ def main(args):
     for purpose in purposes.values():
         log.info(f"Calculating demand for purpose: {purpose.name}")
         demand = purpose.calc_traffic(impedance)
-        demand_trade = purpose.calc_trade_mode_share(demand, trade_demand, fin_border_ids)
         if purpose.route_params and args.logistics_iterations > 0:
             demand["truck"], _ = purpose.run_logistics_module(demand["truck"], impedance, 
                                                               ass_model.mapping, 
@@ -92,14 +92,22 @@ def main(args):
             store_demand.store(mode, demand[mode], omx_filename, purpose.name)
         if purpose.name in args.specify_commodity_names:
             ass_model.freight_network.save_network_volumes(purpose.name)
-        ass_model.freight_network.output_traversal_matrix(set(demand), resultdata.path)
-        aux_demand = transform_traversal_data(resultdata.path, zonedata.zone_numbers)
-        for mode in param.truck_classes:
-            ton_demand = demand["truck"] + sum(aux_demand.values())
-            total_demand[mode] += purpose.calc_vehicles(ton_demand, mode)
+        
+        if "truck" in demand:
+            # Calc aux tons and transform tons to vehicles
+            ass_model.freight_network.output_traversal_matrix(set(demand), resultdata.path)
+            aux_demand = transform_traversal_data(resultdata.path, zonedata.zone_numbers)
+            domestic_tons = demand["truck"] + sum(aux_demand.values())
+            dom_leg_tons = purpose.calc_trade_mode_share(
+                demand, trade_demand, fin_border_ids)
+            for mode in param.truck_classes:
+                total_demand[mode] += purpose.calc_vehicles(domestic_tons, mode)
+                for foreign_purpose in dom_leg_tons:
+                    total_demand[mode] += foreign_purposes[foreign_purpose].calc_vehicles(
+                        dom_leg_tons[foreign_purpose]["truck"], mode)
+            write_domestic_leg_summary(dom_leg_tons, impedance, resultdata)
         write_purpose_summary(purpose, demand, aux_demand, impedance, resultdata)
         write_zone_summary(purpose.name, zonedata.zone_numbers, demand, resultdata)
-        write_domestic_leg_summary(demand_trade, impedance, resultdata)
     write_vehicle_summary(total_demand, impedance, resultdata)
     resultdata.flush()
     

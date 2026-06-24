@@ -4,7 +4,7 @@
     "dest": "null",
     "generation_area": "domestic",
     "attraction_area": "domestic",
-    "struct": "dest>mode",
+    "struct": "mode>dest",
     "impedance_share": {},
     "distance_boundaries": {
         "truck": [
@@ -21,12 +21,13 @@
         ]
     },
     "destination_choice": {
-        "logsum": {
+        "truck": {
             "attraction": {},
-            "impedance": {},
+            "impedance": {
+				"cost": -0.1175
+			},
             "log": {
-                "attraction_size": 1.0,
-                "logsum": 0.4868
+                "attraction_size": 1
             },
             "attraction_size": {
                 "att_oljytu": 1
@@ -38,31 +39,11 @@
             "constant": 0,
             "generation": {},
             "attraction": {},
-            "impedance": {
-                "cost": -0.3869
+            "impedance": {},
+            "log": {
+                "logsum": 1
             },
-            "log": {},
             "individual_dummy": {}
-        },
-        "freight_train": {
-            "generation": {},
-            "attraction": {},
-            "impedance": {
-                "cost": -0.4142
-            },
-            "log": {},
-            "individual_dummy": {},
-            "constant": 4.765
-        },
-        "ship": {
-            "generation": {},
-            "attraction": {},
-            "impedance": {
-                "cost": -0.7465
-            },
-            "log": {},
-            "individual_dummy": {},
-            "constant": 13.02
         }
     },
     "demand_share": {},
