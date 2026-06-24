@@ -153,7 +153,6 @@ class EmmeAssignmentTest:
                     for ass_class in travel_cost[mtx_type]:
                         cost_data = travel_cost[mtx_type][ass_class]
                         mtx[ass_class] = cost_data
-            ap.transit_results_links_nodes()
 
     def test_transit_cost(self):
         firstb_single = (2, 3, 5, 70, 0, 1.5)

@@ -108,6 +108,7 @@ class SoftMode(AssignmentMode):
 
 class BikeMode(SoftMode):
     def _specify(self):
+        self.temp_volume_attr = f"@{self.name}"
         self.spec = {
             "type": "SOLA_TRAFFIC_ASSIGNMENT",
             "classes": [
@@ -118,7 +119,7 @@ class BikeMode(SoftMode):
                         "od_travel_times": {
                             "shortest_paths": self.time.id,
                         },
-                        "link_volumes": self.volume_attr,
+                        "link_volumes": self.temp_volume_attr,
                     },
                     "path_analyses": [
                         PathAnalysis(LENGTH_ATTR, self.dist.id).spec,

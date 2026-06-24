@@ -726,6 +726,9 @@ class Network:
         self._extra_attr = {attr_type: {} for attr_type in self._objects}
         self._netfield = {attr_type: {} for attr_type in self._objects}
 
+    def create_attribute(self, *args, **kwargs):
+        pass
+
     def mode(self, idx: int) -> 'Mode':
         if idx in self._modes:
             return self._modes[idx]

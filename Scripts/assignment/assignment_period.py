@@ -617,13 +617,15 @@ class AssignmentPeriod(Period):
             for link in network.links():
                 link[time_attr] = link.auto_time
         truck_time_attr = self.extra("truck_time")
+        modes = [self.assignment_modes[ass_class]
+                 for ass_class in param.car_and_van_classes
+                 if ass_class in self.assignment_modes]
         for link in network.links():
             link[param.aux_car_time_attr] = link.auto_time
             # Truck speed limited to 90 km/h
             link[truck_time_attr] = max(link.auto_time, link.length * 0.67)
-            for ass_class in param.car_and_van_classes:
-                if ass_class in self.assignment_modes:
-                    link[self.assignment_modes[ass_class].volume_attr] = link[f"@{ass_class}"]
+            for mode in modes:
+                    link[mode.volume_attr] = link[mode.temp_volume_attr]
         self.emme_scenario.publish_network(network)
         log.info("Car assignment performed for scenario {}".format(
             self.emme_scenario.id))
@@ -636,21 +638,27 @@ class AssignmentPeriod(Period):
             self.emme_project.car_assignment(
                 truck_spec, self.emme_scenario)
         network = self.emme_scenario.get_network()
+        modes = [self.assignment_modes[ass_class]
+                 for ass_class in param.truck_classes
+                 if ass_class in self.assignment_modes]
         for link in network.links():
-            for ass_class in param.truck_classes:
-                if ass_class in self.assignment_modes:
-                    link[self.assignment_modes[ass_class].volume_attr] = link[f"@{ass_class}"]
+            for mode in modes:
+                link[mode.volume_attr] = link[mode.temp_volume_attr]
         self.emme_scenario.publish_network(network)
         log.info("Truck assignment performed for scenario {}".format(
             self.emme_scenario.id))
 
     def _assign_bikes(self):
         """Perform bike traffic assignment for one scenario."""
-        self.bike_mode.init_matrices()
+        mode = self.bike_mode
+        mode.init_matrices()
         scen = self.emme_scenario
         log.info("Bike assignment started...")
-        self.emme_project.car_assignment(
-            specification=self.bike_mode.spec, scenario=scen)
+        self.emme_project.car_assignment(specification=mode.spec, scenario=scen)
+        network = self.emme_scenario.get_network()
+        for link in network.links():
+            link[mode.volume_attr] = link[mode.temp_volume_attr]
+        self.emme_scenario.publish_network(network)
         log.info("Bike assignment performed for scenario " + str(scen.id))
 
     def _calc_extra_wait_time(self):

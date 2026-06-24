@@ -1,6 +1,7 @@
 from __future__ import annotations
 from platform import node
 from typing import TYPE_CHECKING, Dict
+from collections import defaultdict
 
 import parameters.assignment as param
 from parameters.cost import tour_duration, value_of_time
@@ -32,6 +33,7 @@ class TransitMode(AssignmentMode):
         """
         AssignmentMode.__init__(self, name, assignment_period, save_matrices)
         self.vot_inv = 60 / value_of_time[self.name]
+        self.day_scenario = day_scenario
         self._create_matrices()
 
         # Specify
@@ -197,34 +199,36 @@ class TransitMode(AssignmentMode):
         self.emme_project.create_network_field(
             "LINK", "REAL", volax_attr, "aux transit volume",
             overwrite=True, scenario=self.emme_scenario)
-        self.segment_results: Dict[str, str] = {}
-        self.node_results: Dict[str, str] = {}
-        tp = self.time_period
-        for res, attr in param.segment_results.items():
-            attr_name = f"#{self.name}_{attr[1:]}_{tp}"
-            self.segment_results[res] = attr_name
-            self.emme_project.create_network_field(
-                "TRANSIT_SEGMENT", "REAL", attr_name, f"{self.name} {res}",
-                overwrite=True, scenario=self.emme_scenario)
-            if res != "transit_volumes":
-                attr_name = f"#node_{self.name}_{attr[1:]}_{tp}"
-                self.node_results[res] = attr_name
-                self.emme_project.create_network_field(
-                    "NODE", "REAL", attr_name, f"{self.name} {res}",
-                    overwrite=True, scenario=self.emme_scenario)
+        self.segment_results: Dict[str, str] = defaultdict(dict)
+        self.node_results: Dict[str, str] = defaultdict(dict)
         network = self.emme_scenario.get_network()
         for link in network.links():
             link[volax_attr] = link.aux_transit_volume
-        for result, attr in param.segment_results.items():
-            segment_attr = self.segment_results[result]
+        for result, temp_result_attr in param.segment_results.items():
+            for scenario, tp in (
+                    (self.day_scenario, "vrk"),
+                    (self.emme_scenario, self.time_period)):
+                result_attr = f"#{self.name}_{temp_result_attr[1:]}_{tp}"
+                self.segment_results[result][tp] = result_attr
+                self.emme_project.create_network_field(
+                    "TRANSIT_SEGMENT", "REAL", result_attr, f"{self.name} {result}",
+                    overwrite=True, scenario=scenario)
+                network.create_attribute("TRANSIT_SEGMENT", result_attr)
+                if result != "transit_volumes":
+                    node_result_attr = f"#node_{self.name}_{temp_result_attr[1:]}_{tp}"
+                    self.node_results[result][tp] = node_result_attr
+                    self.emme_project.create_network_field(
+                        "NODE", "REAL", node_result_attr, f"{self.name} {result}",
+                        overwrite=True, scenario=scenario)
+                    network.create_attribute("NODE", node_result_attr)
             for segment in network.transit_segments():
-                vol = segment[attr]
-                segment[segment_attr] = vol
+                vol = segment[temp_result_attr]
+                segment[result_attr] = vol
                 if result == "transit_volumes":
                     if segment.link is not None:
                         segment.link[self.volume_attr] += vol
                 else:
-                    segment.i_node[self.node_results[result]] += vol
+                    segment.i_node[node_result_attr] += vol
         self._save_link_results(network)
         self.emme_scenario.publish_network(network)
 
