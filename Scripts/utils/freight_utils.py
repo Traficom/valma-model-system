@@ -154,12 +154,8 @@ def write_purpose_summary(purpose: FreightPurpose, demand: dict, aux_demand: dic
     for cost in costs.values():
         cost[cost == numpy.inf] = 0
     ton_costs = [numpy.sum(costs.pop(mode)*demand[mode]) for mode in modes]
-    aux_ton_dist = []
-    for mode in modes:
-        if mode == "truck":
-            aux_ton_dist.append(0)
-        else:
-            aux_ton_dist.append(numpy.sum(aux_demand[mode]*impedance[mode]["aux_dist"]))
+    aux_ton_dist = [numpy.sum(aux_demand[mode]*impedance["truck"]["dist"]) 
+                    if mode != "truck" else 0 for mode in modes]
     df = DataFrame(data={
         "Commodity": [purpose.name]*len(modes),
         "Mode": modes,
