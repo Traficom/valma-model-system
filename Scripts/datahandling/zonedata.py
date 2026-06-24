@@ -128,8 +128,8 @@ class ZoneData:
         # Two-way intrazonal distances from building distances
         self["dist_walk"] = data["intra_dist_walk"] * 2
         self["dist_bike"] = data["intra_dist_bike"] * 2
-        self["time_car"] = data["intra_dist_car"] / (20/60) # 20 km/h
-        self["cost_car"] = car_dist_cost * data["intra_dist_car"]
+        self["time_car"] = 2 * data["intra_dist_car"] / (20/60) # 20 km/h
+        self["cost_car"] = 2 * car_dist_cost * data["intra_dist_car"]
 
         dummies = {
             "zone": {},
