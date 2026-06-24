@@ -270,12 +270,9 @@ class EmmeAssignmentModel(AssignmentModel):
         network = self.day_scenario.get_network()
         networks = {ap.name: ap.emme_scenario.get_network()
             for ap in self.assignment_periods}
-        for result in param.segment_results:
-            self._transit_segment_24h(network, networks, result)
-            if result != "transit_volumes":
-                self._node_24h(network, networks, result)
-            log.info("Attribute {} aggregated to 24h (scenario {})".format(
-                result, self.day_scenario.id))
+        self._node_seg_24h(network, networks)
+        log.info("Segment attribute aggregated to 24h (scenario {})".format(
+            self.day_scenario.id))
         self._link_24h(network, networks)
         self.day_scenario.publish_network(network)
         log.info("Link attributes aggregated to 24h (scenario {})".format(
@@ -538,10 +535,9 @@ class EmmeAssignmentModel(AssignmentModel):
             sum24.sum_24h(link, networks, hour_attrs, day_attrs, sum24.get_link)
         return network
 
-    def _node_24h(self, network: Network, networks: Dict[str, Network],
-                  attr: str):
+    def _node_seg_24h(self, network: Network, networks: Dict[str, Network]):
         """ 
-        Sums and expands node attributes to 24h.
+        Sums and expands node and segment attributes to 24h.
 
         Parameters
         ----------
@@ -552,48 +548,28 @@ class EmmeAssignmentModel(AssignmentModel):
                 Time period
             value : inro.emme.network.Network.Network
                 Time-period networks
-        attr : str
-            Attribute name that is usually in param.segment_results
         """
-        day_attrs = {}
-        hour_attrs = {}
+        node_day_attrs = {}
+        node_hour_attrs = {}
+        segment_day_attrs = {}
+        segment_hour_attrs = {}
         for ap in self.assignment_periods:
-            hour_attrs[ap.name] = {}
+            node_hour_attrs[ap.name] = {}
+            segment_hour_attrs[ap.name] = {}
             for tc in self.simple_transit_classes:
-                result = ap.assignment_modes[tc].node_results[attr]
-                hour_attrs[ap.name][tc] = result[ap.name]
-                day_attrs[tc] = result["vrk"]
+                for result in ap.assignment_modes[tc].node_results.values():
+                    node_hour_attrs[ap.name][tc] = result[ap.name]
+                    node_day_attrs[tc] = result["vrk"]
+                for result in ap.assignment_modes[tc].segment_results.values():
+                    segment_hour_attrs[ap.name][tc] = result[ap.name]
+                    segment_day_attrs[tc] = result["vrk"]
         # save node volumes to result network
         for node in network.nodes():
-            sum24.sum_24h(node, networks, hour_attrs, day_attrs, sum24.get_node)
-        return network
-
-    def _transit_segment_24h(self, network: Network,
-                             networks: Dict[str, Network], attr: str):
-        """ 
-        Sums and expands transit attributes to 24h.
-
-        Parameters
-        ----------
-        network : inro.emme.network.Network.Network
-            Day network
-        networks : dict
-            key : str
-                Time period
-            value : inro.emme.network.Network.Network
-                Time-period networks
-        attr : str
-            Attribute name that is usually in param.segment_results
-        """
-        day_attrs = {}
-        hour_attrs = {}
-        for ap in self.assignment_periods:
-            hour_attrs[ap.name] = {}
-            for tc in self.simple_transit_classes:
-                result = ap.assignment_modes[tc].segment_results[attr]
-                hour_attrs[ap.name][tc] = result[ap.name]
-                day_attrs[tc] = result["vrk"]
+            sum24.sum_24h(
+                node, networks, node_hour_attrs, node_day_attrs, sum24.get_node)
         # save segment volumes to result network
         for segment in network.transit_segments():
-            sum24.sum_24h(segment, networks, hour_attrs, day_attrs, sum24.get_segment)
+            sum24.sum_24h(
+                segment, networks, segment_hour_attrs, segment_day_attrs,
+                sum24.get_segment)
         return network
