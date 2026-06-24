@@ -271,11 +271,9 @@ class EmmeAssignmentModel(AssignmentModel):
         networks = {ap.name: ap.emme_scenario.get_network()
             for ap in self.assignment_periods}
         self._node_seg_24h(network, networks)
-        log.info("Segment attribute aggregated to 24h (scenario {})".format(
-            self.day_scenario.id))
         self._link_24h(network, networks)
         self.day_scenario.publish_network(network)
-        log.info("Link attributes aggregated to 24h (scenario {})".format(
+        log.info("Attributes aggregated to 24h (scenario {})".format(
             self.day_scenario.id))
 
         # Aggregate and print transit vehicle kms
