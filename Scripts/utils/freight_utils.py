@@ -141,26 +141,28 @@ def write_purpose_summary(purpose: FreightPurpose, demand: dict, aux_demand: dic
     and total eur-ton product.
     """
     modes = list(demand)
-    mode_tons = [numpy.sum(demand[mode])+0.01 for mode in modes]
-    shares_tons = [tons / sum(mode_tons) for tons in mode_tons]
-    mode_ton_dist = [numpy.sum(demand[mode]*impedance[mode]["dist"])+0.01 for mode in modes]
-    shares_mileage = [share / sum(mode_ton_dist) for share in mode_ton_dist]
-    costs = {mode: c["cost"] for mode, c in purpose.get_costs(impedance).items()}
-    for cost in costs.values():
-        cost[cost == numpy.inf] = 0
-    ton_costs = [numpy.sum(costs.pop(mode)*demand[mode]) for mode in modes]
-    aux_ton_dist = [numpy.sum(aux_demand[mode]*impedance[mode]["aux_dist"])
-                    if mode != "truck" else 0 for mode in modes]
+    mode_tons = numpy.array([numpy.sum(demand[mode])
+                             for mode in modes], dtype=numpy.int32)
+    mode_ton_dist = numpy.array([numpy.sum(demand[mode] * impedance[mode]["dist"]) 
+                                 for mode in modes], dtype=numpy.int64)
+    costs = {mode: numpy.nan_to_num(c["cost"], posinf=0)
+             for mode, c in purpose.get_costs(impedance).items()}
     df = DataFrame(data={
-        "Commodity": [purpose.name]*len(modes),
+        "Commodity": [purpose.name] * len(modes),
         "Mode": modes,
-        "Mode share from tons (%)": [round(i, 3) for i in shares_tons],
-        "Tons (t/annual)": [int(i) for i in mode_tons],
-        "Mode share from mileage (%)": [round(i, 3) for i in shares_mileage],
-        "Ton mileage (tkm/annual)": [int(i) for i in mode_ton_dist],
-        "Aux ton mileage (tkm/annual)": [int(i) for i in aux_ton_dist],
-        "Costs (eur-ton/annual)": [int(i) for i in ton_costs]
-        })
+        "Mode share from tons (%)": numpy.round(mode_tons / mode_tons.sum(), 3),
+        "Tons (t/annual)": mode_tons,
+        "Mode share from mileage (%)": numpy.round(mode_ton_dist / mode_ton_dist.sum(), 3),
+        "Ton mileage (tkm/annual)": mode_ton_dist,
+        "Aux ton mileage (tkm/annual)": [
+            int(numpy.sum(aux_demand[mode] * impedance[mode]["aux_dist"]))
+            if mode != "truck" else 0 for mode in modes
+        ],
+        "Costs (eur-ton/annual)": [
+            int(numpy.sum(costs[mode] * demand[mode])) 
+            for mode in modes
+        ]
+    })
     filename = "freight_purpose_summary.txt"
     resultdata.print_concat(df, filename)
 
@@ -179,13 +181,14 @@ def write_zone_summary(purpose_name: str, zone_numbers: list,
 def write_vehicle_summary(demand: dict, impedance: dict, resultdata: ResultsData):
     """Write summary for truck classes and their mileage."""
     modes = list(demand)
-    vehicles_sum = [numpy.sum(demand[mode]) for mode in modes]
-    mileage_sum = [numpy.sum(impedance[mode]["dist"]*demand[mode]) for mode in modes]
     df = DataFrame(data={
         "Mode": modes,
-        "Vehicle trips (day)": [int(i) for i in vehicles_sum],
-        "Vehicle mileage (vkm/day)": [int(i) for i in mileage_sum]
-        })
+        "Vehicle trips (day)": numpy.array([
+            numpy.sum(demand[mode]) for mode in modes], dtype=numpy.int32),
+        "Vehicle mileage (vkm/day)": numpy.array([
+            numpy.sum(impedance[mode]["dist"]*demand[mode])
+            for mode in modes], dtype=numpy.int64)
+    })
     filename = "freight_vehicle_summary.txt"
     resultdata.print_data(df, filename)
 
