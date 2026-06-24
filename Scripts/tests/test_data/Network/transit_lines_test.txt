@@ -5,6 +5,20 @@ c Scenario 5:     test network
 t lines
 c Transit Lines
 c Line  Mod Veh Headwy Speed Description             Data1  Data2  Data3
+a'1000_w' w  15   1.00  30.00 'Helsinki-Espoo'          5      0      0
+  path=no
+   900136      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   900300      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   900301      dwt=>0.01   ttf=0   us1=0   us2=0   us3=0
+   249548        lay=0.00
+c '1000_w' first:      dwt=<0.01 hidden:    us1=0   us2=0   us3=0
+a'1001_w' w  15   1.00  30.00 'Espoo-Helsinki'          5      0      0
+  path=no
+   249548      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   900301      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
+   900300         dwt=>0   ttf=0   us1=0   us2=0   us3=0
+   900136        lay=0.00
+c '1001_w' first:         dwt=<0 hidden:    us1=0   us2=0   us3=0
 a'10002_W' W  20   1.00  30.00 'KotkaHamina-Hanko'       4     10      0
   path=no
    834513      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
@@ -151,20 +165,6 @@ a'10009_J' J  31   1.00  30.00 'Tampere-Turku'           4     10      0
    247629      dwt=>0.01   ttf=0   us1=0   us2=0   us3=0
    247507        lay=0.00
 c '10009_J' first:         dwt=<0 hidden:    us1=0   us2=0   us3=0
-a'1000_w' w  11   1.00  30.00 'Helsinki-Espoo'          5      0      0
-  path=no
-   900136      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
-   900300      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
-   900301      dwt=>0.01   ttf=0   us1=0   us2=0   us3=0
-   249548        lay=0.00
-c '1000_w' first:      dwt=<0.01 hidden:    us1=0   us2=0   us3=0
-a'1001_w' w  11   1.00  30.00 'Espoo-Helsinki'          5      0      0
-  path=no
-   249548      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
-   900301      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
-   900300         dwt=>0   ttf=0   us1=0   us2=0   us3=0
-   900136        lay=0.00
-c '1001_w' first:         dwt=<0 hidden:    us1=0   us2=0   us3=0
 a'EETLL-FIHMN_kaasu' L  23   1.00  30.00 'EETLL-FIHMN_kaasu'     254    118  11.54
   path=no
    900400      dwt=+0.01   ttf=0   us1=0   us2=0   us3=0
@@ -316,12 +316,12 @@ a'FIHNK-SESTO_sailio' O  24   1.00  30.00 'FIHNK-SESTO_sailio'    301      5  11
 c 'FIHNK-SESTO_sailio' first:      dwt=<0.01 hidden:    us1=0   us2=0   us3=0
 a'Finnair-AY285-1' l   6 999.00  30.00 'AY285-EFJY'              3      0      0
   path=no
-   249870      dwt=>0.01   ttf=0   us1=50   us2=0   us3=0
+   249870      dwt=>0.01   ttf=0  us1=50   us2=0   us3=0
    249881        lay=0.00
 c 'Finnair-AY285-1' first:      dwt=<0.01 hidden:    us1=0   us2=0   us3=0
 a'Finnair-AY285-2' l   6 999.00  30.00 'AY285-EFJY'              3      0      0
   path=no
-   249881         dwt=>0   ttf=0   us1=50   us2=0   us3=0
+   249881         dwt=>0   ttf=0  us1=50   us2=0   us3=0
    249870        lay=0.00
 c 'Finnair-AY285-2' first:         dwt=<0 hidden:    us1=0   us2=0   us3=0
 a'Helsingin-15-1' p   7   8.90  30.00 'Itakeskus-Keilaniemi'      0      0      0
