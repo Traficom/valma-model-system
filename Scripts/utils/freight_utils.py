@@ -91,35 +91,30 @@ def write_trade_route_summary(purpose: FreightPurpose, demand: dict,
     Handles both 2nd leg and cluster_border summary outputs.
     """
     commodity, trade_type = purpose.name.split("_")
-    cluster_border_indices = {i: key for i, key in enumerate(cluster_border_ids)}
+    cluster_border_indices = dict(enumerate(cluster_border_ids))
+    match_clusters = purpose.is_export == bool(clusters)
     if clusters:
-        key_indices = {i: key for i, key in enumerate(clusters)}
+        key_indices = dict(enumerate(clusters))
         leg_name = "leg_three" if purpose.is_export else "leg_one"
         label = "Cluster"
-        filename = "freight_leg2_summary.txt"
+        filename = "freight_cluster_border_summary.txt"
     else:
-        key_indices = {i: key for i, key in enumerate(fin_border_ids)}
+        key_indices = dict(enumerate(fin_border_ids))
         leg_name = "leg_two"
         label = "Finnish border"
-        filename = "freight_cluster_border_summary.txt"
-    df_data = []
-    for mode in demand[leg_name]:
-        mtx = numpy.round(demand[leg_name][mode], 5)
-        for row, col in zip(*numpy.nonzero(mtx)):
-            if clusters:
-                idx = col if purpose.is_export else row
-                foreign_border_idx = row if purpose.is_export else col
-            else:
-                idx = row if purpose.is_export else col
-                foreign_border_idx = col if purpose.is_export else row
-            df_data.append({
-                "Commodity": commodity,
-                "Type": trade_type,
-                "Mode": mode,
-                label: key_indices[idx],
-                "Foreign_border": cluster_border_indices[foreign_border_idx],
-                "Tons (t/annual)": mtx[row, col]
-            })
+        filename = "freight_leg2_summary.txt"
+    df_data = [
+        {
+            "Commodity": commodity,
+            "Type": trade_type,
+            "Mode": mode,
+            label: key_indices[col if match_clusters else row],
+            "Foreign_border": cluster_border_indices[row if match_clusters else col],
+            "Tons (t/annual)": mtx[row, col]
+        }
+        for mode, mtx in demand[leg_name].items()
+        for row, col in zip(*numpy.nonzero(numpy.round(mtx, 5)))
+    ]
     resultdata.print_concat(DataFrame(df_data), filename)
 
 def write_domestic_leg_summary(demand_trade: dict, impedance: dict,
@@ -159,8 +154,12 @@ def write_purpose_summary(purpose: FreightPurpose, demand: dict, aux_demand: dic
     for cost in costs.values():
         cost[cost == numpy.inf] = 0
     ton_costs = [numpy.sum(costs.pop(mode)*demand[mode]) for mode in modes]
-    aux_ton_dist = [numpy.sum(aux_demand[mode]*impedance["truck"]["dist"]) 
-                    if mode != "truck" else 0 for mode in modes]
+    aux_ton_dist = []
+    for mode in modes:
+        if mode == "truck":
+            aux_ton_dist.append(0)
+        else:
+            aux_ton_dist.append(numpy.sum(aux_demand[mode]*impedance[mode]["aux_dist"]))
     df = DataFrame(data={
         "Commodity": [purpose.name]*len(modes),
         "Mode": modes,
