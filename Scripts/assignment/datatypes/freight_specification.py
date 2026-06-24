@@ -39,7 +39,7 @@ class FreightMode(AssignmentMode):
         self.canal_cost = self._create_matrix("canal_cost")
         no_penalty = dict.fromkeys(
             ["global", "at_nodes", "on_lines", "on_segments"])
-        all_modes = {param.park_and_ride_mode: "truck access"}
+        all_modes = {param.freight_aux_mode: "truck access"}
         modes = param.freight_modes[self.name]
         all_modes.update(modes)
         transitions = [{
@@ -54,6 +54,10 @@ class FreightMode(AssignmentMode):
             "boarding_cost": no_penalty.copy(),
             "waiting_time": None,
         } for mode in all_modes]
+        # Prevent reaching destination without boarding transit mode
+        journey_levels[0]["destinations_reachable"] = False
+        journey_levels[1]["transition_rules"][0]["next_journey_level"] = 1
+        
         # Terminal cost is related to mode that changes the journey level,
         # hence "the other" mode
         terminal_cost_attrs = ([param.terminal_cost_attr]
@@ -88,7 +92,7 @@ class FreightMode(AssignmentMode):
                 "perception_factor": 1,
             },
             "aux_transit_by_mode": [{
-                "mode": param.park_and_ride_mode,
+                "mode": param.freight_aux_mode,
                 "time": "@truck_time_vrk",
                 "time_perception_factor": param.aux_time_perception_factor_truck,
             }],
@@ -118,7 +122,7 @@ class FreightMode(AssignmentMode):
         self.local_result_spec = {
             "type": "EXTENDED_TRANSIT_MATRIX_RESULTS",
             "by_mode_subset": {
-                "modes": [param.park_and_ride_mode],
+                "modes": [param.freight_aux_mode],
                 "distance": self.aux_dist.id,
                 "actual_aux_transit_times": self.aux_time.id,
             },
