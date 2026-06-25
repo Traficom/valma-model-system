@@ -58,6 +58,7 @@
             "municipality",
             "county",
             "submodel",
+            "pt_authority",
             "calibration_area"
         ]
     },
@@ -120,7 +121,8 @@
             "municipality",
             "county",
             "submodel",
-            "calibration_area"
+            "calibration_area",
+            "pt_authority"
         ]
     }
 }

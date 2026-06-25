@@ -155,69 +155,74 @@
             "impedance": {},
             "log": {
                 "attraction_size": 1,
-                "logsum": 0.7275
+                "logsum": 0.7454
             },
             "attraction_size": {
                 "area_leisure_buildings": 1,
-                "wrk_hospitality": 43.16371,
-                "age_7_17": 0.25872,
-                "age_18_29": 0.25872,
-                "age_30_49": 0.25872,
-                "age_50_64": 6.3917,
-                "age_65_99": 6.3917
+                "wrk_hospitality": 44.38937,
+                "age_7_17": 0.25589,
+                "age_18_29": 0.25589,
+                "age_30_49": 0.25589,
+                "age_50_64": 6.41732,
+                "age_65_99": 6.41732
             }
         }
     },
     "mode_choice": {
         "car_drv": {
-            "constant": -8.972,
+            "constant": -8.15,
             "generation": {},
             "attraction": {
                 "within_zone_inf": -1,
-                "Lappi": 1.22,
-                "beeline": 0.0038
+                "Lappi": 1.206,
+                "beeline": 0.0036
             },
             "impedance": {
-                "gen_cost": -0.01029
+                "gen_cost": -0.00979
             },
             "log": {
-                "gen_cost": -1.787
+                "gen_cost": -1.751
             },
             "individual_dummy": {
-                "sh_cars1_hh1": 3.868,
-                "sh_cars2_hh2": 3.868,
-                "sh_cars1_hh2": 3.602
+                "sh_cars1_hh1": 3.842,
+                "sh_cars2_hh2": 3.842,
+                "sh_cars1_hh2": 3.583
             }
         },
         "car_pax": {
-            "constant": -6.944,
+            "constant": -6.127,
             "generation": {},
             "attraction": {
                 "within_zone_inf": -1,
-                "Lappi": 1.22,
-                "beeline": 0.0038
+                "Lappi": 1.206,
+                "beeline": 0.0036
             },
             "impedance": {
-                "gen_cost": -0.0118
+                "gen_cost": -0.01121
             },
             "log": {
-                "gen_cost": -1.923
+                "gen_cost": -1.885
             },
             "individual_dummy": {
-                "sh_cars1_hh2": 1.56,
-                "sh_cars2_hh2": 1.56
+                "sh_cars1_hh2": 1.543,
+                "sh_cars2_hh2": 1.543
             }
         },
         "transit": {
-            "constant": -3.102,
-            "generation": {},
+            "constant": -3.046,
+            "generation": {
+                "HSL": 0.2924,
+                "Lahti": -0.03502,
+                "Tampere": 0.194,
+                "Turku": 0.2063
+            },
             "attraction": {
                 "within_zone_inf": -1,
-                "Lappi": 1.22,
-                "beeline": 0.0038
+                "Lappi": 1.206,
+                "beeline": 0.0036
             },
             "impedance": {
-                "logsum": 0.91
+                "logsum": 0.8569
             },
             "log": {},
             "individual_dummy": {}
@@ -227,25 +232,27 @@
             "generation": {},
             "attraction": {
                 "within_zone_inf": -1,
-                "Lappi": 1.22,
-                "beeline": 0.0038
+                "Lappi": 1.206,
+                "beeline": 0.0036
             },
             "impedance": {
-                "logsum": 0.91
+                "logsum": 0.8569
             },
             "log": {},
             "individual_dummy": {}
         },
         "walk": {
-            "constant": -7.412,
-            "generation": {},
+            "constant": -6.676,
+            "generation": {
+                "Oulu": 0.721
+            },
             "attraction": {
                 "within_zone_inf": -1,
-                "Lappi": 1.22,
-                "beeline": 0.0038
+                "Lappi": 1.206,
+                "beeline": 0.0036
             },
             "impedance": {
-                "dist": -0.2556
+                "dist": -0.2528
             },
             "log": {},
             "individual_dummy": {}
