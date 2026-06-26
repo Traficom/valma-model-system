@@ -525,8 +525,7 @@ class EmmeAssignmentModel(AssignmentModel):
         for attr in day_attrs:
             self.emme_project.create_network_field(
                 "LINK", "REAL", day_attrs[attr], f"{attr}_vol",
-                overwrite=True, scenario=self.day_scenario)
-            network.create_attribute("LINK", day_attrs[attr])
+                overwrite=True, scenario=self.day_scenario, network=network)
         # save link volumes to result network
         for link in network.links():
             sum24.sum_24h(link, networks, hour_attrs, day_attrs, sum24.get_link)

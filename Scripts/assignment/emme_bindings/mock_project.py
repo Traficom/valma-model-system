@@ -109,7 +109,8 @@ class MockProject:
                              network_field_name: str,
                              network_field_description: str,
                              overwrite: bool = False,
-                             scenario: Optional[Scenario] = None):
+                             scenario: Optional[Scenario] = None,
+                             network: Optional[Network] = None):
         if overwrite:
             try:
                 scenario.delete_network_field(
@@ -725,9 +726,6 @@ class Network:
         }
         self._extra_attr = {attr_type: {} for attr_type in self._objects}
         self._netfield = {attr_type: {} for attr_type in self._objects}
-
-    def create_attribute(self, *args, **kwargs):
-        pass
 
     def mode(self, idx: int) -> 'Mode':
         if idx in self._modes:

@@ -216,16 +216,14 @@ class TransitMode(AssignmentMode):
                 self.segment_results[result][tp] = result_attr
                 self.emme_project.create_network_field(
                     "TRANSIT_SEGMENT", "REAL", result_attr, f"{self.name} {result}",
-                    overwrite=True, scenario=scenario)
-                network.create_attribute("TRANSIT_SEGMENT", result_attr)
+                    overwrite=True, scenario=scenario, network=network)
                 if result != "transit_volumes":
                     # Create node network fields
                     node_result_attr = f"#node_{self.name}_{temp_result_attr[1:]}_{tp}"
                     self.node_results[result][tp] = node_result_attr
                     self.emme_project.create_network_field(
                         "NODE", "REAL", node_result_attr, f"{self.name} {result}",
-                        overwrite=True, scenario=scenario)
-                    network.create_attribute("NODE", node_result_attr)
+                        overwrite=True, scenario=scenario, network=network)
             for segment in network.transit_segments():
                 # Save segment volumes to network field
                 vol = segment[temp_result_attr]
