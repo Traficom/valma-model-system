@@ -32,9 +32,7 @@
                     "sh_wrk_healthcare",
                     "sh_wrk_shop",
                     "sh_wrk_hospitality",
-                    "sh_wrk_recreation",
-                    "sh_wrk_edu_higher",
-                    "sh_wrk_edu_other"
+                    "sh_wrk_recreation"
                 ]
             },
             "sport_facility_indoor",
@@ -42,6 +40,8 @@
             "area_leisure_buildings",
             "area_university_buildings",
             "students_comprehensive",
+            "students_upper_secondary",
+            "students_higher_education",
             "land_area"
         ],
         "mean": [
