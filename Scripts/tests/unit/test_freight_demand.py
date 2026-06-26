@@ -9,9 +9,9 @@ from copy import deepcopy
 import parameters.assignment as param
 from datahandling.resultdata import ResultsData
 from datahandling.zonedata import FreightZoneData
+from datatypes.freight_purpose import create_purposes
 from utils.freight_utils import (
-    create_purposes, write_trade_route_summary, write_purpose_summary, 
-    update_diagonal_cost, write_zone_summary, write_vehicle_summary, 
+    update_diagonal_cost, write_vehicle_summary,
     write_domestic_leg_summary,
 )
 from tests.integration.test_data_handling import (
@@ -83,7 +83,7 @@ class FreightModelTest(unittest.TestCase):
         
         # Run test domestic demand model
         for purpose in purposes.values():
-            demand = purpose.calc_traffic(impedance)
+            demand = purpose.calc_traffic(impedance, iterations)
             demand_trade = purpose.calc_trade_mode_share(demand, trade_demand, fin_borders)
             costs = purpose.get_costs(impedance)
             self._assert_calc_demand_results(demand, costs)
@@ -106,8 +106,8 @@ class FreightModelTest(unittest.TestCase):
                         demand_trade[foreign_purpose]["truck"], mode)
                 total_demand[mode] += vehicles["domestic"][mode] + vehicles["foreign"][mode]
             self._assert_calc_vehicle_results(vehicles, purpose.name)
-            write_purpose_summary(purpose, demand, aux_demand, impedance, resultdata)
-            write_zone_summary(purpose.name, zonedata.zone_numbers, demand, resultdata)
+            purpose.write_summary(demand, aux_demand, impedance)
+            purpose.write_zone_summary(demand)
             write_domestic_leg_summary(demand_trade, impedance, resultdata)
             
             # Calculate test logistics demand
@@ -163,10 +163,6 @@ class FreightModelTest(unittest.TestCase):
         for purpose in purposes.values():
             demand = purpose.run_trade_route_module(
                 impedance, *marine_attr, TRADE_DEMAND_PATH)
-            write_trade_route_summary(purpose, demand, marine_modes, 
-                                      fin_border, cluster_border, resultdata)
-            write_trade_route_summary(purpose, demand, marine_modes, fin_border, 
-                                      cluster_border, resultdata, network_clusters)
             trade_demand[purpose.name] = demand
         resultdata.flush()
         return trade_demand, purposes, list(fin_border.values())

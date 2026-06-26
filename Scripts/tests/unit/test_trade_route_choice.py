@@ -8,7 +8,7 @@ import openmatrix as omx
 
 from datahandling.resultdata import ResultsData
 from datahandling.zonedata import FreightZoneData
-from utils.freight_utils import create_purposes
+from datatypes.freight_purpose import create_purposes
 from parameters.marine_ship import leg_names
 from tests.integration.test_data_handling import (
     TEST_DATA_PATH,

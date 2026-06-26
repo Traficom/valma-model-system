@@ -13,47 +13,7 @@ from parameters.commodity import commodity_conversion
 from datahandling.matrixdata import MatrixData
 from assignment.freight_assignment import FreightAssignmentPeriod
 
-def create_purposes(parameters_path: Path, zonedata: FreightZoneData, 
-                    resultdata: ResultsData, costdata: Dict[str, dict]) -> dict:
-    """Creates instances of FreightPurpose class for each model parameter json file
-    in parameters path.
 
-    Parameters
-    ----------
-    parameters_path : Path
-        Path object to estimation model type folder containing model parameter
-        json files
-    zonedata : FreightZoneData
-        freight zonedata container
-    resultdata : ResultsData
-        handler for result saving operations 
-    costdata : Dict[str, dict]
-        Freight purpose : Freight mode
-            Freight mode (truck/freight_train/ship) : mode
-                Mode (truck/trailer_truck...) : unit cost name
-                    unit cost name : unit cost value
-
-    Returns
-    -------
-    dict[str, FreightPurpose]
-        purpose name : FreightPurpose
-    """
-    purposes = {}
-    for file in parameters_path.rglob("*.json"):
-        commodity_params = json.loads(file.read_text("utf-8"))
-        commodity = commodity_params["name"].split("_")[0]
-        purpose_cost = costdata.get(commodity_conversion[commodity])
-        if not purpose_cost:
-            log.warn(f"Aggregated commodity class '{commodity_conversion[commodity]}' "
-                     f"for commodity '{commodity}' not found in costs json")
-            continue
-        zone_data = {parameters_path.stem: zonedata}
-        if parameters_path.stem == "foreign":
-            zone_data["domestic"] = zonedata
-        purposes[commodity_params["name"]] = FreightPurpose(commodity_params, 
-                                                            zone_data, resultdata,
-                                                            purpose_cost)
-    return purposes
 
 def update_diagonal_cost(impedance: dict) -> dict:
     """Updates diagonal (own zone) impedance values
@@ -84,38 +44,6 @@ def update_diagonal_cost(impedance: dict) -> dict:
             numpy.fill_diagonal(impedance[mode][imp_type], diag_values[imp_type])
     return impedance
 
-def write_trade_route_summary(purpose: FreightPurpose, demand: dict, 
-                              _, fin_border_ids: dict, cluster_border_ids: dict,
-                              resultdata: ResultsData, clusters: dict = None):
-    """Write summary from routed trade demand matrix.
-    Handles both 2nd leg and cluster_border summary outputs.
-    """
-    commodity, trade_type = purpose.name.split("_")
-    cluster_border_indices = dict(enumerate(cluster_border_ids))
-    match_clusters = purpose.is_export == bool(clusters)
-    if clusters:
-        key_indices = dict(enumerate(clusters))
-        leg_name = "leg_three" if purpose.is_export else "leg_one"
-        label = "Cluster"
-        filename = "freight_cluster_border_summary.txt"
-    else:
-        key_indices = dict(enumerate(fin_border_ids))
-        leg_name = "leg_two"
-        label = "Finnish border"
-        filename = "freight_leg2_summary.txt"
-    df_data = [
-        {
-            "Commodity": commodity,
-            "Type": trade_type,
-            "Mode": mode,
-            label: key_indices[col if match_clusters else row],
-            "Foreign_border": cluster_border_indices[row if match_clusters else col],
-            "Tons (t/annual)": mtx[row, col]
-        }
-        for mode, mtx in demand[leg_name].items()
-        for row, col in zip(*numpy.nonzero(numpy.round(mtx, 5)))
-    ]
-    resultdata.print_concat(DataFrame(df_data), filename)
 
 def write_domestic_leg_summary(demand_trade: dict, impedance: dict,
                                resultdata: ResultsData):
@@ -137,51 +65,6 @@ def write_domestic_leg_summary(demand_trade: dict, impedance: dict,
     ]
     filename = "freight_domestic_leg_summary.txt"
     resultdata.print_concat(DataFrame(rows), filename)
-
-def write_purpose_summary(purpose: FreightPurpose, demand: dict, aux_demand: dict, 
-                          impedance: dict, resultdata: ResultsData):
-    """Write purpose-mode specific summary as txt-file containing mode shares 
-    calculated from demand (tons), mode specific demand (tons), mode shares 
-    calculated from mileage, mode specific ton-mileage, mode auxiliary ton-mileage
-    and total eur-ton product.
-    """
-    modes = list(demand)
-    mode_tons = numpy.array([numpy.sum(demand[mode])
-                             for mode in modes], dtype=numpy.int32)
-    mode_ton_dist = numpy.array([numpy.sum(demand[mode] * impedance[mode]["dist"]) 
-                                 for mode in modes], dtype=numpy.int64)
-    costs = {mode: numpy.nan_to_num(c["cost"], posinf=0)
-             for mode, c in purpose.get_costs(impedance).items()}
-    df = DataFrame(data={
-        "Commodity": [purpose.name] * len(modes),
-        "Mode": modes,
-        "Mode share from tons (%)": numpy.round(mode_tons / mode_tons.sum(), 3),
-        "Tons (t/annual)": mode_tons,
-        "Mode share from mileage (%)": numpy.round(mode_ton_dist / mode_ton_dist.sum(), 3),
-        "Ton mileage (tkm/annual)": mode_ton_dist,
-        "Aux ton mileage (tkm/annual)": [
-            int(numpy.sum(aux_demand[mode] * impedance[mode]["aux_dist"]))
-            if mode != "truck" else 0 for mode in modes
-        ],
-        "Costs (eur-ton/annual)": [
-            int(numpy.sum(costs[mode] * demand[mode])) 
-            for mode in modes
-        ]
-    })
-    filename = "freight_purpose_summary.txt"
-    resultdata.print_concat(df, filename)
-
-def write_zone_summary(purpose_name: str, zone_numbers: list, 
-                       demand: dict, resultdata: ResultsData):
-    """Write purpose and mode specific departing and arriving tons for each zone
-    in zone mapping.
-    """
-    df = DataFrame(index=zone_numbers)
-    for mode in demand:
-        df[f"Departing_{purpose_name}_{mode}"] = numpy.sum(demand[mode], axis=1, dtype="int32")
-        df[f"Arriving_{purpose_name}_{mode}"] = numpy.sum(demand[mode], axis=0, dtype="int32")
-    filename = "freight_zone_summary.txt"
-    resultdata.print_data(df, filename)
 
 def write_vehicle_summary(demand: dict, impedance: dict, resultdata: ResultsData):
     """Write summary for truck classes and their mileage."""

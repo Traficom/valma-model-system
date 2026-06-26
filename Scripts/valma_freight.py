@@ -12,9 +12,10 @@ from datahandling.resultdata import ResultsData
 from assignment.emme_assignment import EmmeAssignmentModel
 from assignment.emme_bindings.emme_project import EmmeProject
 from datahandling.matrixdata import MatrixData
-
+from datatypes.freight_purpose import (
+    DomesticFreightPurpose, ForeignFreightPurpose, create_purposes)
 from utils.freight_utils import (
-    create_purposes, StoreDemand, update_diagonal_cost, write_trade_route_summary, 
+    StoreDemand, update_diagonal_cost,
     write_domestic_leg_summary, write_purpose_summary, 
     write_zone_summary, write_vehicle_summary
 )
@@ -46,8 +47,8 @@ def main(args):
     costdata = json.loads(cost_data_file.read_text("utf-8"))
     
     # Set foreign purposes and fetch impedances
-    foreign_purposes = create_purposes(parameters_path / "foreign", zonedata, 
-                                       resultdata, costdata["freight"])
+    foreign_purposes: dict[str, ForeignFreightPurpose] = create_purposes(
+        parameters_path / "foreign", zonedata, resultdata, costdata["freight"])
     purposes_to_assign = [purpose for purpose in list(commodity_conversion)
                           if purpose in args.specify_commodity_names]
     ass_model.prepare_freight_network(
@@ -65,11 +66,8 @@ def main(args):
     for purpose in foreign_purposes.values():
         log.info(f"Calculating trade route for purpose: {purpose.name}")
         marine_data = marine_export if purpose.is_export else marine_import
-        demand = purpose.run_trade_route_module(impedance, *marine_data,
-                                                trade_demand_file)
-        write_trade_route_summary(purpose, demand, *marine_data, resultdata)
-        write_trade_route_summary(purpose, demand, *marine_data, resultdata, 
-                                  clusters)
+        demand = purpose.run_trade_route_module(
+            impedance, *marine_data, trade_demand_file)
         trade_demand[purpose.name] = demand
     resultdata.flush()
     fin_border_ids = list(marine_export[1].values())
@@ -82,16 +80,12 @@ def main(args):
     total_demand = {mode: numpy.zeros([zonedata.nr_zones, zonedata.nr_zones], dtype="float32")
                     for mode in param.truck_classes}
     
-    purposes = create_purposes(parameters_path / "domestic", zonedata, 
-                               resultdata, costdata["freight"])
+    purposes: dict[str, DomesticFreightPurpose] = create_purposes(
+        parameters_path / "domestic", zonedata, resultdata, costdata["freight"])
     # Run domestic demand calculation
     for purpose in purposes.values():
         log.info(f"Calculating demand for purpose: {purpose.name}")
-        demand = purpose.calc_traffic(impedance)
-        if purpose.route_params and args.logistics_iterations > 0:
-            demand["truck"], _ = purpose.run_logistics_module(demand["truck"], impedance, 
-                                                              ass_model.mapping, 
-                                                              args.logistics_iterations)
+        demand = purpose.calc_traffic(impedance, args.logistics_iterations)
         for mode in demand:
             omx_filename = ("freight_demand_tons" if purpose.name 
                             in args.specify_commodity_names else "")
@@ -112,8 +106,8 @@ def main(args):
                     total_demand[mode] += foreign_purposes[foreign_purpose].calc_vehicles(
                         dom_leg_tons[foreign_purpose]["truck"], mode)
             write_domestic_leg_summary(dom_leg_tons, impedance, resultdata)
-        write_purpose_summary(purpose, demand, aux_demand, impedance, resultdata)
-        write_zone_summary(purpose.name, zonedata.zone_numbers, demand, resultdata)
+        purpose.write_summary(demand, aux_demand, impedance)
+        purpose.write_zone_summary(demand)
     write_vehicle_summary(total_demand, impedance, resultdata)
     resultdata.flush()
     
