@@ -100,14 +100,14 @@
         "car_pax": {
             "attraction": {},
             "impedance": {
-                "time": -0.1453
+                "time": -0.1465
             },
             "log": {
                 "attraction_size": 1
             },
             "attraction_size": {
                 "students_comprehensive*within_municipality": 1,
-                "students_comprehensive*outside_municipality": 0.0973
+                "students_comprehensive*outside_municipality": 0.09769
             }
         },
         "transit": {
@@ -115,14 +115,14 @@
                 "within_zone_inf": -1
             },
             "impedance": {
-                "time": -0.01645
+                "time": -0.01651
             },
             "log": {
                 "attraction_size": 1
             },
             "attraction_size": {
                 "students_comprehensive*within_municipality": 1,
-                "students_comprehensive*outside_municipality": 0.0973
+                "students_comprehensive*outside_municipality": 0.09769
             }
         },
         "bike": {
@@ -135,62 +135,62 @@
             },
             "attraction_size": {
                 "students_comprehensive*within_municipality": 1,
-                "students_comprehensive*outside_municipality": 0.0973
+                "students_comprehensive*outside_municipality": 0.09769
             }
         },
         "walk": {
             "attraction": {},
             "impedance": {
-                "dist": -0.7074
+                "dist": -0.7075
             },
             "log": {
                 "attraction_size": 1
             },
             "attraction_size": {
                 "students_comprehensive*within_municipality": 1,
-                "students_comprehensive*outside_municipality": 0.0973
+                "students_comprehensive*outside_municipality": 0.09769
             }
         }
     },
     "mode_choice": {
         "car_pax": {
-            "constant": -4.987,
+            "constant": -5.005,
             "generation": {},
             "attraction": {},
             "impedance": {},
             "log": {
-                "logsum": 0.4764
+                "logsum": 0.4711
             },
             "individual_dummy": {
-                "sh_cars1_hh2": 3.409,
-                "sh_cars2_hh2": 3.409
+                "sh_cars1_hh2": 3.459,
+                "sh_cars2_hh2": 3.459
             }
         },
         "transit": {
-            "constant": -4.124,
+            "constant": -4.142,
             "generation": {
-                "HSL": 0.5649,
-                "Lahti": -0.3551,
-                "Tampere": -1.078,
-                "Turku": 0.4147
+                "HSL": 0.5798,
+                "Lahti": -0.3541,
+                "Tampere": -1.088,
+                "Turku": 0.4225
             },
             "attraction": {},
             "impedance": {},
             "log": {
-                "logsum": 0.4764
+                "logsum": 0.4711
             },
             "individual_dummy": {}
         },
         "bike": {
-            "constant": -1.826,
+            "constant": -1.836,
             "generation": {
-                "Joensuu": 3.025,
-                "Oulu": 3.075
+                "Joensuu": 3.055,
+                "Oulu": 3.108
             },
             "attraction": {},
             "impedance": {},
             "log": {
-                "logsum": 0.4764
+                "logsum": 0.4711
             },
             "individual_dummy": {}
         },
@@ -200,36 +200,36 @@
             "attraction": {},
             "impedance": {},
             "log": {
-                "logsum": 0.4764
+                "logsum": 0.4711
             },
             "individual_dummy": {}
         },
         "scaling": {
             "car_pax": {
-                "constant": 0.4764,
+                "constant": 0.4711,
                 "individual_dummy": {
-                    "sh_cars1_hh2": 0.4764,
-                    "sh_cars2_hh2": 0.4764
+                    "sh_cars1_hh2": 0.4711,
+                    "sh_cars2_hh2": 0.4711
                 }
             },
             "transit": {
-                "constant": 0.4764,
+                "constant": 0.4711,
                 "generation": {
-                    "HSL": 0.4764,
-                    "Lahti": 0.4764,
-                    "Tampere": 0.4764,
-                    "Turku": 0.4764
+                    "HSL": 0.4711,
+                    "Lahti": 0.4711,
+                    "Tampere": 0.4711,
+                    "Turku": 0.4711
                 }
             },
             "bike": {
-                "constant": 0.4764,
+                "constant": 0.4711,
                 "generation": {
-                    "Joensuu": 0.4764,
-                    "Oulu": 0.4764
+                    "Joensuu": 0.4711,
+                    "Oulu": 0.4711
                 }
             },
             "walk": {
-                "constant": 0.4764
+                "constant": 0.4711
             }
         }
     },
