@@ -129,7 +129,7 @@ class ZoneData:
         self["dist_walk"] = data["intra_dist_walk"] * 2
         self["dist_bike"] = data["intra_dist_bike"] * 2
         car_spd = 15.37 + 7.99 * numpy.sqrt(data["intra_dist_car"])
-        self["time_car"] = 2 * data["intra_dist_car"] / car_spd
+        self["time_car"] = 2 * 60 * data["intra_dist_car"] / car_spd
         self["cost_car"] = 2 * car_dist_cost * data["intra_dist_car"]
 
         dummies = {
