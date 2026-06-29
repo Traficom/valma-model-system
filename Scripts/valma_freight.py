@@ -16,12 +16,10 @@ from datatypes.commodity import (
     DomesticCommodity, ForeignCommodity, create_commodities)
 from utils.freight_utils import (
     StoreDemand, update_diagonal_cost,
-    write_domestic_leg_summary, write_purpose_summary, 
-    write_zone_summary, write_vehicle_summary
+    write_domestic_leg_summary, write_vehicle_summary
 )
 from datahandling.traversaldata import transform_traversal_data
 from parameters.commodity import commodity_conversion
-from parameters.zone import clusters
 
 
 def main(args):

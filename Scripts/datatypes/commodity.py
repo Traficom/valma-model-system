@@ -22,7 +22,7 @@ from parameters.zone import clusters
 
 def create_commodities(parameters_path: Path, zonedata: FreightZoneData,
                        resultdata: ResultsData, costdata: Dict[str, dict]):
-    """Create instances of FreightPurpose for each model parameter json file
+    """Create instances of FreightCommodity for each model parameter json file
     in parameters path.
 
     Parameters
@@ -42,8 +42,8 @@ def create_commodities(parameters_path: Path, zonedata: FreightZoneData,
 
     Returns
     -------
-    dict[str, FreightPurpose]
-        purpose name : FreightPurpose
+    dict[str, FreightCommodity]
+        commodity name : FreightCommodity
     """
     purposes: Dict[str, FreightCommodity] = {}
     for file in parameters_path.rglob("*.json"):

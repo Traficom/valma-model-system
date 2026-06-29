@@ -1,13 +1,8 @@
-import json
 import numpy
-from pathlib import Path
-from typing import Dict
 from pandas import DataFrame
 
-import utils.log as log
 from parameters.assignment import truck_classes
 from datahandling.resultdata import ResultsData
-from parameters.commodity import commodity_conversion
 from datahandling.matrixdata import MatrixData
 from assignment.freight_assignment import FreightAssignmentPeriod
 
