@@ -162,7 +162,7 @@
         },
         "bike": {
             "attraction": {
-                "density_pop_wrk": -0.00007
+                "density_pop_wrk": -0.000067
             },
             "impedance": {
                 "dist": -0.4169

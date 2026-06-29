@@ -121,7 +121,7 @@
             "attraction": {},
             "impedance": {
                 "time": -0.02658,
-                "cost": -0.00269
+                "cost": -0.002689
             },
             "log": {
                 "attraction_size": 1,
@@ -131,16 +131,16 @@
                 "age_7_17": 1,
                 "age_18_29": 1,
                 "age_30_49": 1,
-                "age_50_64": 2.52439,
-                "age_65_99": 2.52439,
-                "area_leisure_buildings": 0.35345
+                "age_50_64": 2.524391,
+                "age_65_99": 2.524391,
+                "area_leisure_buildings": 0.353455
             }
         },
         "car_pax": {
             "attraction": {},
             "impedance": {
                 "time": -0.02414,
-                "cost": -0.00269
+                "cost": -0.002689
             },
             "log": {
                 "attraction_size": 1,
@@ -150,9 +150,9 @@
                 "age_7_17": 1,
                 "age_18_29": 1,
                 "age_30_49": 1,
-                "age_50_64": 2.52439,
-                "age_65_99": 2.52439,
-                "area_leisure_buildings": 0.35345
+                "age_50_64": 2.524391,
+                "age_65_99": 2.524391,
+                "area_leisure_buildings": 0.353455
             }
         },
         "transit": {
@@ -161,7 +161,7 @@
             },
             "impedance": {
                 "time": -0.01416,
-                "cost": -0.00269
+                "cost": -0.002689
             },
             "log": {
                 "attraction_size": 1,
@@ -171,14 +171,14 @@
                 "age_7_17": 1,
                 "age_18_29": 1,
                 "age_30_49": 1,
-                "age_50_64": 2.52439,
-                "age_65_99": 2.52439,
-                "area_leisure_buildings": 0.35345
+                "age_50_64": 2.524391,
+                "age_65_99": 2.524391,
+                "area_leisure_buildings": 0.353455
             }
         },
         "bike": {
             "attraction": {
-                "density_pop_wrk": -0.00005
+                "density_pop_wrk": -0.000054
             },
             "impedance": {
                 "dist": -0.2986
@@ -190,9 +190,9 @@
                 "age_7_17": 1,
                 "age_18_29": 1,
                 "age_30_49": 1,
-                "age_50_64": 2.52439,
-                "age_65_99": 2.52439,
-                "area_leisure_buildings": 0.35345
+                "age_50_64": 2.524391,
+                "age_65_99": 2.524391,
+                "area_leisure_buildings": 0.353455
             }
         },
         "walk": {
@@ -207,9 +207,9 @@
                 "age_7_17": 1,
                 "age_18_29": 1,
                 "age_30_49": 1,
-                "age_50_64": 2.52439,
-                "age_65_99": 2.52439,
-                "area_leisure_buildings": 0.35345
+                "age_50_64": 2.524391,
+                "age_65_99": 2.524391,
+                "area_leisure_buildings": 0.353455
             }
         }
     },

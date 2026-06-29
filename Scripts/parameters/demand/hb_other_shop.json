@@ -121,7 +121,7 @@
             "attraction": {},
             "impedance": {
                 "time": -0.06308,
-                "cost": -0.00938
+                "cost": -0.009377
             },
             "log": {
                 "attraction_size": 1,
@@ -136,7 +136,7 @@
             "attraction": {},
             "impedance": {
                 "time": -0.05608,
-                "cost": -0.00938
+                "cost": -0.009377
             },
             "log": {
                 "attraction_size": 1,
@@ -153,7 +153,7 @@
             },
             "impedance": {
                 "time": -0.02454,
-                "cost": -0.00938
+                "cost": -0.009377
             },
             "log": {
                 "attraction_size": 1,
@@ -166,7 +166,7 @@
         },
         "bike": {
             "attraction": {
-                "density_pop_wrk": -0.00001
+                "density_pop_wrk": -0.000015
             },
             "impedance": {
                 "dist": -0.2647

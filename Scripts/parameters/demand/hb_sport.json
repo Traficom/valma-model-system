@@ -129,7 +129,7 @@
             },
             "attraction_size": {
                 "sport_facility_indoor": 1,
-                "sport_facility_outdoor": 0.11765
+                "sport_facility_outdoor": 0.117655
             }
         },
         "car_pax": {
@@ -144,7 +144,7 @@
             },
             "attraction_size": {
                 "sport_facility_indoor": 1,
-                "sport_facility_outdoor": 0.11765
+                "sport_facility_outdoor": 0.117655
             }
         },
         "transit": {
@@ -161,12 +161,12 @@
             },
             "attraction_size": {
                 "sport_facility_indoor": 1,
-                "sport_facility_outdoor": 0.11765
+                "sport_facility_outdoor": 0.117655
             }
         },
         "bike": {
             "attraction": {
-                "density_pop_wrk": 0
+                "density_pop_wrk": -0.000005
             },
             "impedance": {
                 "dist": -0.2814
@@ -176,7 +176,7 @@
             },
             "attraction_size": {
                 "sport_facility_indoor": 1,
-                "sport_facility_outdoor": 0.11765
+                "sport_facility_outdoor": 0.117655
             }
         },
         "walk": {
@@ -189,7 +189,7 @@
             },
             "attraction_size": {
                 "sport_facility_indoor": 1,
-                "sport_facility_outdoor": 0.11765
+                "sport_facility_outdoor": 0.117655
             }
         }
     },

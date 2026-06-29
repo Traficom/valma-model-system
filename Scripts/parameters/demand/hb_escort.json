@@ -129,8 +129,8 @@
             },
             "attraction_size": {
                 "students_comprehensive*within_municipality": 1,
-				"students_comprehensive*outside_municipality": 0.33221,
-                "population": 0.03011
+				"students_comprehensive*outside_municipality": 0.332206,
+                "population": 0.030107
             }
         },
         "car_pax": {
@@ -145,8 +145,8 @@
             },
             "attraction_size": {
                 "students_comprehensive*within_municipality": 1,
-				"students_comprehensive*outside_municipality": 0.33221,
-                "population": 0.03011
+				"students_comprehensive*outside_municipality": 0.332206,
+                "population": 0.030107
             }
         },
         "transit": {
@@ -163,13 +163,13 @@
             },
             "attraction_size": {
                 "students_comprehensive*within_municipality": 1,
-				"students_comprehensive*outside_municipality": 0.33221,
-                "population": 0.03011
+				"students_comprehensive*outside_municipality": 0.332206,
+                "population": 0.030107
             }
         },
         "bike": {
             "attraction": {
-                "density_pop_wrk": 0
+                "density_pop_wrk": -0.000003
             },
             "impedance": {
                 "dist": -0.4386
@@ -179,8 +179,8 @@
             },
             "attraction_size": {
                 "students_comprehensive*within_municipality": 1,
-				"students_comprehensive*outside_municipality": 0.33221,
-                "population": 0.03011
+				"students_comprehensive*outside_municipality": 0.332206,
+                "population": 0.030107
             }
         },
         "walk": {
@@ -193,8 +193,8 @@
             },
             "attraction_size": {
                 "students_comprehensive*within_municipality": 1,
-				"students_comprehensive*outside_municipality": 0.33221,
-                "population": 0.03011
+				"students_comprehensive*outside_municipality": 0.332206,
+                "population": 0.030107
             }
         }
     },

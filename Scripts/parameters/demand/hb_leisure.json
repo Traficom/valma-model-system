@@ -121,7 +121,7 @@
             "attraction": {},
             "impedance": {
                 "time": -0.02855,
-                "cost": 0.00406
+                "cost": 0.004062
             },
             "log": {
                 "attraction_size": 1,
@@ -129,14 +129,14 @@
             },
             "attraction_size": {
                 "wrk_hospitality": 1,
-                "wrk_recreation": 1.32817
+                "wrk_recreation": 1.328167
             }
         },
         "car_pax": {
             "attraction": {},
             "impedance": {
                 "time": -0.02274,
-                "cost": 0.00406
+                "cost": 0.004062
             },
             "log": {
                 "attraction_size": 1,
@@ -144,7 +144,7 @@
             },
             "attraction_size": {
                 "wrk_hospitality": 1,
-                "wrk_recreation": 1.32817
+                "wrk_recreation": 1.328167
             }
         },
         "transit": {
@@ -153,7 +153,7 @@
             },
             "impedance": {
                 "time": -0.01444,
-                "cost": 0.00406
+                "cost": 0.004062
             },
             "log": {
                 "attraction_size": 1,
@@ -161,12 +161,12 @@
             },
             "attraction_size": {
                 "wrk_hospitality": 1,
-                "wrk_recreation": 1.32817
+                "wrk_recreation": 1.328167
             }
         },
         "bike": {
             "attraction": {
-                "density_pop_wrk": -0.00005
+                "density_pop_wrk": -0.000051
             },
             "impedance": {
                 "dist": -0.269
@@ -176,7 +176,7 @@
             },
             "attraction_size": {
                 "wrk_hospitality": 1,
-                "wrk_recreation": 1.32817
+                "wrk_recreation": 1.328167
             }
         },
         "walk": {
@@ -189,7 +189,7 @@
             },
             "attraction_size": {
                 "wrk_hospitality": 1,
-                "wrk_recreation": 1.32817
+                "wrk_recreation": 1.328167
             }
         }
     },

@@ -4,7 +4,7 @@
     "dest": "work",
     "generation_area": "domestic",
     "attraction_area": "domestic",
-    "struct": "dest>mode",
+    "struct": "mode>dest",
     "gen_model": "rate",
     "generation": {
         "no_car": {
@@ -117,12 +117,71 @@
         ]
     },
     "destination_choice": {
-        "logsum": {
+        "car_drv": {
             "attraction": {},
-            "impedance": {},
+            "impedance": {
+                "time": -0.03068,
+                "cost": -0.05099
+            },
             "log": {
                 "attraction_size": 1,
-                "logsum": 0.9123
+                "cost": -0.2033
+            },
+            "attraction_size": {
+                "workplaces": 1
+            }
+        },
+        "car_pax": {
+            "attraction": {},
+            "impedance": {
+                "time": -0.06193,
+                "cost": -0.05099
+            },
+            "log": {
+                "attraction_size": 1,
+                "cost": -0.2033
+            },
+            "attraction_size": {
+                "workplaces": 1
+            }
+        },
+        "transit": {
+            "attraction": {
+                "within_zone_inf": -1,
+                "sh_office": 0.9237
+            },
+            "impedance": {
+                "time": -0.01149
+            },
+            "log": {
+                "attraction_size": 1,
+                "cost": -0.2033
+            },
+            "attraction_size": {
+                "workplaces": 1
+            }
+        },
+        "bike": {
+            "attraction": {
+                "density_pop_wrk": -0.000012
+            },
+            "impedance": {
+                "dist": -0.1419
+            },
+            "log": {
+                "attraction_size": 1
+            },
+            "attraction_size": {
+                "workplaces": 1
+            }
+        },
+        "walk": {
+            "attraction": {},
+            "impedance": {
+                "dist": -0.4902
+            },
+            "log": {
+                "attraction_size": 1
             },
             "attraction_size": {
                 "workplaces": 1
@@ -131,83 +190,105 @@
     },
     "mode_choice": {
         "car_drv": {
-            "constant": -3.661,
+            "constant": -3.818,
             "generation": {},
             "attraction": {},
-            "impedance": {
-                "time": -0.03373,
-                "cost": -0.05545
-            },
+            "impedance": {},
             "log": {
-                "cost": -0.2337
+                "logsum": 0.8888
             },
             "individual_dummy": {
-                "sh_cars1_hh1": 4.44,
-                "sh_cars2_hh2": 4.44,
-                "sh_cars1_hh2": 2.968
+                "sh_cars1_hh1": 4.982,
+                "sh_cars2_hh2": 4.982,
+                "sh_cars1_hh2": 3.322
             }
         },
         "car_pax": {
-            "constant": -4.592,
+            "constant": -4.523,
             "generation": {},
             "attraction": {},
-            "impedance": {
-                "time": -0.0671,
-                "cost": -0.05545
-            },
+            "impedance": {},
             "log": {
-                "cost": -0.2337
+                "logsum": 0.8888
             },
             "individual_dummy": {
-                "sh_cars1_hh2": 0.9197,
-                "sh_cars2_hh2": 0.9197
+                "sh_cars1_hh2": 1.03,
+                "sh_cars2_hh2": 1.03
             }
         },
         "transit": {
-            "constant": -1.89,
+            "constant": -2.058,
             "generation": {
-                "HSL": 1.125,
-                "Lahti": 0.01385,
-                "Tampere": 0.4342,
-                "Turku": 0.3339
+                "HSL": 1.38,
+                "Lahti": 0.07782,
+                "Tampere": 0.5868,
+                "Turku": 0.4083
             },
-            "attraction": {
-                "within_zone_inf": -1,
-                "sh_office": 0.8989
-            },
-            "impedance": {
-                "time": -0.01274,
-                "cost": -0.05545
-            },
+            "attraction": {},
+            "impedance": {},
             "log": {
-                "cost": -0.2337
+                "logsum": 0.8888
             },
             "individual_dummy": {}
         },
         "bike": {
-            "constant": -1.3,
+            "constant": -1.271,
             "generation": {
-                "Joensuu": 0.4818,
-                "Oulu": 0.7994
+                "Joensuu": 0.5553,
+                "Oulu": 0.8538
             },
-            "attraction": {
-                "density_pop_wrk": -0.00001
+            "attraction": {},
+            "impedance": {},
+            "log": {
+                "logsum": 0.8888
             },
-            "impedance": {
-                "dist": -0.1505
-            },
-            "log": {},
             "individual_dummy": {}
         },
         "walk": {
             "constant": 0,
             "generation": {},
             "attraction": {},
-            "impedance": {
-                "dist": -0.499
+            "impedance": {},
+            "log": {
+                "logsum": 0.8888
             },
-            "log": {},
             "individual_dummy": {}
+        },
+        "scaling": {
+            "car_drv": {
+                "constant": 0.8888,
+                "individual_dummy": {
+                    "sh_cars1_hh1": 0.8888,
+                    "sh_cars2_hh2": 0.8888,
+                    "sh_cars1_hh2": 0.8888
+                }
+            },
+            "car_pax": {
+                "constant": 0.8888,
+                "individual_dummy": {
+                    "sh_cars1_hh2": 0.8888,
+                    "sh_cars2_hh2": 0.8888
+                }
+            },
+            "transit": {
+                "constant": 0.8888,
+                "generation": {
+                    "HSL": 0.8888,
+                    "Lahti": 0.8888,
+                    "Tampere": 0.8888,
+                    "Turku": 0.8888
+                }
+            },
+            "bike": {
+                "constant": 0.8888,
+                "generation": {
+                    "Joensuu": 0.8888,
+                    "Oulu": 0.8888
+                }
+            },
+            "walk": {
+                "constant": 0.8888
+            }
         }
     },
     "demand_share": {
