@@ -52,7 +52,8 @@
             "intra_dist_bike",
             "intra_dist_car",
             "sh_office",
-            "sh_row_or_detached"
+            "sh_row_or_detached",
+            "density_pop_wrk"
         ],
         "first": [
             "municipality",
