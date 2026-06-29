@@ -102,8 +102,7 @@ class EmmeAssignmentTest(unittest.TestCase):
     def test_freight_assignment(self):
         ass_model = EmmeAssignmentModel(
             self.context, self.scenario_id, "koko_suomi")
-        ass_model.prepare_freight_network(
-            self.dist_cost, self.time_cost, ["c1", "c2"])
+        ass_model.prepare_freight_network(self.dist_cost, self.time_cost)
         ass_model.freight_network.assign()
         demand = numpy.full((ass_model.nr_zones, ass_model.nr_zones), 1.0)
         for mode in ["truck", "freight_train", "ship"]:
