@@ -80,7 +80,7 @@ class FreightAssignmentPeriod(AssignmentPeriod):
         for spec in self._car_spec.truck_specs():
             spec["stopping_criteria"] = self.stopping_criteria["coarse"]
             self.emme_project.car_assignment(spec, self.emme_scenario)
-        link_attr = f"#{commodity_class}_{truck}"
+        link_attr = f"#{commodity_class}_truck"
         self.emme_project.create_network_field(
             "LINK", "REAL", link_attr, "truck commodity flow",
             overwrite=True, scenario=self.emme_scenario)
