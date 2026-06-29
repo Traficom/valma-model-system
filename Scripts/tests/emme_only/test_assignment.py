@@ -153,7 +153,6 @@ class EmmeAssignmentTest:
                     for ass_class in travel_cost[mtx_type]:
                         cost_data = travel_cost[mtx_type][ass_class]
                         mtx[ass_class] = cost_data
-            ap.transit_results_links_nodes()
 
     def test_transit_cost(self):
         firstb_single = (2, 3, 5, 70, 0, 1.5)
@@ -167,8 +166,7 @@ class EmmeAssignmentTest:
     def test_freight_assignment(self):
         purposes = ["marita", "kalevi"]
         self.ass_model.prepare_freight_network(self.costdata["vehicle_km_cost"],
-                                               self.costdata["vehicle_hour_cost"],
-                                               purposes)
+                                               self.costdata["vehicle_hour_cost"])
         temp_impedance = self.ass_model.freight_network.assign()
         nr_zones = self.ass_model.nr_zones
         freight_modes = ["truck", "freight_train", "ship"]
