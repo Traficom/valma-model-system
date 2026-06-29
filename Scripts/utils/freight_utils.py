@@ -6,13 +6,10 @@ from pandas import DataFrame
 
 import utils.log as log
 from parameters.assignment import truck_classes
-from datatypes.purpose import FreightPurpose
-from datahandling.zonedata import FreightZoneData
 from datahandling.resultdata import ResultsData
 from parameters.commodity import commodity_conversion
 from datahandling.matrixdata import MatrixData
 from assignment.freight_assignment import FreightAssignmentPeriod
-
 
 
 def update_diagonal_cost(impedance: dict) -> dict:
@@ -66,6 +63,7 @@ def write_domestic_leg_summary(demand_trade: dict, impedance: dict,
     filename = "freight_domestic_leg_summary.txt"
     resultdata.print_concat(DataFrame(rows), filename)
 
+
 def write_vehicle_summary(demand: dict, impedance: dict, resultdata: ResultsData):
     """Write summary for truck classes and their mileage."""
     modes = list(demand)
@@ -79,6 +77,7 @@ def write_vehicle_summary(demand: dict, impedance: dict, resultdata: ResultsData
     })
     filename = "freight_vehicle_summary.txt"
     resultdata.print_data(df, filename)
+
 
 class StoreDemand():
     """Handles demand dimension compatibility when storing demand matrices 
