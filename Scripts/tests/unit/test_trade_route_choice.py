@@ -8,7 +8,7 @@ import openmatrix as omx
 
 from datahandling.resultdata import ResultsData
 from datahandling.zonedata import FreightZoneData
-from utils.freight_utils import create_purposes
+from datatypes.commodity import create_commodities
 from parameters.marine_ship import leg_names
 from tests.integration.test_data_handling import (
     TEST_DATA_PATH,
@@ -38,11 +38,12 @@ class TradeRouteChoiceTest(unittest.TestCase):
         resultdata = ResultsData(RESULTS_PATH)
         with open(COSTDATA_PATH) as file:
             costdata = json.load(file)
-        purposes = create_purposes(PARAMETERS_PATH / "foreign", zonedata, 
-                                   resultdata, costdata["freight"])
-        del purposes["kummuo_export"]
-        del purposes["kummuo_import"]
-        self.assertEqual(len(purposes), 2)
+        commodities = create_commodities(
+            PARAMETERS_PATH / "foreign", zonedata, resultdata,
+            costdata["freight"])
+        del commodities["kummuo_export"]
+        del commodities["kummuo_import"]
+        self.assertEqual(len(commodities), 2)
 
         time_impedance = omx.open_file(TEST_MATRICES / "freight_time.omx", "r")
         dist_impedance = omx.open_file(TEST_MATRICES / "freight_dist.omx", "r")
@@ -72,13 +73,14 @@ class TradeRouteChoiceTest(unittest.TestCase):
         ship_imps["roro_vessel"]["frequency"][0][0] = 162
 
         marine_attr = (ship_imps, fin_border, cluster_border)
-        for purpose in purposes.values():
-            split_impedances = purpose.form_impedance_legs(impedance, *marine_attr)
-            self._assert_leg_impedances(purpose.name, split_impedances, 
+        for commodity in commodities.values():
+            split_impedances = commodity.form_impedance_legs(impedance, *marine_attr)
+            self._assert_leg_impedances(commodity.name, split_impedances,
                                         truck_name, marine_modes)
             
-            demand = purpose.run_trade_route_module(impedance, *marine_attr, TRADE_DEMAND_PATH)
-            self._assert_leg_demand(purpose.name, demand)
+            demand = commodity.run_trade_route_module(
+                impedance, *marine_attr, TRADE_DEMAND_PATH)
+            self._assert_leg_demand(commodity.name, demand)
 
     def _assert_leg_impedances(self, name, split_impedances, truck_name, marine_modes):
         if name.split("_")[0] == "kemlaa":
