@@ -39,7 +39,7 @@ class FreightMode(AssignmentMode):
         self.canal_cost = self._create_matrix("canal_cost")
         no_penalty = dict.fromkeys(
             ["global", "at_nodes", "on_lines", "on_segments"])
-        all_modes = {param.freight_aux_mode: "truck access"}
+        all_modes = {param.park_and_ride_mode: "truck access"}
         modes = param.freight_modes[self.name]
         all_modes.update(modes)
         transitions = [{
@@ -92,7 +92,7 @@ class FreightMode(AssignmentMode):
                 "perception_factor": 1,
             },
             "aux_transit_by_mode": [{
-                "mode": param.freight_aux_mode,
+                "mode": param.park_and_ride_mode,
                 "time": "@truck_time_vrk",
                 "time_perception_factor": param.aux_time_perception_factor_truck,
             }],
@@ -122,7 +122,7 @@ class FreightMode(AssignmentMode):
         self.local_result_spec = {
             "type": "EXTENDED_TRANSIT_MATRIX_RESULTS",
             "by_mode_subset": {
-                "modes": [param.freight_aux_mode],
+                "modes": [param.park_and_ride_mode],
                 "distance": self.aux_dist.id,
                 "actual_aux_transit_times": self.aux_time.id,
             },

@@ -447,7 +447,6 @@ aux_modes = [
     'a'
 ]
 park_and_ride_mode = 'u'
-freight_aux_mode = "F"
 freight_modes = {
     "freight_train": {
         'D': "@diesel_train",
