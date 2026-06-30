@@ -225,7 +225,6 @@
             "constant": -6.246,
             "generation": {
                 "HSL": 4.881,
-                "Lahti": 1.844,
                 "Tampere": 1.218,
                 "Turku": 4.24
             },
@@ -239,7 +238,6 @@
         "bike": {
             "constant": -3.15,
             "generation": {
-                "Joensuu": 2.336,
                 "Oulu": 1.741
             },
             "attraction": {},
@@ -279,7 +277,6 @@
                 "constant": 0.4723,
                 "generation": {
                     "HSL": 0.4723,
-                    "Lahti": 0.4723,
                     "Tampere": 0.4723,
                     "Turku": 0.4723
                 }
@@ -287,7 +284,6 @@
             "bike": {
                 "constant": 0.4723,
                 "generation": {
-                    "Joensuu": 0.4723,
                     "Oulu": 0.4723
                 }
             },

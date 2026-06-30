@@ -128,8 +128,7 @@ class ZoneData:
         # Two-way intrazonal distances from building distances
         self["dist_walk"] = data["intra_dist_walk"] * 2
         self["dist_bike"] = data["intra_dist_bike"] * 2
-        car_spd = 15.37 + 7.99 * numpy.sqrt(data["intra_dist_car"])
-        self["time_car"] = 2 * 60 * data["intra_dist_car"] / car_spd
+        self["time_car"] = 2 * 60 * data["intra_dist_car"] / 20
         self["cost_car"] = 2 * car_dist_cost * data["intra_dist_car"]
 
         dummies = {
@@ -138,7 +137,7 @@ class ZoneData:
             "county": {"Lappi"},
             "submodel": {},
             "calibration_area": {},
-            "pt_authority": {"HSL", "Joensuu", "Lahti", "Oulu", "Tampere", "Turku"}
+            "pt_authority": {"HSL", "Oulu", "Tampere", "Turku"}
         }
         for division_type in dummies:
             dummies[division_type].update(extra_dummies.get(division_type, []))
