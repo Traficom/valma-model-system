@@ -133,14 +133,15 @@ class DomesticCommodity(FreightCommodity):
         self.modes: List[str] = list(specification["mode_choice"])
         args = (self, specification, self.generation_zone_data,
                 self.attraction_zone_data, resultdata)
-        if specification["struct"] == "dest>mode":
-            self.model = logit.DestModeModel(*args)
-        elif specification["struct"] == "mode>dest":
-            self.model = logit.ModeDestModel(*args)
-        else:
-            msg = f"Purpose {self.name} has invalid struct in specification"
-            log.error(msg)
-            raise ValueError(msg)
+        match specification["struct"]:
+            case "dest>mode":
+                self.model = logit.DestModeModel(*args)
+            case "mode>dest":
+                self.model = logit.ModeDestModel(*args)
+            case _:
+                msg = f"Commodity {self.name} has invalid struct in specification"
+                log.error(msg)
+                raise ValueError(msg)
         self.route_params = specification.get("route_choice", None)
         self._truck_distribution = "domestic_distribution"
 
@@ -382,14 +383,15 @@ class ForeignCommodity(FreightCommodity):
     def __init__(self, specification, zone_data, resultdata, costdata):
         Purpose.__init__(self, specification, zone_data, resultdata)
         self.costdata = costdata
-        if specification["struct"] == "export":
-            self.is_export = True
-        elif specification["struct"] == "import":
-            self.is_export = False
-        else:
-            msg = f"Purpose {self.name} has invalid struct in specification"
-            log.error(msg)
-            raise ValueError(msg)
+        match specification["struct"]:
+            case "export":
+                self.is_export = True
+            case "import":
+                self.is_export = False
+            case _:
+                msg = f"Commodity {self.name} has invalid struct in specification"
+                log.error(msg)
+                raise ValueError(msg)
         self.route_params = specification["route_choice"]
         self._truck_distribution = "foreign_distribution"
 
