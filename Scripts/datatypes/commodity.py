@@ -130,6 +130,7 @@ class DomesticCommodity(FreightCommodity):
     def __init__(self, specification, zone_data, resultdata, costdata):
         Purpose.__init__(self, specification, zone_data, resultdata)
         self.costdata = costdata
+        self.modes: List[str] = list(specification["mode_choice"])
         args = (self, specification, self.generation_zone_data,
                 self.attraction_zone_data, resultdata)
         if specification["struct"] == "dest>mode":
@@ -140,7 +141,6 @@ class DomesticCommodity(FreightCommodity):
             msg = f"Purpose {self.name} has invalid struct in specification"
             log.error(msg)
             raise ValueError(msg)
-        self.modes: List[str] = list(specification["mode_choice"])
         self.route_params = specification.get("route_choice", None)
         self._truck_distribution = "domestic_distribution"
 
@@ -441,8 +441,7 @@ class ForeignCommodity(FreightCommodity):
         impedance_legs = {
             leg: {"truck": {"cost": truck_cost[numpy.ix_(masks[i], masks[i+1])]}}
                   for i, leg in enumerate(leg_names)}
-        ship_costs = self._calc_foreign_ship_cost(
-            ship_imps, fin_border_ids)
+        ship_costs = self._calc_foreign_ship_cost(ship_imps, fin_border_ids)
         impedance_legs["leg_two"].update(ship_costs)
 
         # Retain leg two truck cost only for designated land border pairs
