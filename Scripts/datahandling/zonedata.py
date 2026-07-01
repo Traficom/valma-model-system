@@ -130,6 +130,8 @@ class ZoneData:
         self["dist_bike"] = data["intra_dist_bike"] * 2
         self["time_car"] = 2 * 60 * data["intra_dist_car"] / 20
         self["cost_car"] = 2 * car_dist_cost * data["intra_dist_car"]
+        self["density_pop_wrk"] = divide((data["population"] + data["workplaces"]),
+                                          data["land_area"])
 
         dummies = {
             "zone": {},
