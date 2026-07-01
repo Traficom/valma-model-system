@@ -182,7 +182,7 @@ def main(args):
                 for key in nr_new_attr:
                     nr_new_attr[key] *= len(time_periods) + 1
             nr_new_attr["links"] += nr_veh_classes + 7
-            nr_new_attr["transit_lines"] += nr_transit_classes + 5
+            nr_new_attr["transit_lines"] += 2 * nr_transit_classes + 5
             nr_new_attr["transit_segments"] += 6
             dim = emmebank.dimensions
             dim["nodes"] = dim["centroids"] + dim["regular_nodes"]

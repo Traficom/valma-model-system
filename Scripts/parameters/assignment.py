@@ -210,27 +210,40 @@ in_vehicle_weight = {
 }
 # Boarding penalties for different transit modes
 boarding_penalty = {
-    'b': 10, # Bus
-    'e': 10, # Coach bus
-    'g': 8, # Trunk bus
-    't': 5, # Tram
-    'p': 5, # Light rail
-    'm': 5, # Metro
-    'w': 5, # Ferry
-    'd': 10, # Long-distance ferry
-    'r': 5, # Commuter train
-    'j': 5, # Long-distance train
-    'l': 5, # Airplane
+    'b': 5, # Bus
+    'e': 5, # Coach bus
+    'g': 3, # Trunk bus
+    't': 0, # Tram
+    'p': 0, # Light rail
+    'm': 0, # Metro
+    'w': 0, # Ferry
+    'd': 5, # Long-distance ferry
+    'r': 0, # Commuter train
+    'j': 0, # Long-distance train
+    'l': 0, # Airplane
+}
+long_dist_boarding_penalty = {
+    'b': 5, # Bus
+    'e': 25, # Coach bus
+    'g': 3, # Trunk bus
+    't': 0, # Tram
+    'p': 0, # Light rail
+    'm': 0, # Metro
+    'w': 0, # Ferry
+    'd': 25, # Long-distance ferry
+    'r': 0, # Commuter train
+    'j': 25, # Long-distance train
+    'l': 25, # Airplane
 }
 transfer_penalty = {
-    "transit": 5,
-    "airplane": 5,
-    "pt_car_acc": 5,
-    "pt_taxi_acc": 5,
-    "airpl_car_acc": 5,
-    "pt_car_egr": 5,
-    "pt_taxi_egr": 5,
-    "airpl_car_egr": 5,
+    "transit": 10,
+    "airplane": 10,
+    "pt_car_acc": 10,
+    "pt_taxi_acc": 10,
+    "airpl_car_acc": 10,
+    "pt_car_egr": 10,
+    "pt_taxi_egr": 10,
+    "airpl_car_egr": 10,
 }
 extra_waiting_time = {
     "penalty": "@wait_time_dev",
@@ -518,6 +531,7 @@ ship_attrs = {
     "frequency": "ut2",
 }
 boarding_penalty_attr = "@boa_"
+long_dist_boarding_penalty_attr = "@bld_"
 dist_fare_attr = "@dist_fare"
 board_fare_attr = "@board_fare"
 board_long_dist_attr = "@board_long_dist"
