@@ -1,33 +1,34 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-from pathlib import Path
 import json
 import numpy
 import unittest
 import openmatrix as omx
+from copy import deepcopy
 
 import parameters.assignment as param
 from datahandling.resultdata import ResultsData
 from datahandling.zonedata import FreightZoneData
+from datatypes.commodity import create_commodities
 from utils.freight_utils import (
-    create_purposes, write_leg2_summary, write_purpose_summary, 
-    write_zone_summary, write_vehicle_summary, write_domestic_leg_summary
+    update_diagonal_cost, write_vehicle_summary,
+    write_domestic_leg_summary,
 )
 from tests.integration.test_data_handling import (
     TEST_DATA_PATH,
     RESULTS_PATH,
     COSTDATA_PATH,
     BASE_MATRICES_PATH,
+    INTERNAL_ZONES,
+    EXTERNAL_ZONES
 )
+from parameters.zone import clusters
 
 TEST_MATRICES = RESULTS_PATH / "Matrices" / "koko_suomi"
 TEST_ZONE_DATA_PATH = TEST_DATA_PATH / "Scenario_input_data" / "freight_zonedata.gpkg"
 TRADE_DEMAND_PATH = BASE_MATRICES_PATH / "koko_suomi" / "trade_demand.omx"
 PARAMETERS_PATH = TEST_DATA_PATH.parent.parent / "parameters" / "freight"
-ZONE_NUMBERS = [202, 1344, 1755, 2037, 2129, 2224, 2333, 2413, 2519, 2621,
-                2707, 2814, 2918, 3000, 3003, 3203, 3302, 3416, 3639, 3705,
-                3800, 4013, 4102, 4202, 7043, 8284, 12614, 17278, 19401, 23678,
-                50107, 50127, 50201, 50205]
+ZONE_NUMBERS = INTERNAL_ZONES + EXTERNAL_ZONES
 
 
 class FreightModelTest(unittest.TestCase):
@@ -61,8 +62,9 @@ class FreightModelTest(unittest.TestCase):
                 "canal_cost": numpy.zeros([len(ZONE_NUMBERS), len(ZONE_NUMBERS)])
             }
         }
-        impedance["semi_trailer"] = impedance["truck"]
-        impedance["trailer_truck"] = impedance["truck"]
+        impedance["semi_trailer"] = deepcopy(impedance["truck"])
+        impedance["trailer_truck"] = deepcopy(impedance["truck"])
+        impedance = update_diagonal_cost(impedance)
 
         # Run test foreign trade choice model
         trade_demand, foreign_purposes, fin_borders = self.run_trade_route_choice(
@@ -70,9 +72,10 @@ class FreightModelTest(unittest.TestCase):
         for mtx_type in impedance.keys():
             for ass_class, mtx in impedance[mtx_type].items():
                 impedance[mtx_type][ass_class] = mtx[:zonedata.nr_zones, :zonedata.nr_zones]
-        purposes = create_purposes(PARAMETERS_PATH / "domestic", zonedata, 
-                                   resultdata, costdata["freight"])
-        self.assertEqual(len(purposes), 2)
+        commodities = create_commodities(
+            PARAMETERS_PATH / "domestic", zonedata, resultdata,
+            costdata["freight"])
+        self.assertEqual(len(commodities), 2)
 
         total_demand = {mode : numpy.zeros_like(impedance["truck"]["cost"])
                         for mode in param.truck_classes}
@@ -80,10 +83,10 @@ class FreightModelTest(unittest.TestCase):
         mapping = {zone: idx for idx, zone in enumerate(zonedata.zone_numbers)}
         
         # Run test domestic demand model
-        for purpose in purposes.values():
-            demand = purpose.calc_traffic(impedance)
-            demand_trade = purpose.calc_trade_mode_share(demand, trade_demand, fin_borders)
-            costs = purpose.get_costs(impedance)
+        for commodity in commodities.values():
+            demand = commodity.calc_traffic(impedance)
+            demand_trade = commodity.calc_trade_mode_share(demand, trade_demand, fin_borders)
+            costs = commodity.get_costs(impedance)
             self._assert_calc_demand_results(demand, costs)
             
             # Calculate test vehicles
@@ -98,33 +101,32 @@ class FreightModelTest(unittest.TestCase):
                 for model_type in ("domestic", "foreign")
             }
             for mode in param.truck_classes:
-                vehicles["domestic"][mode] += purpose.calc_vehicles(ton_demand, mode)
+                vehicles["domestic"][mode] += commodity.calc_vehicles(ton_demand, mode)
                 for foreign_purpose in demand_trade:
                     vehicles["foreign"][mode] += foreign_purposes[foreign_purpose].calc_vehicles(
                         demand_trade[foreign_purpose]["truck"], mode)
                 total_demand[mode] += vehicles["domestic"][mode] + vehicles["foreign"][mode]
-            self._assert_calc_vehicle_results(vehicles, purpose.name)
-            write_purpose_summary(purpose, demand, aux_demand, impedance, resultdata)
-            write_zone_summary(purpose.name, zonedata.zone_numbers, demand, resultdata)
+            self._assert_calc_vehicle_results(vehicles, commodity.name)
+            commodity.write_summary(demand, aux_demand, impedance)
+            commodity.write_zone_summary(demand)
             write_domestic_leg_summary(demand_trade, impedance, resultdata)
             
             # Calculate test logistics demand
-            if purpose.route_params and iterations > 0:
-                demand_truck, per_route = purpose.run_logistics_module(demand["truck"],
-                                                                       impedance, mapping, 
-                                                                       iterations)
+            if commodity.route_params and iterations > 0:
+                demand_truck, per_route = commodity.run_logistics_module(
+                    demand["truck"], impedance, iterations)
                 self.assertTrue(numpy.isfinite(demand_truck).all())
                 self.assertTrue((demand_truck >= 0).all())
                 self.assertTrue(demand_truck.shape == (zonedata.nr_zones, zonedata.nr_zones))
 
                 detour_total = numpy.sum(per_route[:-1])
                 direct_total = per_route[-1]
-                if purpose.name == "kemlaa":
-                    self.assertAlmostEqual(detour_total, 50.635654, places=3)
-                    self.assertAlmostEqual(direct_total, 12883.39, places=3)
-                elif purpose.name == "kummuo":
-                    self.assertAlmostEqual(detour_total, 81.766624, places=3)
-                    self.assertAlmostEqual(direct_total, 15670.479, places=3)
+                if commodity.name == "kemlaa":
+                    self.assertAlmostEqual(detour_total, 19.52376, places=3)
+                    self.assertAlmostEqual(direct_total, 12913.464, places=3)
+                elif commodity.name == "kummuo":
+                    self.assertAlmostEqual(detour_total, 26.133245, places=3)
+                    self.assertAlmostEqual(direct_total, 15725.467, places=3)
 
         write_vehicle_summary(total_demand, impedance, resultdata)
         resultdata.flush()
@@ -135,11 +137,12 @@ class FreightModelTest(unittest.TestCase):
         fin_border = {"FIHKO": 4102, "FIHMN": 19401}
         cluster_border = {"EETLL": 50107, "SESTO": 50127}
 
-        purposes = create_purposes(PARAMETERS_PATH / "foreign", zonedata, 
-                                   resultdata, costdata["freight"])
-        del purposes["kummuo_export"]
-        del purposes["kummuo_import"]
-        self.assertEqual(len(purposes), 2)
+        commodities = create_commodities(
+            PARAMETERS_PATH / "foreign", zonedata, resultdata,
+            costdata["freight"])
+        del commodities["kummuo_export"]
+        del commodities["kummuo_import"]
+        self.assertEqual(len(commodities), 2)
 
         ship_imps = {
             mode: {
@@ -153,16 +156,17 @@ class FreightModelTest(unittest.TestCase):
         ship_imps["roro_vessel"]["dist"][0][0] = 126
         ship_imps["roro_vessel"]["frequency"][0][0] = 162
         marine_attr = (ship_imps, fin_border, cluster_border)
+        network_clusters = set(ZONE_NUMBERS) & set(clusters.values())
+        network_clusters = {key: value for key, value in clusters.items() 
+                            if value in network_clusters}
 
         trade_demand = {}
-        for purpose in purposes.values():
+        for purpose in commodities.values():
             demand = purpose.run_trade_route_module(
                 impedance, *marine_attr, TRADE_DEMAND_PATH)
-            write_leg2_summary(purpose, demand, marine_modes, 
-                               fin_border, cluster_border, resultdata)
             trade_demand[purpose.name] = demand
         resultdata.flush()
-        return trade_demand, purposes, list(fin_border.values())
+        return trade_demand, commodities, list(fin_border.values())
 
     def _assert_calc_demand_results(self, demand, costs):
         for mode in demand:

@@ -1,5 +1,6 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING, Dict
+from collections import defaultdict
 
 import parameters.assignment as param
 from parameters.cost import avg_tour_duration, value_of_time
@@ -31,25 +32,8 @@ class TransitMode(AssignmentMode):
         """
         AssignmentMode.__init__(self, name, assignment_period, save_matrices)
         self.vot_inv = 60 / value_of_time[self.name]
+        self.day_scenario = day_scenario
         self._create_matrices()
-
-        # Create extra attributes
-        self.segment_results: Dict[str, str] = {}
-        self.node_results: Dict[str, str] = {}
-        for scenario, tp in (
-                (day_scenario, "vrk"), (self.emme_scenario, self.time_period)):
-            for res, attr in param.segment_results.items():
-                attr_name = f"#{self.name}_{attr[1:]}_{tp}"
-                self.segment_results[res] = attr_name
-                self.emme_project.create_network_field(
-                    "TRANSIT_SEGMENT", "REAL", attr_name, f"{self.name} {res}",
-                    overwrite=True, scenario=scenario)
-                if res != "transit_volumes":
-                    attr_name = f"#node_{self.name}_{attr[1:]}_{tp}"
-                    self.node_results[res] = attr_name
-                    self.emme_project.create_network_field(
-                        "NODE", "REAL", attr_name, f"{self.name} {res}",
-                        overwrite=True, scenario=scenario)
 
         # Specify
         no_penalty = dict.fromkeys(["at_nodes", "on_lines", "on_segments"])
@@ -202,11 +186,46 @@ class TransitMode(AssignmentMode):
         self.emme_project.network_results(
             self.ntw_results_spec, scenario=self.emme_scenario,
             class_name=self.name)
+
+        # Save aux volumes to network field
+        volax_attr = f"#aux_transit_{self.name}_{self.time_period}"
+        self.emme_project.create_network_field(
+            "LINK", "REAL", volax_attr, "aux transit volume",
+            overwrite=True, scenario=self.emme_scenario)
         network = self.emme_scenario.get_network()
-        for result, attr in param.segment_results.items():
-            netfield = self.segment_results[result]
+        for link in network.links():
+            link[volax_attr] = link.aux_transit_volume
+
+        # Save volumes in network fields
+        self.segment_results: Dict[str, str] = defaultdict(dict)
+        self.node_results: Dict[str, str] = defaultdict(dict)
+        for result, temp_result_attr in param.segment_results.items():
+            for scenario, tp in (
+                    (self.day_scenario, "vrk"),
+                    (self.emme_scenario, self.time_period)):
+                # Create segment network fields
+                result_attr = f"#{self.name}_{temp_result_attr[1:]}_{tp}"
+                self.segment_results[result][tp] = result_attr
+                self.emme_project.create_network_field(
+                    "TRANSIT_SEGMENT", "REAL", result_attr, f"{self.name} {result}",
+                    overwrite=True, scenario=scenario, network=network)
+                if result != "transit_volumes":
+                    # Create node network fields
+                    node_result_attr = f"#node_{self.name}_{temp_result_attr[1:]}_{tp}"
+                    self.node_results[result][tp] = node_result_attr
+                    self.emme_project.create_network_field(
+                        "NODE", "REAL", node_result_attr, f"{self.name} {result}",
+                        overwrite=True, scenario=scenario, network=network)
             for segment in network.transit_segments():
-                segment[netfield] = segment[attr]
+                # Save segment volumes to network field
+                vol = segment[temp_result_attr]
+                segment[result_attr] = vol
+                # Sum volumes on link and node level
+                if result == "transit_volumes":
+                    if segment.link is not None:
+                        segment.link[self.volume_attr] += vol
+                else:
+                    segment.i_node[node_result_attr] += vol
         self._save_link_results(network)
         self.emme_scenario.publish_network(network)
 

@@ -462,11 +462,11 @@ aux_modes = [
 park_and_ride_mode = 'u'
 freight_modes = {
     "freight_train": {
-        'D': "@diesel_train",
-        'J': "@electric_train",
+        'D': "@d_train_term_cost",
+        'J': "@e_train_term_cost",
     },
     "ship": {
-        'W': "@ship",
+        'W': "@ship_term_cost",
     },
 }
 freight_marine_modes = {
@@ -548,6 +548,8 @@ ferry_wait_attr = "@ferry_wait_time"
 free_flow_time_attr = "@free_flow_time"
 extra_freight_cost_attr = "#extra_cost"
 park_ride_vol_attr = "@park_and_ride_vol"
+commodity_flow_attr = "@comm_flow"
+aux_commodity_flow_attr = "@aux_comm_flow"
 railtypes = {
     2: "tram",
     3: "metro",

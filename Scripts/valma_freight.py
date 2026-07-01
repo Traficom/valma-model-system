@@ -12,11 +12,11 @@ from datahandling.resultdata import ResultsData
 from assignment.emme_assignment import EmmeAssignmentModel
 from assignment.emme_bindings.emme_project import EmmeProject
 from datahandling.matrixdata import MatrixData
-
+from datatypes.commodity import (
+    DomesticCommodity, ForeignCommodity, create_commodities)
 from utils.freight_utils import (
-    create_purposes, StoreDemand,
-    write_leg2_summary, write_domestic_leg_summary, write_purpose_summary, 
-    write_zone_summary, write_vehicle_summary
+    StoreDemand, update_diagonal_cost,
+    write_domestic_leg_summary, write_vehicle_summary
 )
 from datahandling.traversaldata import transform_traversal_data
 from parameters.commodity import commodity_conversion
@@ -45,28 +45,25 @@ def main(args):
     costdata = json.loads(cost_data_file.read_text("utf-8"))
     
     # Set foreign purposes and fetch impedances
-    foreign_purposes = create_purposes(parameters_path / "foreign", zonedata, 
-                                       resultdata, costdata["freight"])
-    purposes_to_assign = [purpose for purpose in list(commodity_conversion)
-                          if purpose in args.specify_commodity_names]
+    foreign_commodities: dict[str, ForeignCommodity] = create_commodities(
+        parameters_path / "foreign", zonedata, resultdata, costdata["freight"])
     ass_model.prepare_freight_network(
-        costdata["vehicle_km_cost"], costdata["vehicle_hour_cost"],
-        purposes_to_assign)
+        costdata["vehicle_km_cost"], costdata["vehicle_hour_cost"])
     store_demand = StoreDemand(ass_model.freight_network, resultmatrices, 
                                zonedata.all_zone_numbers, zonedata.zone_numbers)
     impedance = ass_model.freight_network.assign()
-    
+    impedance = update_diagonal_cost(impedance)
+
     log.info("Reads marine ship impedances from network")
     trade_demand = {}
     marine_export = ass_model.freight_network.read_ship_impedances(True)
     marine_import = ass_model.freight_network.read_ship_impedances(False)
-    for purpose in foreign_purposes.values():
-        log.info(f"Calculating trade route for purpose: {purpose.name}")
-        marine_data = marine_export if purpose.is_export else marine_import
-        demand = purpose.run_trade_route_module(impedance, *marine_data,
-                                                trade_demand_file)
-        write_leg2_summary(purpose, demand, *marine_data, resultdata)
-        trade_demand[purpose.name] = demand
+    for commodity in foreign_commodities.values():
+        log.info(f"Calculating trade route for purpose: {commodity.name}")
+        marine_data = marine_export if commodity.is_export else marine_import
+        demand = commodity.run_trade_route_module(
+            impedance, *marine_data, trade_demand_file)
+        trade_demand[commodity.name] = demand
     resultdata.flush()
     fin_border_ids = list(marine_export[1].values())
     marine_export, marine_import = None, None
@@ -78,38 +75,34 @@ def main(args):
     total_demand = {mode: numpy.zeros([zonedata.nr_zones, zonedata.nr_zones], dtype="float32")
                     for mode in param.truck_classes}
     
-    purposes = create_purposes(parameters_path / "domestic", zonedata, 
-                               resultdata, costdata["freight"])
+    commodities: dict[str, DomesticCommodity] = create_commodities(
+        parameters_path / "domestic", zonedata, resultdata, costdata["freight"])
     # Run domestic demand calculation
-    for purpose in purposes.values():
-        log.info(f"Calculating demand for purpose: {purpose.name}")
-        demand = purpose.calc_traffic(impedance)
-        if purpose.route_params and args.logistics_iterations > 0:
-            demand["truck"], _ = purpose.run_logistics_module(demand["truck"], impedance, 
-                                                              ass_model.mapping, 
-                                                              args.logistics_iterations)
+    for commodity in commodities.values():
+        log.info(f"Calculating demand for purpose: {commodity.name}")
+        demand = commodity.calc_traffic(impedance, args.logistics_iterations)
         for mode in demand:
-            omx_filename = ("freight_demand_tons" if purpose.name 
+            omx_filename = ("freight_demand_tons" if commodity.name
                             in args.specify_commodity_names else "")
-            store_demand.store(mode, demand[mode], omx_filename, purpose.name)
-        if purpose.name in args.specify_commodity_names:
-            ass_model.freight_network.save_network_volumes(purpose.name)
+            store_demand.store(mode, demand[mode], omx_filename, commodity.name)
+        if commodity.name in args.specify_commodity_names:
+            ass_model.freight_network.save_network_volumes(commodity.name)
         
         if "truck" in demand:
             # Calc aux tons and transform tons to vehicles
             ass_model.freight_network.output_traversal_matrix(set(demand), resultdata.path)
             aux_demand = transform_traversal_data(resultdata.path, zonedata.zone_numbers)
             domestic_tons = demand["truck"] + sum(aux_demand.values())
-            dom_leg_tons = purpose.calc_trade_mode_share(
+            dom_leg_tons = commodity.calc_trade_mode_share(
                 demand, trade_demand, fin_border_ids)
             for mode in param.truck_classes:
-                total_demand[mode] += purpose.calc_vehicles(domestic_tons, mode)
+                total_demand[mode] += commodity.calc_vehicles(domestic_tons, mode)
                 for foreign_purpose in dom_leg_tons:
-                    total_demand[mode] += foreign_purposes[foreign_purpose].calc_vehicles(
+                    total_demand[mode] += foreign_commodities[foreign_purpose].calc_vehicles(
                         dom_leg_tons[foreign_purpose]["truck"], mode)
             write_domestic_leg_summary(dom_leg_tons, impedance, resultdata)
-        write_purpose_summary(purpose, demand, aux_demand, impedance, resultdata)
-        write_zone_summary(purpose.name, zonedata.zone_numbers, demand, resultdata)
+        commodity.write_summary(demand, aux_demand, impedance)
+        commodity.write_zone_summary(demand)
     write_vehicle_summary(total_demand, impedance, resultdata)
     resultdata.flush()
     

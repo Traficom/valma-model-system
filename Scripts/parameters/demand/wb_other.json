@@ -111,29 +111,29 @@
         "car_drv": {
             "attraction": {},
             "impedance": {
-                "time": -0.1653
+                "time": -0.1686
             },
             "log": {
                 "attraction_size": 1
             },
             "attraction_size": {
                 "wrk_shop": 1,
-                "wrk_recreation": 0.73934,
-                "wrk_hospitality": 1.86116
+                "wrk_recreation": 0.72166,
+                "wrk_hospitality": 1.86657
             }
         },
         "car_pax": {
             "attraction": {},
             "impedance": {
-                "time": -0.201
+                "time": -0.1967
             },
             "log": {
                 "attraction_size": 1
             },
             "attraction_size": {
                 "wrk_shop": 1,
-                "wrk_recreation": 0.73934,
-                "wrk_hospitality": 1.86116
+                "wrk_recreation": 0.72166,
+                "wrk_hospitality": 1.86657
             }
         },
         "transit": {
@@ -141,89 +141,89 @@
                 "within_zone_inf": -1
             },
             "impedance": {
-                "time": -0.02849
+                "time": -0.02839
             },
             "log": {
                 "attraction_size": 1
             },
             "attraction_size": {
                 "wrk_shop": 1,
-                "wrk_recreation": 0.73934,
-                "wrk_hospitality": 1.86116
+                "wrk_recreation": 0.72166,
+                "wrk_hospitality": 1.86657
             }
         },
         "bike": {
             "attraction": {},
             "impedance": {
-                "dist": -0.5139
+                "dist": -0.5215
             },
             "log": {
                 "attraction_size": 1
             },
             "attraction_size": {
                 "wrk_shop": 1,
-                "wrk_recreation": 0.73934,
-                "wrk_hospitality": 1.86116
+                "wrk_recreation": 0.72166,
+                "wrk_hospitality": 1.86657
             }
         },
         "walk": {
             "attraction": {},
             "impedance": {
-                "dist": -1.155
+                "dist": -1.177
             },
             "log": {
                 "attraction_size": 1
             },
             "attraction_size": {
                 "wrk_shop": 1,
-                "wrk_recreation": 0.73934,
-                "wrk_hospitality": 1.86116
+                "wrk_recreation": 0.72166,
+                "wrk_hospitality": 1.86657
             }
         }
     },
     "mode_choice": {
         "car_drv": {
-            "constant": -5.699,
+            "constant": -4.42,
             "generation": {},
             "attraction": {},
             "impedance": {},
             "log": {
-                "logsum": 0.6771
+                "logsum": 0.8872
             },
             "individual_dummy": {
-                "wb_other_parent_car_drv_share": 5.519
+                "wb_other_parent_car_drv_share": 4.247
             }
         },
         "car_pax": {
-            "constant": -2.543,
+            "constant": -1.983,
             "generation": {},
             "attraction": {},
             "impedance": {},
             "log": {
-                "logsum": 0.6771
+                "logsum": 0.8872
             },
             "individual_dummy": {}
         },
         "transit": {
-            "constant": -6.537,
+            "constant": -5.404,
             "generation": {},
             "attraction": {},
             "impedance": {},
             "log": {
-                "logsum": 0.6771
+                "logsum": 0.8872
             },
             "individual_dummy": {}
         },
         "bike": {
-            "constant": -7.383,
+            "constant": -5.88,
             "generation": {},
             "attraction": {},
             "impedance": {},
             "log": {
-                "logsum": 0.6771
+                "logsum": 0.8872
             },
             "individual_dummy": {
-                "wb_other_parent_bike_share": 4.885
+                "wb_other_parent_bike_share": 3.776
             }
         },
         "walk": {
@@ -232,31 +232,31 @@
             "attraction": {},
             "impedance": {},
             "log": {
-                "logsum": 0.6771
+                "logsum": 0.8872
             },
             "individual_dummy": {}
         },
         "scaling": {
             "car_drv": {
-                "constant": 0.6771,
+                "constant": 0.8872,
                 "individual_dummy": {
-                    "wb_other_parent_car_drv_share": 0.6771
+                    "wb_other_parent_car_drv_share": 0.8872
                 }
             },
             "car_pax": {
-                "constant": 0.6771
+                "constant": 0.8872
             },
             "transit": {
-                "constant": 0.6771
+                "constant": 0.8872
             },
             "bike": {
-                "constant": 0.6771,
+                "constant": 0.8872,
                 "individual_dummy": {
-                    "wb_other_parent_bike_share": 0.6771
+                    "wb_other_parent_bike_share": 0.8872
                 }
             },
             "walk": {
-                "constant": 0.6771
+                "constant": 0.8872
             }
         }
     },

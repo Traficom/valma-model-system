@@ -1,12 +1,13 @@
 from __future__ import annotations
-from typing import Dict, Iterator, Optional, List, cast
+from typing import Dict, Iterator, Optional
 from copy import copy
 from collections import defaultdict
 import numpy # type: ignore
 import pandas
+
 from datahandling.resultdata import ResultsData
 from datahandling.zonedata import ZoneData
-from datahandling.matrixdata import MatrixData, read_omx_item
+from datahandling.matrixdata import MatrixData
 import utils.log as log
 import parameters.zone as param
 import models.logit as logit
@@ -19,11 +20,7 @@ import parameters.cost as cost
 import models.generation as generation
 from datatypes.demand import Demand
 from datatypes.histogram import TourLengthHistogram
-from utils.freight_costs import calc_cost, get_foreign_ship_cost
 from utils.calibrate import attempt_calibration
-from models.logistics import (LogisticsModule, TradeRouteModule,
-                              run_logistics_model, run_trade_model)
-from parameters.marine_ship import leg_names
 
 
 class Purpose:
@@ -225,9 +222,11 @@ class TravelPurpose(Purpose):
         zd = self.attraction_zone_data
         for mode in day_imp:
             for mtx_type in day_imp[mode]:
-                if mtx_type in ("time", "cost", "dist"):
+                ass_class = mode_impedance[mode]
+                label = f"{mtx_type}_{ass_class}"
+                if label in ("time_car", "cost_car", "dist_walk", "dist_bike"):
                     # Get intra-zonal impendances from zone data
-                    numpy.fill_diagonal(day_imp[mode][mtx_type], zd[mtx_type])
+                    numpy.fill_diagonal(day_imp[mode][mtx_type], zd[label])
             if "car" in mode:
                 day_imp[mode]["time"] += numpy.asarray(zd["avg_park_time"])
                 day_imp[mode]["cost"] += (self.activity_time * self.park_cost_share
@@ -628,310 +627,3 @@ class SecDestPurpose(TravelPurpose):
                 sum(self.attracted_tours.values()),
                 self.dest_zone_numbers, name=self.name),
             "attraction.txt")
-
-class FreightPurpose(Purpose):
-    """Standard purpose for handling freight calculations.
-
-    Parameters
-    ----------
-    specification : dict
-        Model parameter specifications
-    zone_data : Dict[str, FreightZoneData]
-        Model area (domestic/foreign) : Data used for all demand calculations
-    resultdata : ResultData
-        Writer object to result directory
-    costdata : Dict[str, dict]
-        Freight mode (truck/freight_train/ship) : mode
-            Mode (truck/trailer_truck...) : unit cost name
-                unit cost name : unit cost value
-    """
-    def __init__(self, specification, zone_data, resultdata, costdata):
-        Purpose.__init__(self, specification, zone_data, resultdata)
-        self.costdata = costdata
-        self.model_category = list(zone_data)[0]
-        self.modes: List[str] = list(specification["mode_choice"])
-        args = (self, specification, self.generation_zone_data,
-                self.attraction_zone_data, resultdata)
-        if specification["struct"] == "dest>mode":
-            self.model = logit.DestModeModel(*args)
-        elif specification["struct"] == "mode>dest":
-            self.model = logit.ModeDestModel(*args)
-        else:
-            self.model = None
-        self.route_params = specification.get("route_choice", None)
-        self.is_export = {"export": True, "import": False}.get(specification["struct"])
-
-        if (self.model is None and self.model_category == "domestic"
-            or self.is_export is None and self.model_category == "foreign"):
-            msg = f"Purpose {self.name} has invalid struct in specification"
-            log.error(msg)
-            raise ValueError(msg)
-        
-        elif self.route_params is None and self.model_category == "foreign":
-            msg = f"Purpose {self.name} is missing route choice specification"
-            log.error(msg)
-            raise ValueError(msg)
-
-    def calc_traffic(self, impedance: dict):                                                                                    
-        """Calculate freight traffic matrix.
-
-        Parameters
-        ----------
-        impedance : dict
-            Mode (truck/train/...) : dict
-                Type (time/dist/toll_cost/canal_cost) : numpy 2d matrix
-
-        Return
-        ------
-        dict
-            Mode (truck/train/...) : calculated demand (numpy 2d matrix)
-        """
-        costs = self.get_costs(impedance)
-        self.dist = costs[self.modes[0]]["cost"]
-        nr_zones = self.attraction_zone_data.nr_zones
-        probs = self.model.calc_prob(costs)
-        generation = numpy.tile(self.generation_zone_data[f"gen_{self.name}"], (nr_zones, 1))
-        demand = {mode: (probs.pop(mode) * generation).T for mode in self.modes}
-        return demand
-
-    def form_impedance_legs(self, impedance: dict,
-                            ship_imps: dict,
-                            fin_border_ids: dict,
-                            cluster_border_ids: dict) -> dict:
-        """Forms impedance matrices for the three legs of foreign trade 
-        route choice model. 
-
-        Parameters
-        ----------
-        impedance : dict
-            Mode (truck/train/...) : dict
-                Type (time/dist/toll_cost/canal_cost) : numpy 2d matrix
-        ship_imps : dict
-            Mode (container_ship/general_cargo...) : attribute
-                Type (dist/frequency) : numpy.ndarray
-        fin_border_ids : dict
-            Finland border id (FIHEL/FISKV...) : str
-                Centroid id : int
-        cluster_border_ids : dict
-            Foreign border id (AEJEA/SESTO...) : str
-                Centroid id : int
-
-        Returns
-        -------
-        dict
-            Name of a leg (leg_one/...) : dict
-                Mode (truck/train/marine ships) : dict
-                    Type (cost/frequency/draught) : mask indexed numpy 2d matrix
-        """
-        fin_port_zones = numpy.array(
-            list(fin_border_ids.values()), dtype=numpy.int32)
-        cluster_port_zones = numpy.array(
-            list(cluster_border_ids.values()), dtype=numpy.int32)
-        all_zones = self.generation_zone_data.all_zone_numbers
-        fin_borders = numpy.isin(all_zones, fin_port_zones)
-        cluster_borders = numpy.isin(all_zones, cluster_port_zones)
-        fin_zones = numpy.isin(all_zones, numpy.union1d(self.orig_zone_numbers, 
-                                                        fin_port_zones))
-        cluster_zones = ~fin_zones & ~cluster_borders
-        
-        masks = (fin_zones, fin_borders, cluster_borders, cluster_zones)
-        if not self.is_export:
-            masks = masks[::-1]
-
-        costs = self.get_costs(impedance)
-        impedance_legs = {l: {} for l in leg_names}
-        for i, imp_leg in enumerate(impedance_legs.values()):
-            imp_leg["truck"] = {imp_type: mtx[numpy.ix_(masks[i], masks[i+1])]
-                                for imp_type, mtx in costs["truck"].items()}
-        ship_costs = get_foreign_ship_cost(
-            self.costdata, ship_imps, self.model_category, fin_border_ids,
-            self.is_export)
-        impedance_legs["leg_two"].update(ship_costs)
-
-        # Retain leg two truck cost only for designated land border pairs
-        mask = pandas.DataFrame(True, index=fin_port_zones, columns=cluster_port_zones)
-        for fin_border, cluster_border in param.land_border_pairs.values():
-            if fin_border in fin_port_zones and cluster_border in cluster_port_zones:
-                mask.at[fin_border, cluster_border] = False
-        if not self.is_export:
-            mask = mask.T
-        impedance_legs["leg_two"]["truck"]["cost"][mask.to_numpy()] = numpy.inf
-        return impedance_legs
-
-    def get_costs(self, impedance: dict):
-        """Fetches calculated costs for each mode in model's mode choice.
-
-        Parameters
-        ----------
-        impedance : dict 
-            Mode (truck/train/...) : dict
-                Type (time/dist/toll_cost/canal_cost) : numpy 2d matrix
-
-        Returns
-        -------
-        dict
-            Mode (truck/freight_train/...) : cost : numpy.ndarray
-        """
-        costs = {mode: calc_cost(mode, self.costdata, impedance[mode], self.model_category)
-                for mode in self.modes}
-        for mode, mode_costs in costs.items():
-            if not self.model or "aux_cost" not in self.model.mode_choice_param[mode]["impedance"]:
-                mode_costs["cost"] += mode_costs.pop("aux_cost", 0)
-        return costs
-
-    def calc_vehicles(self, matrix: numpy.ndarray, ass_class: str):
-        """Calculate vehicle matrix from ton matrix using ton-to-vehicles 
-        conversion values.
-
-        Parameters
-        ----------
-        matrix : numpy.ndarray
-            ton matrix
-        ass_class : str
-            truck assignment class
-
-        Returns
-        -------
-        numpy.ndarray
-            vehicle matrix
-        """
-        costdata = self.costdata["truck"][ass_class]
-        vehicles = (matrix * costdata[f"{self.model_category}_distribution"] 
-                    / costdata["avg_load"] / 365)
-        vehicles += vehicles.T * costdata["empty_share"]
-        return vehicles
-
-    def calc_trade_mode_share(self, dom_demand: dict, trade_demand: dict,
-                              fin_borders: list):
-        """Calculate mode share of trade demand on its domestic leg 
-        among freight land mode alternatives.
-
-        Parameters
-        ----------
-        dom_demand : dict
-            Mode (truck/train/...) : domestic demand numpy 2d array
-        trade_demand : dict
-            Foreign purpose name : str
-                Leg (one/two/three) : str
-                    Mode (truck/container_ship...) : trade demand numpy 2d array
-        fin_borders : list[int]
-            Finnish border centroid ids
-
-        Returns
-        -------
-        dict
-            Foreign purpose name : str
-                Mode (truck/freight_train) : trade demand domestic leg numpy 2d array
-        """
-        demand_sum = sum(dom_demand[mode] for mode in dom_demand
-                         if mode in ["truck", "freight_train"])
-        truck_share = numpy.zeros_like(demand_sum)
-        numpy.divide(dom_demand["truck"], demand_sum, out=truck_share,
-                     where=demand_sum > 0.0)
-        train_share = numpy.ones_like(truck_share) - truck_share
-        
-        # Extracts trade purposes with same name as self.name
-        # e.g. if self is kemlaa, extracts kemlaa_export and kemlaa_import
-        purpose_trade_demand = {
-            k: v for k, v in trade_demand.items()
-            if k.startswith(f"{self.name}_")
-        }
-        
-        dom_leg_demand = {}
-        for purpose in purpose_trade_demand:
-            demand_full = pandas.DataFrame(
-                0, index=self.orig_zone_numbers, columns=self.orig_zone_numbers,
-                dtype=numpy.float32
-            )
-            if purpose.endswith("_export"):
-                demand_full.loc[:, fin_borders] = purpose_trade_demand[purpose]["leg_one"]["truck"]
-            else:
-                demand_full.loc[fin_borders, :] = purpose_trade_demand[purpose]["leg_three"]["truck"]
-            dom_leg_demand[purpose] = {"truck": demand_full.values * truck_share}
-            train_demand = demand_full.values * train_share
-            if numpy.sum(train_demand) > 0.0:
-                dom_leg_demand[purpose]["freight_train"] = train_demand
-        return dom_leg_demand
-
-    def run_logistics_module(self, demand_truck: numpy.ndarray, impedance: numpy.ndarray, 
-                             zone_index_map: dict, iterations: int) -> tuple:
-        """Entry point for running logistics module for truck demand within Finland
-
-        Parameters
-        ----------
-        demand_truck : numpy.ndarray
-            Modelled truck demand for purpose
-        impedance : dict
-            Mode (truck/train/...) : dict
-                Type (time/dist/toll_cost/canal_cost) : numpy 2d matrix
-        zone_index_map : dict 
-            zone id number : index
-        iterations : int
-            Number of times logistics module is run
-
-        Returns
-        -------
-        Tuple[np.ndarray]
-            Routed truck demand, and totals for detoured and direct demand
-        """
-        try:
-            lcs_areas = self.generation_zone_data[f"lc_area_{self.name}"]
-        except KeyError:
-            lcs_areas = self.generation_zone_data["lc_area"]
-        lc_sizes = lcs_areas[lcs_areas > 0]
-        lc_indices = numpy.array([zone_index_map.get(id, None) 
-                                for id in list(lc_sizes.index)])
-        lc_sizes = lc_sizes.to_numpy()
-        cost = self.get_costs(impedance)
-        model = LogisticsModule(cost, self.route_params, lc_indices, lc_sizes)
-        for i in range(1, iterations + 1):
-            demand_truck, per_route = run_logistics_model(model, demand_truck, i)
-        return demand_truck, per_route
-
-    def run_trade_route_module(self, impedance: dict,
-                               ship_imps: dict,
-                               fin_border_ids: dict,
-                               cluster_border_ids: dict,
-                               trade_demand_path):
-        """Entry point for running foreign trade route choice module. 
-        
-        Parameters
-        ----------
-        impedance : dict
-            Mode (truck/train/...) : dict
-                Type (time/dist/toll_cost/canal_cost) : numpy 2d matrix
-        ship_imps : dict
-            Mode (container_ship/general_cargo...) : attribute
-                Type (dist/frequency) : numpy.ndarray
-        fin_border_ids : dict
-            Finland border id (FIHEL/FISKV...) : str
-                Centroid id : int
-        cluster_border_ids : dict
-            Foreign border id (AEJEA/SESTO...) : str
-                Centroid id : int
-        trade_demand_path : Path
-            argument path to trade demand omx-file
-
-        Returns
-        -------
-        dict
-            Leg name (one/two/three) : Mode
-                Name (truck/container_ship...) : numpy 2d array
-        """
-        impedance_legs = self.form_impedance_legs(
-            impedance, ship_imps, fin_border_ids, cluster_border_ids)
-        demand, trade_mappings = read_omx_item(trade_demand_path, self.name)
-
-        mapping_name = (self.generation_zone_data.mapping.name if self.is_export 
-                        else self.attraction_zone_data.mapping.name)
-        if mapping_name == "municipality_center":
-            df = pandas.DataFrame(demand, trade_mappings["finland_zone_number"])
-            demand = df.groupby(self.generation_zone_data.mapping).sum().to_numpy()
-        demand = demand.T if not self.is_export else demand
-
-        # Finland border control point key - zone index
-        border_indices = {key: idx for idx, key in enumerate(fin_border_ids)}
-        route_model = TradeRouteModule(impedance_legs, self.route_params, 
-                                       border_indices, self.is_export)
-        trade_demand = run_trade_model(route_model, demand)
-        return trade_demand

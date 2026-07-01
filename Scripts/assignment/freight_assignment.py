@@ -61,16 +61,33 @@ class FreightAssignmentPeriod(AssignmentPeriod):
         """
         for ass_class in param.freight_modes:
             spec = self.assignment_modes[ass_class].ntw_results_spec
-            attr_name = (commodity_class + ass_class)[:17]
-            spec["on_segments"]["transit_volumes"] = "@" + attr_name
-            spec["on_links"]["aux_transit_volumes"] = "@a_" + attr_name
             self.emme_project.network_results(
                 spec, self.emme_scenario, ass_class)
-        attr_name = (commodity_class + "truck")[:17]
+            seg_attr = f"#{commodity_class}_{ass_class}"
+            self.emme_project.create_network_field(
+                    "TRANSIT_SEGMENT", "REAL", seg_attr, "commodity flow",
+                    overwrite=True, scenario=self.emme_scenario)
+            link_attr = f"#aux_{commodity_class}_{ass_class}"
+            self.emme_project.create_network_field(
+                    "LINK", "REAL", link_attr, "aux commodity flow",
+                    overwrite=True, scenario=self.emme_scenario)
+            network = self.emme_scenario.get_network()
+            for segment in network.transit_segments():
+                segment[seg_attr] = segment[param.commodity_flow_attr]
+            for link in network.links():
+                link[link_attr] = link[param.aux_commodity_flow_attr]
+            self.emme_scenario.publish_network(network)
         for spec in self._car_spec.truck_specs():
-            spec["classes"][0]["results"]["link_volumes"] = "@" + attr_name
             spec["stopping_criteria"] = self.stopping_criteria["coarse"]
             self.emme_project.car_assignment(spec, self.emme_scenario)
+        link_attr = f"#{commodity_class}_truck"
+        self.emme_project.create_network_field(
+            "LINK", "REAL", link_attr, "truck commodity flow",
+            overwrite=True, scenario=self.emme_scenario)
+        network = self.emme_scenario.get_network()
+        for link in network.links():
+                link[link_attr] = link["@truck"]
+        self.emme_scenario.publish_network(network)
         for tc in param.truck_classes:
             self.assignment_modes[tc].get_matrices()
 
