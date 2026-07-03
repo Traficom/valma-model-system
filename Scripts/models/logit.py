@@ -64,12 +64,6 @@ class LogitModel:
                        b: Dict[str, Dict[str, float]]):
         self._add_zone_util(utility, b["attraction"])
         self._add_impedance(utility, impedance, b["impedance"])
-        if "transform" in b:
-            b_transf = b["transform"]
-            transimp = numpy.zeros_like(utility)
-            self._add_zone_util(transimp, b_transf["attraction"])
-            self._add_impedance(transimp, impedance, b_transf["impedance"])
-            impedance["transform"] = transimp
         self._add_log_impedance(utility, impedance, b["log"])
         exps = numpy.exp(utility)
         dist = self.purpose.dist

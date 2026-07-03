@@ -71,5 +71,6 @@ Scripts/tests/test_data/Results/*
 !Scripts/tests/test_data/Results/test/Matrices/koko_suomi/transfer_time*
 !Scripts/tests/test_data/Results/test/Matrices/koko_suomi/park_cost*
 !Scripts/tests/test_data/Results/test/Matrices/koko_suomi/beeline*
+!Scripts/tests/test_data/Results/test/Matrices/koko_suomi/freight*
 project.mtbx-shm
 project.mtbx-wal

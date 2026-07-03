@@ -1,5 +1,5 @@
 {
-    "name": "elektr",
+    "name": "oljyru",
     "orig": "null",
     "dest": "null",
     "generation_area": "domestic",
@@ -26,60 +26,35 @@
             "impedance": {},
             "log": {
                 "attraction_size": 1,
-                "logsum": 0.3772
+                "logsum": 1
             },
             "attraction_size": {
-                "att_elektr": 1
+                "att_oljyru": 1
             }
         }
     },
     "mode_choice": {
-        "truck": {
-            "constant": 0,
-            "generation": {},
-            "attraction": {},
-            "impedance": {
-                "cost": -0.03947
-            },
-            "log": {
-				"cost": -2.452
-			},
-            "individual_dummy": {}
-        },
         "freight_train": {
             "generation": {},
             "attraction": {},
             "impedance": {
-                "cost": -0.3088,
-				"aux_cost": -0.2463
+                "cost": -0.04502,
+				"aux_cost": -0.3885
             },
             "log": {},
             "individual_dummy": {},
-            "constant": -3.945
+            "constant": -4.005
         },
         "ship": {
             "generation": {},
             "attraction": {},
             "impedance": {
-                "cost": -0.7799,
-				"aux_cost": -0.6487
+                "cost": -0.1296
             },
             "log": {},
             "individual_dummy": {},
-            "constant": 11.67
+            "constant": 0
         }
     },
-    "demand_share": {},
-    "route_choice": {
-        "size": 2.4866,
-        "constant": {
-            "detour": 3.2539,
-            "direct": -8.2535
-        },
-        "impedance": {
-            "orig_lc_detour": -0.9978,
-            "lc_dest_detour": -0.9000,
-            "orig_dest_direct": -0.9976
-        }
-    }
+    "demand_share": {}
 }
