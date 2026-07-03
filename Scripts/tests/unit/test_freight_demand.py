@@ -122,11 +122,11 @@ class FreightModelTest(unittest.TestCase):
                 detour_total = numpy.sum(per_route[:-1])
                 direct_total = per_route[-1]
                 if commodity.name == "kemlaa":
-                    self.assertAlmostEqual(detour_total, 19.52376, places=3)
-                    self.assertAlmostEqual(direct_total, 12913.461, places=3)
+                    self.assertAlmostEqual(detour_total, 18.290195, places=3)
+                    self.assertAlmostEqual(direct_total, 12170.293, places=3)
                 elif commodity.name == "kummuo":
-                    self.assertAlmostEqual(detour_total, 26.133245, places=3)
-                    self.assertAlmostEqual(direct_total, 15725.457, places=3)
+                    self.assertAlmostEqual(detour_total, 24.376, places=3)
+                    self.assertAlmostEqual(direct_total, 14812.304, places=3)
 
         write_vehicle_summary(total_demand, impedance, resultdata)
         resultdata.flush()
@@ -180,16 +180,16 @@ class FreightModelTest(unittest.TestCase):
         dom_vehicles = vehicles["domestic"]
         for_vehicles = vehicles["foreign"] 
         if purpose_name == "kemlaa":
-            self.assertAlmostEqual(numpy.sum(dom_vehicles["truck"]), 2.1024585, places=3)
-            self.assertAlmostEqual(numpy.sum(for_vehicles["truck"]), 0.032649778, places=3)
-            self.assertAlmostEqual(numpy.sum(dom_vehicles["semi_trailer"]), 1.2102093, places=3)
-            self.assertAlmostEqual(numpy.sum(for_vehicles["semi_trailer"]), 0.05011665, places=3)
-            self.assertAlmostEqual(numpy.sum(dom_vehicles["trailer_truck"]), 1.0011706, places=3)
-            self.assertAlmostEqual(numpy.sum(for_vehicles["trailer_truck"]), 0.031095028, places=3)
+            self.assertAlmostEqual(numpy.sum(dom_vehicles["truck"]), 1.9960878, places=3)
+            self.assertAlmostEqual(numpy.sum(for_vehicles["truck"]), 0.03186997, places=3)
+            self.assertAlmostEqual(numpy.sum(dom_vehicles["semi_trailer"]), 1.1489806, places=3)
+            self.assertAlmostEqual(numpy.sum(for_vehicles["semi_trailer"]), 0.04891966, places=3)
+            self.assertAlmostEqual(numpy.sum(dom_vehicles["trailer_truck"]), 0.95051795, places=3)
+            self.assertAlmostEqual(numpy.sum(for_vehicles["trailer_truck"]), 0.03035235, places=3)
         elif purpose_name == "kummuo":
-            self.assertAlmostEqual(numpy.sum(dom_vehicles["truck"]), 2.5046012, places=3)
+            self.assertAlmostEqual(numpy.sum(dom_vehicles["truck"]), 2.3739552, places=3)
             self.assertAlmostEqual(numpy.sum(for_vehicles["truck"]), 0.0, places=3)
-            self.assertAlmostEqual(numpy.sum(dom_vehicles["semi_trailer"]), 1.4416891, places=3)
+            self.assertAlmostEqual(numpy.sum(dom_vehicles["semi_trailer"]), 1.3664873, places=3)
             self.assertAlmostEqual(numpy.sum(for_vehicles["semi_trailer"]), 0.0, places=3)
-            self.assertAlmostEqual(numpy.sum(dom_vehicles["trailer_truck"]), 1.1926672, places=3)
+            self.assertAlmostEqual(numpy.sum(dom_vehicles["trailer_truck"]), 1.130455, places=3)
             self.assertAlmostEqual(numpy.sum(for_vehicles["trailer_truck"]), 0.0, places=3)

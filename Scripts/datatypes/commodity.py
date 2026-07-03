@@ -205,11 +205,7 @@ class DomesticCommodity(FreightCommodity):
         cost = sum(
             impedance[mtx_type] * unit_costs[mtx_type]
             for mtx_type in unit_costs)
-        aux_cost = numpy.where(
-            (impedance["aux_dist"] > (impedance["dist"]*2))
-            | (impedance["dist"] == 0),
-            numpy.inf,
-            self._transform_road_cost(impedance["aux_cost"]))
+        aux_cost = self._transform_road_cost(impedance["aux_cost"])
         return {
             "cost": cost,
             "aux_cost": aux_cost,
@@ -481,24 +477,22 @@ class ForeignCommodity(FreightCommodity):
         for mode in self.costdata["ship"].keys():
             if mode == "domestic_vessel":
                 continue
-            mode_imp = impedance[mode]
             ship_info[mode] = {
                 "cost": inf_mtx.copy(),
                 "draught": inf_mtx.copy(),
-                "frequency": mode_imp["frequency"]
+                "frequency": impedance[mode]["frequency"]
             }
             port_draughts = numpy.array(
                 [port_draught_limit[mode].get(port, numpy.inf)
                 for port in fin_ports])
             for draught in map(int, self.costdata["ship"][mode]):
-                mode_imp["time"] = (mode_imp["dist"]
-                                    / ship_draught_speed[mode][draught]
-                                    * 60)
-                mode_imp["terminal_cost"] = numpy.ones_like(mode_imp["dist"])
+                time = (impedance[mode]["dist"]
+                        / ship_draught_speed[mode][draught]
+                        * 60)
                 unit_costs = self.costdata["ship"][mode][f"{draught}"]
-                cost = sum(
-                    mode_imp[mtx_type] * unit_costs[mtx_type]
-                    for mtx_type in unit_costs)
+                cost = (unit_costs["time"]*time
+                        + unit_costs["dist"]*impedance[mode]["dist"]
+                        + unit_costs["terminal_cost"])
                 # Evaluate whether ship type can enter Finnish ports
                 too_shallow_ports = draught > port_draughts
                 if self.is_export:

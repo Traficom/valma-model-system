@@ -1,5 +1,6 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Dict
+import numpy
 
 import parameters.assignment as param
 from assignment.datatypes.assignment_mode import AssignmentMode
@@ -142,12 +143,15 @@ class FreightMode(AssignmentMode):
     def get_matrices(self):
         mtxs = {
             **self.dist.item,
-            **self.aux_dist.item,
             **self.time.item,
             **self.canal_cost.item,
         }
+        dist = self.dist.data
+        aux_dist = self.aux_dist.data
         aux_cost = (self._time_unit_cost*self.aux_time.data/60
-                    + self._dist_unit_cost*self.aux_dist.data)
+                    + self._dist_unit_cost*aux_dist)
+        aux_cost = numpy.where(
+            (aux_dist > dist*2) | (dist == 0), numpy.inf, aux_cost)
         if self._include_toll_cost:
             aux_cost += self.toll_cost.data
         mtxs["aux_cost"] = aux_cost
