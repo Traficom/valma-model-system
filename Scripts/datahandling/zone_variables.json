@@ -46,6 +46,7 @@
         "mean": [
             "avg_park_cost",
             "avg_park_time",
+            "avg_walk_time",
             "car_density",
             "intra_dist_walk",
             "intra_dist_bike",
