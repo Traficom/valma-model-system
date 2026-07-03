@@ -20,14 +20,17 @@ class FreightAssignmentPeriod(AssignmentPeriod):
                 time_unit_cost: Dict[str, float], save_matrices: bool):
         self._prepare_cars(dist_unit_cost, time_unit_cost, save_matrices)
         network = self.emme_scenario.get_network()
+        ass_classes = {mode: ass_class
+                       for ass_class, modes in param.freight_modes.items()
+                       for mode in modes}
         for line in network.transit_lines():
             mode = line.mode.id
-            for cost_attrs in param.freight_modes.values():
-                if mode in cost_attrs:
-                    cost = param.freight_terminal_cost[mode]
-                    line[param.terminal_cost_attr] = cost
-                    line[cost_attrs[mode]] = cost
-                    break
+            if mode in param.terminal_change_attrs:
+                ass_class = ass_classes[mode]
+                cost = param.freight_terminal_cost[ass_class]
+                line[param.terminal_cost_attr] = cost
+                line[param.terminal_change_attrs[mode]] = (cost
+                    if len(param.freight_modes[ass_class]) > 1 else 0)
         self.emme_scenario.publish_network(network)
         include_toll_cost = self.emme_scenario.network_field(
             "LINK", self.netfield("hinta")) is not None
@@ -35,6 +38,12 @@ class FreightAssignmentPeriod(AssignmentPeriod):
                 ass_class, self, dist_unit_cost["truck"],
                 time_unit_cost["truck"], include_toll_cost, save_matrices)
             for ass_class in param.freight_modes})
+        self._dist_unit_cost = {}
+        self._time_unit_cost = {}
+        for mode_dict in param.freight_modes.values():
+            for mode, description in mode_dict.items():
+                self._dist_unit_cost[mode] = dist_unit_cost[description]
+                self._time_unit_cost[mode] = time_unit_cost[description]
 
     def assign(self):
         self._set_car_vdfs(use_free_flow_speeds=True)
@@ -42,14 +51,8 @@ class FreightAssignmentPeriod(AssignmentPeriod):
         self._assign_trucks()
         self._set_freight_vdfs()
         self._assign_freight()
-        mtxs = {tc: self.assignment_modes[tc].get_matrices()
+        return {tc: self.assignment_modes[tc].get_matrices()
                 for tc in param.truck_classes + tuple(param.freight_modes)}
-        impedance_types = ("time", "dist", "cost", "aux_cost", "aux_dist",
-                           "canal_cost")
-        impedance = {mode: {mtx_type: mtxs[mode][mtx_type]
-                            for mtx_type in impedance_types if mtx_type in mtxs[mode]}
-                    for mode in mtxs}
-        return impedance
 
     def save_network_volumes(self, commodity_class: str):
         """Save commodity-specific volumes in segment attribute.
@@ -128,27 +131,37 @@ class FreightAssignmentPeriod(AssignmentPeriod):
 
     def _assign_freight(self):
         network = self.emme_scenario.get_network()
-        truck_mode = network.mode(param.assignment_modes["truck"])
-        park_and_ride_mode = network.mode(param.park_and_ride_mode)
-        extra_cost_attr = param.background_traffic_attr.replace("ul", "data")
-        for link in network.links():
-            if truck_mode in link.modes:
-                link.modes |= {park_and_ride_mode}
-            else:
-                link.modes -= {park_and_ride_mode}
-            link[extra_cost_attr] = link[param.extra_freight_cost_attr]
-        self.emme_scenario.publish_network(network)
+        cost_attr = param.line_penalty_attr.replace("us", "data")
+        for line in network.transit_lines():
+            mode = line.mode.id
+            if mode in param.terminal_change_attrs:
+                line[param.freight_time_perception_attr] = (self._time_unit_cost[mode]
+                                                            / 60)
+                for segment in line.segments():
+                    link = segment.link
+                    segment[cost_attr] = (self._dist_unit_cost[mode]*link.length
+                                          + link[param.extra_freight_cost_attr])
         for i, ass_class in enumerate(param.freight_modes):
+            truck_mode = network.mode(param.assignment_modes["truck"])
+            park_and_ride_mode = network.mode(param.park_and_ride_mode)
+            terminal_mode = network.mode(param.terminal_modes[ass_class])
+            for link in network.links():
+                if truck_mode in link.modes or terminal_mode in link.modes:
+                    link.modes |= {park_and_ride_mode}
+                else:
+                    link.modes -= {park_and_ride_mode}
+            self.emme_scenario.publish_network(network)
             spec = self.assignment_modes[ass_class]
             spec.init_matrices()
             self.emme_project.transit_assignment(
                 specification=spec.spec, scenario=self.emme_scenario,
                 add_volumes=i, save_strategies=True, class_name=ass_class)
-            self.emme_project.matrix_results(
-                spec.result_spec, scenario=self.emme_scenario,
-                class_name=ass_class)
-            self.emme_project.matrix_results(
-                spec.local_result_spec, scenario=self.emme_scenario,
+            for result_spec in spec.result_specs:
+                self.emme_project.matrix_results(
+                    result_spec, scenario=self.emme_scenario,
+                    class_name=ass_class)
+            self.emme_project.strategy_analysis(
+                spec.canal_cost_spec, scenario=self.emme_scenario,
                 class_name=ass_class)
         log.info("Freight assignment performed for scenario {}".format(
             self.emme_scenario.id))

@@ -5,12 +5,18 @@
         "van": 0.20,
         "truck": 0.23,
         "semi_trailer": 0.35,
-        "trailer_truck": 0.44
+        "trailer_truck": 0.44,
+        "diesel_train": 5.17,
+        "electric_train": 2.94,
+        "domestic_vessel": 54.2
     },
     "vehicle_hour_cost": {
         "truck": 31.96,
         "semi_trailer": 35.11,
-        "trailer_truck": 36.0
+        "trailer_truck": 36.0,
+        "diesel_train": 284.7,
+        "electric_train": 316.7,
+        "domestic_vessel": 208.8
     },
     "transit_cost": {
         "HSL": {
@@ -71,47 +77,41 @@
                 }
             },
             "freight_train": {
-                "electric_train": {
-                    "time": 0.08,
-                    "dist": 0.03,
-                    "terminal_cost": 12.5
-                },
-                "diesel_train": {
-                    "time": 0.07,
-                    "dist": 0.06,
-                    "terminal_cost": 11.5
-                }
+                "time_J": 0.08,
+                "dist_J": 0.03,
+                "num_terminals_J": 12.5,
+                "time_D": 0.07,
+                "dist_D": 0.06,
+                "num_terminals_D": 11.5
             },
             "ship": {
-                "domestic_vessel": {
-                    "time": 0.0037,
-                    "dist": 0.0032,
-                    "terminal_cost": 22.0,
-                    "canal_cost": 1.0
+                "time_W": 0.0037,
+                "dist_W": 0.0032,
+                "num_terminals_W": 22.0,
+                "canal_cost": 1.0
+            },
+            "container_ship": {
+                "4": {
+                    "time": 0.00199,
+                    "dist": 0.00172,
+                    "terminal_cost": 25.7523
                 },
-                "container_ship": {
-                    "4": {
-                        "time": 0.00199,
-                        "dist": 0.00172,
-                        "terminal_cost": 25.7523
-                    },
-                    "8": {
-                        "time": 0.00061,
-                        "dist": 0.00132,
-                        "terminal_cost": 25.7994
-                    },
-                    "15": {
-                        "time": 0.00032,
-                        "dist": 0.0009,
-                        "terminal_cost": 28.03951
-                    }
+                "8": {
+                    "time": 0.00061,
+                    "dist": 0.00132,
+                    "terminal_cost": 25.7994
                 },
-                "roro_vessel": {
-                    "5": {
-                        "time": 0.00554,
-                        "dist": 0.01407,
-                        "terminal_cost": 22.7679
-                    }
+                "15": {
+                    "time": 0.00032,
+                    "dist": 0.0009,
+                    "terminal_cost": 28.03951
+                }
+            },
+            "roro_vessel": {
+                "5": {
+                    "time": 0.00554,
+                    "dist": 0.01407,
+                    "terminal_cost": 22.7679
                 }
             }
         }

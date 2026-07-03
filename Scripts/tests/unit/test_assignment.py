@@ -24,11 +24,17 @@ class EmmeAssignmentTest(unittest.TestCase):
             "semi_trailer": 0.4,
             "truck": 0.3,
             "van": 0.2,
+            "diesel_train": 0.1,
+            "electric_train": 0.05,
+            "domestic_vessel": 0.05,
         }
         self.time_cost = {
             "truck": 31.96,
             "semi_trailer": 35.11,
             "trailer_truck": 36.0,
+            "diesel_train": 0.1,
+            "electric_train": 0.05,
+            "domestic_vessel": 0.05,
         }
         firstb_single = (2, 3, 5, 70, 0, 1.5)
         dist_single = (0.1, 0.2, 0.1, 0.3, 0.1, 0.2)
