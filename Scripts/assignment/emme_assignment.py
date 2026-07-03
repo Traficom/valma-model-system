@@ -188,16 +188,19 @@ class EmmeAssignmentModel(AssignmentModel):
             "TRANSIT_LINE", param.terminal_cost_attr, "terminal cost",
             overwrite=True, scenario=self.mod_scenario)
         self.emme_project.create_extra_attribute(
+            "TRANSIT_LINE", param.freight_time_perception_attr,
+            "freight time perception",
+            overwrite=True, scenario=self.mod_scenario)
+        self.emme_project.create_extra_attribute(
             "LINK", param.aux_commodity_flow_attr, "commodity flow",
             overwrite=True, scenario=self.mod_scenario)
         self.emme_project.create_extra_attribute(
             "TRANSIT_SEGMENT", param.commodity_flow_attr, "commodity flow",
             overwrite=True, scenario=self.mod_scenario)
-        for ass_class in param.freight_modes.values():
-            for attr in ass_class.values():
-                self.emme_project.create_extra_attribute(
-                    "TRANSIT_LINE", attr, "terminal cost",
-                    overwrite=True, scenario=self.mod_scenario)
+        for attr in param.terminal_change_attrs.values():
+            self.emme_project.create_extra_attribute(
+                "TRANSIT_LINE", attr, "terminal cost",
+                overwrite=True, scenario=self.mod_scenario)
         self._create_attributes(
             self.mod_scenario,
             list(param.truck_classes) + list(param.freight_modes),

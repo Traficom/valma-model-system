@@ -149,9 +149,9 @@ performance_settings = {
 }
 congested_time_weight = 1.5
 freight_terminal_cost = {
-    'D': 0,
-    'J': 0,
-    'W': 0
+    "freight_train": 5000,
+    "timber_train": 5000,
+    "ship": 40000,
 }
 # Headway standard deviation function parameters for different transit modes
 headway_sd_func = {
@@ -460,14 +460,27 @@ aux_modes = [
     'a'
 ]
 park_and_ride_mode = 'u'
+terminal_modes = {
+    "freight": "F",
+    "timber_train": "T",
+}
 freight_modes = {
     "freight_train": {
-        'D': "@d_train_term_cost",
-        'J': "@e_train_term_cost",
+        'D': "diesel_train",
+        'J': "electric_train",
+    },
+    "timber_train": {
+        'D': "diesel_train",
+        'J': "electric_train",
     },
     "ship": {
-        'W': "@ship_term_cost",
+        'W': "domestic_vessel",
     },
+}
+terminal_change_attrs = {
+    'D': "@d_train_term_cost",
+    'J': "@e_train_term_cost",
+    'W': "@ship_term_cost",
 }
 freight_marine_modes = {
     "container_ship": {
@@ -539,6 +552,7 @@ is_in_transit_zone_attr = "ui1"
 keep_stops_attr = "#keep_stops"
 submodel_attr = "#subarea"
 terminal_cost_attr = "@freight_term_cost"
+freight_time_perception_attr = "@freight_time_perc"
 aux_transit_time_attr = "@walk_time"
 aux_car_time_attr = "@car_time"
 park_cost_attr_n = "#park_cost_n"
