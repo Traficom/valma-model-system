@@ -461,8 +461,9 @@ aux_modes = [
 ]
 park_and_ride_mode = 'u'
 terminal_modes = {
-    "freight": "F",
-    "timber_train": "T",
+    "freight_train": 'F',
+    "timber_train": 'T',
+    "ship": 'F',
 }
 freight_modes = {
     "freight_train": {
