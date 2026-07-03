@@ -232,16 +232,16 @@
         },
         "calibration": {
             "car_pax": {
-                "constant": 0.0
+                "constant": -0.1243
             },
             "transit": {
-                "constant": 0.0
+                "constant": -0.2425
             },
             "bike": {
-                "constant": 0.0
+                "constant": -0.0292
             },
             "walk": {
-                "constant": 0.0
+                "constant": -0.1486
             }
         }
     },
