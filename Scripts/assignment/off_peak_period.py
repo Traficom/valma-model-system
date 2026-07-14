@@ -206,7 +206,6 @@ class TransitAssignmentPeriod(OffPeakPeriod):
         self._assign_transit(
             param.simple_transit_classes, calc_network_results=True,
             delete_strat_files=self._delete_strat_files)
-        self._calc_transit_link_results()
         mtxs = self._get_impedances(self._end_assignment_classes)
         for tc in self.assignment_modes:
             self.assignment_modes[tc].release_matrices()

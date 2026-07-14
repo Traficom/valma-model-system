@@ -144,7 +144,6 @@ class EmmeAssignmentModel(AssignmentModel):
                 delete_strat_files=self._delete_strat_files))
         ass_classes = (param.car_classes + param.transit_classes + ("bike",)
             if self.use_free_flow_speeds else param.simple_transport_classes)
-        ass_classes += ("bus",)
         self._create_attributes(
             self.day_scenario, ass_classes, self._extra, self._netfield)
         self._segment_results = self._create_transit_attributes(
@@ -163,8 +162,7 @@ class EmmeAssignmentModel(AssignmentModel):
         self.emme_project.set_extra_function_parameters(el1=param.ferry_wait_attr)
 
     def prepare_freight_network(self, car_dist_unit_cost: Dict[str, float],
-                                car_time_unit_cost: Dict[str, float],
-                                commodity_classes: List[str]):
+                                car_time_unit_cost: Dict[str, float]):
         """Create matrices, extra attributes and calc background variables.
 
         Parameters
@@ -179,8 +177,6 @@ class EmmeAssignmentModel(AssignmentModel):
                 Assignment class (car_work/truck/...)
             value : float
                 Value of time in euros per hour for the assignment class
-        commodity_classes : list of str
-            Class names for which we want extra attributes
         """
         self.freight_network = FreightAssignmentPeriod(
             "vrk", self.mod_scenario.number, self.emme_project)
@@ -191,27 +187,17 @@ class EmmeAssignmentModel(AssignmentModel):
         self.emme_project.create_extra_attribute(
             "TRANSIT_LINE", param.terminal_cost_attr, "terminal cost",
             overwrite=True, scenario=self.mod_scenario)
+        self.emme_project.create_extra_attribute(
+            "LINK", param.aux_commodity_flow_attr, "commodity flow",
+            overwrite=True, scenario=self.mod_scenario)
+        self.emme_project.create_extra_attribute(
+            "TRANSIT_SEGMENT", param.commodity_flow_attr, "commodity flow",
+            overwrite=True, scenario=self.mod_scenario)
         for ass_class in param.freight_modes.values():
             for attr in ass_class.values():
                 self.emme_project.create_extra_attribute(
                     "TRANSIT_LINE", attr, "terminal cost",
                     overwrite=True, scenario=self.mod_scenario)
-        for comm_class in commodity_classes:
-            for ass_class in param.freight_modes:
-                attr_name = (comm_class + ass_class)[:17]
-                self.emme_project.create_extra_attribute(
-                    "TRANSIT_SEGMENT", '@' + attr_name,
-                    "commodity flow", overwrite=True,
-                    scenario=self.mod_scenario)
-                self.emme_project.create_extra_attribute(
-                    "LINK", '@a_' + attr_name,
-                    "commodity flow", overwrite=True,
-                    scenario=self.mod_scenario)
-                attr_name = (comm_class + "truck")[:17]
-                self.emme_project.create_extra_attribute(
-                        "LINK", '@' + attr_name,
-                        "commodity flow", overwrite=True,
-                        scenario=self.mod_scenario)
         self._create_attributes(
             self.mod_scenario,
             list(param.truck_classes) + list(param.freight_modes),
@@ -281,24 +267,13 @@ class EmmeAssignmentModel(AssignmentModel):
                 car_times, f"netfield_links_{self.submodel}.txt")
 
         # Aggregate results to 24h
-        for ap in self.assignment_periods:
-            ap.transit_results_links_nodes()
         network = self.day_scenario.get_network()
         networks = {ap.name: ap.emme_scenario.get_network()
             for ap in self.assignment_periods}
-        for res in param.segment_results:
-            self._transit_segment_24h(
-                network, networks, param.segment_results[res])
-            if res != "transit_volumes":
-                self._node_24h(network, networks, param.segment_results[res])
-            log.info("Attribute {} aggregated to 24h (scenario {})".format(
-                res, self.day_scenario.id))
-        ass_classes = (param.car_classes + param.long_distance_transit_classes
-            if self.use_free_flow_speeds else param.simple_transport_classes)
-        ass_classes += ("bus", "aux_transit")
-        self._link_24h(network, networks, ass_classes)
+        self._node_seg_24h(network, networks)
+        self._link_24h(network, networks)
         self.day_scenario.publish_network(network)
-        log.info("Link attributes aggregated to 24h (scenario {})".format(
+        log.info("Attributes aggregated to 24h (scenario {})".format(
             self.day_scenario.id))
 
         # Aggregate and print transit vehicle kms
@@ -307,7 +282,6 @@ class EmmeAssignmentModel(AssignmentModel):
             for miletype in ("dist", "time")}
         for ap in self.assignment_periods:
             volume_factor = param.volume_factors["bus"][ap.name]
-            time_attr = ap.extra(param.uncongested_transit_time)
             for line in networks.pop(ap.name).transit_lines():
                 mode = line.vehicle.description
                 headway = line[ap.netfield("hdw")]
@@ -315,10 +289,12 @@ class EmmeAssignmentModel(AssignmentModel):
                     departures = 60 / headway / volume_factor
                     for segment in line.segments():
                         miles["dist"][mode] += departures * segment.link.length
-                        miles["time"][mode] += departures * segment[time_attr]
+                        miles["time"][mode] += departures * segment.transit_time
         resultdata.print_data(miles, "transit_kms.txt")
 
         # Aggregate and print vehicle kms and link lengths
+        ass_classes = (param.car_classes + param.long_distance_transit_classes
+            if self.use_free_flow_speeds else param.simple_transport_classes)
         kms = dict.fromkeys(ass_classes, 0.0)
         vdfs = {param.roadclasses[linktype].volume_delay_func
             for linktype in param.roadclasses}
@@ -341,7 +317,7 @@ class EmmeAssignmentModel(AssignmentModel):
                 else:
                     vdf = 0
                 for ass_class in ass_classes:
-                    veh_kms = link[self._extra(ass_class)] * link.length
+                    veh_kms = link[self._netfield(ass_class)] * link.length
                     kms[ass_class] += veh_kms
                     try:
                         vdf_kms[ass_class][vdf] += veh_kms
@@ -351,12 +327,11 @@ class EmmeAssignmentModel(AssignmentModel):
                     linklengths[param.railtypes[linktype]] += link.length
                 else:
                     linklengths[param.roadtypes[vdf]] += link.length / 2
-        resultdata.print_line("\nVehicle kilometres", "result_summary")
-        resultdata.print_concat(vdf_kms, "vehicle_kms_vdfs.txt")
+        resultdata.print_concat(vdf_kms, "vehicle_kilometers_by_road_class.txt")
         for ass_class in ass_classes:
             resultdata.print_line(
                 "{}:\t{:1.0f}".format(ass_class, kms[ass_class]),
-                "result_summary")
+                "vehicle_kilometers_by_mode")
         resultdata.print_data(linklengths, "link_lengths.txt")
 
         # Export link, node and segnment extra attributes to GeoPackage file
@@ -464,7 +439,7 @@ class EmmeAssignmentModel(AssignmentModel):
         if TYPE_CHECKING: scenario = cast(Scenario, scenario)
         for ass_class in assignment_classes:
             self.emme_project.create_extra_attribute(
-                "LINK", extra(ass_class), ass_class + " volume",
+                "LINK", f"@{ass_class}", f"{ass_class} volume",
                 overwrite=True, scenario=scenario)
         self.emme_project.create_extra_attribute(
             "LINK", param.aux_car_time_attr, "walk time",
@@ -494,9 +469,6 @@ class EmmeAssignmentModel(AssignmentModel):
         """
         # Create link attributes
         self.emme_project.create_extra_attribute(
-            "LINK", extra("aux_transit"), "aux transit volume",
-            overwrite=True, scenario=scenario)
-        self.emme_project.create_extra_attribute(
             "LINK", param.park_cost_attr_l, "terminal parking cost",
             overwrite=True, scenario=scenario)
         self.emme_project.create_extra_attribute(
@@ -508,11 +480,16 @@ class EmmeAssignmentModel(AssignmentModel):
             "boarding fare attribute", overwrite=True, scenario=scenario)
         self.emme_project.create_extra_attribute(
             "TRANSIT_LINE", param.board_long_dist_attr,
-            "boarding fare attribute", overwrite=True, scenario=scenario)
+            "long distance boarding fare attribute", overwrite=True,
+            scenario=scenario)
         for transit_class in param.transfer_penalty:
             self.emme_project.create_extra_attribute(
-                "TRANSIT_LINE", param.boarding_penalty_attr + transit_class,
-                "boarding pentalty attribute", overwrite=True,
+                "TRANSIT_LINE", param.boarding_penalty_attr+transit_class,
+                "boarding penalty attribute", overwrite=True,
+                scenario=scenario)
+            self.emme_project.create_extra_attribute(
+                "TRANSIT_LINE", param.long_dist_boarding_penalty_attr+transit_class,
+                "long distance boarding penalty attribute", overwrite=True,
                 scenario=scenario)
         # Create transit segment attributes
         self.emme_project.create_extra_attribute(
@@ -521,9 +498,6 @@ class EmmeAssignmentModel(AssignmentModel):
         self.emme_project.create_extra_attribute(
             "TRANSIT_SEGMENT", param.extra_waiting_time["penalty"],
             "wait time st.dev.", overwrite=True, scenario=scenario)
-        self.emme_project.create_extra_attribute(
-            "TRANSIT_SEGMENT", extra(param.uncongested_transit_time),
-            "uncongested transit time", overwrite=True, scenario=scenario)
         for result, attr_name in param.segment_results.items():
             self.emme_project.create_extra_attribute(
                 "TRANSIT_SEGMENT", attr_name, result, overwrite=True,
@@ -532,8 +506,7 @@ class EmmeAssignmentModel(AssignmentModel):
             "LINK", param.park_ride_vol_attr, "park-and-ride car volume",
             overwrite=True, scenario=scenario)
 
-    def _link_24h(self, network: Network, networks: Dict[str, Network],
-                  attrs: Iterable[str]):
+    def _link_24h(self, network: Network, networks: Dict[str, Network]):
         """ 
         Sums and expands link volumes to 24h.
 
@@ -546,22 +519,26 @@ class EmmeAssignmentModel(AssignmentModel):
                 Time period
             value : inro.emme.network.Network.Network
                 Time-period networks
-        attrs : list of str
-            List of attributes corresponding to assignment class volumes
         """
-        attrs = {attr: attr for attr in attrs}
-        extras = {ap.name: {attr: ap.extra(attrs[attr]) for attr in attrs}
-            for ap in self.assignment_periods}
-        extra = {attr: self._extra(attrs[attr]) for attr in attrs}
+        day_attrs = {}
+        hour_attrs = {}
+        for ap in self.assignment_periods:
+            hour_attrs[ap.name] = {}
+            for mode in ap.assignment_modes.values():
+                hour_attrs[ap.name][mode.name] = mode.volume_attr
+                day_attrs[mode.name] = self._netfield(mode.name)
+        for attr in day_attrs:
+            self.emme_project.create_network_field(
+                "LINK", "REAL", day_attrs[attr], f"{attr}_vol",
+                overwrite=True, scenario=self.day_scenario, network=network)
         # save link volumes to result network
         for link in network.links():
-            sum24.sum_24h(link, networks, extras, extra, sum24.get_link)
+            sum24.sum_24h(link, networks, hour_attrs, day_attrs, sum24.get_link)
         return network
 
-    def _node_24h(self, network: Network, networks: Dict[str, Network],
-                  attr: str):
+    def _node_seg_24h(self, network: Network, networks: Dict[str, Network]):
         """ 
-        Sums and expands node attributes to 24h.
+        Sums and expands node and segment attributes to 24h.
 
         Parameters
         ----------
@@ -572,44 +549,28 @@ class EmmeAssignmentModel(AssignmentModel):
                 Time period
             value : inro.emme.network.Network.Network
                 Time-period networks
-        attr : str
-            Attribute name that is usually in param.segment_results
         """
-        attrs = {transit_class: f"node_{transit_class}_{attr[1:]}"
-            for transit_class in self.simple_transit_classes}
-        netfields = self._netfields(attrs)
+        node_day_attrs = {}
+        node_hour_attrs = {}
+        segment_day_attrs = {}
+        segment_hour_attrs = {}
+        for ap in self.assignment_periods:
+            node_hour_attrs[ap.name] = {}
+            segment_hour_attrs[ap.name] = {}
+            for tc in self.simple_transit_classes:
+                for result in ap.assignment_modes[tc].node_results.values():
+                    node_hour_attrs[ap.name][tc] = result[ap.name]
+                    node_day_attrs[tc] = result["vrk"]
+                for result in ap.assignment_modes[tc].segment_results.values():
+                    segment_hour_attrs[ap.name][tc] = result[ap.name]
+                    segment_day_attrs[tc] = result["vrk"]
         # save node volumes to result network
         for node in network.nodes():
-            sum24.sum_24h(node, networks, *netfields, sum24.get_node)
-        return network
-
-    def _transit_segment_24h(self, network: Network,
-                             networks: Dict[str, Network], attr: str):
-        """ 
-        Sums and expands transit attributes to 24h.
-
-        Parameters
-        ----------
-        network : inro.emme.network.Network.Network
-            Day network
-        networks : dict
-            key : str
-                Time period
-            value : inro.emme.network.Network.Network
-                Time-period networks
-        attr : str
-            Attribute name that is usually in param.segment_results
-        """
-        attrs = {transit_class: transit_class + '_' + attr[1:]
-            for transit_class in self.simple_transit_classes}
-        netfields = self._netfields(attrs)
+            sum24.sum_24h(
+                node, networks, node_hour_attrs, node_day_attrs, sum24.get_node)
         # save segment volumes to result network
         for segment in network.transit_segments():
-            sum24.sum_24h(segment, networks, *netfields, sum24.get_segment)
+            sum24.sum_24h(
+                segment, networks, segment_hour_attrs, segment_day_attrs,
+                sum24.get_segment)
         return network
-
-    def _netfields(self, attrs: Dict[str, str]):
-        extras = {ap.name: {attr: ap.netfield(attrs[attr]) for attr in attrs}
-            for ap in self.assignment_periods}
-        extra = {attr: self._netfield(attrs[attr]) for attr in attrs}
-        return extras, extra

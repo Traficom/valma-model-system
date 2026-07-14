@@ -62,7 +62,7 @@ class ZoneData:
         data, mapping = read_zonedata(
             data_path, self.zone_numbers, zone_mapping, data_type)
         self.mapping = mapping
-        demand_aggs = ["municipality", "county", "submodel", "calibration_area"]
+        demand_aggs = ["municipality", "county", "submodel", "calibration_area", "pt_authority"]
         result_aggs = demand_aggs + [key for key in data if "aggregate_results_" in key]
         self.demand_aggs = ZoneAggregations(data[demand_aggs])
         self.result_aggs = ZoneAggregations(data[result_aggs])
@@ -126,16 +126,20 @@ class ZoneData:
         self["log_pop_density"] = numpy.log(self["pop_density"]+1)
 
         # Two-way intrazonal distances from building distances
-        self["dist"] = data["avg_building_distance"] * 2
-        self["time"] = self["dist"] / (20/60) # 20 km/h
-        self["cost"] = car_dist_cost * self["dist"]
+        self["dist_walk"] = data["intra_dist_walk"] * 2
+        self["dist_bike"] = data["intra_dist_bike"] * 2
+        self["time_car"] = 2 * 60 * data["intra_dist_car"] / 20
+        self["cost_car"] = 2 * car_dist_cost * data["intra_dist_car"]
+        self["density_pop_wrk"] = divide((data["population"] + data["workplaces"]),
+                                          data["land_area"])
 
         dummies = {
             "zone": {},
             "municipality": {},
             "county": {"Lappi"},
             "submodel": {},
-            "calibration_area": {}
+            "calibration_area": {},
+            "pt_authority": {"HSL", "Oulu", "Tampere", "Turku"}
         }
         for division_type in dummies:
             dummies[division_type].update(extra_dummies.get(division_type, []))
@@ -408,6 +412,8 @@ def read_zonedata(path: Path,
     )[data_type]
     aggs = {}
     shares: Dict[str, Dict[str, List[str]]] = {}
+    optional_agg = [key for key in list(data.columns.values) if "aggregate_results_" in key]
+    zone_variables["first"].extend(optional_agg)
     for func, cols in zone_variables.items():
         for col in cols:
             try:
