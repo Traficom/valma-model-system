@@ -255,6 +255,19 @@ class ZoneData:
             Index of zone number
         """
         return self.zones[zone_number].index
+    
+    def get_foreign_external_data(self) -> pandas.DataFrame:
+        """Get zone data for foreign external passenger traffic calculation.
+        Returns
+        -------
+        pandas DataFrame
+            Zone data for foreign external passenger traffic calculation
+        """
+        variables = (
+            "population",
+        )
+        data = {k: self._values[k] for k in variables}
+        return pandas.DataFrame(data)
 
     def __getitem__(self, key: str) -> Union[pandas.Series, numpy.ndarray]:
         try:

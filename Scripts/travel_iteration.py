@@ -19,7 +19,7 @@ from datahandling.zonedata import ZoneData
 from datahandling.matrixdata import MatrixData
 from demand.trips import DemandModel
 from demand.external import ExternalPurpose
-from datatypes.purpose import TravelPurpose, TourPurpose, SecDestPurpose
+from datatypes.purpose import TravelPurpose, TourPurpose, SecDestPurpose, ForeignExternalPurpose
 from datatypes.demand import Demand
 import parameters.assignment as param
 import parameters.zone as zone_param
@@ -111,12 +111,15 @@ class ModelSystem:
         self.resultdata = ResultsData(results_path)
         self.resultmatrices = MatrixData(results_path / "Matrices" / submodel)
         parameters_path = Path(__file__).parent / "parameters" / "demand"
+        foreign_external_path = self.basematrices.path / "ext_foreign_passenger_vrk.omx"
         home_based_purposes = []
         sec_dest_purposes = []
         other_purposes = []
         purpose_names = []
         for file in parameters_path.glob("*.json"):
             specification = json.loads(file.read_text("utf-8"))
+            if specification["name"] == "hb_abroad_other" and not foreign_external_path.exists():
+                continue
             for dummies in mode_dummies.values():
                 for subarea in dummies:
                     for mode, coeff in dummies[subarea].items():
@@ -129,9 +132,16 @@ class ModelSystem:
                         if mode in specification["destination_choice"]:
                             (specification["destination_choice"][mode]
                                           ["attraction"][subarea]) = coeff
-            purpose = TravelPurpose(
-                specification, self._zone_datas, self.resultdata,
-                cost_data["cost_changes"])
+            if specification["name"] == "hb_abroad_other":
+                purpose = ForeignExternalPurpose(specification,
+                                                              self._zone_datas,
+                                                              self.resultdata,
+                                                              cost_data["cost_changes"],
+                                                              foreign_external_path)
+            else:
+                purpose = TravelPurpose(
+                    specification, self._zone_datas, self.resultdata,
+                    cost_data["cost_changes"])
             required_time_periods = sorted(
                 {tp for m in purpose.impedance_share.values() for tp in m})
             if required_time_periods == sorted(assignment_model.time_periods):
@@ -431,6 +441,8 @@ class ModelSystem:
 
     def _export_accessibility(self):
         for purpose in self.dm.tour_purposes:
+            if purpose.name == "hb_abroad_other":
+                continue
             for logsum in purpose.model.accessibility.values():
                 self.resultdata.print_data(logsum, f"accessibility.txt")
     
@@ -438,21 +450,21 @@ class ModelSystem:
         self.resultdata.print_data(
             self._zone_datas["domestic"].zone_values, "zonedata_input.txt")
         gen_tours_purpose = {purpose.name: purpose.generated_tours_all
-                             for purpose in self.dm.tour_purposes}
+                             for purpose in self.dm.tour_purposes if not purpose.name == "hb_abroad_other"}
         self.resultdata.print_data(
             gen_tours_purpose, "zone_generation_by_purpose.txt")
         attr_tours_purpose = {purpose.name: purpose.attracted_tours_all
-                              for purpose in self.dm.tour_purposes}
+                              for purpose in self.dm.tour_purposes if not purpose.name == "hb_abroad_other"}
         self.resultdata.print_data(
             attr_tours_purpose, "zone_attraction_by_purpose.txt")
         gen_dist_purpose = {
             purpose.name: purpose.generated_dist_all / purpose.generated_tours_all
-                              for purpose in self.dm.tour_purposes}
+                              for purpose in self.dm.tour_purposes if not purpose.name == "hb_abroad_other"}
         self.resultdata.print_data(
             gen_dist_purpose, "zone_generation_dist_by_purpose.txt")
         attr_dist_purpose = {
             purpose.name: purpose.attracted_dist_all / purpose.attracted_tours_all
-                              for purpose in self.dm.tour_purposes}
+                              for purpose in self.dm.tour_purposes if not purpose.name == "hb_abroad_other"}
         self.resultdata.print_data(
             attr_dist_purpose, "zone_attraction_dist_by_purpose.txt")
         tours, dists = self._get_mode_tours()
@@ -462,6 +474,8 @@ class ModelSystem:
         self.resultdata.print_data(tours, "zone_attraction_by_mode.txt")
         self.resultdata.print_data(dists, "zone_attraction_dist_by_mode.txt")
         for purpose in self.dm.tour_purposes:
+            if purpose.name == "hb_abroad_other":
+                continue
             self.resultdata.print_concat(
                 purpose.generation_mode_shares, "purpose_mode_shares.txt")
             self.resultdata.print_concat(
@@ -482,6 +496,8 @@ class ModelSystem:
             demand = pandas.Series(0.0, idx, name=mode)
             dist = pandas.Series(0.0, idx, name=mode)
             for purpose in self.dm.tour_purposes:
+                if purpose.name == "hb_abroad_other":
+                    continue
                 if mode in purpose.modes and purpose.dest != "source":
                     if generation:
                         bounds = (next(iter(purpose.sources)).bounds

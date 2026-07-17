@@ -1,0 +1,90 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING, Dict
+import numpy # type: ignore
+import pandas
+if TYPE_CHECKING:
+    from datahandling.matrixdata import MatrixData
+    from datahandling.zonedata import ZoneData
+    from datatypes.purpose import Purpose
+
+from parameters.departure_time import demand_share
+from pathlib import Path
+from utils.external import fratar, calibrate
+import openmatrix as omx # type: ignore
+from parameters.zone import purpose_areas
+
+
+class ForeignExternalModel:
+    """Foreign external passenger traffic model.
+    Parameters
+    ----------
+    zone_data_base : datahandling.zonedata.ZoneData
+        Zone data for base year
+    zone_data_forecast : datahandling.zonedata.ZoneData
+        Zone data for forecast year
+    base_demand : datahandling.matrixdata.MatrixData
+        Base demand matrices
+    """
+
+    def __init__(self,
+                 purpose: Purpose, 
+                 zone_data_base: Dict[str, ZoneData], 
+                 zone_data_forecast: Dict[str, ZoneData], 
+                 base_demand_path: Path,
+                 zone_numbers: numpy.ndarray):
+        self.purpose = purpose
+        self.zdata_b = zone_data_base["domestic"]
+        self.zdata_f = zone_data_forecast["domestic"]
+        self.base_demand_path = base_demand_path
+        self.zone_numbers = zone_numbers
+        self.zone_numbers_zone_data = list(self.zdata_b.zone_numbers)
+
+    def calc_foreign_external_traffic(self, mode: str) -> numpy.ndarray:
+        """Calculate foreign external passenger traffic matrix.
+        Return
+        ------
+        numpy.ndarray
+            Foreign external passenger demand matrix for whole day
+        """
+        zone_data_base = self.zdata_b.get_foreign_external_data()
+        zone_data_forecast = self.zdata_f.get_foreign_external_data()
+        production_base = self._generate_trips(zone_data_base, mode)
+        production_forecast = self._generate_trips(zone_data_forecast, mode)
+
+        with omx.open_file(self.base_demand_path, "r") as mtx:
+            # Remove zero values
+            base_mtx = numpy.array(mtx[mode]).clip(0.000001, None)
+            base_colsum = base_mtx.sum(1)
+            omx_zone_numbers = mtx.mapping("zone_number")
+        # Calibrate generation
+        production = calibrate(
+            base_colsum, production_base, production_forecast)
+
+        # Matrix balancing
+        mock_attraction = base_mtx.sum(0)
+        demand = fratar(production, mock_attraction, base_mtx)
+ 
+        # Destination zones for this purpose from zone data
+        desired_dest_zones = numpy.array(self.zone_numbers)[
+            self.purpose.dest_interval]
+ 
+        # Add zero columns for external centroids not in the OMX file
+        new_ncols = len(desired_dest_zones)
+        new_demand = numpy.zeros((demand.shape[0], new_ncols))
+        index_by_zone = {i: int(z) for i, z in omx_zone_numbers.items()}
+        for col_idx, zone in enumerate(desired_dest_zones):
+            src_col = index_by_zone.get(int(zone))
+            if src_col is not None:
+                new_demand[:, col_idx] = demand[:, src_col]
+        demand = new_demand
+       
+        # Remove small values
+        demand[demand < 0.0001] = 0
+
+        return demand
+
+    def _generate_trips(self, 
+                        zone_data: pandas.DataFrame, 
+                        mode: str) -> numpy.ndarray:
+        b = pandas.Series(self.purpose.tour_generation[mode])
+        return (b * zone_data).sum(1) + 0.001
