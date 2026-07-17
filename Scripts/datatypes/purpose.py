@@ -223,15 +223,15 @@ class TravelPurpose(Purpose):
         for mode in self.discount:
             for mtx_type in self.discount[mode]:
                 day_imp[mode][mtx_type] *= self.discount[mode][mtx_type]
-        zd = getattr(self, "attraction_zone_data", None)
+        zd = self.attraction_zone_data
         for mode in day_imp:
             for mtx_type in day_imp[mode]:
                 ass_class = mode_impedance[mode]
                 label = f"{mtx_type}_{ass_class}"
-                if label in ("time_car", "cost_car", "dist_walk", "dist_bike") and zd is not None:
+                if label in ("time_car", "cost_car", "dist_walk", "dist_bike") and not self.name == "hb_abroad_other":
                     # Get intra-zonal impendances from zone data
                     numpy.fill_diagonal(day_imp[mode][mtx_type], zd[label])
-            if "car" in mode and zd is not None:
+            if "car" in mode and not self.name == "hb_abroad_other":
                 day_imp[mode]["time"] += numpy.asarray(zd["avg_park_time"])
                 day_imp[mode]["cost"] += (self.activity_time * self.park_cost_share
                                           * numpy.asarray(zd["avg_park_cost"]))
