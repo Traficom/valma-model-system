@@ -193,7 +193,7 @@
     "access_mode_choice": {
         "airplane": {
             "airplane": {
-                "constant": -2,
+                "constant": -0.2421,
                 "generation": {},
                 "attraction": {},
                 "impedance": {
@@ -205,7 +205,7 @@
                 "individual_dummy": {}
             },
             "airpl_car_acc": {
-                "constant": -4.27,
+                "constant": -4.9269,
                 "generation": {},
                 "attraction": {},
                 "impedance": {
