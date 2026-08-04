@@ -127,6 +127,7 @@ class ZoneData:
 
         # Two-way intrazonal distances from building distances
         self["dist_walk"] = data["intra_dist_walk"] * 2
+        self["pop_non_higher"] = self["population"] - self["pop_higher"]
         self["dist_bike"] = data["intra_dist_bike"] * 2
         self["time_car"] = 2 * 60 * data["intra_dist_car"] / 20
         self["cost_car"] = 2 * car_dist_cost * data["intra_dist_car"]

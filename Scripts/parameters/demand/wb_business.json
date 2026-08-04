@@ -3,14 +3,16 @@
     "orig": "source",
     "dest": "other",
     "source": [
-        "hb_work"
+        "hb_work_white",
+        "hb_work_blue"
     ],
     "generation_area": "domestic",
     "attraction_area": "domestic",
     "struct": "mode>dest",
     "gen_model": "rate",
     "generation": {
-        "hb_work": 0.0674
+        "hb_work_white": 0.0334,
+        "hb_work_blue": 0.0334
     },
     "sec_dest_rate": {
         "car_drv": 1.1013,
