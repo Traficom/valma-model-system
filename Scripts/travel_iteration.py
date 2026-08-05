@@ -132,16 +132,9 @@ class ModelSystem:
                         if mode in specification["destination_choice"]:
                             (specification["destination_choice"][mode]
                                           ["attraction"][subarea]) = coeff
-            if specification["name"] == "hb_abroad_other":
-                purpose = ForeignExternalPurpose(specification,
-                                                              self._zone_datas,
-                                                              self.resultdata,
-                                                              cost_data["cost_changes"],
-                                                              foreign_external_path)
-            else:
-                purpose = TravelPurpose(
-                    specification, self._zone_datas, self.resultdata,
-                    cost_data["cost_changes"])
+            purpose = TravelPurpose(
+                specification, self._zone_datas, self.resultdata,
+                cost_data["cost_changes"], foreign_external_path)
             required_time_periods = sorted(
                 {tp for m in purpose.impedance_share.values() for tp in m})
             if required_time_periods == sorted(assignment_model.time_periods):

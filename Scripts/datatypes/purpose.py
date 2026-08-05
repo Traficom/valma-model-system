@@ -90,7 +90,8 @@ class TravelPurpose(Purpose):
                  specification,
                  zone_datas,
                  resultdata = None,
-                 mtx_adjustment = None):
+                 mtx_adjustment = None,
+                 foreign_external_path = None):
         """Create purpose for two-way tour or for secondary destination of tour.
 
         Parameters
@@ -275,9 +276,9 @@ class TravelPurpose(Purpose):
 class TourPurpose(TravelPurpose):
     """Standard two-way tour purpose."""
 
-    def __init__(self, specification, zone_datas, resultdata, mtx_adjustment):
+    def __init__(self, specification, zone_datas, resultdata, mtx_adjustment, basematrices_path=None):
         TravelPurpose.__init__(
-            self, specification, zone_datas, resultdata, mtx_adjustment)
+            self, specification, zone_datas, resultdata, mtx_adjustment, basematrices_path)
         if (self.orig == "home" and 
             specification["gen_model"] == "rate"):
             self.gen_model = generation.GenerationModel(
@@ -561,7 +562,7 @@ class TourPurpose(TravelPurpose):
 class SecDestPurpose(TravelPurpose):
     """Purpose for secondary destination of tour."""
 
-    def __init__(self, specification, zone_data, resultdata, mtx_adjustment):
+    def __init__(self, specification, zone_data, resultdata, mtx_adjustment, basematrices_path=None):
         args = (self, specification, zone_data, resultdata)
         TravelPurpose.__init__(*args, mtx_adjustment)
         self.gen_model = generation.SecDestGeneration(
