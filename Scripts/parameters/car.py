@@ -24,7 +24,7 @@ car_ownership = {
                 "sh_income_100_*sh_hh_1_adult_children": 0,
             },
             "calibration": {
-                "constant": 0
+                "constant": 0.295158762
             }
         },
         "1": {
@@ -47,7 +47,7 @@ car_ownership = {
                 "sh_income_100_*sh_hh_1_adult_children": 0.530891,
             },
             "calibration": {
-                "constant": 0.0
+                "constant": -0.09826214
             },
         }
     },
@@ -70,7 +70,7 @@ car_ownership = {
                 "sh_income_100_*sh_hh_2_adults_children": 0,
             },
             "calibration": {
-                "constant": 0
+                "constant": 0.432910651
             }
         },
         "1": {
@@ -93,7 +93,7 @@ car_ownership = {
                 "sh_income_100_*sh_hh_2_adults_children": 0.197250,
             },
             "calibration": {
-                "constant": 0.0
+                "constant": -0.05476665
             }
         },
     },
@@ -116,7 +116,7 @@ car_ownership = {
                 "sh_income_100_*sh_hh_2_adults_children": 0,
             },
             "calibration": {
-                "constant": 0
+                "constant": -0.35784365
             }
         },
         "1": {
@@ -139,7 +139,7 @@ car_ownership = {
                 "sh_income_100_*sh_hh_2_adults_children": 0.379870,
             },
             "calibration": {
-                "constant": 0.0
+                "constant": -0.01644901
             }
         },
         "2": {
@@ -162,7 +162,7 @@ car_ownership = {
                 "sh_income_100_*sh_hh_2_adults_children": 1.133864+0.573108,
             },
             "calibration": {
-                "constant": 0.0
+                "constant": 0.061056609
             }
         }
     }
