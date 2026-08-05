@@ -150,23 +150,6 @@
         ]
     },
     "destination_choice": {
-        "logsum": {
-            "attraction": {},
-            "impedance": {},
-            "log": {
-                "attraction_size": 1,
-                "logsum": 0.7381
-            },
-            "attraction_size": {
-                "area_leisure_buildings": 1,
-                "wrk_hospitality": 44.478236,
-                "age_7_17": 0.256148,
-                "age_18_29": 0.256148,
-                "age_30_49": 0.256148,
-                "age_50_64": 6.449483,
-                "age_65_99": 6.449483
-            }
-        }
     },
     "mode_choice": {
         "airplane": {
