@@ -9,7 +9,7 @@ if TYPE_CHECKING:
 
 from parameters.departure_time import demand_share
 from pathlib import Path
-from utils.external import fratar, calibrate
+from utils.matrix_calibration import fratar, calibrate
 import openmatrix as omx # type: ignore
 from parameters.zone import purpose_areas
 
