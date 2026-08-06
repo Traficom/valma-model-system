@@ -111,12 +111,15 @@ class ModelSystem:
         self.resultdata = ResultsData(results_path)
         self.resultmatrices = MatrixData(results_path / "Matrices" / submodel)
         parameters_path = Path(__file__).parent / "parameters" / "demand"
+        foreign_external_path = self.basematrices.path / "ext_foreign_passenger_vrk.omx"
         home_based_purposes = []
         sec_dest_purposes = []
         other_purposes = []
         purpose_names = []
         for file in parameters_path.glob("*.json"):
             specification = json.loads(file.read_text("utf-8"))
+            if specification["name"] == "hb_abroad_other" and not foreign_external_path.exists():
+                continue
             for dummies in mode_dummies.values():
                 for subarea in dummies:
                     for mode, coeff in dummies[subarea].items():
@@ -131,7 +134,7 @@ class ModelSystem:
                                           ["attraction"][subarea]) = coeff
             purpose = TravelPurpose(
                 specification, self._zone_datas, self.resultdata,
-                cost_data["cost_changes"])
+                cost_data["cost_changes"], foreign_external_path)
             required_time_periods = sorted(
                 {tp for m in purpose.impedance_share.values() for tp in m})
             if required_time_periods == sorted(assignment_model.time_periods):

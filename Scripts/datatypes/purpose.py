@@ -19,6 +19,7 @@ from parameters.assignment import (
 import parameters.cost as cost
 import models.generation as generation
 from datatypes.demand import Demand
+from demand.foreign_external import ForeignExternalModel
 from datatypes.histogram import TourLengthHistogram
 from utils.calibrate import attempt_calibration
 
@@ -86,7 +87,8 @@ class TravelPurpose(Purpose):
                  specification,
                  zone_datas,
                  resultdata = None,
-                 mtx_adjustment = None):
+                 mtx_adjustment = None,
+                 foreign_external_path = None):
         """Create purpose for two-way tour or for secondary destination of tour.
 
         Parameters
@@ -133,6 +135,9 @@ class TravelPurpose(Purpose):
             Writer object for result directory
         mtx_adjustment : dict (optional)
             Dict of matrix adjustments for testing elasticities
+        foreign_external_path : Path
+            Path to base matrices for calculating foreign external demand
+            (only used in foreign external tour purpose)
         """
         Purpose.__init__(self, specification, zone_datas, resultdata)
         self.impedance_share = specification["impedance_share"]
@@ -219,20 +224,7 @@ class TravelPurpose(Purpose):
         for mode in self.discount:
             for mtx_type in self.discount[mode]:
                 day_imp[mode][mtx_type] *= self.discount[mode][mtx_type]
-        dzd = self.attraction_zone_data
-        ozd = self.generation_zone_data
-        for mode in day_imp:
-            for mtx_type in day_imp[mode]:
-                ass_class = mode_impedance[mode]
-                label = f"{mtx_type}_{ass_class}"
-                if label in ("time_car", "cost_car", "dist_walk", "dist_bike"):
-                    # Get intra-zonal impendances from zone data
-                    numpy.fill_diagonal(day_imp[mode][mtx_type], dzd[label])
-            if "car" in mode:
-                day_imp[mode]["time"] += numpy.asarray(ozd["avg_walk_time"])[:, numpy.newaxis]
-                day_imp[mode]["time"] += numpy.asarray(dzd["avg_park_time"] + dzd["avg_walk_time"])
-                day_imp[mode]["cost"] += (self.activity_time * self.park_cost_share
-                                          * numpy.asarray(dzd["avg_park_cost"]))
+        self._add_destination_impedances(day_imp)
         if self.occupancy:
             if "car_drv" in day_imp:
                 day_imp["car_drv"]["cost"] *= (1 - self.cost_share
@@ -252,6 +244,22 @@ class TravelPurpose(Purpose):
                                               / cost.avg_tour_duration[mode])
         return day_imp
 
+    def _add_destination_impedances(self, day_imp):
+        dzd = self.attraction_zone_data
+        ozd = self.generation_zone_data
+        for mode in day_imp:
+            for mtx_type in day_imp[mode]:
+                ass_class = mode_impedance[mode]
+                label = f"{mtx_type}_{ass_class}"
+                if label in ("time_car", "cost_car", "dist_walk", "dist_bike"):
+                    # Get intra-zonal impendances from zone data
+                    numpy.fill_diagonal(day_imp[mode][mtx_type], dzd[label])
+            if "car" in mode:
+                day_imp[mode]["time"] += numpy.asarray(ozd["avg_walk_time"])[:, numpy.newaxis]
+                day_imp[mode]["time"] += numpy.asarray(dzd["avg_park_time"] + dzd["avg_walk_time"])
+                day_imp[mode]["cost"] += (self.activity_time * self.park_cost_share
+                                          * numpy.asarray(dzd["avg_park_cost"]))
+
     def __new__(cls, *args):
         if cls is not TravelPurpose:
             return super(TravelPurpose, cls).__new__(cls)
@@ -259,6 +267,8 @@ class TravelPurpose(Purpose):
         attempt_calibration(specification)
         if "sec_dest" in specification:
             purpose = SecDestPurpose(*args)
+        elif specification["name"] == "hb_abroad_other":
+            purpose = ForeignExternalPurpose(*args)
         else:
             purpose = TourPurpose(*args)
         try:
@@ -271,7 +281,7 @@ class TravelPurpose(Purpose):
 class TourPurpose(TravelPurpose):
     """Standard two-way tour purpose."""
 
-    def __init__(self, specification, zone_datas, resultdata, mtx_adjustment):
+    def __init__(self, specification, zone_datas, resultdata, mtx_adjustment, basematrices_path=None):
         TravelPurpose.__init__(
             self, specification, zone_datas, resultdata, mtx_adjustment)
         if (self.orig == "home" and 
@@ -408,18 +418,7 @@ class TourPurpose(TravelPurpose):
         #If the trip is long-distance, calculate unimodal/intermodal
         # probability split for each main mode
         if "vrk" in impedance:
-            acc_splits = {}
-            matrixdata = MatrixData(self.resultdata.path / "Matrices")
-            with matrixdata.open(
-                    f"logsum_{self.name}", "vrk", list(self.orig_zone_numbers), m='w'
-                    ) as mtx:
-                for main_mode, acc_modes in self.intermodals.items():
-                    mode_impedance = {mode: purpose_impedance.pop(mode)
-                        for mode in [main_mode] + acc_modes}
-                    acc_splits[main_mode], logsum = self.split_connection_mode(
-                        mode_impedance, main_mode)
-                    purpose_impedance[main_mode] = {"logsum": logsum}
-                    mtx[main_mode] = logsum
+            acc_splits = self._calc_connection_prob(purpose_impedance)
 
         # Calculate main mode probability after access mode probability
         # to have access mode logsum as variable
@@ -435,15 +434,49 @@ class TourPurpose(TravelPurpose):
                     prob[acc_mode] = split[acc_mode] * main_prob
         return prob
 
-    def split_connection_mode(self, impedance, pt_mode):
-        if pt_mode == "airplane":
-            impedance["airpl_taxi_acc"] = impedance["airpl_car_acc"]
-        model = self.connection_models[pt_mode]
-        prob, logsum = model.calc_mode_prob(impedance)
-        if "airpl_taxi_acc" in prob:
-            prob["airpl_car_acc"] += prob.pop("airpl_taxi_acc")
-        return prob, logsum
+    def _calc_connection_prob(self, purpose_impedance):
+        """Calculate mode probabilities for connection modes.
 
+        Parameters
+        ----------
+        purpose_impedance : dict
+            key : str
+                Mode (transit/airplane)
+            value : dict
+                key : str
+                    Type (time/cost/dist)
+                value : numpy.ndarray
+                    Impedance (float 2-d matrix)
+
+        Returns
+        -------
+        dict
+            key: str
+                Mode (transit/airplane)
+            value : dict
+                key : str
+                    Connection mode (pt_acc/airpl_car_acc/airpl_taxi_acc...)
+                value : numpy.ndarray
+                    Choice probabilities
+        """
+        acc_splits = {}
+        matrixdata = MatrixData(self.resultdata.path / "Matrices")
+        with matrixdata.open(
+                f"logsum_{self.name}", "vrk", list(self.orig_zone_numbers), m='w'
+                ) as mtx:
+            for main_mode, acc_modes in self.intermodals.items():
+                mode_impedance = {mode: purpose_impedance.pop(mode)
+                    for mode in [main_mode] + acc_modes}
+                if main_mode == "airplane":
+                    mode_impedance["airpl_taxi_acc"] = mode_impedance["airpl_car_acc"]
+                model = self.connection_models[main_mode]
+                prob, logsum = model.calc_mode_prob(mode_impedance)
+                if "airpl_taxi_acc" in prob:
+                    prob["airpl_car_acc"] += prob.pop("airpl_taxi_acc")
+                acc_splits[main_mode] = prob
+                purpose_impedance[main_mode] = {"logsum": logsum}
+                mtx[main_mode] = logsum
+        return acc_splits
 
     def calc_basic_prob(self, impedance, is_last_iteration):
         """Calculate mode and destination probabilities.
@@ -491,8 +524,6 @@ class TourPurpose(TravelPurpose):
         self.gen_model.add_tours()
         prob = self.calc_prob(impedance, is_last_iteration)
         tours = self.gen_model.get_tours()
-        orig_agg = self.generation_zone_data.result_aggs
-        dest_agg = self.attraction_zone_data.result_aggs
         for mode in self.modes:
             mtx = (prob.pop(mode) * tours).T
             try:
@@ -500,29 +531,34 @@ class TourPurpose(TravelPurpose):
                     mtx, mode, self)
             except AttributeError:
                 pass
-            self.attracted_tours[mode] = mtx.sum(0)
-            self.generated_tours[mode] = mtx.sum(1)
-            self.attracted_distance[mode] = (self.dist*mtx).sum(0)
-            self.generated_distance[mode] = (self.dist*mtx).sum(1)
-            self.histograms[mode].count_tour_dists(mtx, self.dist)
-            for mapping in self.aggregates:
-                df = pandas.DataFrame(
-                    mtx, self.orig_zone_numbers, self.dest_zone_numbers)
-                df = orig_agg.aggregate_array(df, mapping).T
-                df = dest_agg.aggregate_array(df, mapping).T
-                self.aggregates[mapping][mode] = df
-            self.within_zone_tours[mode] = pandas.Series(
-                numpy.diag(mtx), self.dest_zone_numbers,
-                name="{}_{}".format(self.name, mode))
+            self._aggregate_results(mode, mtx)
             if self.dest != "source":
                 yield Demand(self, mode, mtx)
         log.info(f"Demand calculated for {self.name}")
+
+    def _aggregate_results(self, mode, mtx):
+        self.attracted_tours[mode] = mtx.sum(0)
+        self.generated_tours[mode] = mtx.sum(1)
+        self.attracted_distance[mode] = (self.dist*mtx).sum(0)
+        self.generated_distance[mode] = (self.dist*mtx).sum(1)
+        self.histograms[mode].count_tour_dists(mtx, self.dist)
+        orig_agg = self.generation_zone_data.result_aggs
+        dest_agg = self.attraction_zone_data.result_aggs
+        for mapping in self.aggregates:
+            df = pandas.DataFrame(
+                mtx, self.orig_zone_numbers, self.dest_zone_numbers)
+            df = orig_agg.aggregate_array(df, mapping).T
+            df = dest_agg.aggregate_array(df, mapping).T
+            self.aggregates[mapping][mode] = df
+        self.within_zone_tours[mode] = pandas.Series(
+            numpy.diag(mtx), self.dest_zone_numbers,
+            name="{}_{}".format(self.name, mode))
 
 
 class SecDestPurpose(TravelPurpose):
     """Purpose for secondary destination of tour."""
 
-    def __init__(self, specification, zone_data, resultdata, mtx_adjustment):
+    def __init__(self, specification, zone_data, resultdata, mtx_adjustment, basematrices_path=None):
         args = (self, specification, zone_data, resultdata)
         TravelPurpose.__init__(*args, mtx_adjustment)
         self.gen_model = generation.SecDestGeneration(
@@ -629,3 +665,73 @@ class SecDestPurpose(TravelPurpose):
                 sum(self.attracted_tours.values()),
                 self.dest_zone_numbers, name=self.name),
             "attraction.txt")
+    
+class ForeignExternalPurpose(TourPurpose):
+    """External two-way tour purpose.
+
+    Parameters
+    ----------
+        See `new_tour_purpose()`
+    zone_datas : Dict
+        key : str
+            Model area (domestic/foreign)
+        val : ZoneData
+            Data used for all demand calculations
+    resultdata : ResultData
+        Writer object for result directory
+    mtx_adjustment : dict (optional)
+        Dict of matrix adjustments for testing elasticities
+    basematrices_path : Path
+        Path to base matrices for calculating foreign external demand
+    """
+
+    def __init__(self, specification, zone_datas, resultdata, mtx_adjustment, basematrices_path):
+        attempt_calibration(specification)
+        TourPurpose.__init__(
+            self, specification, zone_datas, resultdata, mtx_adjustment)
+        self.dest_interval = slice(
+            *self.generation_zone_data.all_zone_numbers.searchsorted(
+                param.purpose_areas["external"]))
+        self.dest_mappings = []
+        self.tour_generation = specification["tour_generation"]
+        self._zone_datas = zone_datas
+        self.basematrices_path = basematrices_path
+        self.fem = ForeignExternalModel(
+            self, self._zone_datas, self._zone_datas, self.basematrices_path,
+            self.generation_zone_data.all_zone_numbers)
+
+    @property
+    def dest_zone_numbers(self):
+        return self.generation_zone_data.all_zone_numbers[self.dest_interval]
+
+    def _add_destination_impedances(self, day_imp):
+        pass
+
+    def calc_demand(
+            self, impedance, is_last_iteration: bool) -> Iterator[Demand]:
+        """Calculate purpose specific demand matrices.
+
+        Parameters
+        ----------
+        impedance : dict
+            Time period (aht/pt/iht/it) : dict
+                Type (time/cost/dist) : dict
+                    Mode (car/transit/bike/...) : numpy.ndarray
+        is_last_iteration : bool
+            Whether to calculate and store accessibility indicators
+
+        Yields
+        -------
+        Demand
+                Mode-specific demand matrix for whole day
+        """
+        purpose_impedance = self.transform_impedance(impedance)
+        # Calculate probabilities for all access modes of the main mode
+        access_mode_probs = self._calc_connection_prob(purpose_impedance)
+        for main_mode in self.intermodals:
+            foreign_ext_mtx = self.fem.calc_foreign_external_traffic(main_mode)
+            for access_mode, probs in access_mode_probs[main_mode].items():
+                access_mode_mtx = foreign_ext_mtx * probs.T
+                self._aggregate_results(access_mode, access_mode_mtx)
+                yield Demand(self, access_mode, access_mode_mtx)
+            log.info(f"Demand calculated for {self.name}")
