@@ -148,6 +148,7 @@ class ModelSystem:
             raise ValueError(msg)
         self.dm = self._init_demand_model(
             home_based_purposes + other_purposes + sec_dest_purposes)
+        self.dm.calculate_car_ownership()
         self.travel_modes = {mode: True for purpose in self.dm.tour_purposes
             for mode in purpose.modes}  # Dict instead of set, to preserve order
         self.ass_classes = set()
@@ -342,8 +343,6 @@ class ModelSystem:
         """
         impedance = {}
         self.dtm.init_demand(self.ass_classes | {"van"})
-
-        self.dm.calculate_car_ownership(previous_iter_impedance)
 
         # Calculate demand and add external demand
         self._add_internal_demand(previous_iter_impedance, iteration=="last")
