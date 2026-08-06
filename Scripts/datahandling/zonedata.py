@@ -124,7 +124,8 @@ class ZoneData:
 
         self["pop_density"] = divide(data["population"], data["land_area"])
         self["log_pop_density"] = numpy.log(self["pop_density"]+1)
-
+        self["sqrt_pop_density"] = numpy.sqrt(self["pop_density"])
+        
         # Two-way intrazonal distances from building distances
         self["dist_walk"] = data["intra_dist_walk"] * 2
         self["dist_bike"] = data["intra_dist_bike"] * 2
