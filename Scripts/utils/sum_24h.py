@@ -40,7 +40,7 @@ def sum_24h(obj, networks, extras: Dict[str, Dict[str, str]],
         except (AttributeError, TypeError):
             pass
         else:
-            for attr in extra:
+            for attr in extras[tp]:
                 day_attr[attr] += (tp_obj[extras[tp][attr]]
                                    / volume_factors[attr][tp])
     for attr in extra:

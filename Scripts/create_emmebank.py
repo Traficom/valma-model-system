@@ -53,11 +53,11 @@ def create_emme_project(args):
     nr_transit_classes = len(param.transit_classes)
     nr_veh_classes = len(param.transport_classes)
     nr_attr = {
-        "centroids": 1,
-        "regular_nodes": 1,
-        "links": nr_veh_classes + 3,
-        "transit_lines": nr_transit_classes,
-        "transit_segments": 2,
+        "centroids": 0,
+        "regular_nodes": 0,
+        "links": nr_veh_classes + 1,
+        "transit_lines": 0,
+        "transit_segments": 0,
     }
     
     if not args.separate_emme_scenarios:
@@ -65,9 +65,9 @@ def create_emme_project(args):
     # EMME scenario
         for key in nr_attr:
             nr_attr[key] *= len(param.time_periods) + 1
-    nr_attr["links"] += 3
-    nr_attr["transit_lines"] += 2
-    nr_attr["transit_segments"] += 5
+    nr_attr["links"] += nr_veh_classes + 7
+    nr_attr["transit_lines"] += nr_transit_classes + 5
+    nr_attr["transit_segments"] += 6
 
     # calculate extra attribute dimensions:
     dim = submodel_dimensions.get(

@@ -109,7 +109,8 @@ class MockProject:
                              network_field_name: str,
                              network_field_description: str,
                              overwrite: bool = False,
-                             scenario: Optional[Scenario] = None):
+                             scenario: Optional[Scenario] = None,
+                             network: Optional[Network] = None):
         if overwrite:
             try:
                 scenario.delete_network_field(

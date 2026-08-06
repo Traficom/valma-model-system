@@ -59,7 +59,9 @@ def main(args):
     # Check scenario based input data
     log.info("Checking base zonedata & scenario-based input data...")
     for i, emp_path in enumerate(emme_project_files):
-        log.info("Checking input data for scenario #{} ...".format(i))
+        log.info(
+            "Checking input data for "
+            + f"{args.scenario_name[i]} {args.submodel[i]}...")
 
         data_path = args.cost_data_files[i]
         if not os.path.exists(data_path):
@@ -157,10 +159,10 @@ def main(args):
             nr_veh_classes = len(param.transport_classes)
             nr_assignment_modes = len(param.assignment_modes)
             nr_new_attr = {
-                "nodes": 1,
-                "links": nr_veh_classes + 3,
-                "transit_lines": nr_transit_classes,
-                "transit_segments": 2,
+                "nodes": 0,
+                "links": 0,
+                "transit_lines": 0,
+                "transit_segments": 0,
             }
             link_costs_defined = False
             for tp in time_periods:
@@ -179,9 +181,9 @@ def main(args):
                 # EMME scenario
                 for key in nr_new_attr:
                     nr_new_attr[key] *= len(time_periods) + 1
-            nr_new_attr["links"] += 3
-            nr_new_attr["transit_lines"] += 2
-            nr_new_attr["transit_segments"] += 5
+            nr_new_attr["links"] += nr_veh_classes + 7
+            nr_new_attr["transit_lines"] += 2 * nr_transit_classes + 5
+            nr_new_attr["transit_segments"] += 6
             dim = emmebank.dimensions
             dim["nodes"] = dim["centroids"] + dim["regular_nodes"]
             attr_space = 0

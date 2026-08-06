@@ -5,9 +5,12 @@ import utils.log as log
 import logging
 import inro.emme.desktop.app as _app # type: ignore
 import inro.modeller as _m # type: ignore
+from inro.emme.core.exception import Error # type: ignore
 if TYPE_CHECKING:
     #The following one is likely in different location
     from inro.modeller import ContentManager # type: ignore
+    from inro.emme.database.scenario import Scenario # type: ignore
+    from inro.emme.network.Network import Network # type: ignore
 
 
 class EmmeProject:
@@ -109,11 +112,29 @@ class EmmeProject:
             "inro.emme.transit_assignment.extended.traversal_analysis")
         self.create_extra_attribute = self.modeller.tool(
             "inro.emme.data.extra_attribute.create_extra_attribute")
-        self.create_network_field = self.modeller.tool(
+        self._create_network_field = self.modeller.tool(
             "inro.emme.data.network_field.create_network_field")
         self.set_extra_function_parameters = self.modeller.tool(
             "inro.emme.traffic_assignment.set_extra_function_parameters")
-    
+
+    def create_network_field(self,
+                             network_field_type: str,
+                             network_field_atype: str,
+                             network_field_name: str,
+                             network_field_description: str,
+                             overwrite: bool = False,
+                             scenario: Optional[Scenario] = None,
+                             network: Optional[Network] = None):
+        """Create network field even if network is currently edited."""
+        self._create_network_field(
+            network_field_type, network_field_atype, network_field_name,
+            network_field_description, overwrite, scenario)
+        if network:
+            try:
+                network.create_attribute(network_field_type, network_field_name)
+            except Error:
+                pass
+
     def write(self, message: str):
         """Write to logbook."""
         # _m.logbook_write(message)

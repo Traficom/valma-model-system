@@ -29,8 +29,11 @@ class FreightAssignmentPeriod(AssignmentPeriod):
                     line[cost_attrs[mode]] = cost
                     break
         self.emme_scenario.publish_network(network)
+        include_toll_cost = self.emme_scenario.network_field(
+            "LINK", self.netfield("hinta")) is not None
         self.assignment_modes.update({ass_class: FreightMode(
-                ass_class, self, save_matrices)
+                ass_class, self, dist_unit_cost["truck"],
+                time_unit_cost["truck"], include_toll_cost, save_matrices)
             for ass_class in param.freight_modes})
 
     def assign(self):
@@ -41,8 +44,8 @@ class FreightAssignmentPeriod(AssignmentPeriod):
         self._assign_freight()
         mtxs = {tc: self.assignment_modes[tc].get_matrices()
                 for tc in param.truck_classes + tuple(param.freight_modes)}
-        impedance_types = ("time", "dist", "aux_time", "aux_dist",
-                           "toll_cost", "canal_cost")
+        impedance_types = ("time", "dist", "cost", "aux_cost", "aux_dist",
+                           "canal_cost")
         impedance = {mode: {mtx_type: mtxs[mode][mtx_type]
                             for mtx_type in impedance_types if mtx_type in mtxs[mode]}
                     for mode in mtxs}
@@ -58,16 +61,33 @@ class FreightAssignmentPeriod(AssignmentPeriod):
         """
         for ass_class in param.freight_modes:
             spec = self.assignment_modes[ass_class].ntw_results_spec
-            attr_name = (commodity_class + ass_class)[:17]
-            spec["on_segments"]["transit_volumes"] = "@" + attr_name
-            spec["on_links"]["aux_transit_volumes"] = "@a_" + attr_name
             self.emme_project.network_results(
                 spec, self.emme_scenario, ass_class)
-        attr_name = (commodity_class + "truck")[:17]
+            seg_attr = f"#{commodity_class}_{ass_class}"
+            self.emme_project.create_network_field(
+                    "TRANSIT_SEGMENT", "REAL", seg_attr, "commodity flow",
+                    overwrite=True, scenario=self.emme_scenario)
+            link_attr = f"#aux_{commodity_class}_{ass_class}"
+            self.emme_project.create_network_field(
+                    "LINK", "REAL", link_attr, "aux commodity flow",
+                    overwrite=True, scenario=self.emme_scenario)
+            network = self.emme_scenario.get_network()
+            for segment in network.transit_segments():
+                segment[seg_attr] = segment[param.commodity_flow_attr]
+            for link in network.links():
+                link[link_attr] = link[param.aux_commodity_flow_attr]
+            self.emme_scenario.publish_network(network)
         for spec in self._car_spec.truck_specs():
-            spec["classes"][0]["results"]["link_volumes"] = "@" + attr_name
             spec["stopping_criteria"] = self.stopping_criteria["coarse"]
             self.emme_project.car_assignment(spec, self.emme_scenario)
+        link_attr = f"#{commodity_class}_truck"
+        self.emme_project.create_network_field(
+            "LINK", "REAL", link_attr, "truck commodity flow",
+            overwrite=True, scenario=self.emme_scenario)
+        network = self.emme_scenario.get_network()
+        for link in network.links():
+                link[link_attr] = link["@truck"]
+        self.emme_scenario.publish_network(network)
         for tc in param.truck_classes:
             self.assignment_modes[tc].get_matrices()
 

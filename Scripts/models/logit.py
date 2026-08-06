@@ -30,8 +30,10 @@ class LogitModel:
         Tour purpose (type of tour)
     parameters : dict
         See `datatypes.purpose.new_tour_purpose()`
-    zone_data : ZoneData
-        Data used for all demand calculations
+    generation_zone_data : ZoneData
+        Data used for generation calculations
+    attraction_zone_data : ZoneData
+        Data used for attraction calculations
     resultdata : ResultData
         Writer object to result directory
     """
@@ -39,13 +41,13 @@ class LogitModel:
     def __init__(self, 
                  purpose: TourPurpose,
                  parameters: dict,
-                 zone_data: ZoneData,
+                 generation_zone_data: ZoneData,
+                 attraction_zone_data: ZoneData,
                  resultdata: ResultsData):
         self.resultdata = resultdata
         self.purpose = purpose
-        self.bounds = purpose.bounds
-        self.zone_data = zone_data
-        self.mode_utils: Dict[str, numpy.ndarray] = {}
+        self.generation_zone_data = generation_zone_data
+        self.attraction_zone_data = attraction_zone_data
         self.dest_choice_param: Dict[str, Dict[str, Any]] = parameters["destination_choice"]
         self.mode_choice_param: Optional[Dict[str, Dict[str, Any]]] = parameters["mode_choice"]
         self.distance_boundary = parameters["distance_boundaries"]
@@ -53,7 +55,6 @@ class LogitModel:
     def calc_mode_prob(self, impedance: Dict[str, numpy.ndarray]):
         expsum, mode_exps = self._calc_mode_utils(impedance)
         impedance.clear()
-        self.mode_utils.clear()
         prob = {mode: divide(mode_exps.pop(mode), expsum).T
             for mode in self.mode_choice_param}
         return prob, log(expsum)
@@ -63,12 +64,6 @@ class LogitModel:
                        b: Dict[str, Dict[str, float]]):
         self._add_zone_util(utility, b["attraction"])
         self._add_impedance(utility, impedance, b["impedance"])
-        if "transform" in b:
-            b_transf = b["transform"]
-            transimp = numpy.zeros_like(utility)
-            self._add_zone_util(transimp, b_transf["attraction"])
-            self._add_impedance(transimp, impedance, b_transf["impedance"])
-            impedance["transform"] = transimp
         self._add_log_impedance(utility, impedance, b["log"])
         exps = numpy.exp(utility)
         dist = self.purpose.dist
@@ -88,7 +83,6 @@ class LogitModel:
         utility = self._add_zone_util(
             utility.T, b["generation"], generation=True).T
         exps = self._calc_alt_util(mode, utility, impedance, b)
-        self.mode_utils[mode] = utility
         return exps
 
     def _calc_mode_utils(self, impedance: Dict[str, Dict[str, numpy.ndarray]],
@@ -172,15 +166,15 @@ class LogitModel:
             geographical area in which this model is used based on the
             `self.bounds` attribute of this class.
         """
-        zdata = self.zone_data
+        zdata = (self.generation_zone_data if generation
+                 else self.attraction_zone_data)
         for i in b:
-            utility += b[i] * zdata.get_data(i, self.bounds, generation)
+            utility += b[i] * numpy.asarray(zdata[i])
         return utility
     
     def _add_sec_zone_util(self, utility, b):
         for i in b:
-            data = self.zone_data.get_data(i, self.bounds, generation=True)
-            utility += b[i] * data
+            utility += b[i] * numpy.asarray(self.generation_zone_data[i])
         return utility
 
     def _add_log_zone_util(self, exps, b, generation=False):
@@ -202,10 +196,11 @@ class LogitModel:
             geographical area in which this model is used based on the
             `self.bounds` attribute of this class.
         """
-        zdata = self.zone_data
+        zdata = (self.generation_zone_data if generation
+                 else self.attraction_zone_data)
         for i in b:
             exps *= numpy.power(
-                zdata.get_data(i, self.bounds, generation) + 1, b[i])
+                numpy.asarray(zdata[i]) + 1, b[i])
         return exps
 
 
@@ -296,11 +291,6 @@ class ModeDestModel(LogitModel):
         First calculates basic probabilities. Then inserts individual
         dummy variables by calling `calc_individual_prob()`.
 
-        If model for non-home-based tours has individual dummy variables
-        representing parent tour mode choice, None will be returned,
-        because it requires parent tour demand to be calculated first.
-        In this case, `calc_prob_again` will be called later.
-
         Parameters
         ----------
         impedance : dict
@@ -320,32 +310,6 @@ class ModeDestModel(LogitModel):
             impedance)
         if calc_accessibility:
             self._calc_accessibility(mode_exps, mode_expsum)
-        mode_probs = self._calc_mode_prob(mode_exps, mode_expsum)
-        if mode_probs is None:
-            self._stashed_exps += [dest_exps, dest_expsums]
-            return None
-        else:
-            try:
-                self.soft_mode_probs = {
-                    mode: mode_probs[mode] for mode in self.soft_mode_exps}
-            except AttributeError:
-                pass
-            return self._calc_prob(mode_probs, dest_exps, dest_expsums)
-
-    def calc_prob_again(self) -> dict:
-        """Return matrix of choice probabilities.
-
-        First recovers basic probabilities. Then inserts individual
-        dummy variables by calling `calc_individual_prob()`.
-
-        Returns
-        -------
-        dict
-            Mode (car/transit/bike/walk) : numpy 2-d matrix
-                Choice probabilities
-        """
-        mode_exps, mode_expsum, dest_exps, dest_expsums = self._stashed_exps
-        del self._stashed_exps
         mode_probs = self._calc_mode_prob(mode_exps, mode_expsum)
         try:
             self.soft_mode_probs = {
@@ -395,7 +359,7 @@ class ModeDestModel(LogitModel):
         logsum = pandas.Series(
             log(mode_expsum), self.purpose.orig_zone_numbers,
             name=self.purpose.name)
-        self.zone_data._values[self.purpose.name] = logsum
+        self.generation_zone_data._values[self.purpose.name] = logsum
         return mode_exps, mode_expsum, dest_exps, dest_expsums
 
     def _calc_exps(self,
@@ -413,7 +377,7 @@ class ModeDestModel(LogitModel):
             label = self.purpose.name + "_" + mode
             logsum = pandas.Series(
                 log(expsum), self.purpose.orig_zone_numbers, name=label)
-            self.zone_data._values[label] = logsum
+            self.generation_zone_data._values[label] = logsum
             mode_exps[mode] = self._calc_mode_util(mode, dest_expsums[mode])
         return mode_exps, dest_exps, dest_expsums
 
@@ -430,12 +394,7 @@ class ModeDestModel(LogitModel):
         mode_probs: defaultdict[str, list] = defaultdict(list)
         no_dummy_share = 1.0
         for dummy, modes in dummies.items():
-            try:
-                dummy_share = self.zone_data.get_data(
-                    dummy, self.bounds, generation=True)
-            except KeyError:
-                self._stashed_exps = [mode_exps, mode_expsum]
-                return None
+            dummy_share = numpy.asarray(self.generation_zone_data[dummy])
             no_dummy_share -= dummy_share
             mode_exps2 = self._calc_individual_prob(modes, dummy, mode_exps)
             mode_expsum2 = sum(mode_exps2.values())
@@ -466,11 +425,11 @@ class ModeDestModel(LogitModel):
         Individual dummy variables are not included.
         """
         self.accessibility: Dict[str, pandas.Series] = {}
-        self.accessibility["all"] = self.zone_data[self.purpose.name]
+        self.accessibility["all"] = self.generation_zone_data[self.purpose.name]
         sustainable_expsum = numpy.zeros_like(mode_expsum)
         car_expsum = numpy.zeros_like(mode_expsum)
         for mode in self.mode_choice_param:
-            logsum = self.zone_data[f"{self.purpose.name}_{mode}"]
+            logsum = self.generation_zone_data[f"{self.purpose.name}_{mode}"]
             self.accessibility[mode] = logsum
             if "car" in mode:
                 car_expsum += mode_exps[mode]
@@ -479,7 +438,7 @@ class ModeDestModel(LogitModel):
         label = f"{self.purpose.name}_sustainable"
         logsum_sustainable = pandas.Series(
             log(sustainable_expsum), self.purpose.orig_zone_numbers, name=label)
-        self.zone_data._values[label] = logsum_sustainable
+        self.generation_zone_data._values[label] = logsum_sustainable
         self.accessibility["sustainable"] = logsum_sustainable
         self.accessibility["car"] = pandas.Series(
             log(car_expsum), self.purpose.orig_zone_numbers,
@@ -544,8 +503,7 @@ class DestModeModel(LogitModel):
         no_dummy_share = 1.0
         prob = defaultdict(float)
         for dummy in dummies:
-            dummy_share = self.zone_data.get_data(
-                dummy, self.bounds, generation=True)
+            dummy_share = numpy.asarray(self.generation_zone_data[dummy])
             no_dummy_share -= dummy_share
             tmp_prob = self._calc_prob(impedance, dummy)
             for mode in self.mode_choice_param:
@@ -558,7 +516,6 @@ class DestModeModel(LogitModel):
     def _calc_prob(self, impedance: Dict[str, Dict[str, numpy.ndarray]],
                    dummy: Optional[str] = None, store_logsum: bool = False):
         mode_expsum, mode_exps = self._calc_mode_utils(impedance, dummy)
-        self.mode_utils = {}
         dest_exps = self._calc_dest_util("logsum", {"logsum": mode_expsum})
         try:
             dest_expsum = dest_exps.sum(1)
@@ -569,7 +526,7 @@ class DestModeModel(LogitModel):
                 log(dest_expsum), self.purpose.orig_zone_numbers,
                 name=self.purpose.name)
             self.accessibility = {"all": logsum}
-            self.zone_data._values[self.purpose.name] = logsum
+            self.generation_zone_data._values[self.purpose.name] = logsum
         prob: Dict[str, numpy.ndarray] = {}
         dest_prob = divide(dest_exps.T, dest_expsum)
         for mode in self.mode_choice_param:
@@ -648,7 +605,7 @@ class GenerationLogit(LogitModel):
                  bounds: slice, 
                  resultdata: ResultsData):
         self.resultdata = resultdata
-        self.zone_data = zone_data
+        self.generation_zone_data = zone_data
         self.bounds = bounds
         attempt_calibration(parameters)
         self.param = parameters
@@ -695,8 +652,7 @@ class GenerationLogit(LogitModel):
                 nr_expsum += nr_exp[nr]
             for nr in self.param:
                 ind_prob = nr_exp[nr] / nr_expsum
-                dummy_share = self.zone_data.get_data(
-                    dummy, self.bounds, generation=True)
+                dummy_share = numpy.asarray(self.generation_zone_data[dummy])
                 with_dummy = dummy_share * ind_prob
                 prob[nr] += with_dummy
         return prob

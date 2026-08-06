@@ -7,7 +7,6 @@ from pathlib import Path
 
 from typing import TYPE_CHECKING, Dict, Union, Iterable, Optional
 import utils.log as log
-from utils.validate_assignment import divide_matrices, output_od_los
 import parameters.assignment as param
 from parameters.cost import value_of_time
 from assignment.datatypes.assignment_mode import AssignmentMode, BikeMode, WalkMode
@@ -257,7 +256,6 @@ class AssignmentPeriod(Period):
             self._assign_transit(
                 param.simple_transit_classes, calc_network_results=True,
                 delete_strat_files=self._delete_strat_files)
-            self._calc_transit_link_results()
         else:
             self._end_assignment_classes -= set(param.transit_classes)
         mtxs = self._get_impedances(self._end_assignment_classes)
@@ -270,14 +268,7 @@ class AssignmentPeriod(Period):
         mtxs = {tc: self.assignment_modes[tc].get_matrices()
             for tc in assignment_classes}
         for mode in mtxs:
-            try:
-                divide_matrices(
-                    mtxs[mode]["dist"], mtxs[mode]["time"]/60,
-                    f"OD speed (km/h) {mode}")
-            except KeyError:
-                pass
             for mtx_type, mtx in mtxs[mode].items():
-                output_od_los(mtx, self.mapping, mtx_type, mode)
                 if numpy.any(mtx > 1e10):
                     log.warn(f"Matrix with infinite values: {mtx_type} {mode}")
         impedance = {mtx_type: {mode: mtxs[mode][mtx_type]
@@ -330,26 +321,6 @@ class AssignmentPeriod(Period):
                     if line.mode.id in long_dist_transit_modes else 0)
         self.emme_scenario.publish_network(network)
 
-    def transit_results_links_nodes(self):
-        """
-        Calculate and sum transit results to link and nodes.
-        """
-        network = self.emme_scenario.get_network()
-        for tc in param.transit_classes:
-            if tc in self.assignment_modes:
-                link_attr = self.extra(tc)
-                mode: TransitMode = self.assignment_modes[tc]
-                for result, attr_name in mode.segment_results.items():
-                    if result == "transit_volumes":
-                        for segment in network.transit_segments():
-                            if segment.link is not None:
-                                segment.link[link_attr] += segment[attr_name]
-                    else:
-                        nodeattr = mode.node_results[result]
-                        for segment in network.transit_segments():
-                            segment.i_node[nodeattr] += segment[attr_name]
-        self.emme_scenario.publish_network(network)
-
     def get_car_times(self) -> Dict[str, float]:
         """Get dict of link car travel times for links within sub-model.
 
@@ -368,8 +339,8 @@ class AssignmentPeriod(Period):
             if link.i_node[param.submodel_attr] == 2 and link[time_attr] > 0}
 
     def _set_car_vdfs(self, use_free_flow_speeds: bool = False):
-        log.info("Sets car functions for scenario {}".format(
-            self.emme_scenario.id))
+        log.info("Setting car functions for scenario {}, {}...".format(
+            self.emme_scenario.id, self.name))
         emmebank = self.emme_project.modeller.emmebank
         # Function 90 is used for free-flow speeds on external links
         emmebank.function("fd90").expression = param.volume_delay_funcs["fd90"]
@@ -456,8 +427,8 @@ class AssignmentPeriod(Period):
                 raise ValueError(msg)
 
     def _set_transit_vdfs(self):
-        log.info("Sets transit functions for scenario {}".format(
-            self.emme_scenario.id))
+        log.info("Setting transit functions for scenario {}, {}...".format(
+            self.emme_scenario.id, self.name))
         network = self.emme_scenario.get_network()
         transit_modesets = {modes[0]: {network.mode(m) for m in modes[1]}
             for modes in param.transit_delay_funcs}
@@ -505,8 +476,8 @@ class AssignmentPeriod(Period):
         self.emme_scenario.publish_network(network)
 
     def _set_bike_vdfs(self):
-        log.info("Sets bike functions for scenario {}".format(
-            self.emme_scenario.id))
+        log.info("Setting bike functions for scenario {}, {}...".format(
+            self.emme_scenario.id, self.name))
         emmebank = self.emme_project.modeller.emmebank
         emmebank.function("fd90").expression = param.volume_delay_funcs["fd98"]
         network = self.emme_scenario.get_network()
@@ -542,12 +513,16 @@ class AssignmentPeriod(Period):
 
     def _calc_background_traffic(self, include_trucks: bool = False):
         """Calculate background traffic (buses)."""
+        bus_vol_attr = self.netfield("bus")
+        self.emme_project.create_network_field(
+            "LINK", "REAL", bus_vol_attr, f"{bus_vol_attr}_vol",
+            overwrite=True, scenario=self.emme_scenario)
         network = self.emme_scenario.get_network()
         # emme api has name "data3" for ul3
         background_traffic = param.background_traffic_attr.replace(
             "ul", "data")
         # calc @bus and data3
-        heavy = [self.extra(ass_class) for ass_class in param.truck_classes]
+        heavy = [self.netfield(ass_class) for ass_class in param.truck_classes]
         for link in network.links():
             if link.type > 100: # If car or bus link
                 freq = 0
@@ -555,7 +530,7 @@ class AssignmentPeriod(Period):
                     segment_hdw = segment.line[self.netfield("hdw")]
                     if 0 < segment_hdw < 900:
                         freq += 60 / segment_hdw
-                link[self.extra("bus")] = freq
+                link[bus_vol_attr] = freq
                 link[background_traffic] = 0 if link["#buslane"] else freq
                 if include_trucks:
                     for ass_class in heavy:
@@ -598,20 +573,24 @@ class AssignmentPeriod(Period):
         # Definition of line specific boarding penalties
         network = self.emme_scenario.get_network()
         missing_penalties = set()
-        penalty_attr = param.boarding_penalty_attr
+        board_pen_attr = param.boarding_penalty_attr
+        bld_pen_attr = param.long_dist_boarding_penalty_attr
         weight_attr = param.in_vehice_weight_attr.replace("ut", "data")
         for line in network.transit_lines():
             try:
-                line[weight_attr] = param.in_vehicle_weight[line.mode.id]
+                line[weight_attr] = param.in_vehicle_weight[line.vehicle.id]
             except KeyError:
                 line[weight_attr] = 1.0
             try:
-                boarding_penalty = param.boarding_penalty[line.mode.id]
+                board_pen = param.boarding_penalty[line.mode.id]
+                bld_pen = param.long_dist_boarding_penalty[line.mode.id]
             except KeyError:
-                boarding_penalty = 0
+                board_pen = 0
+                bld_pen = 0
                 missing_penalties.add(line.mode.id)
-            for transit_class, transfer_penalty in param.transfer_penalty.items():
-                line[penalty_attr + transit_class] = boarding_penalty + transfer_penalty
+            for transit_class, transfer_pen in param.transfer_penalty.items():
+                line[board_pen_attr + transit_class] = board_pen + transfer_pen
+                line[bld_pen_attr + transit_class] = bld_pen + transfer_pen
         if missing_penalties:
             missing_penalties_str: str = ", ".join(missing_penalties)
             log.warn("No boarding penalty found for transit modes " + missing_penalties_str)
@@ -642,10 +621,15 @@ class AssignmentPeriod(Period):
             for link in network.links():
                 link[time_attr] = link.auto_time
         truck_time_attr = self.extra("truck_time")
+        modes = [self.assignment_modes[ass_class]
+                 for ass_class in param.car_and_van_classes
+                 if ass_class in self.assignment_modes]
         for link in network.links():
             link[param.aux_car_time_attr] = link.auto_time
             # Truck speed limited to 90 km/h
             link[truck_time_attr] = max(link.auto_time, link.length * 0.67)
+            for mode in modes:
+                    link[mode.volume_attr] = link[mode.temp_volume_attr]
         self.emme_scenario.publish_network(network)
         log.info("Car assignment performed for scenario {}".format(
             self.emme_scenario.id))
@@ -657,16 +641,28 @@ class AssignmentPeriod(Period):
             truck_spec["stopping_criteria"] = stopping_criteria
             self.emme_project.car_assignment(
                 truck_spec, self.emme_scenario)
+        network = self.emme_scenario.get_network()
+        modes = [self.assignment_modes[ass_class]
+                 for ass_class in param.truck_classes
+                 if ass_class in self.assignment_modes]
+        for link in network.links():
+            for mode in modes:
+                link[mode.volume_attr] = link[mode.temp_volume_attr]
+        self.emme_scenario.publish_network(network)
         log.info("Truck assignment performed for scenario {}".format(
             self.emme_scenario.id))
 
     def _assign_bikes(self):
         """Perform bike traffic assignment for one scenario."""
-        self.bike_mode.init_matrices()
+        mode = self.bike_mode
+        mode.init_matrices()
         scen = self.emme_scenario
         log.info("Bike assignment started...")
-        self.emme_project.car_assignment(
-            specification=self.bike_mode.spec, scenario=scen)
+        self.emme_project.car_assignment(specification=mode.spec, scenario=scen)
+        network = self.emme_scenario.get_network()
+        for link in network.links():
+            link[mode.volume_attr] = link[mode.temp_volume_attr]
+        self.emme_scenario.publish_network(network)
         log.info("Bike assignment performed for scenario " + str(scen.id))
 
     def _calc_extra_wait_time(self):
@@ -745,16 +741,6 @@ class AssignmentPeriod(Period):
             if delete_strat_files:
                 self._strategy_paths[transit_class].unlink(missing_ok=True)
             log.info(f"Transit class {transit_class} assigned")
-
-    def _calc_transit_link_results(self):
-        volax_attr = self.extra("aux_transit")
-        network = self.emme_scenario.get_network()
-        for link in network.links():
-            link[volax_attr] = link.aux_transit_volume
-        time_attr = self.extra(param.uncongested_transit_time)
-        for segment in network.transit_segments():
-            segment[time_attr] = segment.transit_time
-        self.emme_scenario.publish_network(network)
 
     @property
     def _strategy_paths(self) -> Dict[str, Path]:

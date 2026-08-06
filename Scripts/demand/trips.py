@@ -55,15 +55,8 @@ class DemandModel:
                 car_ownership[hh_size], zone_data, self.bounds, self.resultdata)
             for hh_size in car_ownership}
     
-    def calculate_car_ownership(self, impedance):
-        try:
-            acc_purpose = self.purpose_dict["hb_leisure"]
-        except KeyError:
-            log.info("Car ownership not calculated, take from zone data")
-            return
-        log.info("Calc car ownership based on hb_leisure accessibility...")
-        purpose_impedance = acc_purpose.transform_impedance(impedance)
-        acc_purpose.model.calc_prob(purpose_impedance, calc_accessibility=True)
+    def calculate_car_ownership(self):
+        log.info("Calculate car ownership...")
         zd = self.zone_data
         prob = {hh_size: model.calc_prob()
             for hh_size, model in self.car_ownership_models.items()}
