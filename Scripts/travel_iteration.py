@@ -19,7 +19,7 @@ from datahandling.zonedata import ZoneData
 from datahandling.matrixdata import MatrixData
 from demand.trips import DemandModel
 from demand.external import ExternalPurpose
-from datatypes.purpose import TravelPurpose, TourPurpose, SecDestPurpose, ForeignExternalPurpose
+from datatypes.purpose import TravelPurpose, TourPurpose, SecDestPurpose
 from datatypes.demand import Demand
 import parameters.assignment as param
 import parameters.zone as zone_param
