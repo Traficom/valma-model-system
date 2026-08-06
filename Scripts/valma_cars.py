@@ -2,43 +2,42 @@ from argparse import ArgumentParser
 import sys
 from pathlib import Path
 
+import fiona
+import pandas
+
+from datahandling.resultdata import ResultsData
+from datahandling.zonedata import ZoneData
+from demand.trips import DemandModel
 import utils.config
 import utils.log as log
-from assignment.mock_assignment import MockAssignmentModel
-from travel_iteration import ModelSystem
-from datahandling.matrixdata import MatrixData
 
 
 def main(args):
-    base_matrices_path = Path(args.base_data_folder, "Matrices")
     zone_data_file = Path(args.zone_data_file)
-    cost_data_file = Path(args.cost_data_file)
     result_data_folder = Path(args.result_data_folder, args.scenario_name)
     if not zone_data_file.is_file():
         raise NameError(
             "Forecast data file '{}' does not exist.".format(
                 zone_data_file))
 
-    # Choose and initialize the Traffic Assignment (supply)model
-    log.info("Initializing MockAssignmentModel...")
-    mock_result_path = result_data_folder / "Matrices" / args.submodel
-    if not mock_result_path.is_dir():
-        raise NameError(
-            "Mock Results directory {} does not exist.".format(
-            mock_result_path))
-    ass_model = MockAssignmentModel(MatrixData(mock_result_path))
-    
-    # Initialize model system (wrapping Assignment-model,
-    # and providing demand calculations as Python modules)
-    # Read input matrices (.omx) and zonedata (.csv)
-    log.info("Initializing matrices and models...")
-    model_args = (zone_data_file, cost_data_file,
-                  base_matrices_path, result_data_folder, ass_model, args.submodel)
-    model = ModelSystem(*model_args)
+    # Read zone numbers
+    if len(fiona.listlayers(zone_data_file)) > 1:
+            msg = f"Multiple layers found in file {zone_data_file}"
+            log.error(msg)
+            raise TypeError(msg)
+    with fiona.open(zone_data_file, ignore_geometry=True) as colxn:
+        data = pandas.DataFrame(
+            [record["properties"] for record in colxn],
+            columns=list(colxn.schema["properties"]))
+
+    zonedata = ZoneData(
+        zone_data_file, data["input_zone_id"], args.submodel,
+        car_dist_cost=0.12)
+    resultdata = ResultsData(result_data_folder)
+    dm = DemandModel(zonedata, resultdata, [])
 
     # Run  simulation for one iteration.
-    impedance = model.assign_base_demand()
-    model.run_car_ownership(impedance)
+    dm.calculate_individual_car_ownership()
     log.info("Simulation ended.")
 
 
@@ -68,27 +67,19 @@ if __name__ == "__main__":
     parser.add_argument(
         "--scenario-name",
         type=str,
-        help="Name of HELMET scenario. Influences result folder name and log file name."),
+        help="Name of HELMET scenario. Influences result folder name and log file name.")
     parser.add_argument(
         "--results-path",
         type=str,
-        help="Path to folder where result data is saved to."),
+        help="Path to folder where result data is saved to.")
     parser.add_argument(
         "--submodel",
         type=str,
-        help="Name of submodel, used for choosing appropriate zone mapping"),
+        help="Name of submodel, used for choosing appropriate zone mapping")
     parser.add_argument(
-        "--baseline-data-path",
-        type=str,
-        help="Path to folder containing both baseline zonedata and -matrices (Given privately by project manager)"),
-    parser.add_argument(
-        "--forecast-data-path",
-        type=str,
-        help="Path to folder containing forecast zonedata"),
-    parser.add_argument(
-        "--cost-data-path",
-        type=str,
-        help="Path to file containing transport cost data"),
+            "--zone-data-file",
+            type=str,
+            help="Path to folder containing forecast zonedata")
     parser.set_defaults(
         **{key.lower(): val for key, val in config.items()})
     args = parser.parse_args()

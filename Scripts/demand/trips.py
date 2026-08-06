@@ -94,14 +94,8 @@ class DemandModel:
         self.resultdata.print_data(result, "zone_car_ownership.txt")
         log.info("New car-ownership values calculated.")
 
-    def individual_car_ownership(self, impedance):
-        try:
-            acc_purpose = self.purpose_dict["hb_leisure"]
-        except KeyError:
-            raise AttributeError("Accessibility for model is not defined.")
-        log.info("Calc car ownership based on hb_leisure accessibility...")
-        purpose_impedance = acc_purpose.transform_impedance(impedance)
-        acc_purpose.model.calc_prob(purpose_impedance, calc_accessibility=True)
+    def calculate_individual_car_ownership(self):
+        log.info("Calculate individual car ownership...")
         prob = {}
         result = {}
         for hh_size, model in self.car_ownership_models.items():
