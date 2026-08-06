@@ -23,11 +23,10 @@
     "destination_choice": {
         "truck": {
             "attraction": {},
-            "impedance": {
-                "cost": -0.2116
-            },
+            "impedance": {},
             "log": {
-                "attraction_size": 1
+                "attraction_size": 1,
+                "cost": -3.314
             },
             "attraction_size": {
                 "att_jate": 1

@@ -25,8 +25,8 @@
             "attraction": {},
             "impedance": {},
             "log": {
-                "attraction_size": 1.0,
-                "logsum": 2.824
+                "attraction_size": 1,
+                "logsum": 0.4063
             },
             "attraction_size": {
                 "att_kokbri": 1
@@ -38,21 +38,21 @@
             "constant": 0,
             "generation": {},
             "attraction": {},
-            "impedance": {
-                "cost": -0.2065
+            "impedance": {},
+            "log": {
+                "cost": -6.372
             },
-            "log": {},
             "individual_dummy": {}
         },
         "ship": {
             "generation": {},
             "attraction": {},
             "impedance": {
-                "cost": -0.004761
+                "cost": -0.7298
             },
             "log": {},
             "individual_dummy": {},
-            "constant": -3.907
+            "constant": 0.455
         }
     },
     "demand_share": {}

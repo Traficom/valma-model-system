@@ -113,7 +113,15 @@ class JourneyLevel:
             "description": DESCRIPTION[level],
             "destinations_reachable": DESTINATIONS_REACHABLE[level],
             "transition_rules": transitions,
-            "boarding_time": None,
+            "boarding_time": {
+                "global": None,
+                "at_nodes": None,
+                "on_lines": {
+                    "penalty": param.boarding_penalty_attr + transit_class,
+                    "perception_factor": 1
+                },
+                "on_segments": param.extra_waiting_time,
+            },
             "boarding_cost": {
                 "global": None,
                 "at_nodes": None,
@@ -125,6 +133,10 @@ class JourneyLevel:
             },
             "waiting_time": None,
         }
+        if level == BOARDED_LONG_D:
+            # Higher transfer penalty from long-dist to long-dist
+            board_pen = param.long_dist_boarding_penalty_attr + transit_class
+            spec["boarding_time"]["on_lines"]["penalty"] = board_pen
         if level in (BOARDED_LOCAL, BOARDED_DEST):
             # Free transfers within local transit
             (spec["boarding_cost"]

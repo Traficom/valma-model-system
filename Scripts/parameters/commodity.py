@@ -15,6 +15,7 @@ commodity_conversion = {
 	"pappai": "papsel",
 	"kokbri": "energy",
 	"oljytu": "oljytu",
+    "oljyru": "oljytu",
 	"kemlaa": "kemiat",
 	"kummuo": "kemiat",
 	"minkai": "kaivan",

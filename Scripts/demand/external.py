@@ -20,3 +20,4 @@ class ExternalPurpose:
         bounds = slice(*zone_numbers.searchsorted(purpose_areas["all"]))
         self.bounds = bounds
         self.dest_interval = bounds
+        self.sec_dest_rates = {}
