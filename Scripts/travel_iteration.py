@@ -211,7 +211,7 @@ class ModelSystem:
                              long_dist_matrices: MatrixData,
                              long_dist_classes: Iterable[str]):
         class_list = ", ".join(long_dist_classes)
-        log.info(f"Get matrices for {class_list}...")
+        log.info(f"Getting external demand matrices for {class_list}...")
         zone_numbers = self.ass_model.zone_numbers
         matrices_to_add = {}
         with long_dist_matrices.open(
