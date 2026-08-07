@@ -38,6 +38,7 @@ def main(args):
 
     # Run  simulation for one iteration.
     dm.calculate_individual_car_ownership()
+    resultdata.flush()
     log.info("Simulation ended.")
 
 
