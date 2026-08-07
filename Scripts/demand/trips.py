@@ -93,3 +93,19 @@ class DemandModel:
         result[f"sh_cars0"] += 1 - sum(zd[f"sh_{hh_type}"] for hh_type in prob)
         self.resultdata.print_data(result, "zone_car_ownership.txt")
         log.info("New car-ownership values calculated.")
+
+    def calculate_individual_car_ownership(self):
+        log.info("Calculate individual car ownership...")
+        prob = {}
+        result = {}
+        for hh_size, model in self.car_ownership_models.items():
+            result[f"households"] = self.zone_data[f"households"]
+            result[f"sh_{hh_size}"] = self.zone_data[f"sh_{hh_size}"]
+            for segment in model.param["0"]["individual_dummy"]:
+                prob[f"{hh_size}*{segment}"] = model.calc_segment_prob(segment)
+        for key in prob:
+            for nr in prob[key]:
+                result[f"{key}*car{nr}"] = prob[key][nr]
+        result_df = pandas.DataFrame(result, index=self.zone_data.zone_numbers)
+        self.resultdata.print_data(result_df, "zone_car_ownership_by_segment.txt")
+        log.info("Segmented car-ownership values calculated.")
