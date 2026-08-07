@@ -144,7 +144,8 @@
                 "within_zone_inf": -1
             },
             "impedance": {
-                "time": -0.01121
+                "time": -0.01121,
+                "cost": -0.06887
             },
             "log": {
                 "attraction_size": 1,
