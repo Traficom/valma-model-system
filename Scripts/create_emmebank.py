@@ -66,7 +66,7 @@ def create_emme_project(args):
         for key in nr_attr:
             nr_attr[key] *= len(param.time_periods) + 1
     nr_attr["links"] += nr_veh_classes + 7
-    nr_attr["transit_lines"] += nr_transit_classes + 5
+    nr_attr["transit_lines"] += 7
     nr_attr["transit_segments"] += 6
 
     # calculate extra attribute dimensions:
