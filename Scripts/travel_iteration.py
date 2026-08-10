@@ -433,6 +433,8 @@ class ModelSystem:
 
     def _export_accessibility(self):
         for purpose in self.dm.tour_purposes:
+            if purpose.name == "hb_abroad_other":
+                continue
             for logsum in purpose.model.accessibility.values():
                 self.resultdata.print_data(logsum, f"accessibility.txt")
     
