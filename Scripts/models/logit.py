@@ -51,6 +51,7 @@ class LogitModel:
         self.dest_choice_param: Dict[str, Dict[str, Any]] = parameters["destination_choice"]
         self.mode_choice_param: Optional[Dict[str, Dict[str, Any]]] = parameters["mode_choice"]
         self.distance_boundary = parameters["distance_boundaries"]
+        self.accessibility: Dict[str, pandas.Series] = {}
 
     def calc_mode_prob(self, impedance: Dict[str, numpy.ndarray]):
         expsum, mode_exps = self._calc_mode_utils(impedance)
