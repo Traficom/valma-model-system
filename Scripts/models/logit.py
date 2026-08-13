@@ -62,17 +62,15 @@ class LogitModel:
     def _calc_alt_util(self, mode: str, utility: numpy.ndarray,
                        impedance: Dict[str, numpy.ndarray],
                        params: Dict[str, Dict[str, float]]):
-        utility += sum(
-            beta * numpy.asarray(self.attraction_zone_data[var])
-            for var, beta in params["attraction"].items())
-        utility += sum(
-            beta * impedance[var] for var, beta in params["impedance"].items())
-        utility += sum(
-            beta * log(impedance[var] + 1)
-            for var, beta in params["log"].items() if beta < 0)
-        utility += sum(
-            beta * log(impedance[var])
-            for var, beta in params["log"].items() if beta > 0)
+        for var, beta in params["attraction"].items():
+            utility += beta * numpy.asarray(self.attraction_zone_data[var])
+        for var, beta in params["impedance"].items():
+            utility += beta * impedance[var]
+        for var, beta in params["log"].items():
+            if beta < 0:
+                utility += beta * log(impedance[var] + 1)
+            else:
+                utility += beta * log(impedance[var])
         exps = numpy.exp(utility)
         dist = self.purpose.dist
         if mode != "logsum" and dist.shape == exps.shape:
@@ -85,9 +83,8 @@ class LogitModel:
                         dummy: Optional[str] = None):
         params = self.mode_choice_param[mode]
         utility = params["constant"] + params["individual_dummy"].get(dummy, 0)
-        utility += sum(
-            beta * numpy.asarray(self.generation_zone_data[var])
-            for var, beta in params["generation"].items())
+        for var, beta in params["generation"].items():
+            utility += beta * numpy.asarray(self.generation_zone_data[var])
         first_mtx = next(iter(impedance.values()))
         if first_mtx.ndim == 2 and isinstance(utility, numpy.ndarray):
             utility = numpy.full_like(first_mtx, utility[:, numpy.newaxis])
