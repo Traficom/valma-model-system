@@ -4,7 +4,6 @@
     "dest": "other",
     "source": [
         "hb_work",
-        "hb_edu_basic",
         "hb_edu_student"
     ],
     "generation_area": "domestic",
@@ -13,7 +12,6 @@
     "gen_model": "rate",
     "generation": {
         "hb_work": 0.1104,
-        "hb_edu_basic": 0.0287,
         "hb_edu_student": 0.0319
     },
     "sec_dest_rate": {
@@ -193,8 +191,7 @@
                 "logsum": 0.8367
             },
             "individual_dummy": {
-                "wb_other_parent_car_drv_share*sh_age_7_17": 3.716,
-                "wb_other_parent_car_drv_share*sh_age_18_99": 3.716
+                "wb_other_parent_car_drv_share": 3.716
             }
         },
         "car_pax": {
@@ -243,8 +240,7 @@
             "car_drv": {
                 "constant": 0.8367,
                 "individual_dummy": {
-                    "wb_other_parent_car_drv_share*sh_age_7_17": 0.8367,
-                    "wb_other_parent_car_drv_share*sh_age_18_99": 0.8367
+                    "wb_other_parent_car_drv_share": 0.8367
                 }
             },
             "car_pax": {

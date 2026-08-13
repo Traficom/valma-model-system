@@ -8,14 +8,12 @@
     "gen_model": "rate",
     "generation": {
         "no_car": {
-            "age_7_17": 0.0936,
             "age_18_29": 0.1146,
             "age_30_49": 0.0891,
             "age_50_64": 0.0713,
             "age_65_99": 0.0864
         },
         "has_car": {
-            "age_7_17": 0.1601,
             "age_18_29": 0.1419,
             "age_30_49": 0.1106,
             "age_50_64": 0.128,
@@ -223,12 +221,9 @@
                 "logsum": 0.1598
             },
             "individual_dummy": {
-                "sh_cars1_hh1*sh_age_7_17": -1e99,
-                "sh_cars2_hh2*sh_age_7_17": -1e99,
-                "sh_cars1_hh2*sh_age_7_17": -1e99,
-                "sh_cars1_hh1*sh_age_18_99": 21.39,
-                "sh_cars2_hh2*sh_age_18_99": 21.39,
-                "sh_cars1_hh2*sh_age_18_99": 17.24
+                "sh_cars1_hh1": 21.39,
+                "sh_cars2_hh2": 21.39,
+                "sh_cars1_hh2": 17.24
             }
         },
         "car_pax": {
@@ -240,10 +235,8 @@
                 "logsum": 0.1598
             },
             "individual_dummy": {
-                "sh_cars1_hh2*sh_age_7_17": 7.105,
-                "sh_cars2_hh2*sh_age_7_17": 7.105,
-                "sh_cars1_hh2*sh_age_18_99": 7.105,
-                "sh_cars2_hh2*sh_age_18_99": 7.105
+                "sh_cars1_hh2": 7.105,
+                "sh_cars2_hh2": 7.105
             }
         },
         "transit": {
@@ -286,21 +279,16 @@
             "car_drv": {
                 "constant": 0.1598,
                 "individual_dummy": {
-                    "sh_cars1_hh1*sh_age_7_17": 0.1598,
-                    "sh_cars2_hh2*sh_age_7_17": 0.1598,
-                    "sh_cars1_hh2*sh_age_7_17": 0.1598,
-                    "sh_cars1_hh1*sh_age_18_99": 0.1598,
-                    "sh_cars2_hh2*sh_age_18_99": 0.1598,
-                    "sh_cars1_hh2*sh_age_18_99": 0.1598
+                    "sh_cars1_hh1": 0.1598,
+                    "sh_cars2_hh2": 0.1598,
+                    "sh_cars1_hh2": 0.1598
                 }
             },
             "car_pax": {
                 "constant": 0.1598,
                 "individual_dummy": {
-                    "sh_cars1_hh2*sh_age_7_17": 0.1598,
-                    "sh_cars2_hh2*sh_age_7_17": 0.1598,
-                    "sh_cars1_hh2*sh_age_18_99": 0.1598,
-                    "sh_cars2_hh2*sh_age_18_99": 0.1598
+                    "sh_cars1_hh2": 0.1598,
+                    "sh_cars2_hh2": 0.1598
                 }
             },
             "transit": {
