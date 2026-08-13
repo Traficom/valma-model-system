@@ -525,9 +525,8 @@ class GenerationLogit(LogitModel):
             b = self.param[nr]
             utility = numpy.zeros(self.bounds.stop, dtype=numpy.float32)
             utility += b["constant"]
-            utility += sum(
-                beta * numpy.asarray(self.generation_zone_data[var])
-                for var, beta in b["generation"].items())
+            for var, beta in b["generation"].items():
+                utility += beta * numpy.asarray(self.generation_zone_data[var])
             self.exps[nr] = numpy.minimum(numpy.exp(utility), 99999)
             nr_expsum += self.exps[nr]
         for nr in self.param:
