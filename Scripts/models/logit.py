@@ -51,6 +51,7 @@ class LogitModel:
         self.dest_choice_param: Dict[str, Dict[str, Any]] = parameters["destination_choice"]
         self.mode_choice_param: Optional[Dict[str, Dict[str, Any]]] = parameters["mode_choice"]
         self.distance_boundary = parameters["distance_boundaries"]
+        self.accessibility: Dict[str, pandas.Series] = {}
 
     def calc_mode_prob(self, impedance: Dict[str, numpy.ndarray]):
         expsum, mode_exps = self._calc_mode_utils(impedance)
@@ -61,10 +62,16 @@ class LogitModel:
 
     def _calc_alt_util(self, mode: str, utility: numpy.ndarray,
                        impedance: Dict[str, numpy.ndarray],
-                       b: Dict[str, Dict[str, float]]):
-        self._add_zone_util(utility, b["attraction"])
-        self._add_impedance(utility, impedance, b["impedance"])
-        self._add_log_impedance(utility, impedance, b["log"])
+                       params: Dict[str, Dict[str, float]]):
+        for var, beta in params["attraction"].items():
+            utility += beta * numpy.asarray(self.attraction_zone_data[var])
+        for var, beta in params["impedance"].items():
+            utility += beta * impedance[var]
+        for var, beta in params["log"].items():
+            if beta < 0:
+                utility += beta * log(impedance[var] + 1)
+            else:
+                utility += beta * log(impedance[var])
         exps = numpy.exp(utility)
         dist = self.purpose.dist
         if mode != "logsum" and dist.shape == exps.shape:
@@ -75,14 +82,14 @@ class LogitModel:
 
     def _calc_mode_util(self, mode: str, impedance: Dict[str, numpy.ndarray],
                         dummy: Optional[str] = None):
-        b = self.mode_choice_param[mode]
-        utility = numpy.zeros_like(next(iter(impedance.values())))
-        utility += b["constant"]
-        if dummy in b["individual_dummy"]:
-            utility += b["individual_dummy"][dummy]
-        utility = self._add_zone_util(
-            utility.T, b["generation"], generation=True).T
-        exps = self._calc_alt_util(mode, utility, impedance, b)
+        params = self.mode_choice_param[mode]
+        utility = params["constant"] + params["individual_dummy"].get(dummy, 0)
+        for var, beta in params["generation"].items():
+            utility += beta * numpy.asarray(self.generation_zone_data[var])
+        first_mtx = next(iter(impedance.values()))
+        if first_mtx.ndim == 2 and isinstance(utility, numpy.ndarray):
+            utility = numpy.full_like(first_mtx, utility[:, numpy.newaxis])
+        exps = self._calc_alt_util(mode, utility, impedance, params)
         return exps
 
     def _calc_mode_utils(self, impedance: Dict[str, Dict[str, numpy.ndarray]],
@@ -94,114 +101,14 @@ class LogitModel:
         return expsum, mode_exps
 
     def _calc_dest_util(self, mode: str, impedance: dict) -> numpy.ndarray:
-        b = self.dest_choice_param[mode]
-        b["attraction"][f"municipality_calibration_{mode}"] = 1.0
-        utility = numpy.zeros_like(next(iter(impedance.values())))
-        impedance["attraction_size"] = self._add_zone_util(
-            numpy.zeros_like(utility), b["attraction_size"])
-        dest_exp = self._calc_alt_util(mode, utility, impedance, b)
-        return dest_exp
-    
-    def _calc_sec_dest_util(self, mode, impedance, orig, dest):
-        b = self.dest_choice_param[mode]
-        utility = numpy.zeros_like(next(iter(impedance.values())))
-        self._add_sec_zone_util(utility, b["attraction"], orig, dest)
-        self._add_impedance(utility, impedance, b["impedance"])
-        dest_exps = numpy.exp(utility)
-        size = numpy.zeros_like(utility)
-        self._add_sec_zone_util(size, b["attraction_size"])
-        impedance["attraction_size"] = size
-        self._add_log_impedance(dest_exps, impedance, b["log"])
-        if mode != "logsum":
-            l, u = self.distance_boundary[mode]
-            dest_exps[(impedance["dist"] < l) | (impedance["dist"] >= u)] = 0
-        return dest_exps
-
-    def _add_impedance(self, utility, impedance, b):
-        """Adds simple linear impedances to utility.
-        
-        Parameters
-        ----------
-        utility : ndarray
-            Numpy array to which the impedances will be added
-        impedance : dict
-            A dictionary of time-averaged impedance matrices. Includes keys
-            `time`, `cost`, and `dist` of which values are all ndarrays.
-        b : dict
-            The parameters for different impedance matrices.
-        """
-        for i in b:
-            utility += b[i] * impedance[i]
-        return utility
-
-    def _add_log_impedance(self, utility, impedance, b):
-        """Adds log transformations of impedance to utility.
-
-        Parameters
-        ----------
-        exps : ndarray
-            Numpy array to which the impedances will be multiplied
-        impedance : dict
-            A dictionary of time-averaged impedance matrices. Includes keys
-            `time`, `cost`, and `dist` of which values are all ndarrays.
-        b : dict
-            The parameters for different impedance matrices
-        """
-        for i in b:
-            imp = impedance[i] + 1 if b[i] < 0 else impedance[i]
-            utility += b[i] * log(imp)
-        return utility
-
-    def _add_zone_util(self, utility, b, generation=False):
-        """Adds simple linear zone terms to utility.
-        
-        Parameters
-        ----------
-        utility : ndarray
-            Numpy array to which the impedances will be added
-        b : dict
-            The parameters for different zone data.
-        generation : bool
-            Whether the effect of the zone term is added only to the
-            geographical area in which this model is used based on the
-            `self.bounds` attribute of this class.
-        """
-        zdata = (self.generation_zone_data if generation
-                 else self.attraction_zone_data)
-        for i in b:
-            utility += b[i] * numpy.asarray(zdata[i])
-        return utility
-    
-    def _add_sec_zone_util(self, utility, b):
-        for i in b:
-            utility += b[i] * numpy.asarray(self.generation_zone_data[i])
-        return utility
-
-    def _add_log_zone_util(self, exps, b, generation=False):
-        """Adds log transformations of zone data to utility.
-        
-        This is an optimized way of calculating log terms. Calculates
-        zonedata1^b1 * ... * zonedataN^bN in the following equation:
-        e^(linear_terms + b1*log(zonedata1) + ... + bN*log(zonedataN))
-        = e^(linear_terms) * zonedata1^b1 * ... * zonedataN^bN
-
-        Parameters
-        ----------
-        utility : ndarray
-            Numpy array to which the impedances will be added
-        b : dict
-            The parameters for different zone data.
-        generation : bool
-            Whether the effect of the zone term is added only to the
-            geographical area in which this model is used based on the
-            `self.bounds` attribute of this class.
-        """
-        zdata = (self.generation_zone_data if generation
-                 else self.attraction_zone_data)
-        for i in b:
-            exps *= numpy.power(
-                numpy.asarray(zdata[i]) + 1, b[i])
-        return exps
+        params = self.dest_choice_param[mode]
+        params["attraction"][f"municipality_calibration_{mode}"] = 1.0
+        impedance["attraction_size"] = sum(
+            beta * numpy.asarray(self.attraction_zone_data[var])
+            for var, beta in params["attraction_size"].items())
+        return self._calc_alt_util(
+            mode, numpy.zeros_like(next(iter(impedance.values()))), impedance,
+            params)
 
     def _calc_electric_car_shares(self,
                                   ec_probs: Dict[str, Dict[str, numpy.ndarray]]
@@ -631,7 +538,7 @@ class SecDestModel(LogitModel):
         Writer object to result directory
     """
 
-    def calc_prob(self, mode, impedance, origin, destination=None):
+    def calc_prob(self, mode, impedance):
         """Calculate matrix of choice probabilities.
         
         Parameters
@@ -652,7 +559,7 @@ class SecDestModel(LogitModel):
         numpy 2-d matrix
                 Choice probabilities
         """
-        dest_exps = self._calc_sec_dest_util(mode, impedance, origin, destination)
+        dest_exps = self._calc_dest_util(mode, impedance)
         return dest_exps.T / dest_exps.sum(1)
 
 
@@ -693,7 +600,8 @@ class GenerationLogit(LogitModel):
             b = self.param[nr]
             utility = numpy.zeros(self.bounds.stop, dtype=numpy.float32)
             utility += b["constant"]
-            utility = self._add_zone_util(utility, b["generation"], True)
+            for var, beta in b["generation"].items():
+                utility += beta * numpy.asarray(self.generation_zone_data[var])
             self.exps[nr] = numpy.minimum(numpy.exp(utility), 99999)
             nr_expsum += self.exps[nr]
         for nr in self.param:
@@ -729,4 +637,40 @@ class GenerationLogit(LogitModel):
                 dummy_share = numpy.asarray(self.generation_zone_data[dummy])
                 with_dummy = dummy_share * ind_prob
                 prob[nr] += with_dummy
+        return prob
+    
+    def calc_segment_prob(self, segment: str):
+
+
+        """Calculate tour generation probabilities with individual dummies included.
+        Uses results from previously run `calc_basic_prob()`.
+
+        Parameters
+        ----------
+        segment : str
+            Agent/segment
+        zone : int (optional)
+            Index of zone where the agent lives, if no zone index is given,
+            calculation is done for all zones
+
+        Returns
+        -------
+        dict
+            key : int
+                Number of cars in household (0, 1, 2(+))
+            value : numpy.ndarray
+                Choice probabilities
+        """
+        self.calc_basic_prob()
+        prob = {}
+        exps = {}
+        nr_expsum = 0
+        for nr in self.param:
+            exps[nr] = self.exps[nr]
+            b = self.param
+            if segment in b[nr]["individual_dummy"]:
+                exps[nr] *= numpy.exp(b[nr]["individual_dummy"][segment])
+            nr_expsum += exps[nr]
+        for nr in self.param:
+            prob[nr] = exps[nr] / nr_expsum
         return prob

@@ -151,7 +151,8 @@
                 "sh_office": 1.531
             },
             "impedance": {
-                "time": -0.01051
+                "time": -0.01051,
+                "cost": -0.05425
             },
             "log": {
                 "attraction_size": 1,

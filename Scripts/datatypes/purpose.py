@@ -682,7 +682,7 @@ class SecDestPurpose(TravelPurpose):
             dest_imp[mtx_type] = (impedance[mtx_type][dests, :]
                                   + impedance[mtx_type][:, orig]
                                   - impedance[mtx_type][dests, orig][:, numpy.newaxis])
-        return self.model.calc_prob(mode, dest_imp, orig, dests)
+        return self.model.calc_prob(mode, dest_imp)
 
     def print_data(self):
         self.resultdata.print_data(

@@ -215,6 +215,7 @@ class AssignmentPeriod(Period):
             Type (time/cost/dist) : dict
                 Assignment class (car/transit/...) : numpy 2-d matrix
         """
+        log.info(f"--- ASSIGNING PERIOD {self.name.upper()} ---")
         if not self._separate_emme_scenarios:
             self._calc_background_traffic(include_trucks=True)
         self._assign_cars(self.stopping_criteria["coarse"])
@@ -244,6 +245,7 @@ class AssignmentPeriod(Period):
             Type (time/cost/dist) : dict
                 Assignment class (car/transit/...) : numpy 2-d matrix
         """
+        log.info(f"--- END-ASSIGNING PERIOD {self.name.upper()} ---")
         self._set_bike_vdfs()
         self._assign_bikes()
         self._set_car_vdfs()
@@ -599,22 +601,27 @@ class AssignmentPeriod(Period):
     def _assign_cars(self, 
                      stopping_criteria: Dict[str, Union[int, float]]):
         """Perform car traffic assignment for one scenario."""
-        log.info("Car assignment started...")
         if self.use_stored_speeds:
+            log.info("Car assignment with stored speeds started...")
             for car_spec in self._car_spec.separate_light_specs():
                 car_spec["stopping_criteria"] = stopping_criteria
                 self.emme_project.car_assignment(car_spec, self.emme_scenario)
         else:
+            max_iterations = stopping_criteria["max_iterations"]
+            if max_iterations == 0:
+                log.info("Car assignment with free-flow speeds started...")
+            else:
+                log.info("Car assignment started...")
             car_spec = self._car_spec.light_spec()
             car_spec["stopping_criteria"] = stopping_criteria
             assign_report = self.emme_project.car_assignment(
                 car_spec, self.emme_scenario)
-            log.info("Stopping criteria: {}, iteration {} / {}".format(
-                assign_report["stopping_criterion"],
-                len(assign_report["iterations"]),
-                stopping_criteria["max_iterations"]))
-            if assign_report["stopping_criterion"] == "MAX_ITERATIONS":
-                log.warn("Car assignment not fully converged.")
+            if max_iterations > 0:
+                log.info("Stopping criteria: {}, iteration {} / {}".format(
+                    assign_report["stopping_criterion"],
+                    len(assign_report["iterations"]), max_iterations))
+                if assign_report["stopping_criterion"] == "MAX_ITERATIONS":
+                    log.warn("Car assignment not fully converged")
         network = self.emme_scenario.get_network()
         if not self.use_stored_speeds:
             time_attr = self.netfield("car_time")
@@ -631,8 +638,8 @@ class AssignmentPeriod(Period):
             for mode in modes:
                     link[mode.volume_attr] = link[mode.temp_volume_attr]
         self.emme_scenario.publish_network(network)
-        log.info("Car assignment performed for scenario {}".format(
-            self.emme_scenario.id))
+        log.info("Car assignment performed for scenario {}, {}".format(
+            self.emme_scenario.id, self.name))
 
     def _assign_trucks(self):
         stopping_criteria = copy.deepcopy(param.stopping_criteria["coarse"])
@@ -649,8 +656,8 @@ class AssignmentPeriod(Period):
             for mode in modes:
                 link[mode.volume_attr] = link[mode.temp_volume_attr]
         self.emme_scenario.publish_network(network)
-        log.info("Truck assignment performed for scenario {}".format(
-            self.emme_scenario.id))
+        log.info("Truck assignment performed for scenario {}, {}".format(
+            self.emme_scenario.id, self.name))
 
     def _assign_bikes(self):
         """Perform bike traffic assignment for one scenario."""
@@ -663,7 +670,8 @@ class AssignmentPeriod(Period):
         for link in network.links():
             link[mode.volume_attr] = link[mode.temp_volume_attr]
         self.emme_scenario.publish_network(network)
-        log.info("Bike assignment performed for scenario " + str(scen.id))
+        log.info("Bike assignment performed for scenario {}, {}".format(
+            self.emme_scenario.id, self.name))
 
     def _calc_extra_wait_time(self):
         """Calculate extra waiting time for one scenario."""

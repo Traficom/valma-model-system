@@ -61,10 +61,12 @@ class OffPeakPeriod(AssignmentPeriod):
             transit_classes=param.local_transit_classes)
 
     def init_assign(self):
+        log.info(f"--- INITIALIZING ASSIGNMENT FOR PERIOD {self.name.upper()} ---")
         self._init_assign_transit()
         log.info("Pedestrian assignment started...")
         self.walk_mode.assign()
-        log.info(f"Pedestrians assigned for scenario {self.emme_scenario.id}")
+        log.info("Pedestrians assigned for scenario {}, {}".format(
+            self.emme_scenario.id, self.name))
         self._set_bike_vdfs()
         self._assign_bikes()
         return self.get_soft_mode_impedances()
@@ -100,6 +102,7 @@ class OffPeakPeriod(AssignmentPeriod):
             Type (time/cost/dist) : dict
                 Assignment class (car/transit/...) : numpy 2-d matrix
         """
+        log.info(f"--- ASSIGNING PERIOD {self.name.upper()} ---")
         if not self._separate_emme_scenarios:
             self._calc_background_traffic(include_trucks=True)
         self._assign_cars(self.stopping_criteria["coarse"])
@@ -159,6 +162,7 @@ class TransitAssignmentPeriod(OffPeakPeriod):
         self._prepare_other(day_scenario, save_matrices)
 
     def init_assign(self):
+        log.info(f"--- ASSIGNING PERIOD {self.name.upper()} ---")
         self._init_assign_transit()
         self.car_mode.get_matrices()
         return []
@@ -201,6 +205,7 @@ class TransitAssignmentPeriod(OffPeakPeriod):
             Type (time/cost/dist) : dict
                 Assignment class (transit/...) : numpy 2-d matrix
         """
+        log.info(f"--- END-ASSIGNING PERIOD {self.name.upper()} ---")
         if not assign_transit:
             return {}
         self._assign_transit(
