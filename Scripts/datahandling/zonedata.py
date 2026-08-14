@@ -38,6 +38,15 @@ class ZoneData:
             Additional dummy variables to create
     car_dist_cost : float
         Car cost (eur) per km
+    electric_car_share : dict
+        key : str
+            County name or "default"
+        value : dict
+            key : str
+                Electric car type (bev/phev)
+            value : float
+                Share of electric cars of that type
+    ----------
     """
     beeline_dist: numpy.ndarray
 

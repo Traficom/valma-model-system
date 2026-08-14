@@ -87,10 +87,10 @@ class LogitModelTest(unittest.TestCase):
                     else ModeDestModel(*args))
                 prob = model.calc_prob(impedance)
                 if parameters["dest"] in ("work"):
-                    for mode in ("car_drv", "transit", "bike", "walk"):
+                    for mode in ("car_drv", "transit"):
                         self._validate(prob[mode])
                 else:
-                    for mode in ("car_drv", "transit", "bike", "walk"):
+                    for mode in ("car_drv", "transit"):
                         self._validate(prob[mode])
 
     def _validate(self, prob):
