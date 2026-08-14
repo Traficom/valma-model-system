@@ -235,6 +235,9 @@ class ModeDestModel(LogitModel):
             Mode (car/transit/bike/walk) : numpy 2-d matrix
                 Choice probabilities
         """
+        self.calc_soft_mode_exps(
+            {mode: impedance.pop(mode) for mode in ["walk", "bike"]
+             if mode in impedance})
         ec_impedance = defaultdict(dict)
         for mode, electric_modes in self.purpose.car_modes.items():
             for e_mode in electric_modes:

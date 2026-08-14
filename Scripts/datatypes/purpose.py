@@ -548,6 +548,11 @@ class TourPurpose(TravelPurpose):
         """
         self.gen_model.add_tours()
         prob = self.calc_prob(impedance, is_last_iteration)
+        purpose_impedance = self.transform_impedance(impedance)
+        for mode in list(purpose_impedance):
+            if mode not in ["walk", "bike"]:
+                purpose_impedance.pop(mode)
+        prob.update(self.model.calc_soft_mode_prob(purpose_impedance))
         tours = self.gen_model.get_tours()
         for mode in self.modes:
             mtx = (prob.pop(mode) * tours).T
