@@ -551,7 +551,7 @@ class TourPurpose(TravelPurpose):
             df = dest_agg.aggregate_array(df, mapping).T
             self.aggregates[mapping][mode] = df
         self.within_zone_tours[mode] = pandas.Series(
-            numpy.diag(mtx), self.dest_zone_numbers,
+            numpy.diag(mtx).copy(), self.dest_zone_numbers,
             name="{}_{}".format(self.name, mode))
 
 
