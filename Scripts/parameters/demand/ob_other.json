@@ -268,19 +268,19 @@
         },
         "calibration": {
             "car_drv": {
-                "constant": 0.0
+                "constant": 0.0698
             },
             "car_pax": {
-                "constant": 0.0
+                "constant": -0.1052
             },
             "transit": {
-                "constant": 0.0
+                "constant": -0.3506
             },
             "bike": {
-                "constant": 0.0
+                "constant": -0.1869
             },
             "walk": {
-                "constant": 0.0
+                "constant": 0.0312
             }
         }
     },
