@@ -87,6 +87,7 @@ class ZoneData:
             0.5, self.zone_numbers, dtype=numpy.float32)
         self.share["share_male"] = pandas.Series(
             0.5, self.zone_numbers, dtype=numpy.float32)
+        self.share["sh_age_18_99"] = 1 - self["sh_age_7_17"]
 
         # Convert household shares to population shares
         avg_hh_size = {
@@ -112,6 +113,7 @@ class ZoneData:
         self["sqrt_pop_density"] = numpy.sqrt(self["pop_density"])
         
         # Two-way intrazonal distances from building distances
+    
         self["dist_walk"] = data["intra_dist_walk"] * 2
         self["dist_bike"] = data["intra_dist_bike"] * 2
         self["time_car"] = 2 * 60 * data["intra_dist_car"] / 20

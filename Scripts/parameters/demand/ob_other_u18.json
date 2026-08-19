@@ -1,41 +1,25 @@
 {
-    "name": "ob_other",
+    "name": "ob_other_u18",
     "orig": "source",
     "dest": "other",
     "source": [
-        "hb_leisure",
-        "hb_sport",
-        "hb_visit"
+        "hb_leisure_u18",
+        "hb_sport_u18",
+        "hb_visit_u18"
     ],
     "generation_area": "domestic",
     "attraction_area": "domestic",
     "struct": "mode>dest",
     "gen_model": "rate",
     "generation": {
-        "hb_leisure": 0.0262,
-        "hb_sport": 0.0051,
-        "hb_visit": 0.1141
+        "hb_leisure_u18": 0.0262,
+        "hb_sport_u18": 0.0051,
+        "hb_visit_u18": 0.1141
     },
     "sec_dest_rate": {
-        "car_drv": 1.0516,
-        "car_pax": 1.1103,
-        "transit": 1.083
+        "car_drv": 1.0516
     },
     "impedance_share": {
-        "car_drv": {
-            "aht": [
-                0.0171,
-                0.0048
-            ],
-            "pt": [
-                0.6808,
-                0.6455
-            ],
-            "iht": [
-                0.3021,
-                0.3497
-            ]
-        },
         "car_pax": {
             "aht": [
                 0.0171,
@@ -86,10 +70,6 @@
     "car_cost_sharing": 0.0,
     "occupancy": {},
     "distance_boundaries": {
-        "car_drv": [
-            0,
-            100
-        ],
         "car_pax": [
             0,
             100
@@ -108,20 +88,6 @@
         ]
     },
     "destination_choice": {
-        "car_drv": {
-            "attraction": {},
-            "impedance": {
-                "time": -0.09058
-            },
-            "log": {
-                "attraction_size": 1
-            },
-            "attraction_size": {
-                "wrk_shop": 1,
-                "wrk_recreation": 1.189461,
-                "wrk_hospitality": 1.241226
-            }
-        },
         "car_pax": {
             "attraction": {},
             "impedance": {
@@ -184,18 +150,6 @@
         }
     },
     "mode_choice": {
-        "car_drv": {
-            "constant": -3.908,
-            "generation": {},
-            "attraction": {},
-            "impedance": {},
-            "log": {
-                "logsum": 0.5376
-            },
-            "individual_dummy": {
-                "ob_other_parent_car_drv_share": 4.743
-            }
-        },
         "car_pax": {
             "constant": -3.32,
             "generation": {},
@@ -241,12 +195,6 @@
             "individual_dummy": {}
         },
         "scaling": {
-            "car_drv": {
-                "constant": 0.5376,
-                "individual_dummy": {
-                    "ob_other_parent_car_drv_share": 0.5376
-                }
-            },
             "car_pax": {
                 "constant": 0.5376,
                 "individual_dummy": {
@@ -267,9 +215,6 @@
             }
         },
         "calibration": {
-            "car_drv": {
-                "constant": 0.0
-            },
             "car_pax": {
                 "constant": 0.0
             },
