@@ -143,6 +143,7 @@ class FreightMode(AssignmentMode):
     def get_matrices(self):
         mtxs = {
             **self.dist.item,
+            **self.aux_dist.item,
             **self.time.item,
             **self.canal_cost.item,
         }
