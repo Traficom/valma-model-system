@@ -7,7 +7,7 @@ from typing import Any, Dict, List, Tuple, Union
 # hence need sub-intervals defined.
 purpose_areas: Dict[str, Tuple[int,int]] = {
     "domestic": (0, 50000),
-    "external": (50000, 60000),
+    "external": (50000, 70000),
     "foreign": (60000, 70000),
     "all": (0, 70000),
 }

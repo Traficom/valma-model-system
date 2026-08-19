@@ -28,6 +28,9 @@ class LogitModelTest(unittest.TestCase):
         pur = Purpose()
         zi = numpy.array(INTERNAL_ZONES)
         zd = ZoneData(ZONEDATA_PATH, zi, "uusimaa", car_dist_cost=0.12)
+        for attr in ("sh_cars1_hh1", "sh_cars1_hh2", "sh_cars1_hh3",
+                     "sh_cars2_hh2", "sh_cars2_hh3"):
+            zd[attr] = pandas.Series(0.2, index=zd.zone_numbers)
         mtx = numpy.arange(24*24, dtype=numpy.float32)
         mtx.shape = (24, 24)
         mtx[numpy.diag_indices(24)] = 0
