@@ -181,8 +181,7 @@ class FreightMode(AssignmentMode):
         aux_dist = self.aux_dist.data
         aux_cost = (self._time_unit_cost*self.aux_time.data/60
                     + self._dist_unit_cost*aux_dist)
-        aux_cost = numpy.where(
-            (aux_dist > dist*2) | (dist == 0), numpy.inf, aux_cost)
+        aux_cost = numpy.where(aux_dist > dist*2, numpy.inf, aux_cost)
         if self._include_toll_cost:
             aux_cost += self.toll_cost.data
         mtxs["aux_cost"] = aux_cost

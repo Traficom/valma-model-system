@@ -162,18 +162,13 @@ class DomesticCommodity(FreightCommodity):
                 Type (cost/aux_cost) : numpy.ndarray
         """
         costs = {}
-        truck = "truck"
-        if truck in self.modes:
-            costs[truck] = {"cost": self._transform_road_cost(
-                impedance[truck]["cost"])}
-        train = "freight_train"
-        if train in self.modes:
-            costs[train] = self._calc_ton_cost(
-                impedance[train], self.costdata[train]["diesel_train"])
-        ship = "ship"
-        if ship in self.modes:
-            costs[ship] = self._calc_ton_cost(
-                impedance[ship], self.costdata[ship]["domestic_vessel"])
+        for mode in self.modes:
+            if mode == "truck":
+                costs[mode] = {"cost": self._transform_road_cost(
+                    impedance[mode]["cost"])}
+            else:
+                costs[mode] = self._calc_ton_cost(
+                    impedance[mode], self.costdata[mode])
         for mode, mode_costs in costs.items():
             if not self.model or "aux_cost" not in self.model.mode_choice_param[mode]["impedance"]:
                 mode_costs["cost"] += mode_costs.pop("aux_cost", 0)
@@ -201,7 +196,6 @@ class DomesticCommodity(FreightCommodity):
             auxiliary road cost : numpy.ndarray
             impedance type cost : numpy.ndarray
         """
-        impedance["terminal_cost"] = numpy.ones_like(impedance["dist"])
         cost = sum(
             impedance[mtx_type] * unit_costs[mtx_type]
             for mtx_type in unit_costs)
@@ -474,9 +468,7 @@ class ForeignCommodity(FreightCommodity):
         inf_mtx = numpy.full_like(
             next(iter(impedance.values()))["frequency"], numpy.inf)
         ship_info = {}
-        for mode in self.costdata["ship"].keys():
-            if mode == "domestic_vessel":
-                continue
+        for mode in self.costdata["foreign_ship"].keys():
             ship_info[mode] = {
                 "cost": inf_mtx.copy(),
                 "draught": inf_mtx.copy(),
@@ -485,11 +477,11 @@ class ForeignCommodity(FreightCommodity):
             port_draughts = numpy.array(
                 [port_draught_limit[mode].get(port, numpy.inf)
                 for port in fin_ports])
-            for draught in map(int, self.costdata["ship"][mode]):
+            for draught in map(int, self.costdata["foreign_ship"][mode]):
                 time = (impedance[mode]["dist"]
                         / ship_draught_speed[mode][draught]
                         * 60)
-                unit_costs = self.costdata["ship"][mode][f"{draught}"]
+                unit_costs = self.costdata["foreign_ship"][mode][f"{draught}"]
                 cost = (unit_costs["time"]*time
                         + unit_costs["dist"]*impedance[mode]["dist"]
                         + unit_costs["terminal_cost"])
