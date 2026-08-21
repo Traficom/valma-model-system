@@ -107,24 +107,10 @@ class ZoneData:
         # Calculate population license shares
         self._calc_household_shares(share="sh_pop")
 
-        # Convert household shares to population shares
-        # These fixed shares are used only in long-dist models
-        self.share["sh_cars1_hh1"] = divide(self["sh_cars1_hh1"], hh_pop)
-        self.share["sh_cars1_hh2"] = divide(
-            (avg_hh_size["hh2"]*self["sh_cars1_hh2"]
-             + avg_hh_size["hh3"]*self["sh_cars1_hh3"]),
-            hh_pop)
-        self.share["sh_cars2_hh2"] = divide(
-            (avg_hh_size["hh2"]*self["sh_cars2_hh2"]
-             + avg_hh_size["hh3"]*self["sh_cars2_hh3"]),
-            hh_pop)
-        self.share["sh_car"] = (self["sh_cars1_hh1"]
-                                + self["sh_cars1_hh2"]
-                                + self["sh_cars2_hh2"])
-
         self["pop_density"] = divide(data["population"], data["land_area"])
         self["log_pop_density"] = numpy.log(self["pop_density"]+1)
-
+        self["sqrt_pop_density"] = numpy.sqrt(self["pop_density"])
+        
         # Two-way intrazonal distances from building distances
         self["dist_walk"] = data["intra_dist_walk"] * 2
         self["dist_bike"] = data["intra_dist_bike"] * 2
@@ -255,6 +241,19 @@ class ZoneData:
             Index of zone number
         """
         return self.zones[zone_number].index
+    
+    def get_foreign_external_data(self) -> pandas.DataFrame:
+        """Get zone data for foreign external passenger traffic calculation.
+        Returns
+        -------
+        pandas DataFrame
+            Zone data for foreign external passenger traffic calculation
+        """
+        variables = (
+            "population",
+        )
+        data = {k: self._values[k] for k in variables}
+        return pandas.DataFrame(data)
 
     def __getitem__(self, key: str) -> Union[pandas.Series, numpy.ndarray]:
         try:

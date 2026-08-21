@@ -18,11 +18,6 @@
                     "sh_hh1",
                     "sh_hh2",
                     "sh_hh3",
-                    "sh_cars1_hh1",
-                    "sh_cars1_hh2",
-                    "sh_cars1_hh3",
-                    "sh_cars2_hh2",
-                    "sh_cars2_hh3",
                     "sh_adult_license"
                 ]
             },
@@ -46,6 +41,7 @@
         "mean": [
             "avg_park_cost",
             "avg_park_time",
+            "avg_walk_time",
             "car_density",
             "intra_dist_walk",
             "intra_dist_bike",
