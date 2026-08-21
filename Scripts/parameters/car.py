@@ -24,30 +24,30 @@ car_ownership = {
                 "sh_income_100_*sh_hh_1_adult_children": 0,
             },
             "calibration": {
-                "constant": 0.241671346
+                "constant": 0.283344173
             }
         },
         "1": {
-            "constant": 3.065065,
+            "constant": 3.176044,
             "generation": {
-                "sqrt_pop_density": -0.022965,
+                "sqrt_pop_density": -0.022892,
             },
             "individual_dummy": {
-                "sh_income_0_19*sh_hh_1_adult_no_children": -1.553698,
-                "sh_income_20_39*sh_hh_1_adult_no_children": -0.580916,
+                "sh_income_0_19*sh_hh_1_adult_no_children": -1.616701,
+                "sh_income_20_39*sh_hh_1_adult_no_children": -0.647555,
                 "sh_income_40_59*sh_hh_1_adult_no_children": 0,
                 "sh_income_60_79*sh_hh_1_adult_no_children": 0,
                 "sh_income_80_99*sh_hh_1_adult_no_children": 0,
                 "sh_income_100_*sh_hh_1_adult_no_children": 0,
-                "sh_income_0_19*sh_hh_1_adult_children": -1.553698+0.530891,
-                "sh_income_20_39*sh_hh_1_adult_children": -0.580916+0.530891,
-                "sh_income_40_59*sh_hh_1_adult_children": 0.530891,
-                "sh_income_60_79*sh_hh_1_adult_children": 0.530891,
-                "sh_income_80_99*sh_hh_1_adult_children": 0.530891,
-                "sh_income_100_*sh_hh_1_adult_children": 0.530891,
+                "sh_income_0_19*sh_hh_1_adult_children": -1.616701+0.505770,
+                "sh_income_20_39*sh_hh_1_adult_children": -0.647555+0.505770,
+                "sh_income_40_59*sh_hh_1_adult_children": 0.505770,
+                "sh_income_60_79*sh_hh_1_adult_children": 0.505770,
+                "sh_income_80_99*sh_hh_1_adult_children": 0.505770,
+                "sh_income_100_*sh_hh_1_adult_children": 0.505770,
             },
             "calibration": {
-                "constant": -0.08120386
+                "constant": -0.093377328
             },
         }
     },
@@ -70,30 +70,30 @@ car_ownership = {
                 "sh_income_100_*sh_hh_2_adults_children": 0,
             },
             "calibration": {
-                "constant": 0.367440245
+                "constant": 0.537551828
             }
         },
         "1": {
-            "constant": 3.899001,
+            "constant": 4.559945,
             "generation": {
-                "sqrt_pop_density": -0.023521,
+                "sqrt_pop_density": -0.026995,
             },
             "individual_dummy": {
-                "sh_income_0_19*sh_hh_2_adults_no_children": -1.608033,
-                "sh_income_20_39*sh_hh_2_adults_no_children": -0.541490,
+                "sh_income_0_19*sh_hh_2_adults_no_children": -1.997495,
+                "sh_income_20_39*sh_hh_2_adults_no_children": -0.852185,
                 "sh_income_40_59*sh_hh_2_adults_no_children": 0,
                 "sh_income_60_79*sh_hh_2_adults_no_children": 0,
                 "sh_income_80_99*sh_hh_2_adults_no_children": 0,
                 "sh_income_100_*sh_hh_2_adults_no_children": 0,
-                "sh_income_0_19*sh_hh_2_adults_children": -1.608033+0.197250,
-                "sh_income_20_39*sh_hh_2_adults_children": -0.541490+0.197250,
-                "sh_income_40_59*sh_hh_2_adults_children": 0.197250,
-                "sh_income_60_79*sh_hh_2_adults_children": 0.197250,
-                "sh_income_80_99*sh_hh_2_adults_children": 0.197250,
-                "sh_income_100_*sh_hh_2_adults_children": 0.197250,
+                "sh_income_0_19*sh_hh_2_adults_children": -1.997495+0.275084,
+                "sh_income_20_39*sh_hh_2_adults_children": -0.852185+0.275084,
+                "sh_income_40_59*sh_hh_2_adults_children": 0.275084,
+                "sh_income_60_79*sh_hh_2_adults_children": 0.275084,
+                "sh_income_80_99*sh_hh_2_adults_children": 0.275084,
+                "sh_income_100_*sh_hh_2_adults_children": 0.275084,
             },
             "calibration": {
-                "constant": -0.048012218
+                "constant": -0.065788965
             }
         },
     },
