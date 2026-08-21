@@ -74,7 +74,7 @@ class TradeRouteChoiceTest(unittest.TestCase):
 
         marine_attr = (ship_imps, fin_border, cluster_border)
         for commodity in commodities.values():
-            split_impedances = commodity.form_impedance_legs(impedance, *marine_attr)
+            split_impedances = commodity._form_impedance_legs(impedance, *marine_attr)
             self._assert_leg_impedances(commodity.name, split_impedances,
                                         truck_name, marine_modes)
             
