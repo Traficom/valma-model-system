@@ -83,20 +83,19 @@ class JourneyLevel:
             } for mode in param.long_dist_transit_modes[transit_class]]
         if park_and_ride:
             if transit_class in param.car_access_classes:
-                # Park-and-ride (car) mode allowed only on level 0.
-                car = FORBIDDEN if level >= PARKED else NOT_BOARDED
+                car = FORBIDDEN if level >= PARKED else PARKED
                 # If we want parking to be allowed only on specific links
                 # (i.e., park-and-ride facilities), we should specify an
                 # own mode for these links. For now, parking is allowed
                 # on all links where walking to a stop is possible.
-                walk = PARKED if level == NOT_BOARDED else level
+                walk = FORBIDDEN if level == PARKED else level
             elif transit_class in param.car_egress_classes:
                 # Transfer to park-and-ride (car) mode only allowed after first
                 # boarding. If we want parking to be allowed only on specific
                 # links, we should specify an own mode for these links.
                 # For now, parking is allowed on all links where walking
                 # from a stop is possible.
-                car = LEFT if BOARDED_LOCAL < level < FORBIDDEN else FORBIDDEN
+                car = LEFT if BOARDED_LOCAL <= level < FORBIDDEN else FORBIDDEN # A bug fix to fix assymmetry between access and egress? With this fix both now allow BOARDED_LOCAL where as before only access allowed that.
                 walk = FORBIDDEN if level == LEFT else level
             transitions.append({
                 "mode": param.park_and_ride_mode,

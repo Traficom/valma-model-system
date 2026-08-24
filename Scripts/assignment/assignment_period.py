@@ -353,10 +353,21 @@ class AssignmentPeriod(Period):
             network.mode(param.assignment_modes["car"]),
             network.mode(param.assignment_modes["truck"])
         }
+        long_dist_terminal_modes = {network.mode(mode_id) for mode_id in param.long_dist_terminal_modes}
         park_and_ride_mode = network.mode(param.park_and_ride_mode)
+        long_distance_nodes = {node.id for node in network.nodes()
+                                if any(segment.line.mode in long_dist_terminal_modes
+                                       for link in node.incoming_links()
+                                       for segment in link.segments())}
         car_time_zero = []
         for link in network.links():
             linktype = link.type % 100
+            this_link_modes = {segment.line.mode for segment in link.segments()}
+            is_transit_line_link = this_link_modes & long_dist_terminal_modes
+            connects_long_distance = (
+                link.i_node.id in long_distance_nodes
+                or link.j_node.id in long_distance_nodes)
+            is_park_and_ride_connector = connects_long_distance and not is_transit_line_link
             if link.type > 80 and linktype in param.roadclasses:
                 # Car link with standard attributes
                 roadclass = param.roadclasses[linktype]
@@ -394,6 +405,9 @@ class AssignmentPeriod(Period):
             else:
                 # Link with no car traffic
                 link.volume_delay_func = 0
+            if is_park_and_ride_connector:
+                # Park-and-ride connectors
+                link.volume_delay_func = 97
             if link["#buslane"]:
                 if (link.num_lanes == 3
                         and roadclass.num_lanes == ">=3"):
@@ -412,7 +426,7 @@ class AssignmentPeriod(Period):
                         msg = f"Car travel time on link {link.id} is {car_time}"
                         log.error(msg)
                         raise ValueError(msg)
-            if car_modes & link.modes:
+            if (car_modes & link.modes or connects_long_distance) and not is_transit_line_link:
                 link.modes |= {main_mode, park_and_ride_mode}
             else:
                 link.modes -= {main_mode, park_and_ride_mode}

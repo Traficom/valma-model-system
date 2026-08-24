@@ -98,6 +98,7 @@ volume_delay_funcs = {
     "fd11": "length*(60/ul2)+el1",
     "fd90": "length*(60/ul2)",
     "fd91": "length*(60/ul2)",
+    "fd97": "length*(60/5)",
     "fd99": "length*(60/ul2)",
     # Bike functions
     "fd70": "length*(60/19)",
@@ -455,6 +456,9 @@ long_dist_transit_modes = {
     "pt_car_egr": ['j'],
     "pt_taxi_egr": ['e', 'j'],
     "airpl_car_egr": ['l'],
+}
+long_dist_terminal_modes = {
+    'l', 'j', 'd'
 }
 aux_modes = [
     'a'

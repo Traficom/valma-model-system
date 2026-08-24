@@ -261,8 +261,9 @@ class MixedMode(TransitMode):
         })
         if "taxi" not in self.name:
             for mode_cost in aux_transit_times:
-                mode_cost["cost"] = param.park_cost_attr_l
-                mode_cost["cost_perception_factor"] = self.vot_inv
+                if mode_cost["mode"] == param.park_and_ride_mode:
+                    mode_cost["cost"] = param.park_cost_attr_l
+                    mode_cost["cost_perception_factor"] = self.vot_inv
         self.park_ride_results = f"#park_and_ride_vol_{self.name}"
         self.emme_project.create_network_field(
             "LINK", "REAL", self.park_ride_results, self.name,
