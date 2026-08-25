@@ -601,5 +601,8 @@ mode_assignment_classes = {
     "airpl_car_acc": ["airpl_car_acc", "airpl_car_egr"],
     "pt_car_egr": ["pt_car_egr", "pt_car_acc"],
     "pt_taxi_egr": ["pt_taxi_egr", "pt_taxi_acc"],
-    "airpl_car_egr": ["airpl_car_egr", "airpl_car_acc"]
+    "airpl_car_egr": ["airpl_car_egr", "airpl_car_acc"],
+    "truck": ["truck"],
+    "semi_trailer": ["semi_trailer"],
+    "trailer_truck": ["trailer_truck"],
 }
