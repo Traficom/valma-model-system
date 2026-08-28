@@ -132,6 +132,7 @@ class FreightAssignmentPeriod(AssignmentPeriod):
     def _assign_freight(self):
         network = self.emme_scenario.get_network()
         cost_attr = param.line_penalty_attr.replace("us", "data")
+        extra_cost_attr = param.background_traffic_attr.replace("ul", "data")
         for line in network.transit_lines():
             mode = line.mode.id
             if mode in param.terminal_change_attrs:
@@ -150,6 +151,7 @@ class FreightAssignmentPeriod(AssignmentPeriod):
                     link.modes |= {park_and_ride_mode}
                 else:
                     link.modes -= {park_and_ride_mode}
+                link[extra_cost_attr] = link[param.extra_freight_cost_attr]
             self.emme_scenario.publish_network(network)
             spec = self.assignment_modes[ass_class]
             spec.init_matrices()

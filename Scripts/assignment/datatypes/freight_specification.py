@@ -144,7 +144,13 @@ class FreightMode(AssignmentMode):
         self.canal_cost_spec = {
             "type": "EXTENDED_TRANSIT_STRATEGY_ANALYSIS",
             "trip_components": {
-                "in_vehicle": param.extra_freight_cost_attr,
+                "in_vehicle": param.background_traffic_attr,
+            },
+            "sub_path_combination_operator": "+",
+            "sub_strategy_combination_operator": "average",
+            "selected_demand_and_transit_volumes": {
+                "sub_strategies_to_retain": "ALL",
+                "selection_threshold": {},
             },
             "results": {
                 "strategy_values": self.canal_cost.id,
