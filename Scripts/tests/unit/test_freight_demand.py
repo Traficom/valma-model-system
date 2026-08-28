@@ -39,29 +39,28 @@ class FreightModelTest(unittest.TestCase):
         resultdata = ResultsData(RESULTS_PATH)
         with open(COSTDATA_PATH) as file:
             costdata = json.load(file)
-        
-        time_impedance = omx.open_file(TEST_MATRICES / "freight_time.omx", "r")
-        dist_impedance = omx.open_file(TEST_MATRICES / "freight_dist.omx", "r")
-        cost_impedance = omx.open_file(TEST_MATRICES / "freight_cost.omx", "r")
-        impedance = {
-            "truck": {
-                "cost": numpy.array(cost_impedance["truck"]),
-                "dist": numpy.array(dist_impedance["truck"]),
-            },
-            "freight_train": {
-                "time": numpy.array(time_impedance["freight_train"]),
-                "dist": numpy.array(dist_impedance["freight_train"]),
-                "aux_cost": numpy.array(cost_impedance["freight_train_aux"]),
-                "aux_dist": numpy.array(dist_impedance["freight_train_aux"]),
-            },
-            "ship": {
-                "time": numpy.array(time_impedance["ship"]),
-                "dist": numpy.array(dist_impedance["ship"]),
-                "aux_cost": numpy.array(cost_impedance["ship_aux"]),
-                "aux_dist": numpy.array(dist_impedance["ship_aux"]),
-                "canal_cost": numpy.zeros([len(ZONE_NUMBERS), len(ZONE_NUMBERS)])
-            }
-        }
+        impedance = {"truck": {}, "freight_train": {}, "ship": {}}
+        with omx.open_file(TEST_MATRICES / "freight_time.omx", "r") as time_impedance:
+            impedance["freight_train"]["time_D"] = numpy.array(time_impedance["freight_train"])
+            impedance["ship"]["time_W"] = numpy.array(time_impedance["ship"])
+        with omx.open_file(TEST_MATRICES / "freight_dist.omx", "r") as dist_impedance:
+            impedance["truck"]["dist"] = numpy.array(dist_impedance["truck"])
+            impedance["freight_train"]["dist_D"] = numpy.array(dist_impedance["freight_train"])
+            impedance["ship"]["dist_W"] = numpy.array(dist_impedance["ship"])
+            impedance["freight_train"]["aux_dist"] = numpy.array(dist_impedance["freight_train_aux"])
+            impedance["ship"]["aux_dist"] = numpy.array(dist_impedance["ship_aux"])
+        with omx.open_file(TEST_MATRICES / "freight_cost.omx", "r") as cost_impedance:
+            impedance["truck"]["cost"] = numpy.array(cost_impedance["truck"])
+            impedance["freight_train"]["aux_cost"] = numpy.array(cost_impedance["freight_train_aux"])
+            impedance["ship"]["aux_cost"] = numpy.array(cost_impedance["ship_aux"])
+        zero_mtx = numpy.zeros_like(impedance["truck"]["cost"])
+        impedance["ship"]["canal_cost"] = zero_mtx.copy()
+        impedance["freight_train"]["time_J"] = zero_mtx.copy()
+        impedance["freight_train"]["dist_J"] = zero_mtx.copy()
+        one_mtx = numpy.ones_like(impedance["truck"]["cost"])
+        impedance["freight_train"]["num_terminals_D"] = one_mtx.copy()
+        impedance["freight_train"]["num_terminals_J"] = zero_mtx.copy()
+        impedance["ship"]["num_terminals_W"] = one_mtx.copy()
         impedance["semi_trailer"] = deepcopy(impedance["truck"])
         impedance["trailer_truck"] = deepcopy(impedance["truck"])
         impedance = update_diagonal_cost(impedance)
@@ -107,6 +106,13 @@ class FreightModelTest(unittest.TestCase):
                         demand_trade[foreign_purpose]["truck"], mode)
                 total_demand[mode] += vehicles["domestic"][mode] + vehicles["foreign"][mode]
             self._assert_calc_vehicle_results(vehicles, commodity.name)
+            for mode in impedance:
+                dist = 0
+                for imp_type in impedance[mode]:
+                    if "dist" in imp_type:
+                        dist += impedance[mode][imp_type]
+                if dist is not 0:
+                    impedance[mode]["dist"] = dist
             commodity.write_summary(demand, aux_demand, impedance)
             commodity.write_zone_summary(demand)
             write_domestic_leg_summary(demand_trade, impedance, resultdata)
@@ -123,10 +129,10 @@ class FreightModelTest(unittest.TestCase):
                 direct_total = per_route[-1]
                 if commodity.name == "kemlaa":
                     self.assertAlmostEqual(detour_total, 18.290195, places=3)
-                    self.assertAlmostEqual(direct_total, 12170.293, places=3)
+                    self.assertAlmostEqual(direct_total, 12170.287, places=3)
                 elif commodity.name == "kummuo":
                     self.assertAlmostEqual(detour_total, 24.376, places=3)
-                    self.assertAlmostEqual(direct_total, 14812.304, places=3)
+                    self.assertAlmostEqual(direct_total, 14812.302, places=3)
 
         write_vehicle_summary(total_demand, impedance, resultdata)
         resultdata.flush()
