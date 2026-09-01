@@ -355,10 +355,11 @@ class AssignmentPeriod(Period):
         }
         long_dist_terminal_modes = {network.mode(mode_id) for mode_id in param.long_dist_terminal_modes}
         park_and_ride_mode = network.mode(param.park_and_ride_mode)
-        long_distance_nodes = {node.id for node in network.nodes()
-                                if any(segment.line.mode in long_dist_terminal_modes
-                                       for link in node.incoming_links()
-                                       for segment in link.segments())}
+        long_distance_nodes = set()
+        for segment in network.transit_segments():
+            if segment.line.mode in long_dist_terminal_modes and segment.allow_boardings:
+                long_distance_nodes.add(segment.i_node.id)
+                long_distance_nodes.add(segment.j_node.id)
         car_time_zero = []
         for link in network.links():
             linktype = link.type % 100
