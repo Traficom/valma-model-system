@@ -427,7 +427,11 @@ class AssignmentPeriod(Period):
                         msg = f"Car travel time on link {link.id} is {car_time}"
                         log.error(msg)
                         raise ValueError(msg)
-            if (car_modes & link.modes or connects_long_distance) and not is_transit_line_link:
+            if car_modes & link.modes:
+                link.modes |= {main_mode}
+                if not is_transit_line_link:
+                    link.modes |= {park_and_ride_mode}
+            elif connects_long_distance and not is_transit_line_link:
                 link.modes |= {main_mode, park_and_ride_mode}
             else:
                 link.modes -= {main_mode, park_and_ride_mode}
