@@ -131,20 +131,22 @@ class FreightAssignmentPeriod(AssignmentPeriod):
 
     def _assign_freight(self):
         network = self.emme_scenario.get_network()
+        truck_mode = network.mode(param.assignment_modes["truck"])
+        park_and_ride_mode = network.mode(param.park_and_ride_mode)
         cost_attr = param.line_penalty_attr.replace("us", "data")
         extra_cost_attr = param.background_traffic_attr.replace("ul", "data")
+        time_perception_attr = param.freight_time_perception_attr
         for line in network.transit_lines():
             mode = line.mode.id
             if mode in param.terminal_change_attrs:
-                line[param.freight_time_perception_attr] = (self._time_unit_cost[mode]
-                                                            / 60)
+                line[time_perception_attr] = self._time_unit_cost[mode] / 60
                 for segment in line.segments():
                     link = segment.link
                     segment[cost_attr] = (self._dist_unit_cost[mode]*link.length
                                           + link[param.extra_freight_cost_attr])
         for i, ass_class in enumerate(param.freight_modes):
-            truck_mode = network.mode(param.assignment_modes["truck"])
-            park_and_ride_mode = network.mode(param.park_and_ride_mode)
+            if i > 0:
+                network = self.emme_scenario.get_network()
             terminal_mode = network.mode(param.terminal_modes[ass_class])
             for link in network.links():
                 if truck_mode in link.modes or terminal_mode in link.modes:
