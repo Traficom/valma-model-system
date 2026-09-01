@@ -5,7 +5,7 @@ from parameters.cost import value_of_time
 
 (
     NOT_BOARDED,
-    PARKED,
+    ENTERED_CAR,
     BOARDED_LOCAL,
     BOARDED_LONG_D,
     BOARDED_DEST,
@@ -14,7 +14,7 @@ from parameters.cost import value_of_time
 ) = range(7)
 DESCRIPTION = [
     "Not boarded yet",
-    "Parked",
+    "Entered car",
     "Boarded local service",
     "Boarded long-distance service",
     "Boarded local service at destination",
@@ -22,13 +22,13 @@ DESCRIPTION = [
     "Forbidden",
 ]
 DESTINATIONS_REACHABLE = {
-    NOT_BOARDED: False,
-    PARKED: False,
-    BOARDED_LOCAL: True,
-    BOARDED_LONG_D: True,
-    BOARDED_DEST: True,
-    LEFT: True,
-    FORBIDDEN: False,
+    NOT_BOARDED: False, # 0
+    ENTERED_CAR: False, # 1
+    BOARDED_LOCAL: True, # 2
+    BOARDED_LONG_D: True, # 3
+    BOARDED_DEST: True, # 4
+    LEFT: True, # 5
+    FORBIDDEN: False, # 6
 }
 
 
@@ -83,19 +83,19 @@ class JourneyLevel:
             } for mode in param.long_dist_transit_modes[transit_class]]
         if park_and_ride:
             if transit_class in param.car_access_classes:
-                car = FORBIDDEN if level >= PARKED else PARKED
+                car = FORBIDDEN if level > ENTERED_CAR else ENTERED_CAR
                 # If we want parking to be allowed only on specific links
                 # (i.e., park-and-ride facilities), we should specify an
                 # own mode for these links. For now, parking is allowed
                 # on all links where walking to a stop is possible.
-                walk = FORBIDDEN if level == PARKED else level
+                walk = FORBIDDEN if level == ENTERED_CAR else level
             elif transit_class in param.car_egress_classes:
                 # Transfer to park-and-ride (car) mode only allowed after first
                 # boarding. If we want parking to be allowed only on specific
                 # links, we should specify an own mode for these links.
                 # For now, parking is allowed on all links where walking
                 # from a stop is possible.
-                car = LEFT if BOARDED_LOCAL <= level < FORBIDDEN else FORBIDDEN # A bug fix to fix assymmetry between access and egress? With this fix both now allow BOARDED_LOCAL where as before only access allowed that.
+                car = LEFT if level == BOARDED_LONG_D else FORBIDDEN
                 walk = FORBIDDEN if level == LEFT else level
             transitions.append({
                 "mode": param.park_and_ride_mode,
