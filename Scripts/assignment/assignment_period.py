@@ -358,8 +358,10 @@ class AssignmentPeriod(Period):
         long_distance_nodes = set()
         for segment in network.transit_segments():
             if segment.line.mode in long_dist_terminal_modes and segment.allow_boardings:
-                long_distance_nodes.add(segment.i_node.id)
-                long_distance_nodes.add(segment.j_node.id)
+                if segment.i_node is not None:
+                    long_distance_nodes.add(segment.i_node.id)
+                if segment.j_node is not None:
+                    long_distance_nodes.add(segment.j_node.id)
         car_time_zero = []
         for link in network.links():
             linktype = link.type % 100
