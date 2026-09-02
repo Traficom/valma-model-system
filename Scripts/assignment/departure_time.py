@@ -134,11 +134,11 @@ class DepartureTimeModel:
         vol_fac = volume_factors[ass_class][time_period]
         try:
             large_mtx[r_0:r_n, c_0:c_n] += vol_fac * demand_share[0] * mtx
-            large_mtx[c_0:c_n, r_0:r_n] += vol_fac * demand_share[1] * mtx.T
+            large_mtx[c_0:c_n, r_0:r_n] += (vol_fac * demand_share[1] * mtx).T
         except ValueError:
             share = param.backup_demand_share[time_period]
             large_mtx[r_0:r_n, c_0:c_n] += vol_fac * share[0] * mtx
-            large_mtx[c_0:c_n, r_0:r_n] += vol_fac * share[1] * mtx.T
+            large_mtx[c_0:c_n, r_0:r_n] += (vol_fac * share[1] * mtx).T
             log.warn("{} {} matrix not matching {} demand shares. Resorted to backup demand shares.".format(
                 mtx.shape, ass_class, len(demand_share[0])))
         self.demand[time_period][ass_class] = large_mtx
