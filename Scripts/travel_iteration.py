@@ -157,7 +157,7 @@ class ModelSystem:
             for mode in purpose.modes}  # Dict instead of set, to preserve order
         self.ass_classes = set()
         for mode in self.travel_modes.keys():
-            self.ass_classes.add(param.mode_impedance[mode])
+            self.ass_classes.update(param.mode_impedance[mode])
         self.external_purpose = ExternalPurpose(numpy.array(self.zone_numbers))
         self.mode_share: List[Dict[str,Any]] = []
         self.convergence = []

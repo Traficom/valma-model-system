@@ -31,7 +31,7 @@ class DepartureTimeTest(unittest.TestCase):
         dem.purpose.name = "wb_other"
         dem.purpose.sec_dest_rates = {}
         dem.purpose.demand_share = {
-            "car_drv": {
+            "icev": {
                 "aht":[
                     [0.0113538534294527, 0.0483356330299955],
                     [0.000783876140666748, 0.0782437896466509]
@@ -64,7 +64,7 @@ class DepartureTimeTest(unittest.TestCase):
                 ],
             },
         }
-        dem.mode = "car_drv"
+        dem.mode = "icev"
         dem.matrix = mtx
         dem.orig = 1
         dem.dest = None

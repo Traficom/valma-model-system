@@ -31,23 +31,13 @@ class LogitModelTest(unittest.TestCase):
             ZONEDATA_PATH, zi, "uusimaa", car_dist_cost=0.12,
             electric_car_share={"default": {"bev": 0.1, "phev": 0.2}})
         for attr in ("sh_cars1_hh1", "sh_cars1_hh2", "sh_cars1_hh3",
-                             "sh_cars2_hh2", "sh_cars2_hh3"):
-                    zd[attr] = pandas.Series(0.2, index=zd.zone_numbers)
+                     "sh_cars2_hh2", "sh_cars2_hh3"):
+            zd[attr] = pandas.Series(0.2, index=zd.zone_numbers)
         mtx = numpy.arange(24*24, dtype=numpy.float32)
         mtx.shape = (24, 24)
         mtx[numpy.diag_indices(24)] = 0
         impedance = {
             "car_drv": {
-                "time": mtx,
-                "cost": mtx,
-                "dist": mtx,
-            },
-            "bev": {
-                "time": mtx,
-                "cost": mtx,
-                "dist": mtx,
-            },
-            "phev": {
                 "time": mtx,
                 "cost": mtx,
                 "dist": mtx,
@@ -72,9 +62,6 @@ class LogitModelTest(unittest.TestCase):
         pur.bounds = slice(0, 24)
         pur.orig_zone_numbers = INTERNAL_ZONES
         pur.dist = mtx
-        pur.car_modes = {
-            "car_drv": ["bev", "phev"],
-        }
         parameters_path = Path(__file__).parents[2] / "parameters" / "demand"
         for file in parameters_path.rglob("*.json"):
             parameters = json.loads(file.read_text("utf-8"))
@@ -87,10 +74,10 @@ class LogitModelTest(unittest.TestCase):
                     else ModeDestModel(*args))
                 prob = model.calc_prob(impedance)
                 if parameters["dest"] in ("work"):
-                    for mode in ("car_drv", "transit"):
+                    for mode in ("car_drv", "transit", "bike", "walk"):
                         self._validate(prob[mode])
                 else:
-                    for mode in ("car_drv", "transit"):
+                    for mode in ("car_drv", "transit", "bike", "walk"):
                         self._validate(prob[mode])
 
     def _validate(self, prob):

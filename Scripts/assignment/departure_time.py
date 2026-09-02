@@ -10,7 +10,8 @@ from parameters.assignment import (
     transport_classes, 
     volume_factors, 
     mode_assignment_classes,
-    car_classes
+    car_classes,
+    mixed_mode_classes
 )
 
 
@@ -101,9 +102,10 @@ class DepartureTimeModel:
             pass
         position: Sequence[int] = demand.position
         ass_classes = mode_assignment_classes[demand.mode]
-        for is_return, ass_class in enumerate(ass_classes):
+        for i, ass_class in enumerate(ass_classes):
             if len(position) == 2:
                 share: Dict[str, Any] = demand.purpose.demand_share[demand.mode]
+                is_return = i and ass_class in mixed_mode_classes
                 for ap in self.assignment_periods:
                     if ass_class in ap.assignment_modes:
                         mtx = demand.matrix.T if is_return else demand.matrix

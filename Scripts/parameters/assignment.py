@@ -387,13 +387,11 @@ time_periods = {
     "iht": "AssignmentPeriod",
     "it": "TransitAssignmentPeriod",
 }
-ec_modes = ("bev", "phev")
-cp_mode = "car_pax"
-ecp_modes = ("bev_pax", "phev_pax")
-pax_modes = (cp_mode,) + ecp_modes
 car_classes = (
     "icev",
-) + ec_modes
+    "bev",
+    "phev",
+)
 car_and_van_classes = car_classes + ("van",)
 private_classes = car_and_van_classes + ("bike",)
 car_access_classes = (
@@ -440,23 +438,6 @@ assignment_modes = {
     "semi_trailer": 'y',
     "truck": 'k',
     "van": 'v',
-}
-vot_classes = {
-    "icev": "work",
-    "bev": "work",
-    "phev": "work",
-    "trailer_truck": "trailer_truck",
-    "semi_trailer": "semi_trailer",
-    "truck": "truck",
-    "van": "business",
-    "transit": "all",
-    "airplane": "all",
-    "pt_car_acc": "all",
-    "pt_taxi_acc": "all",
-    "airpl_car_acc": "all",
-    "pt_car_egr": "all",
-    "pt_taxi_egr": "all",
-    "airpl_car_egr": "all",
 }
 local_transit_modes = [
     'b',
@@ -591,37 +572,26 @@ roadtypes = {
 }
 # modes in choice model : impedance
 mode_impedance = {
-    "car_drv": "icev",
-    "car_pax": "icev",
-    "bev_drv": "bev",
-    "bev_pax": "bev",
-    "phev_drv": "phev",
-    "phev_pax": "phev",
-    "transit": "transit",
-    "airplane": "airplane",
-    "bike": "bike",
-    "walk": "walk",
-    "pt_car_acc": "pt_car_acc",
-    "pt_taxi_acc": "pt_taxi_acc",
-    "airpl_car_acc": "airpl_car_acc",
-    "pt_car_egr": "pt_car_egr",
-    "pt_taxi_egr": "pt_taxi_egr",
-    "airpl_car_egr": "airpl_car_egr"
+    "car_drv": ["icev", "bev", "phev"],
+    "car_pax": ["icev", "bev", "phev"],
+    "transit": ["transit"],
+    "airplane": ["airplane"],
+    "bike": ["bike"],
+    "walk": ["walk"],
+    "pt_car_acc": ["pt_car_acc"],
+    "pt_taxi_acc": ["pt_taxi_acc"],
+    "airpl_car_acc": ["airpl_car_acc"],
+    "pt_car_egr": ["pt_car_egr"],
+    "pt_taxi_egr": ["pt_taxi_egr"],
+    "airpl_car_egr": ["airpl_car_egr"]
 
 }
 # Modes in choice model : [assignment classes]
 # If the mode has two assignment classes, demand
 # will be transposed for the second one.
 mode_assignment_classes = {
-    "car_drv": ["icev"],
+    "car_drv": ["icev", "bev", "phev"],
     "car_pax": [],
-    "bev_drv": ["bev"],
-    "bev_pax": [],
-    "phev_drv": ["phev"],
-    "phev_pax": [],
-    "icev": ["icev"],
-    "bev": ["bev"],
-    "phev": ["phev"],
     "transit": ["transit"],
     "airplane": ["airplane"],
     "bike": ["bike"],
