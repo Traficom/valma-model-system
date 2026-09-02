@@ -153,6 +153,10 @@ class TravelPurpose(Purpose):
         self.generated_distance: Dict[str, numpy.array] = {}
         self.attracted_tours: Dict[str, numpy.array] = {}
         self.attracted_distance: Dict[str, numpy.array] = {}
+        try:
+            self.sources = specification["source"]
+        except KeyError:
+            pass
 
     def transform_impedance(self, impedance):
         """Perform transformation from time period dependent matrices
@@ -234,7 +238,7 @@ class TravelPurpose(Purpose):
                 day_imp["car_drv"]["cost"] *= (1 - self.cost_share
                                                * (self.occupancy["car_drv"]-1)
                                                / self.occupancy["car_drv"])
-            if "car_drv" in day_imp:
+            if "car_pax" in day_imp:
                 day_imp["car_pax"]["cost"] *= (self.cost_share
                                             / self.occupancy["car_pax"])
         for mode in day_imp:
@@ -273,12 +277,7 @@ class TravelPurpose(Purpose):
             purpose_cls = ForeignExternalPurpose
         else:
             purpose_cls = TourPurpose
-        purpose = object.__new__(purpose_cls)
-        try:
-            purpose.sources = specification["source"]
-        except KeyError:
-            pass
-        return purpose
+        return object.__new__(purpose_cls)
 
 
 class TourPurpose(TravelPurpose):
@@ -319,9 +318,9 @@ class TourPurpose(TravelPurpose):
                              if len(mode_impedance[mode]) > 1 else 1.0)
                 imp_sh[ass_cl] = {tp: [veh_share * share for share in tp_sh]
                                   for tp, tp_sh in imp_sh[mode].items()}
-        for mode in imp_sh:
+        for mode in self.impedance_share:
             if mode not in self.demand_share:
-                self.demand_share[mode] = imp_sh[mode]
+                self.demand_share[mode] = self.impedance_share[mode]
         self.modes = list(self.model.mode_choice_param)
         self.intermodals = {key: intermodals[key] for key in self.modes if key in intermodals}
         self.connection_models: Dict[str, logit.LogitModel] = {}

@@ -104,7 +104,7 @@ class DepartureTimeModel:
         ass_classes = mode_assignment_classes[demand.mode]
         for i, ass_class in enumerate(ass_classes):
             if len(position) == 2:
-                share: Dict[str, Any] = demand.purpose.demand_share[demand.mode]
+                share: Dict[str, Any] = demand.purpose.demand_share[ass_class]
                 is_return = i and ass_class in mixed_mode_classes
                 for ap in self.assignment_periods:
                     if ass_class in ap.assignment_modes:
@@ -151,9 +151,9 @@ class DepartureTimeModel:
         mtx: numpy.ndarray = demand.matrix
         tp: str = time_period
         (o, d1, d2) = demand.position
-        share = demand.purpose.demand_share[demand.mode][tp]
+        share = demand.purpose.demand_share[ass_class][tp]
         if demand.dest is not None:
-            share = demand.purpose.sec_dest_purpose.demand_share[demand.mode][tp]
+            share = demand.purpose.sec_dest_purpose.demand_share[ass_class][tp]
         colsum = mtx.sum(0)[:, numpy.newaxis]
         self._add_2d_demand(share[0], ass_class, tp, mtx, (d1, d2))
         self._add_2d_demand(share[1], ass_class, tp, colsum, (d2, o))
