@@ -5,16 +5,14 @@ from parameters.cost import value_of_time
 
 (
     NOT_BOARDED,
-    ENTERED_CAR,
     BOARDED_LOCAL,
     BOARDED_LONG_D,
     BOARDED_DEST,
     LEFT,
     FORBIDDEN,
-) = range(7)
+) = range(6)
 DESCRIPTION = [
     "Not boarded yet",
-    "Entered car",
     "Boarded local service",
     "Boarded long-distance service",
     "Boarded local service at destination",
@@ -23,12 +21,11 @@ DESCRIPTION = [
 ]
 DESTINATIONS_REACHABLE = {
     NOT_BOARDED: False, # 0
-    ENTERED_CAR: False, # 1
-    BOARDED_LOCAL: True, # 2
-    BOARDED_LONG_D: True, # 3
-    BOARDED_DEST: True, # 4
-    LEFT: True, # 5
-    FORBIDDEN: False, # 6
+    BOARDED_LOCAL: True, # 1
+    BOARDED_LONG_D: True, # 2
+    BOARDED_DEST: True, # 3
+    LEFT: True, # 4
+    FORBIDDEN: False, # 5
 }
 
 
@@ -44,10 +41,10 @@ class JourneyLevel:
     Parameters
     ----------
     level : int
-        Journey level: 0 - not boarded yet, 1 - parked,
-        2 - boarded local service, 3 - boarded long-distance service,
-        4 - boarded local service at destination,
-        5 - left transit system, 6 - forbidden (virtual level)
+        Journey level: 0 - not boarded yet,
+        1 - boarded local service, 2 - boarded long-distance service,
+        3 - boarded local service at destination,
+        4 - left transit system, 5 - forbidden (virtual level)
     transit_class : str
         Name of transit assignment class (transit/pt_car_acc/...)
     park_and_ride : bool
@@ -83,12 +80,12 @@ class JourneyLevel:
             } for mode in param.long_dist_transit_modes[transit_class]]
         if park_and_ride:
             if transit_class in param.car_access_classes:
-                car = FORBIDDEN if level > ENTERED_CAR else ENTERED_CAR
+                car = FORBIDDEN if level > NOT_BOARDED else NOT_BOARDED
                 # If we want parking to be allowed only on specific links
                 # (i.e., park-and-ride facilities), we should specify an
                 # own mode for these links. For now, parking is allowed
                 # on all links where walking to a stop is possible.
-                walk = FORBIDDEN if level == ENTERED_CAR else level
+                walk = FORBIDDEN if level == NOT_BOARDED else level
             elif transit_class in param.car_egress_classes:
                 # Transfer to park-and-ride (car) mode only allowed after first
                 # boarding. If we want parking to be allowed only on specific
