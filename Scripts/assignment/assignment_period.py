@@ -433,7 +433,7 @@ class AssignmentPeriod(Period):
                 link.modes |= {main_mode}
                 if not is_transit_line_link:
                     link.modes |= {park_and_ride_mode}
-            elif connects_long_distance and not is_transit_line_link:
+            elif is_park_and_ride_connector:
                 link.modes |= {main_mode, park_and_ride_mode}
             else:
                 link.modes -= {main_mode, park_and_ride_mode}
