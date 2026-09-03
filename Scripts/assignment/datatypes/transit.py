@@ -188,7 +188,7 @@ class TransitMode(AssignmentMode):
             class_name=self.name)
 
         # Save aux volumes to network field
-        volax_attr = f"#aux_transit_{self.name}_{self.time_period}"
+        volax_attr = f"#aux_transit_{self.name}_{self.time_period}" # Tähän selkeämpi nimi?
         self.emme_project.create_network_field(
             "LINK", "REAL", volax_attr, "aux transit volume",
             overwrite=True, scenario=self.emme_scenario)
@@ -204,14 +204,14 @@ class TransitMode(AssignmentMode):
                     (self.day_scenario, "vrk"),
                     (self.emme_scenario, self.time_period)):
                 # Create segment network fields
-                result_attr = f"#{self.name}_{temp_result_attr[1:]}_{tp}"
+                result_attr = f"#{self.name}_{temp_result_attr[1:]}_{tp}" # Tähän selkeämpi nimi?
                 self.segment_results[result][tp] = result_attr
                 self.emme_project.create_network_field(
                     "TRANSIT_SEGMENT", "REAL", result_attr, f"{self.name} {result}",
                     overwrite=True, scenario=scenario, network=network)
                 if result != "transit_volumes":
                     # Create node network fields
-                    node_result_attr = f"#node_{self.name}_{temp_result_attr[1:]}_{tp}"
+                    node_result_attr = f"#node_{self.name}_{temp_result_attr[1:]}_{tp}" # Tähän selkeämpi nimi?
                     self.node_results[result][tp] = node_result_attr
                     self.emme_project.create_network_field(
                         "NODE", "REAL", node_result_attr, f"{self.name} {result}",

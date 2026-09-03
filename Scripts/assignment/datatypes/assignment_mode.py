@@ -41,7 +41,7 @@ class AssignmentMode(ABC):
         self.emme_scenario = assignment_period.emme_scenario
         self.emme_project = assignment_period.emme_project
         self.time_period = assignment_period.name
-        self.volume_attr = assignment_period.netfield(name)
+        self.volume_attr = assignment_period.netfield(name) # Tähän selkeämpi nimi?
         self.emme_project.create_network_field(
             "LINK", "REAL", self.volume_attr, f"{self.name}_vol",
             overwrite=True, scenario=self.emme_scenario)

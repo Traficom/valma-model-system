@@ -63,11 +63,11 @@ class FreightAssignmentPeriod(AssignmentPeriod):
             spec = self.assignment_modes[ass_class].ntw_results_spec
             self.emme_project.network_results(
                 spec, self.emme_scenario, ass_class)
-            seg_attr = f"#{commodity_class}_{ass_class}"
+            seg_attr = f"#{commodity_class}_{ass_class}" # Tähän selkeämpi nimi?
             self.emme_project.create_network_field(
                     "TRANSIT_SEGMENT", "REAL", seg_attr, "commodity flow",
                     overwrite=True, scenario=self.emme_scenario)
-            link_attr = f"#aux_{commodity_class}_{ass_class}"
+            link_attr = f"#aux_{commodity_class}_{ass_class}" # Tähän selkeämpi nimi?
             self.emme_project.create_network_field(
                     "LINK", "REAL", link_attr, "aux commodity flow",
                     overwrite=True, scenario=self.emme_scenario)
@@ -80,7 +80,7 @@ class FreightAssignmentPeriod(AssignmentPeriod):
         for spec in self._car_spec.truck_specs():
             spec["stopping_criteria"] = self.stopping_criteria["coarse"]
             self.emme_project.car_assignment(spec, self.emme_scenario)
-        link_attr = f"#{commodity_class}_truck"
+        link_attr = f"#{commodity_class}_truck" # Tähän selkeämpi nimi?
         self.emme_project.create_network_field(
             "LINK", "REAL", link_attr, "truck commodity flow",
             overwrite=True, scenario=self.emme_scenario)
