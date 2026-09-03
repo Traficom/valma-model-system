@@ -590,5 +590,8 @@ mode_assignment_classes = {
     "airplane_car_acc": ["airplane_car_acc", "airplane_car_egr"],
     "transit_car_egr": ["transit_car_egr", "transit_car_acc"],
     "transit_taxi_egr": ["transit_taxi_egr", "transit_taxi_acc"],
-    "airplane_car_egr": ["airplane_car_egr", "airplane_car_acc"]
+    "airplane_car_egr": ["airplane_car_egr", "airplane_car_acc"],
+    "truck": ["truck"],
+    "semi_trailer": ["semi_trailer"],
+    "trailer_truck": ["trailer_truck"],
 }

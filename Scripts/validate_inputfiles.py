@@ -129,9 +129,6 @@ def main(args):
                 log.error(msg)
                 raise ValueError(msg)
             zone_numbers[args.submodel[i]] = scen.zone_numbers
-            for scenario in emmebank.scenarios():
-                if scenario.zone_numbers != scen.zone_numbers:
-                    log.warn("Scenarios with different zones found in EMME bank!")
             attrs = {
                 "NODE": (list(param.stop_codes.values())
                          + [param.submodel_attr]),

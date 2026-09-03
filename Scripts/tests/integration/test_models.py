@@ -57,7 +57,7 @@ class ModelTest(unittest.TestCase):
         # Check that model result does not change
         self.assertAlmostEquals(
             model.mode_share[0]["car_drv"],
-            0.3578027299876198)
+            0.3533924834490201)
         
         print("Model system test done")
 
@@ -77,7 +77,7 @@ class ModelTest(unittest.TestCase):
         # Check that model result does not change
         self.assertAlmostEquals(
             model.mode_share[0]["car_drv"],
-            0.0669301749314726)
+            0.06683445720170633)
 
     def _validate_impedances(self, impedances):
         self.assertIsNotNone(impedances)

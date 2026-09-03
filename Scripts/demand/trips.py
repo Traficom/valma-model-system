@@ -56,7 +56,7 @@ class DemandModel:
             for hh_size in car_ownership}
     
     def calculate_car_ownership(self):
-        log.info("Calculate car ownership...")
+        log.info("Calculating car ownership...")
         zd = self.zone_data
         prob = {hh_size: model.calc_prob()
             for hh_size, model in self.car_ownership_models.items()}
@@ -92,10 +92,10 @@ class DemandModel:
         # Add non-license households to zero-car share
         result[f"sh_cars0"] += 1 - sum(zd[f"sh_{hh_type}"] for hh_type in prob)
         self.resultdata.print_data(result, "zone_car_ownership.txt")
-        log.info("New car-ownership values calculated.")
+        log.info("New car-ownership values calculated")
 
     def calculate_individual_car_ownership(self):
-        log.info("Calculate individual car ownership...")
+        log.info("Calculating individual car ownership...")
         prob = {}
         result = {}
         for hh_size, model in self.car_ownership_models.items():
@@ -108,4 +108,4 @@ class DemandModel:
                 result[f"{key}*car{nr}"] = prob[key][nr]
         result_df = pandas.DataFrame(result, index=self.zone_data.zone_numbers)
         self.resultdata.print_data(result_df, "zone_car_ownership_by_segment.txt")
-        log.info("Segmented car-ownership values calculated.")
+        log.info("Segmented car-ownership values calculated")

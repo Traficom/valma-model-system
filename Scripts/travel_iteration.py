@@ -211,7 +211,7 @@ class ModelSystem:
                              long_dist_matrices: MatrixData,
                              long_dist_classes: Iterable[str]):
         class_list = ", ".join(long_dist_classes)
-        log.info(f"Get matrices for {class_list}...")
+        log.info(f"Getting external demand matrices for {class_list}...")
         zone_numbers = self.ass_model.zone_numbers
         matrices_to_add = {}
         with long_dist_matrices.open(
@@ -272,7 +272,6 @@ class ModelSystem:
                 mtx["all"] = ZoneData.beeline_dist
         for ap in self.ass_model.assignment_periods:
             tp = ap.name
-            log.info(f"Initializing assignment for period {tp}...")
             if (is_end_assignment
                     or (not self.ass_model.use_free_flow_speeds
                         and car_time_files is None
@@ -298,7 +297,6 @@ class ModelSystem:
         impedance = {}
         for ap in self.ass_model.assignment_periods:
             tp = ap.name
-            log.info(f"--- ASSIGNING PERIOD {tp.upper()} ---")
             ap.assign_trucks_init()
             impedance[tp] = (ap.end_assign(not is_car_end_assignment)
                              if is_end_assignment
@@ -393,7 +391,6 @@ class ModelSystem:
         # Calculate and return traffic impedance
         for ap in self.ass_model.assignment_periods:
             tp = ap.name
-            log.info(f"--- ASSIGNING PERIOD {tp.upper()} ---")
             impedance[tp] = (ap.end_assign() if iteration=="last"
                              else ap.assign(self.ass_classes))
             if iteration=="last":

@@ -551,7 +551,7 @@ class TourPurpose(TravelPurpose):
             df = dest_agg.aggregate_array(df, mapping).T
             self.aggregates[mapping][mode] = df
         self.within_zone_tours[mode] = pandas.Series(
-            numpy.diag(mtx), self.dest_zone_numbers,
+            numpy.diag(mtx).copy(), self.dest_zone_numbers,
             name="{}_{}".format(self.name, mode))
 
 
@@ -657,7 +657,7 @@ class SecDestPurpose(TravelPurpose):
             dest_imp[mtx_type] = (impedance[mtx_type][dests, :]
                                   + impedance[mtx_type][:, orig]
                                   - impedance[mtx_type][dests, orig][:, numpy.newaxis])
-        return self.model.calc_prob(mode, dest_imp, orig, dests)
+        return self.model.calc_prob(mode, dest_imp)
 
     def print_data(self):
         self.resultdata.print_data(

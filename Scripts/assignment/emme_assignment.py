@@ -240,7 +240,7 @@ class EmmeAssignmentModel(AssignmentModel):
 
     @property
     def beeline_dist(self):
-        log.info("Get beeline distances from network centroids")
+        log.info("Calculating beeline distances from network centroids...")
         network = self.mod_scenario.get_network()
         xy = 0.001 * numpy.array(
             [[node.x, node.y] for node in network.centroids()],
