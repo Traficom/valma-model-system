@@ -111,7 +111,7 @@ class FreightModelTest(unittest.TestCase):
                 for imp_type in impedance[mode]:
                     if "dist" in imp_type:
                         dist += impedance[mode][imp_type]
-                if dist is not 0:
+                if isinstance(dist, numpy.ndarray):
                     impedance[mode]["dist"] = dist
             commodity.write_summary(demand, aux_demand, impedance)
             commodity.write_zone_summary(demand)

@@ -92,7 +92,7 @@ def main(args):
             for imp_type in impedance[mode]:
                 if "dist" in imp_type:
                     dist += impedance[mode][imp_type]
-            if dist is not 0:
+            if isinstance(dist, numpy.ndarray):
                 impedance[mode]["dist"] = dist
         if "truck" in demand:
             # Calc aux tons and transform tons to vehicles
