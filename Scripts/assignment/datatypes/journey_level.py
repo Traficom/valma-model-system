@@ -4,12 +4,12 @@ from parameters.cost import value_of_time
 
 
 (
-    NOT_BOARDED,
-    BOARDED_LOCAL,
-    BOARDED_LONG_D,
-    BOARDED_DEST,
-    LEFT,
-    FORBIDDEN,
+    NOT_BOARDED, # 0
+    BOARDED_LOCAL, # 1
+    BOARDED_LONG_D, # 2
+    BOARDED_DEST, # 3
+    LEFT, # 4
+    FORBIDDEN, # 5
 ) = range(6)
 DESCRIPTION = [
     "Not boarded yet",
@@ -20,12 +20,12 @@ DESCRIPTION = [
     "Forbidden",
 ]
 DESTINATIONS_REACHABLE = {
-    NOT_BOARDED: False, # 0
-    BOARDED_LOCAL: True, # 1
-    BOARDED_LONG_D: True, # 2
-    BOARDED_DEST: True, # 3
-    LEFT: True, # 4
-    FORBIDDEN: False, # 5
+    NOT_BOARDED: False,
+    BOARDED_LOCAL: True,
+    BOARDED_LONG_D: True,
+    BOARDED_DEST: True,
+    LEFT: True,
+    FORBIDDEN: False,
 }
 
 
