@@ -455,7 +455,7 @@ class TourPurpose(TravelPurpose):
                 Mode (transit/airplane)
             value : dict
                 key : str
-                    Connection mode (pt_acc/airpl_car_acc/airpl_taxi_acc...)
+                    Connection mode (pt_acc/airplane_car_acc/airplane_taxi_acc...)
                 value : numpy.ndarray
                     Choice probabilities
         """
@@ -468,11 +468,11 @@ class TourPurpose(TravelPurpose):
                 mode_impedance = {mode: purpose_impedance.pop(mode)
                     for mode in [main_mode] + acc_modes}
                 if main_mode == "airplane":
-                    mode_impedance["airpl_taxi_acc"] = mode_impedance["airpl_car_acc"]
+                    mode_impedance["airplane_taxi_acc"] = mode_impedance["airplane_car_acc"]
                 model = self.connection_models[main_mode]
                 prob, logsum = model.calc_mode_prob(mode_impedance)
-                if "airpl_taxi_acc" in prob:
-                    prob["airpl_car_acc"] += prob.pop("airpl_taxi_acc")
+                if "airplane_taxi_acc" in prob:
+                    prob["airplane_car_acc"] += prob.pop("airplane_taxi_acc")
                 acc_splits[main_mode] = prob
                 purpose_impedance[main_mode] = {"logsum": logsum}
                 mtx[main_mode] = logsum

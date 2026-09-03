@@ -319,7 +319,7 @@ class AssignmentPeriod(Period):
                                                     * segment.link.length)
                     segment[penalty_attr] = segment[param.dist_fare_attr]
                 line[param.board_fare_attr] = fare["firstb_single"]
-                line[param.board_long_dist_attr] = (line[param.board_fare_attr]
+                line[param.long_dist_boarding_cost_attr] = (line[param.board_fare_attr]
                     if line.mode.id in long_dist_transit_modes else 0)
         self.emme_scenario.publish_network(network)
 
@@ -590,9 +590,8 @@ class AssignmentPeriod(Period):
                 board_pen = 0
                 bld_pen = 0
                 missing_penalties.add(line.mode.id)
-            for transit_class, transfer_pen in param.transfer_penalty.items():
-                line[board_pen_attr + transit_class] = board_pen + transfer_pen
-                line[bld_pen_attr + transit_class] = bld_pen + transfer_pen
+            line[board_pen_attr] = board_pen + param.transfer_penalty
+            line[bld_pen_attr] = bld_pen + param.transfer_penalty
         if missing_penalties:
             missing_penalties_str: str = ", ".join(missing_penalties)
             log.warn("No boarding penalty found for transit modes " + missing_penalties_str)

@@ -58,31 +58,31 @@
                 1.0
               ]
             },
-        "airpl_car_acc": {
+        "airplane_car_acc": {
             "vrk": [
                 2.0,
                 0.0
                 ]
             },
-        "airpl_car_egr": {
+        "airplane_car_egr": {
             "vrk": [
                 2.0,
                 0.0
                 ]
             },
-        "pt_car_acc": {
+        "transit_car_acc": {
             "vrk": [
                 2.0,
                 0.0
                 ]
             },
-        "pt_taxi_acc": {
+        "transit_taxi_acc": {
             "vrk": [
                 2.0,
                 0.0
                 ]
             },
-        "pt_taxi_egr": {
+        "transit_taxi_egr": {
             "vrk": [
                 2.0,
                 0.0
@@ -97,11 +97,11 @@
         "car_pax": 2.836
     },
     "tour_duration": {
-        "pt_car_acc": 9.0,
-        "pt_taxi_acc": 9.0,
-        "pt_taxi_egr": 9.0,
-        "airpl_car_acc": 9.0,
-        "airpl_car_egr": 9.0
+        "transit_car_acc": 9.0,
+        "transit_taxi_acc": 9.0,
+        "transit_taxi_egr": 9.0,
+        "airplane_car_acc": 9.0,
+        "airplane_car_egr": 9.0
     },
     "distance_boundaries": {
         "walk": [
@@ -120,15 +120,15 @@
             0,
             9999
         ],
-        "airpl_car_acc": [
+        "airplane_car_acc": [
             0,
             9999
         ],
-        "airpl_taxi_acc": [
+        "airplane_taxi_acc": [
             0,
             9999
         ],
-        "airpl_car_egr": [
+        "airplane_car_egr": [
             0,
             9999
         ],
@@ -136,15 +136,15 @@
             0,
             9999
         ],
-        "pt_car_acc": [
+        "transit_car_acc": [
             0,
             9999
         ],
-        "pt_taxi_acc": [
+        "transit_taxi_acc": [
             0,
             9999
         ],
-        "pt_taxi_egr": [
+        "transit_taxi_egr": [
             0,
             9999
         ]
@@ -288,7 +288,7 @@
                 },
                 "individual_dummy": {}
             },
-            "airpl_car_acc": {
+            "airplane_car_acc": {
                 "constant": -4.182,
                 "generation": {},
                 "attraction": {},
@@ -304,7 +304,7 @@
                     "sh_cars1_hh2": 3.168
                 }
             },
-            "airpl_taxi_acc": {
+            "airplane_taxi_acc": {
                 "constant": -3.296,
                 "generation": {},
                 "attraction": {},
@@ -319,7 +319,7 @@
                     "sh_cars2_hh2": 1.567
                 }
             },
-            "airpl_car_egr": {
+            "airplane_car_egr": {
                 "constant": -2.918,
                 "generation": {},
                 "attraction": {},
@@ -345,7 +345,7 @@
                 },
                 "individual_dummy": {}
             },
-            "pt_car_acc": {
+            "transit_car_acc": {
                 "constant": -4.182,
                 "generation": {},
                 "attraction": {},
@@ -361,7 +361,7 @@
                     "sh_cars1_hh2": 3.168
                 }
             },
-            "pt_taxi_acc": {
+            "transit_taxi_acc": {
                 "constant": -3.296,
                 "generation": {},
                 "attraction": {},
@@ -376,7 +376,7 @@
                     "sh_cars2_hh2": 1.567
                 }
             },
-            "pt_taxi_egr": {
+            "transit_taxi_egr": {
                 "constant": -2.918,
                 "generation": {},
                 "attraction": {},
@@ -421,37 +421,37 @@
                 1.0
               ]
         },
-        "airpl_car_acc": {
+        "airplane_car_acc": {
             "vrk": [
                 1.0,
                 0.0
               ]
         },
-        "pt_car_acc": {
+        "transit_car_acc": {
             "vrk": [
                 1.0,
                 0.0
               ]
         },
-        "pt_taxi_acc": {
+        "transit_taxi_acc": {
             "vrk": [
                 1.0,
                 0.0
               ]
         },
-        "airpl_car_egr": {
+        "airplane_car_egr": {
             "vrk": [
                 1.0,
                 0.0
                 ]
         },
-        "pt_car_egr": {
+        "transit_car_egr": {
             "vrk": [
                 1.0,
                 0.0
                 ]
         },
-        "pt_taxi_egr": {
+        "transit_taxi_egr": {
             "vrk": [
                 1.0,
                 0.0

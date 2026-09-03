@@ -49,7 +49,7 @@ class JourneyLevel:
         4 - boarded local service at destination,
         5 - left transit system, 6 - forbidden (virtual level)
     transit_class : str
-        Name of transit assignment class (transit/pt_car_acc/...)
+        Name of transit assignment class (transit/transit_car_acc/...)
     park_and_ride : bool
         Whether park-and-ride mode is allowed for this journey level.
         If True, car parking is allowed on all links where walking
@@ -117,7 +117,7 @@ class JourneyLevel:
                 "global": None,
                 "at_nodes": None,
                 "on_lines": {
-                    "penalty": param.boarding_penalty_attr + transit_class,
+                    "penalty": param.boarding_penalty_attr,
                     "perception_factor": 1
                 },
                 "on_segments": param.extra_waiting_time,
@@ -135,12 +135,12 @@ class JourneyLevel:
         }
         if level == BOARDED_LONG_D:
             # Higher transfer penalty from long-dist to long-dist
-            board_pen = param.long_dist_boarding_penalty_attr + transit_class
+            board_pen = param.long_dist_boarding_penalty_attr
             spec["boarding_time"]["on_lines"]["penalty"] = board_pen
         if level in (BOARDED_LOCAL, BOARDED_DEST):
             # Free transfers within local transit
             (spec["boarding_cost"]
-                 ["on_lines"]["penalty"]) =  param.board_long_dist_attr
+                 ["on_lines"]["penalty"]) =  param.long_dist_boarding_cost_attr
         if (transit_class in param.long_distance_transit_classes
                 and level == BOARDED_LOCAL):
             spec["destinations_reachable"] = False

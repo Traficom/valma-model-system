@@ -131,12 +131,12 @@ class EmmeAssignmentTest:
             "car",
             "transit",
             "airplane",
-            "pt_car_acc",
-            "pt_taxi_acc",
-            "airpl_car_acc",
-            "pt_car_egr",
-            "pt_taxi_egr",
-            "airpl_car_egr",
+            "transit_car_acc",
+            "transit_taxi_acc",
+            "airplane_car_acc",
+            "transit_car_egr",
+            "transit_taxi_egr",
+            "airplane_car_egr",
         ]
         demand = {ass_class: car_matrix for ass_class in ass_classes}
         for ap in self.long_dist_model.assignment_periods:
