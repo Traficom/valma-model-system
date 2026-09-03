@@ -7,7 +7,7 @@ import pandas
 from math import log10
 
 import utils.log as log
-from utils.print_links import geometries, Node, Link, Segment
+from utils.print_links import geometries, Node, Link, Line, Segment
 import utils.sum_24h as sum24
 import parameters.assignment as param
 from assignment.abstract_assignment import AssignmentModel
@@ -339,13 +339,20 @@ class EmmeAssignmentModel(AssignmentModel):
         for geom_type, objects in (
                 (Node, network.nodes()),
                 (Link, network.links()),
-                (Segment, network.transit_segments())):
+                (Segment, network.transit_segments()),
+                (Line, network.transit_lines())):
             attrs = [attr.name for attr in self.day_scenario.extra_attributes()
                 if attr.type == geom_type.name]
             attrs += [attr.name for attr in self.day_scenario.network_fields()
                 if attr.type == geom_type.name and attr.atype == "REAL"]
             attrs += geom_type.attrs
             attrs += [attr_name for attr_name in self.day_scenario.attributes(geom_type.name)]
+            if geom_type == Link:
+                attrs += ["i_node", "j_node", "modes"]
+            if geom_type == Segment:
+                attrs += ["line_id", "link_id"]
+            if geom_type == Line:
+                attrs += ["mode", "vehicle"]
             attrs = list(set(attrs))
             resultdata.print_gpkg(
                 *geometries(attrs, objects, geom_type), fname, geom_type.name)
