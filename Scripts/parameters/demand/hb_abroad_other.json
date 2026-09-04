@@ -28,24 +28,6 @@
         "transit": 1.0483
     },
     "impedance_share": {
-        "walk": {
-            "vrk": [
-                1.0,
-                1.0
-              ]
-            },
-        "car_drv": {
-            "vrk": [
-                1.0,
-                1.0
-              ]
-            },
-        "car_pax": {
-            "vrk": [
-                1.0,
-                1.0
-              ]
-            },
         "airplane": {
             "vrk": [
                 1.0,

@@ -259,7 +259,21 @@ aux_time_perception_factor_truck = 30
 # Factors for 24-h expansion of volumes
 # TODO: Trucks and vans
 volume_factors = {
-    "car": {
+    "icev": {
+        "aht": 0.439,
+        "pt": 0.098,
+        "iht": 0.378,
+        "it": 0.3,
+        "vrk": 1.0,
+    },
+    "bev": {
+        "aht": 0.439,
+        "pt": 0.098,
+        "iht": 0.378,
+        "it": 0.3,
+        "vrk": 1.0,
+    },
+    "phev": {
         "aht": 0.439,
         "pt": 0.098,
         "iht": 0.378,
@@ -374,7 +388,9 @@ time_periods = {
     "it": "TransitAssignmentPeriod",
 }
 car_classes = (
-    "car",
+    "icev",
+    "bev",
+    "phev",
 )
 car_and_van_classes = car_classes + ("van",)
 private_classes = car_and_van_classes + ("bike",)
@@ -415,26 +431,13 @@ intermodals = {
 main_mode = 'h'
 bike_mode = 'f'
 assignment_modes = {
-    "car": 'c',
+    "icev": 'c',
+    "bev": 'c',
+    "phev": 'c',
     "trailer_truck": 'y',
     "semi_trailer": 'y',
     "truck": 'k',
     "van": 'v',
-}
-vot_classes = {
-    "car": "all",
-    "trailer_truck": "trailer_truck",
-    "semi_trailer": "semi_trailer",
-    "truck": "truck",
-    "van": "business",
-    "transit": "all",
-    "airplane": "all",
-    "pt_car_acc": "all",
-    "pt_taxi_acc": "all",
-    "airpl_car_acc": "all",
-    "pt_car_egr": "all",
-    "pt_taxi_egr": "all",
-    "airpl_car_egr": "all",
 }
 local_transit_modes = [
     'b',
@@ -584,27 +587,26 @@ roadtypes = {
 }
 # modes in choice model : impedance
 mode_impedance = {
-    "car_drv": "car", 
-    "car_pax": "car",
-    "transit": "transit",
-    "airplane": "airplane",
-    "bike": "bike",
-    "walk": "walk",
-    "pt_car_acc": "pt_car_acc",
-    "pt_taxi_acc": "pt_taxi_acc",
-    "airpl_car_acc": "airpl_car_acc",
-    "pt_car_egr": "pt_car_egr",
-    "pt_taxi_egr": "pt_taxi_egr",
-    "airpl_car_egr": "airpl_car_egr"
+    "car_drv": ["icev", "bev", "phev"],
+    "car_pax": ["icev", "bev", "phev"],
+    "transit": ["transit"],
+    "airplane": ["airplane"],
+    "bike": ["bike"],
+    "walk": ["walk"],
+    "pt_car_acc": ["pt_car_acc"],
+    "pt_taxi_acc": ["pt_taxi_acc"],
+    "airpl_car_acc": ["airpl_car_acc"],
+    "pt_car_egr": ["pt_car_egr"],
+    "pt_taxi_egr": ["pt_taxi_egr"],
+    "airpl_car_egr": ["airpl_car_egr"]
 
 }
 # Modes in choice model : [assignment classes]
 # If the mode has two assignment classes, demand
 # will be transposed for the second one.
 mode_assignment_classes = {
-    "car_drv": ["car"], 
+    "car_drv": ["icev", "bev", "phev"],
     "car_pax": [],
-    "car": ["car"],
     "transit": ["transit"],
     "airplane": ["airplane"],
     "bike": ["bike"],
