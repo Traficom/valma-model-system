@@ -98,6 +98,7 @@ volume_delay_funcs = {
     "fd11": "length*(60/ul2)+el1",
     "fd90": "length*(60/ul2)",
     "fd91": "length*(60/ul2)",
+    "fd97": "length*(60/5)",
     "fd99": "length*(60/ul2)",
     # Bike functions
     "fd70": "length*(60/19)",
@@ -452,12 +453,15 @@ local_transit_modes = [
 long_dist_transit_modes = {
     "transit": ['e', 'j', 'd'],
     "airplane": ['l'],
-    "pt_car_acc": ['j'],
-    "pt_taxi_acc": ['e', 'j'],
+    "pt_car_acc": ['j', 'd'],
+    "pt_taxi_acc": ['e', 'j', 'd'],
     "airpl_car_acc": ['l'],
-    "pt_car_egr": ['j'],
-    "pt_taxi_egr": ['e', 'j'],
+    "pt_car_egr": ['j', 'd'],
+    "pt_taxi_egr": ['e', 'j', 'd'],
     "airpl_car_egr": ['l'],
+}
+long_dist_terminal_modes = {
+    'l', 'j', 'd'
 }
 aux_modes = [
     'a'
