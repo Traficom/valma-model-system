@@ -61,9 +61,11 @@ def attr_value(attr_name, obj):
     if attr_name == "line_id":
         return str(obj.line.id)
     if attr_name == "link_id":
-        return str(obj.link.id)
+        return str(obj.link.id if obj.link is not None else "No link")
     if attr_name in ["mode", "vehicle", "i_node", "j_node", "modes"]:
         return str(getattr(obj, attr_name).id)
+    if isinstance(obj[attr_name], np.generic):
+        return obj[attr_name].item()
     else:
         return obj[attr_name]
 
