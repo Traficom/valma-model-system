@@ -104,7 +104,8 @@ class ModelSystem:
                 zone_data_path, self.zone_numbers, submodel,
                 model_area=model_area, municipality_calibration=municip_calib,
                 extra_dummies=extra_dummies,
-                car_dist_cost=self.car_dist_cost["car"]
+                car_dist_cost=self.car_dist_cost["icev"],
+                electric_car_share=cost_data["car_shares"]
             ) for model_area in ["domestic"]}
 
         # Output data
@@ -156,7 +157,7 @@ class ModelSystem:
             for mode in purpose.modes}  # Dict instead of set, to preserve order
         self.ass_classes = set()
         for mode in self.travel_modes.keys():
-            self.ass_classes.add(param.mode_impedance[mode])
+            self.ass_classes.update(param.mode_impedance[mode])
         self.external_purpose = ExternalPurpose(numpy.array(self.zone_numbers))
         self.mode_share: List[Dict[str,Any]] = []
         self.convergence = []

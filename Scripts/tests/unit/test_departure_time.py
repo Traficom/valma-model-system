@@ -11,7 +11,7 @@ class DepartureTimeTest(unittest.TestCase):
             def __init__(self, name):
                 self.name = name
                 self.assignment_modes = [
-                    "car", "transit", "bike"]
+                    "icev", "transit", "bike"]
         assignment_periods = [
             Period(name) for name in ("aht", "pt", "iht")]
         it = Period("it")
@@ -31,7 +31,7 @@ class DepartureTimeTest(unittest.TestCase):
         dem.purpose.name = "wb_other"
         dem.purpose.sec_dest_rates = {}
         dem.purpose.demand_share = {
-            "car_drv": {
+            "icev": {
                 "aht":[
                     [0.0113538534294527, 0.0483356330299955],
                     [0.000783876140666748, 0.0782437896466509]
@@ -115,7 +115,7 @@ class DepartureTimeTest(unittest.TestCase):
         dtm.add_demand(dem)
 
         self.assertIsNotNone(dtm.demand)
-        self.assertIs(type(dtm.demand["iht"]["car"]), numpy.ndarray)
-        self.assertEquals(dtm.demand["pt"]["car"].ndim, 2)
+        self.assertIs(type(dtm.demand["iht"]["icev"]), numpy.ndarray)
+        self.assertEquals(dtm.demand["pt"]["icev"].ndim, 2)
         self.assertEquals(dtm.demand["aht"]["bike"].shape[1], 8)
-        self.assertNotEquals(dtm.demand["iht"]["car"][0, 1], 0)
+        self.assertNotEquals(dtm.demand["iht"]["icev"][0, 1], 0)
