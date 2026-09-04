@@ -462,6 +462,10 @@ class MockProject:
                         and scenario.extra_attribute(attr) is None):
                         raise AttributeError(f"Attribute {attr} does not exist")
 
+    def strategy_analysis(self, specification, scenario=None, class_name="",
+                          num_processors="max", last_n_iterations=None):
+        pass
+
     def traversal_analysis(self, specification: Dict, output_file: str,
                            gate_labels: Optional[str] = None,
                            append_to_output_file: bool = True,

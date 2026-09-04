@@ -108,6 +108,8 @@ class EmmeProject:
             "inro.emme.transit_assignment.extended.matrix_results")
         self.network_results = self.modeller.tool(
             "inro.emme.transit_assignment.extended.network_results")
+        self.strategy_analysis = self.modeller.tool(
+            "inro.emme.transit_assignment.extended.strategy_based_analysis")
         self.traversal_analysis = self.modeller.tool(
             "inro.emme.transit_assignment.extended.traversal_analysis")
         self.create_extra_attribute = self.modeller.tool(

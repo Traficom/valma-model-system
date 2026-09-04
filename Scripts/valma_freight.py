@@ -87,7 +87,13 @@ def main(args):
             store_demand.store(mode, demand[mode], omx_filename, commodity.name)
         if commodity.name in args.specify_commodity_names:
             ass_model.freight_network.save_network_volumes(commodity.name)
-        
+        for mode in impedance:
+            dist = 0
+            for imp_type in impedance[mode]:
+                if "dist" in imp_type:
+                    dist += impedance[mode][imp_type]
+            if isinstance(dist, numpy.ndarray):
+                impedance[mode]["dist"] = dist
         if "truck" in demand:
             # Calc aux tons and transform tons to vehicles
             ass_model.freight_network.output_traversal_matrix(set(demand), resultdata.path)

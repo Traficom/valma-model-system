@@ -24,16 +24,15 @@ def update_diagonal_cost(impedance: dict) -> dict:
     """
     for mode in impedance:
         if mode in truck_classes:
-            diag_values = {
-                imp_type: numpy.min(
-                    numpy.where(impedance[mode][imp_type] > 0, 
-                    impedance[mode][imp_type], numpy.inf), axis=1)
-                for imp_type in ("cost", "dist")
-            }
+            for imp_type in ("cost", "dist"):
+                mtx = impedance[mode][imp_type]
+                diag_values = numpy.min(
+                    numpy.where(mtx > 0, mtx, numpy.inf), axis=1)
+                numpy.fill_diagonal(mtx, diag_values)
         else:
-            diag_values = {mtx: numpy.inf for mtx in ("time", "aux_cost")}
-        for imp_type in diag_values:
-            numpy.fill_diagonal(impedance[mode][imp_type], diag_values[imp_type])
+            for imp_type in impedance[mode]:
+                if "time" in imp_type or "aux_cost" in imp_type:
+                    numpy.fill_diagonal(impedance[mode][imp_type], numpy.inf)
     return impedance
 
 
