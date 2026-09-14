@@ -52,7 +52,7 @@ class CarSpecification:
 
     def truck_specs(self) -> Generator[Dict[str, Any]]:
         """Yield truck assignment specifications."""
-        for mode in param.truck_classes:
+        for mode in tuple(param.truck_fleet):
             self._modes[mode].init_matrices()
             self._spec["classes"] = [self._modes[mode].spec]
             yield self._spec

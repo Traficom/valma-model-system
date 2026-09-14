@@ -1,7 +1,7 @@
 import numpy
 from pandas import DataFrame
 
-from parameters.assignment import truck_classes
+from parameters.assignment import truck_fleet
 from datahandling.resultdata import ResultsData
 from datahandling.matrixdata import MatrixData
 from assignment.freight_assignment import FreightAssignmentPeriod
@@ -23,7 +23,7 @@ def update_diagonal_cost(impedance: dict) -> dict:
             Type (cost/time/dist...) : numpy 2d matrix
     """
     for mode in impedance:
-        if mode in truck_classes:
+        if mode in truck_fleet:
             for imp_type in ("cost", "dist"):
                 mtx = impedance[mode][imp_type]
                 diag_values = numpy.min(

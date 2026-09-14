@@ -421,6 +421,16 @@ truck_classes = (
     "semi_trailer",
     "trailer_truck",
 )
+truck_fleet = {
+    "truck": "truck",
+    "truck_ev": "truck",
+    "truck_3n": "truck",
+    "truck_3n_ev": "truck",
+    "semi_trailer": "semi_trailer",
+    "semi_trailer_ev": "semi_trailer",
+    "trailer_truck": "trailer_truck",
+    "trailer_truck_ev": "trailer_truck"
+}
 simple_transport_classes = (private_classes
                             + simple_transit_classes
                             + truck_classes)
@@ -439,6 +449,11 @@ assignment_modes = {
     "semi_trailer": 'y',
     "truck": 'k',
     "van": 'v',
+    "truck_ev": "k",
+    "truck_3n": "k",
+    "truck_3n_ev": "k",
+    "semi_trailer_ev": "y",
+    "trailer_truck_ev": "y"
 }
 local_transit_modes = [
     'b',
