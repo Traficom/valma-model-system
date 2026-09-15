@@ -37,6 +37,7 @@ class VehicleMode(AssignmentMode):
         self.dist = self._create_matrix("dist")
         self.dist_unit_cost = dist_unit_cost
         self._include_toll_cost = include_toll_cost
+        self.temp_volume_attr = f"@{self.name}"
         perception_factor = self.vot_inv
         if include_toll_cost:
             self.toll_cost = self._create_matrix("toll_cost")
@@ -57,7 +58,7 @@ class VehicleMode(AssignmentMode):
                 "perception_factor": perception_factor,
             },
             "results": {
-                "link_volumes": f"@{self.name}_{self.time_period}",
+                "link_volumes": self.temp_volume_attr,
                 "od_travel_times": {
                     "shortest_paths": self.gen_cost.id
                 }
@@ -75,11 +76,22 @@ class VehicleMode(AssignmentMode):
         analysis = PathAnalysis(link_component, od_values)
         self.spec["path_analyses"].append(analysis.spec)
 
+
+class CarMode(VehicleMode):
+    def __init__(self, *args, **kwargs):
+        VehicleMode.__init__(self, *args, **kwargs)
+        self.free_flow_time = self._create_matrix("free_flow_time")
+        self.add_analysis(param.free_flow_time_attr, self.free_flow_time.id)
+        self.max_congestion = 0.0
+
     def get_matrices(self):
         cost = self.dist_unit_cost * self.dist.data
         if self._include_toll_cost:
             cost += self.toll_cost.data
-        time = self._get_time(cost)
+        free_flow_time = self.free_flow_time.data
+        congested_time = self.gen_cost.data - self.vot_inv*cost - free_flow_time
+        self.max_congestion: float = divide(congested_time, free_flow_time).max()
+        time = free_flow_time + param.congested_time_weight*congested_time
         m = {"cost": cost, "time": time, **self.dist.item}
         if self._include_toll_cost:
             m.update(self.toll_cost.item)
@@ -92,24 +104,6 @@ class VehicleMode(AssignmentMode):
             m[mtx_type][path_not_found] = 999999
         return m
 
-    def _get_time(self, cost):
-        return self.gen_cost.data - self.vot_inv*cost
-
-
-class CarMode(VehicleMode):
-    def __init__(self, *args, **kwargs):
-        VehicleMode.__init__(self, *args, **kwargs)
-        self.free_flow_time = self._create_matrix("free_flow_time")
-        self.add_analysis(param.free_flow_time_attr, self.free_flow_time.id)
-        self.max_congestion = 0.0
-
-    def _get_time(self, cost):
-        time = self.gen_cost.data - self.vot_inv*cost
-        free_flow_time = self.free_flow_time.data
-        congested_time = time - free_flow_time
-        self.max_congestion: float = divide(congested_time, free_flow_time).max()
-        return free_flow_time + param.congested_time_weight*congested_time
-
 
 class TruckMode(VehicleMode):
     def __init__(self, *args, **kwargs):
@@ -117,5 +111,18 @@ class TruckMode(VehicleMode):
         self.time = self._create_matrix("time")
         self.add_analysis(f"@truck_time_{self.time_period}", self.time.id)
 
-    def _get_time(self, *args):
-        return self.time.data
+    def get_matrices(self):
+        cost = self.dist_unit_cost*self.dist.data + self.time.data/self.vot_inv
+        if self._include_toll_cost:
+            cost += self.toll_cost.data
+        m = {"cost": cost, **self.time.item, **self.dist.item}
+        if self._include_toll_cost:
+            m.update(self.toll_cost.item)
+        self._soft_release_matrices()
+        # fix the emme path analysis results
+        # (dist and cost are zero if path not found but we want it to
+        # be the default value 999999)
+        path_not_found = cost > 999999
+        for mtx_type in ("time", "dist"):
+            m[mtx_type][path_not_found] = 999999
+        return m

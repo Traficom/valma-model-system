@@ -1,7 +1,9 @@
 # Parameters to transform LOS matrices
 
 value_of_time = {  # [eur/hour]
-    "car": 9.18,
+    "icev": 9.18,
+    "bev": 9.18,
+    "phev": 9.18,
     "transit": 7.3,
     "airplane": 11.4,
     "pt_car_acc": 7.7,
@@ -21,3 +23,5 @@ avg_tour_duration = {
     "pt_taxi_egr": 2.18,
     "airpl_car_egr": 2.39,
 }
+
+truck_overhead_cost = 1.15

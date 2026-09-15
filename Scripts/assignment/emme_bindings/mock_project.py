@@ -109,7 +109,8 @@ class MockProject:
                              network_field_name: str,
                              network_field_description: str,
                              overwrite: bool = False,
-                             scenario: Optional[Scenario] = None):
+                             scenario: Optional[Scenario] = None,
+                             network: Optional[Network] = None):
         if overwrite:
             try:
                 scenario.delete_network_field(
@@ -461,6 +462,10 @@ class MockProject:
                         and scenario.extra_attribute(attr) is None):
                         raise AttributeError(f"Attribute {attr} does not exist")
 
+    def strategy_analysis(self, specification, scenario=None, class_name="",
+                          num_processors="max", last_n_iterations=None):
+        pass
+
     def traversal_analysis(self, specification: Dict, output_file: str,
                            gate_labels: Optional[str] = None,
                            append_to_output_file: bool = True,
@@ -561,6 +566,11 @@ class Scenario:
     @property
     def zone_numbers(self):
         return sorted(self._network._centroids)
+
+    def attributes(self, obj_type: str):
+        names = set() # Add basic attributes here if necessary
+        names.add("id")
+        return list(names)
 
     def extra_attribute(self, idx: str):
         network = self.get_network()

@@ -56,7 +56,7 @@ class WholeDayPeriod(AssignmentPeriod):
             save_extra_matrices=save_matrices,
             transit_classes=param.simple_transit_classes,
             mixed_classes=param.mixed_mode_classes,
-            dist_unit_cost=dist_unit_cost["car"])
+            dist_unit_cost=dist_unit_cost["icev"])
 
     def init_assign(self):
         log.info("Pedestrian assignment started...")
@@ -130,6 +130,5 @@ class WholeDayPeriod(AssignmentPeriod):
                 self._assign_transit(
                     param.transit_classes, calc_network_results=True,
                     delete_strat_files=self._delete_strat_files)
-            self._calc_transit_link_results()
         return self._get_impedances(
             param.car_classes + param.transit_classes + ("walk",))
