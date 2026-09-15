@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Any, Dict, Generator
+from typing import Any, Dict, Generator, Iterable
 import parameters.assignment as param
 from assignment.datatypes.car import CarMode
 
@@ -50,9 +50,9 @@ class CarSpecification:
                 self._spec["classes"] = [self._modes[mode].spec]
                 yield self._spec
 
-    def truck_specs(self) -> Generator[Dict[str, Any]]:
+    def truck_specs(self, truck_classes: Iterable) -> Generator[Dict[str, Any]]:
         """Yield truck assignment specifications."""
-        for mode in tuple(param.truck_fleet):
+        for mode in truck_classes:
             self._modes[mode].init_matrices()
             self._spec["classes"] = [self._modes[mode].spec]
             yield self._spec

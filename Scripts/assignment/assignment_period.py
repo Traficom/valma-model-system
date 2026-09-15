@@ -667,7 +667,7 @@ class AssignmentPeriod(Period):
     def _assign_trucks(self, truck_classes: Iterable = param.truck_classes):
         stopping_criteria = copy.deepcopy(param.stopping_criteria["coarse"])
         stopping_criteria["max_iterations"] = 0
-        for truck_spec in self._car_spec.truck_specs():
+        for truck_spec in self._car_spec.truck_specs(truck_classes):
             truck_spec["stopping_criteria"] = stopping_criteria
             self.emme_project.car_assignment(
                 truck_spec, self.emme_scenario)

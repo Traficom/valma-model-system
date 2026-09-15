@@ -81,7 +81,7 @@ class FreightAssignmentPeriod(AssignmentPeriod):
             for link in network.links():
                 link[link_attr] = link[param.aux_commodity_flow_attr]
             self.emme_scenario.publish_network(network)
-        for spec in self._car_spec.truck_specs():
+        for spec in self._car_spec.truck_specs(param.truck_classes):
             spec["stopping_criteria"] = self.stopping_criteria["coarse"]
             self.emme_project.car_assignment(spec, self.emme_scenario)
         link_attr = f"#{commodity_class}_truck"
