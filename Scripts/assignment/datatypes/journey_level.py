@@ -49,7 +49,7 @@ class JourneyLevel:
         4 - boarded local service at destination,
         5 - left transit system, 6 - forbidden (virtual level)
     transit_class : str
-        Name of transit assignment class (transit/transit_car_acc/...)
+        Name of transit assignment class (transit/transit_car_access/...)
     park_and_ride : bool
         Whether park-and-ride mode is allowed for this journey level.
         If True, car parking is allowed on all links where walking

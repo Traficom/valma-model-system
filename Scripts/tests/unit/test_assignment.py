@@ -86,9 +86,9 @@ class EmmeAssignmentTest(unittest.TestCase):
             "car",
             "transit",
             "airplane",
-            "transit_car_acc",
-            "transit_taxi_acc",
-            "airplane_car_acc",
+            "transit_car_access",
+            "transit_taxi_access",
+            "airplane_car_access",
         ]
         for ap in ass_model.assignment_periods:
             for ass_class in demand:

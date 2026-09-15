@@ -320,22 +320,22 @@ volume_factors = {
         "it": 0.238,
         "vrk": 1.0,
     },
-    "airplane_car_acc": {
+    "airplane_car_access": {
         "vrk": 1.0,
     },
-    "transit_car_acc": {
+    "transit_car_access": {
         "vrk": 1.0,
     },
-    "transit_taxi_acc": {
+    "transit_car_access": {
         "vrk": 1.0,
     },
-    "airplane_car_egr": {
+    "airplane_car_egress": {
         "vrk": 1.0,
     },
-    "transit_car_egr": {
+    "transit_car_egress": {
         "vrk": 1.0,
     },
-    "transit_taxi_egr": {
+    "transit_car_egress": {
         "vrk": 1.0,
     },
 }
@@ -370,14 +370,14 @@ car_classes = (
 car_and_van_classes = car_classes + ("van",)
 private_classes = car_and_van_classes + ("bike",)
 car_access_classes = (
-    "transit_car_acc",
-    "transit_taxi_acc",
-    "airplane_car_acc",
+    "transit_car_access",
+    "transit_car_access",
+    "airplane_car_access",
 )
 car_egress_classes = (
-    "transit_car_egr",
-    "transit_taxi_egr",
-    "airplane_car_egr",
+    "transit_car_egress",
+    "transit_car_egress",
+    "airplane_car_egress",
 )
 mixed_mode_classes = car_access_classes + car_egress_classes
 long_dist_simple_classes = (
@@ -400,8 +400,8 @@ simple_transport_classes = (private_classes
                             + truck_classes)
 transport_classes = simple_transport_classes + mixed_mode_classes
 intermodals = {
-    "transit": ["transit_car_acc", "transit_taxi_acc", "transit_taxi_egr"],
-    "airplane": ["airplane_car_acc", "airplane_car_egr"],
+    "transit": ["transit_car_access", "transit_car_access", "transit_car_egress"],
+    "airplane": ["airplane_car_access", "airplane_car_egress"],
 }
 main_mode = 'h'
 bike_mode = 'f'
@@ -420,12 +420,12 @@ vot_classes = {
     "van": "business",
     "transit": "all",
     "airplane": "all",
-    "transit_car_acc": "all",
-    "transit_taxi_acc": "all",
-    "airplane_car_acc": "all",
-    "transit_car_egr": "all",
-    "transit_taxi_egr": "all",
-    "airplane_car_egr": "all",
+    "transit_car_access": "all",
+    "transit_car_access": "all",
+    "airplane_car_access": "all",
+    "transit_car_egress": "all",
+    "transit_car_egress": "all",
+    "airplane_car_egress": "all",
 }
 local_transit_modes = [
     'b',
@@ -440,12 +440,12 @@ local_transit_modes = [
 long_dist_transit_modes = {
     "transit": ['e', 'j', 'd'],
     "airplane": ['l'],
-    "transit_car_acc": ['j'],
-    "transit_taxi_acc": ['e', 'j'],
-    "airplane_car_acc": ['l'],
-    "transit_car_egr": ['j'],
-    "transit_taxi_egr": ['e', 'j'],
-    "airplane_car_egr": ['l'],
+    "transit_car_access": ['j'],
+    "transit_car_access": ['e', 'j'],
+    "airplane_car_access": ['l'],
+    "transit_car_egress": ['j'],
+    "transit_car_egress": ['e', 'j'],
+    "airplane_car_egress": ['l'],
 }
 aux_modes = [
     'a'
@@ -566,12 +566,12 @@ mode_impedance = {
     "airplane": "airplane",
     "bike": "bike",
     "walk": "walk",
-    "transit_car_acc": "transit_car_acc",
-    "transit_taxi_acc": "transit_taxi_acc",
-    "airplane_car_acc": "airplane_car_acc",
-    "transit_car_egr": "transit_car_egr",
-    "transit_taxi_egr": "transit_taxi_egr",
-    "airplane_car_egr": "airplane_car_egr"
+    "transit_car_access": "transit_car_access",
+    "transit_car_access": "transit_car_access",
+    "airplane_car_access": "airplane_car_access",
+    "transit_car_egress": "transit_car_egress",
+    "transit_car_egress": "transit_car_egress",
+    "airplane_car_egress": "airplane_car_egress"
 
 }
 # Modes in choice model : [assignment classes]
@@ -585,12 +585,12 @@ mode_assignment_classes = {
     "airplane": ["airplane"],
     "bike": ["bike"],
     "walk": ["walk"],
-    "transit_car_acc": ["transit_car_acc", "transit_car_egr"],
-    "transit_taxi_acc": ["transit_taxi_acc", "transit_taxi_egr"],
-    "airplane_car_acc": ["airplane_car_acc", "airplane_car_egr"],
-    "transit_car_egr": ["transit_car_egr", "transit_car_acc"],
-    "transit_taxi_egr": ["transit_taxi_egr", "transit_taxi_acc"],
-    "airplane_car_egr": ["airplane_car_egr", "airplane_car_acc"],
+    "transit_car_access": ["transit_car_access", "transit_car_egress"],
+    "transit_car_access": ["transit_car_access", "transit_car_egress"],
+    "airplane_car_access": ["airplane_car_access", "airplane_car_egress"],
+    "transit_car_egress": ["transit_car_egress", "transit_car_access"],
+    "transit_car_egress": ["transit_car_egress", "transit_car_access"],
+    "airplane_car_egress": ["airplane_car_egress", "airplane_car_access"],
     "truck": ["truck"],
     "semi_trailer": ["semi_trailer"],
     "trailer_truck": ["trailer_truck"],
