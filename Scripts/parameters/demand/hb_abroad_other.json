@@ -158,7 +158,7 @@
     "access_mode_choice": {
         "airplane": {
             "airplane": {
-                "constant": -0.2421,
+                "constant": -2.1852,
                 "generation": {},
                 "attraction": {},
                 "impedance": {
@@ -170,7 +170,7 @@
                 "individual_dummy": {}
             },
             "airpl_car_acc": {
-                "constant": -4.9269,
+                "constant": -0.7195,
                 "generation": {},
                 "attraction": {},
                 "impedance": {
@@ -215,7 +215,7 @@
         },
         "transit": {
             "transit": {
-                "constant": 0,
+                "constant": -2.2930,
                 "generation": {},
                 "attraction": {},
                 "impedance": {
@@ -227,7 +227,7 @@
                 "individual_dummy": {}
             },
             "pt_car_acc": {
-                "constant": -4.182,
+                "constant": 1.2763,
                 "generation": {},
                 "attraction": {},
                 "impedance": {
@@ -243,7 +243,7 @@
                 }
             },
             "pt_taxi_acc": {
-                "constant": -3.296,
+                "constant": -0.4609,
                 "generation": {},
                 "attraction": {},
                 "impedance": {
