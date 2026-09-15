@@ -153,6 +153,10 @@ class TravelPurpose(Purpose):
         self.generated_distance: Dict[str, numpy.array] = {}
         self.attracted_tours: Dict[str, numpy.array] = {}
         self.attracted_distance: Dict[str, numpy.array] = {}
+        try:
+            self.sources = specification["source"]
+        except KeyError:
+            pass
 
     def transform_impedance(self, impedance):
         """Perform transformation from time period dependent matrices
@@ -186,17 +190,21 @@ class TravelPurpose(Purpose):
         rows = self.bounds
         cols = self.dest_interval
         day_imp = defaultdict(lambda: defaultdict(float))
-        for mode in self.impedance_share:
+        for mode in self.modes:
             share_sum = 0
-            ass_class = mode_impedance[mode]
-            for time_period in self.impedance_share[mode]:
-                for mtx_type in impedance[time_period]:
-                    if ass_class in impedance[time_period][mtx_type]:
-                        imp = impedance[time_period][mtx_type][ass_class]
-                        share = self.impedance_share[mode][time_period]
-                        share_sum += sum(share)
-                        day_imp[mode][mtx_type] += share[0] * imp[rows, cols]
-                        day_imp[mode][mtx_type] += share[1] * imp[cols, rows].T
+            for ass_class in mode_impedance[mode]:
+                for time_period in self.impedance_share[mode]:
+                    for mtx_type in impedance[time_period]:
+                        if ass_class in impedance[time_period][mtx_type]:
+                            imp = impedance[time_period][mtx_type][ass_class]
+                            share = self.impedance_share[ass_class][time_period]
+                            share_sum += sum(share)
+                            day_imp[mode][mtx_type] += share[0] * imp[rows, cols]
+                            day_imp[mode][mtx_type] += share[1] * imp[cols, rows].T
+            try:
+                share_sum = share_sum.mean()
+            except AttributeError:
+                pass
             if mode in day_imp and abs(share_sum/len(day_imp[mode]) - 2) > 0.001:
                 raise ValueError(f"False impedance shares: {self.name} : {mode}")
         day_imp = {mode: dict(day_imp[mode]) for mode in day_imp}
@@ -230,11 +238,12 @@ class TravelPurpose(Purpose):
                 day_imp["car_drv"]["cost"] *= (1 - self.cost_share
                                                * (self.occupancy["car_drv"]-1)
                                                / self.occupancy["car_drv"])
-            day_imp["car_pax"]["cost"] *= (self.cost_share
-                                           / self.occupancy["car_pax"])
+            if "car_pax" in day_imp:
+                day_imp["car_pax"]["cost"] *= (self.cost_share
+                                            / self.occupancy["car_pax"])
         for mode in day_imp:
             if "vrk" in self.impedance_share[mode] and mode != "walk":
-                vot = cost.value_of_time[mode_impedance[mode]]
+                vot = cost.value_of_time[mode_impedance[mode][0]]
                 day_imp[mode]["gen_cost"] = (day_imp[mode].pop("cost")
                                              + vot*day_imp[mode].pop("time")/60)
                 log.info(f"Generalized cost calculated for {self.name} {mode}.")
@@ -249,8 +258,7 @@ class TravelPurpose(Purpose):
         ozd = self.generation_zone_data
         for mode in day_imp:
             for mtx_type in day_imp[mode]:
-                ass_class = mode_impedance[mode]
-                label = f"{mtx_type}_{ass_class}"
+                label = f"{mtx_type}_{mode.split('_')[0]}"
                 if label in ("time_car", "cost_car", "dist_walk", "dist_bike"):
                     # Get intra-zonal impendances from zone data
                     numpy.fill_diagonal(day_imp[mode][mtx_type], dzd[label])
@@ -261,21 +269,15 @@ class TravelPurpose(Purpose):
                                           * numpy.asarray(dzd["avg_park_cost"]))
 
     def __new__(cls, *args):
-        if cls is not TravelPurpose:
-            return super(TravelPurpose, cls).__new__(cls)
         specification = args[0]
         attempt_calibration(specification)
         if "sec_dest" in specification:
-            purpose = SecDestPurpose(*args)
+            purpose_cls = SecDestPurpose
         elif specification["name"] == "hb_abroad_other":
-            purpose = ForeignExternalPurpose(*args)
+            purpose_cls = ForeignExternalPurpose
         else:
-            purpose = TourPurpose(*args)
-        try:
-            purpose.sources = specification["source"]
-        except KeyError:
-            pass
-        return purpose
+            purpose_cls = TourPurpose
+        return object.__new__(purpose_cls)
 
 
 class TourPurpose(TravelPurpose):
@@ -307,6 +309,15 @@ class TourPurpose(TravelPurpose):
             self.model = logit.DestModeModel(*args)
         else:
             log.error(f"Unknown struct in {self.name} parameters.")
+        imp_sh = self.impedance_share
+        zd = self.generation_zone_data
+        for mode in list(imp_sh):
+            for ass_cl in mode_impedance[mode]:
+                # Split impedance and demand shares by vehicle type
+                veh_share = (numpy.asarray(zd[f"sh_{ass_cl}"])[:, numpy.newaxis]
+                             if len(mode_impedance[mode]) > 1 else 1.0)
+                imp_sh[ass_cl] = {tp: [veh_share * share for share in tp_sh]
+                                  for tp, tp_sh in imp_sh[mode].items()}
         for mode in self.impedance_share:
             if mode not in self.demand_share:
                 self.demand_share[mode] = self.impedance_share[mode]

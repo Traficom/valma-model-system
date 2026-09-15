@@ -19,7 +19,9 @@ class EmmeAssignmentTest(unittest.TestCase):
         self.scenario_id = 19
         self.context.import_scenario(scenario_dir, self.scenario_id, "test")
         self.dist_cost = {
-            "car": 0.12,
+            "icev": 0.12,
+            "bev": 0.04,
+            "phev": 0.06,
             "trailer_truck": 0.5,
             "semi_trailer": 0.4,
             "truck": 0.3,
@@ -37,6 +39,7 @@ class EmmeAssignmentTest(unittest.TestCase):
                  "dist_single": dist_single[i]}
              for i in range(0, len(firstb_single))})
         self.resultdata = ResultsData(RESULTS_PATH)
+        self.linkdata = ResultsData(RESULTS_PATH / "link_results")
 
     def test_assignment(self):
         validate(
@@ -50,7 +53,9 @@ class EmmeAssignmentTest(unittest.TestCase):
         nr_zones = ass_model.nr_zones
         car_matrix = numpy.arange(nr_zones**2).reshape(nr_zones, nr_zones)
         demand = [
-            "car",
+            "icev",
+            "bev",
+            "phev",
             "transit",
             "bike",
             "trailer_truck",
@@ -71,7 +76,7 @@ class EmmeAssignmentTest(unittest.TestCase):
                     self.assertEqual(
                         imp[mtx_type][ass_class].dtype, numpy.float32)
             ap.end_assign()
-        ass_model.aggregate_results(self.resultdata)
+        ass_model.aggregate_results(self.resultdata, self.linkdata)
         self.resultdata.flush()
 
     def test_long_dist_assignment(self):
@@ -83,7 +88,9 @@ class EmmeAssignmentTest(unittest.TestCase):
         nr_zones = ass_model.nr_zones
         car_matrix = numpy.arange(nr_zones**2).reshape(nr_zones, nr_zones)
         demand = [
-            "car",
+            "icev",
+            "bev",
+            "phev",
             "transit",
             "airplane",
             "pt_car_acc",
@@ -97,7 +104,7 @@ class EmmeAssignmentTest(unittest.TestCase):
             ap.assign_trucks_init()
             ap.assign(demand)
             ap.end_assign()
-        ass_model.aggregate_results(self.resultdata)
+        ass_model.aggregate_results(self.resultdata, self.linkdata)
 
     def test_freight_assignment(self):
         ass_model = EmmeAssignmentModel(

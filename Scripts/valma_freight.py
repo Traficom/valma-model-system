@@ -20,6 +20,7 @@ from utils.freight_utils import (
 )
 from datahandling.traversaldata import transform_traversal_data
 from parameters.commodity import commodity_conversion
+from travel_iteration import DEMAND_MATRIX_FOLDER
 
 
 def main(args):
@@ -41,7 +42,8 @@ def main(args):
                                     first_matrix_id=args.first_matrix_id)
     zonedata = FreightZoneData(zone_data_file, ass_model.zone_numbers, "koko_suomi")
     resultdata = ResultsData(result_data_folder)
-    resultmatrices = MatrixData(result_data_folder / "Matrices" / "koko_suomi")
+    resultmatrices = MatrixData(
+        result_data_folder / DEMAND_MATRIX_FOLDER / "koko_suomi")
     costdata = json.loads(cost_data_file.read_text("utf-8"))
     
     # Set foreign purposes and fetch impedances

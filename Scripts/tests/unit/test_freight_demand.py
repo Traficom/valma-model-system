@@ -23,8 +23,10 @@ from tests.integration.test_data_handling import (
     EXTERNAL_ZONES
 )
 from parameters.zone import clusters
+from travel_iteration import LOS_MATRIX_FOLDER
 
-TEST_MATRICES = RESULTS_PATH / "Matrices" / "koko_suomi"
+
+TEST_MATRICES = RESULTS_PATH / LOS_MATRIX_FOLDER / "koko_suomi"
 TEST_ZONE_DATA_PATH = TEST_DATA_PATH / "Scenario_input_data" / "freight_zonedata.gpkg"
 TRADE_DEMAND_PATH = BASE_MATRICES_PATH / "koko_suomi" / "trade_demand.omx"
 PARAMETERS_PATH = TEST_DATA_PATH.parent.parent / "parameters" / "freight"

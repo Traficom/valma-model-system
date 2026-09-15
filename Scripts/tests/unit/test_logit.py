@@ -27,7 +27,9 @@ class LogitModelTest(unittest.TestCase):
             pass
         pur = Purpose()
         zi = numpy.array(INTERNAL_ZONES)
-        zd = ZoneData(ZONEDATA_PATH, zi, "uusimaa", car_dist_cost=0.12)
+        zd = ZoneData(
+            ZONEDATA_PATH, zi, "uusimaa", car_dist_cost=0.12,
+            electric_car_share={"default": {"bev": 0.1, "phev": 0.2}})
         for attr in ("sh_cars1_hh1", "sh_cars1_hh2", "sh_cars1_hh3",
                      "sh_cars2_hh2", "sh_cars2_hh3"):
             zd[attr] = pandas.Series(0.2, index=zd.zone_numbers)

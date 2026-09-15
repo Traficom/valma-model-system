@@ -15,6 +15,7 @@ from tests.integration.test_data_handling import (
     TEST_DATA_PATH, COSTDATA_PATH
 )
 from datahandling.traversaldata import transform_traversal_data
+from travel_iteration import LOS_MATRIX_FOLDER
 try:
     from assignment.emme_bindings.emme_project import EmmeProject
     import inro.emme.desktop.app as _app
@@ -25,6 +26,10 @@ except ImportError:
 except RuntimeError as ex:
     print(f'Unable to start Emme. Emme assignment tests disabled. ({ex})')
     emme_available = False
+
+
+RESULTS_PATH = TEST_DATA_PATH / "Results" / "assignment"
+
 
 class EmmeAssignmentTest:
     """Create small EMME test network and test assignments.
@@ -84,7 +89,8 @@ class EmmeAssignmentTest:
             use_free_flow_speeds=True, time_periods={"vrk": "WholeDayPeriod"})
         with open(COSTDATA_PATH) as file:
             self.costdata = json.load(file)
-        self.resultdata = ResultsData(TEST_DATA_PATH / "Results" / "assignment")
+        self.resultdata = ResultsData(RESULTS_PATH / "aggregated_results")
+        self.linkdata = ResultsData(RESULTS_PATH / "link_results")
     
     def test_assignment(self):
         self.ass_model.prepare_network(self.costdata["vehicle_km_cost"],
@@ -93,7 +99,7 @@ class EmmeAssignmentTest:
         nr_zones = self.ass_model.nr_zones
         car_matrix = numpy.full((nr_zones, nr_zones), 10.0)
         demand = {
-            "car": car_matrix,
+            "bev": car_matrix,
             "transit": car_matrix,
             "bike": car_matrix,
             "trailer_truck": car_matrix,
@@ -109,10 +115,9 @@ class EmmeAssignmentTest:
                 if ass_class in ap.assignment_modes:
                     ap.set_matrix(ass_class, car_matrix)
             travel_cost[ap.name] = ap.end_assign()
-        self.ass_model.aggregate_results(self.resultdata)
+        self.ass_model.aggregate_results(self.resultdata, self.linkdata)
         self.resultdata.flush()
-        costs_files = MatrixData(
-            TEST_DATA_PATH / "Results" / "assignment" / "Matrices")
+        costs_files = MatrixData(RESULTS_PATH / LOS_MATRIX_FOLDER)
         for time_period in travel_cost:
             for mtx_type in travel_cost[time_period]:
                 zone_numbers = self.ass_model.zone_numbers
@@ -128,7 +133,7 @@ class EmmeAssignmentTest:
         nr_zones = self.ass_model.nr_zones
         car_matrix = numpy.full((nr_zones, nr_zones), 10.0)
         ass_classes = [
-            "car",
+            "bev",
             "transit",
             "airplane",
             "pt_car_acc",
@@ -145,8 +150,7 @@ class EmmeAssignmentTest:
             ap.init_assign()
             ap.assign_trucks_init()
             travel_cost = ap.end_assign()
-            costs_files = MatrixData(
-                TEST_DATA_PATH / "Results" / "assignment" / "Matrices")
+            costs_files = MatrixData(RESULTS_PATH / LOS_MATRIX_FOLDER)
             for mtx_type in travel_cost:
                 zone_numbers = self.ass_model.zone_numbers
                 with costs_files.open(mtx_type, ap.name, zone_numbers, m='w') as mtx:
