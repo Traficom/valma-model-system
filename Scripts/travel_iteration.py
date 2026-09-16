@@ -234,25 +234,40 @@ class ModelSystem:
 
     def _add_external_demand(self,
                              long_dist_matrices: MatrixData,
-                             long_dist_classes: Iterable[str]):
+                             long_dist_classes: Iterable[str]
+                             ) -> Dict[str, numpy.ndarray]:
+        """Add external demand in departure time model.
+
+        Also return matrices, if they are to be saved to omx.
+
+        Parameters
+        ----------
+        long_dist_matrices : MatrixData
+            MatrixData object where long-distance demand is found
+        long_dist_classes : Iterable[str]
+            Assignment classes for which long-distance demand is added
+
+        Returns
+        -------
+        dict
+            key : str
+                Assignment class (bev/phev/icev/transit)
+            value : numpy.ndarray
+                Demand matrix (float 2-d matrix)
+        """
         class_list = ", ".join(long_dist_classes)
         log.info(f"Getting external demand matrices for {class_list}...")
         zone_numbers = self.ass_model.zone_numbers
-        matrices_to_add = {}
+        matrices_to_save = {}
         with long_dist_matrices.open(
                 "demand", "vrk", zone_numbers,
                 self._zone_datas["domestic"].mapping, long_dist_classes) as mtx:
             for ass_class in long_dist_classes:
                 demand = Demand(self.external_purpose, ass_class, mtx[ass_class])
                 self.dtm.add_demand(demand)
-                if ass_class in param.car_classes + param.local_transit_classes:
-                    matrices_to_add[ass_class] = demand.matrix
-            log.info(f"Demand imported from {long_dist_matrices.path}")
-        if matrices_to_add:
-            with self.demand_matrices.open(
-                    "demand", "vrk", zone_numbers, m='w') as mtx:
-                for ass_class in matrices_to_add:
-                    mtx[ass_class] = matrices_to_add[ass_class]
+                matrices_to_save[ass_class] = demand.matrix
+        log.info(f"Demand imported from {long_dist_matrices.path}")
+        return matrices_to_save
 
     # possibly merge with init
     def assign_base_demand(self, 
@@ -374,10 +389,25 @@ class ModelSystem:
         self._add_internal_demand(previous_iter_impedance, iteration=="last")
         if (not self.ass_model.use_free_flow_speeds
                 and not isinstance(self.ass_model, MockAssignmentModel)):
-            matrices = (self.basematrices if self.long_dist_matrices is None
-                else self.long_dist_matrices)
-            self._add_external_demand(
-                matrices, param.car_classes + param.local_transit_classes)
+            # Add long car and transit trips
+            long_dist_classes = param.car_classes + param.local_transit_classes
+            zone_numbers = self.ass_model.zone_numbers
+            if self.long_dist_matrices is None:
+                with self.basematrices.open(
+                        "long_dist_demand", "vrk", zone_numbers,
+                        transport_classes=long_dist_classes) as mtx:
+                    for ass_class in long_dist_classes:
+                        self.dtm.add_demand(Demand(
+                            self.external_purpose, ass_class, mtx[ass_class]))
+                log.info(f"Demand imported from {self.basematrices.path}")
+            else:
+                matrices_to_add = self._add_external_demand(
+                    self.long_dist_matrices, long_dist_classes)
+                # Save submodel-aggregated version of matrices to omx
+                with self.demand_matrices.open(
+                        "long_dist_demand", "vrk", zone_numbers, m='w') as mtx:
+                    for ass_class in matrices_to_add:
+                        mtx[ass_class] = matrices_to_add[ass_class]
 
         # Add vans and save demand matrices
         zd = self._zone_datas["domestic"]
