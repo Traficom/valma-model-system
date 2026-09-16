@@ -202,6 +202,3 @@ class FreightModelTest(unittest.TestCase):
             self.assertAlmostEqual(numpy.sum(for_vehicles["semi_trailer"]), 0.0, places=3)
             self.assertAlmostEqual(numpy.sum(dom_vehicles["trailer_truck"]), 1.2449015, places=3)
             self.assertAlmostEqual(numpy.sum(for_vehicles["trailer_truck"]), 0.0, places=3)
-
-a = FreightModelTest()
-a.test_freight_model()
