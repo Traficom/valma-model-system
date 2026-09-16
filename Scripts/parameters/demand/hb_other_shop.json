@@ -1,7 +1,7 @@
 {
     "name": "hb_other_shop",
     "orig": "home",
-    "dest": "wrk_shop",
+    "dest": "wrk_g",
     "generation_area": "domestic",
     "attraction_area": "domestic",
     "struct": "mode>dest",
@@ -128,8 +128,8 @@
                 "cost": -0.3429
             },
             "attraction_size": {
-                "wrk_shop": 1,
-                "wrk_healthcare": 0.143417
+                "wrk_g": 1,
+                "wrk_q": 0.143417
             }
         },
         "car_pax": {
@@ -143,8 +143,8 @@
                 "cost": -0.3429
             },
             "attraction_size": {
-                "wrk_shop": 1,
-                "wrk_healthcare": 0.143417
+                "wrk_g": 1,
+                "wrk_q": 0.143417
             }
         },
         "transit": {
@@ -160,8 +160,8 @@
                 "cost": -0.3429
             },
             "attraction_size": {
-                "wrk_shop": 1,
-                "wrk_healthcare": 0.143417
+                "wrk_g": 1,
+                "wrk_q": 0.143417
             }
         },
         "bike": {
@@ -175,8 +175,8 @@
                 "attraction_size": 1
             },
             "attraction_size": {
-                "wrk_shop": 1,
-                "wrk_healthcare": 0.143417
+                "wrk_g": 1,
+                "wrk_q": 0.143417
             }
         },
         "walk": {
@@ -188,8 +188,8 @@
                 "attraction_size": 1
             },
             "attraction_size": {
-                "wrk_shop": 1,
-                "wrk_healthcare": 0.143417
+                "wrk_g": 1,
+                "wrk_q": 0.143417
             }
         }
     },
