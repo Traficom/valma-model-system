@@ -39,8 +39,7 @@ class TradeRouteChoiceTest(unittest.TestCase):
         with open(COSTDATA_PATH) as file:
             costdata = json.load(file)
         commodities = create_commodities(
-            PARAMETERS_PATH / "foreign", zonedata, resultdata,
-            costdata["freight"])
+            PARAMETERS_PATH / "foreign", zonedata, resultdata, costdata)
         del commodities["kummuo_export"]
         del commodities["kummuo_import"]
         self.assertEqual(len(commodities), 2)

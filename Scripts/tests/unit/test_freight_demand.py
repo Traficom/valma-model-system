@@ -77,8 +77,7 @@ class FreightModelTest(unittest.TestCase):
             for ass_class, mtx in impedance[mtx_type].items():
                 impedance[mtx_type][ass_class] = mtx[:zonedata.nr_zones, :zonedata.nr_zones]
         commodities = create_commodities(
-            PARAMETERS_PATH / "domestic", zonedata, resultdata,
-            costdata["freight"])
+            PARAMETERS_PATH / "domestic", zonedata, resultdata, costdata)
         self.assertEqual(len(commodities), 2)
 
         total_demand = {mode : numpy.zeros_like(impedance["truck"]["cost"])
@@ -103,7 +102,7 @@ class FreightModelTest(unittest.TestCase):
                              for mode in param.truck_classes}
                 for model_type in ("domestic", "foreign")
             }
-            for mode in commodity.costdata["truck"]:
+            for mode in commodity.truck_fleet:
                 ass_class = param.truck_fleet[mode]
                 vehicles["domestic"][ass_class] += commodity.calc_vehicles(ton_demand, mode)
                 for foreign_purpose in demand_trade:
@@ -149,8 +148,7 @@ class FreightModelTest(unittest.TestCase):
         cluster_border = {"EETLL": 50107, "SESTO": 50127}
 
         commodities = create_commodities(
-            PARAMETERS_PATH / "foreign", zonedata, resultdata,
-            costdata["freight"])
+            PARAMETERS_PATH / "foreign", zonedata, resultdata, costdata)
         del commodities["kummuo_export"]
         del commodities["kummuo_import"]
         self.assertEqual(len(commodities), 2)
@@ -204,3 +202,6 @@ class FreightModelTest(unittest.TestCase):
             self.assertAlmostEqual(numpy.sum(for_vehicles["semi_trailer"]), 0.0, places=3)
             self.assertAlmostEqual(numpy.sum(dom_vehicles["trailer_truck"]), 1.2449015, places=3)
             self.assertAlmostEqual(numpy.sum(for_vehicles["trailer_truck"]), 0.0, places=3)
+
+a = FreightModelTest()
+a.test_freight_model()
