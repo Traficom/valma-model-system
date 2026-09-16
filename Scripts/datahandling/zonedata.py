@@ -7,6 +7,7 @@ import pandas
 import fiona
 import logging
 import json
+from shapely.geometry import shape
 
 import parameters.zone as param
 import utils.log as log
@@ -33,7 +34,7 @@ class GridData:
                 zone_numbers: Sequence, model_area: str = "domestic",
                 data_type: str = "domestic_travel"
                 ):
-        self.data, self.mapping = _read_griddata(
+        self.data, self.mapping, self.geometry = _read_griddata(
             data_path, submodel)
         self.submodel = submodel
         self.zone_mapping = self.data[submodel]
@@ -44,6 +45,68 @@ class GridData:
         self.zone_slice = slice(*all_zone_numbers.searchsorted(area))
         self.zone_numbers = pandas.Index(
             all_zone_numbers[self.zone_slice], name="analysis_zone_id")
+        self.calc_intra_dist()
+
+    def calc_intra_dist(self):
+        """Calculate within-zone distances from grid-cell attraction.
+
+        Distances are calculated in kilometres. The resulting values are
+        assigned to every grid cell in the corresponding analysis zone so
+        they are available to the normal grid-to-zone aggregation step.
+        """
+        log.info("Calculate intrazonal distances...")
+        result = {
+            "dist_walk": numpy.zeros(len(self.data)),
+            "dist_bike": numpy.zeros(len(self.data)),
+            "dist_car": numpy.zeros(len(self.data)),
+        }
+        sizes = (self.data["workplaces"] + self.data["population"]).clip(lower=0)
+        population = self.data["population"]
+
+        for zone in self.zone_numbers:
+            actual_rows = numpy.flatnonzero(self.mapping.to_numpy() == zone)
+            rows = actual_rows if actual_rows.size else numpy.array([0])
+            geometries = [self.geometry[index] for index in rows]
+            distances = numpy.array([
+                [origin.distance(destination) for destination in geometries]
+                for origin in geometries
+            ], dtype=float) / 1000
+            numpy.fill_diagonal(distances, 0.125)
+
+            zone_sizes = sizes.iloc[rows].to_numpy(dtype=float)
+            with numpy.errstate(divide="ignore", invalid="ignore"):
+                walk_utility = numpy.exp(-0.8 * distances + 1.5
+                                         + numpy.log(zone_sizes))
+                bike_utility = numpy.exp(-0.3 * distances - 0.5
+                                         + numpy.log(zone_sizes))
+                car_utility = numpy.exp(-0.1 * distances
+                                        + numpy.log(zone_sizes))
+                expsum = numpy.sum(
+                    walk_utility + bike_utility + car_utility, axis=0)
+                
+
+                walk_probability = divide(walk_utility, expsum)
+                bike_probability = divide(bike_utility, expsum)
+                car_probability = divide(car_utility, expsum)
+
+                origin_probability = population.iloc[rows].to_numpy(dtype=float)
+                origin_probability /= origin_probability.sum()
+                origin_probability[numpy.isnan(origin_probability)] = 1
+
+                for name, probability in (
+                        ("dist_walk", walk_probability),
+                        ("dist_bike", bike_probability),
+                        ("dist_car", car_probability)):
+                    destination_probability = probability.sum(axis=0)
+                    distances_by_origin = numpy.sum(
+                        divide(probability, destination_probability) * distances,
+                        axis=0)
+                    if actual_rows.size:
+                        result[name][actual_rows] = numpy.sum(
+                            distances_by_origin * origin_probability)
+
+        for name, values in result.items():
+            self[name] = pandas.Series(values, index=self.data.index)
 
     def __getitem__(self, key: str):
         return self.data[key]
@@ -51,7 +114,7 @@ class GridData:
     def __setitem__(self, key: str, value):
         self.data[key] = value
 
-    def _aggregate(self):
+    def aggregate(self):
         zone_variables: dict = json.loads(
             (Path(__file__).parent / "zone_variables.json").read_text("utf-8")
         )[self.data_type]
@@ -215,8 +278,12 @@ class ZoneData:
         self["pop_density"] = divide(data["population"], data["land_area"])
         self["log_pop_density"] = numpy.log(self["pop_density"]+1)
         self["sqrt_pop_density"] = numpy.sqrt(self["pop_density"])
-        
-        # Two-way intrazonal distances from building distances
+
+        self["dist_walk"] = data["dist_walk"]
+        self["dist_bike"] = data["dist_bike"]
+        self["time_car"] = 2 * 60 * data["dist_car"] / 20
+        self["cost_car"] = 2 * car_dist_cost * data["dist_car"]
+
         self["density_pop_wrk"] = divide((data["population"] + data["workplaces"]),
                                           data["land_area"])
         self["avg_walk_time"] = round(0.047583 * numpy.sqrt(self["density_pop_wrk"]))
@@ -459,10 +526,14 @@ def _read_griddata(path: Path, submodel: str):
         msg = f"Multiple layers found in file {path}"
         log.error(msg)
         raise TypeError(msg)
-    with fiona.open(path, ignore_geometry=True) as colxn:
+    with fiona.open(path, ignore_geometry=False) as colxn:
+        records = list(colxn)
         data = pandas.DataFrame(
-            [record["properties"] for record in colxn],
+            [record["properties"] for record in records],
             columns=list(colxn.schema["properties"]))
+        geometries = [shape(record["geometry"]).centroid for record in records]
+    if "grid_id" not in data:
+        raise IndexError(f"Grid data file {path} lacks grid_id")
     data.set_index("grid_id", inplace=True)
     if data.index.hasnans:
         msg = "Row with only spaces or tabs in file {}".format(path)
@@ -471,9 +542,11 @@ def _read_griddata(path: Path, submodel: str):
     if data.index.has_duplicates:
         raise IndexError("Index in file {} has duplicates".format(path))
     if not data.index.is_monotonic_increasing:
-        data.sort_index(inplace=True)
+        order = numpy.argsort(data.index.to_numpy())
+        data = data.iloc[order]
+        geometries = [geometries[index] for index in order]
         log.warn("File {} is not sorted in ascending order".format(path))
-    return data, data[submodel]
+    return data, data[submodel], geometries
 
 
 def read_zonedata(path: Path,

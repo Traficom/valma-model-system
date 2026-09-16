@@ -41,8 +41,7 @@
         "mean": [
             "avg_park_cost",
             "sh_row_or_detached",
-            "time_car",
-            "cost_car",
+            "dist_car",
             "dist_walk",
             "dist_bike"
         ],

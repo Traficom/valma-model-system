@@ -103,11 +103,7 @@ class ModelSystem:
         log.info(f"Read zonedata from {zone_data_path}")
         grid_data = GridData(zone_data_path, submodel, self.zone_numbers,
                              model_area="domestic")
-        grid_data["dist_walk"] = 0.5
-        grid_data["dist_bike"] = 0.9
-        grid_data["time_car"] = 1.5
-        grid_data["cost_car"] = 1.5
-        data, mapping, zone_numbers = grid_data._aggregate()
+        data, mapping, zone_numbers = grid_data.aggregate()
         self._zone_datas = {
             model_area: ZoneData(
                 data, mapping, zone_numbers, model_area,
