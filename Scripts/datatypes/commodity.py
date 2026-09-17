@@ -51,7 +51,7 @@ def create_commodities(parameters_path: Path, zonedata: FreightZoneData,
     for file in parameters_path.rglob("*.json"):
         commodity_params = json.loads(file.read_text("utf-8"))
         commodity = commodity_params["name"].split("_")[0]
-        purpose_cost = costdata["freight"].get(commodity_conversion[commodity])
+        purpose_cost = costdata.get(commodity_conversion[commodity])
         if not purpose_cost:
             log.warn(f"Aggregated commodity class '{commodity_conversion[commodity]}' "
                      f"for commodity '{commodity}' not found in costs json")
@@ -60,12 +60,10 @@ def create_commodities(parameters_path: Path, zonedata: FreightZoneData,
         if parameters_path.stem == "foreign":
             zone_data["domestic"] = zonedata
             purposes[commodity_params["name"]] = ForeignCommodity(
-                commodity_params, zone_data, resultdata, 
-                purpose_cost, costdata["toll_cost"])
+                commodity_params, zone_data, resultdata, purpose_cost)
         else:
             purposes[commodity_params["name"]] = DomesticCommodity(
-                commodity_params, zone_data, resultdata,
-                purpose_cost, costdata["toll_cost"])
+                commodity_params, zone_data, resultdata, purpose_cost)
     return purposes
 
 
@@ -85,10 +83,9 @@ class FreightCommodity(Purpose):
             Mode (truck/trailer_truck...) : unit cost name
                 unit cost name : unit cost value
     """
-    def __init__(self, specification, zone_data, resultdata, costdata, toll_cost):
+    def __init__(self, specification, zone_data, resultdata, costdata):
         Purpose.__init__(self, specification, zone_data, resultdata)
         self.costdata = costdata
-        self.toll_cost = toll_cost
         self.empty_share = costdata["truck"]["empty_share"]
         self.truck_fleet = costdata["truck"]["fleet"]
         self.truck_param = costdata["truck"]["param"]
@@ -136,9 +133,9 @@ class FreightCommodity(Purpose):
 
 
 class DomesticCommodity(FreightCommodity):
-    def __init__(self, specification, zone_data, resultdata, costdata, toll_cost):
+    def __init__(self, specification, zone_data, resultdata, costdata):
         FreightCommodity.__init__(self, specification, zone_data, resultdata, 
-                                  costdata, toll_cost)
+                                  costdata)
         self.modes: List[str] = list(specification["mode_choice"])
         args = (self, specification, self.generation_zone_data,
                 self.attraction_zone_data, resultdata)
@@ -379,9 +376,9 @@ class DomesticCommodity(FreightCommodity):
 
 
 class ForeignCommodity(FreightCommodity):
-    def __init__(self, specification, zone_data, resultdata, costdata, toll_cost):
+    def __init__(self, specification, zone_data, resultdata, costdata):
         FreightCommodity.__init__(self, specification, zone_data, resultdata, 
-                                  costdata, toll_cost)
+                                  costdata)
         match specification["struct"]:
             case "export":
                 self.is_export = True

@@ -48,7 +48,7 @@ def main(args):
     
     # Set foreign purposes and fetch impedances
     foreign_commodities: dict[str, ForeignCommodity] = create_commodities(
-        parameters_path / "foreign", zonedata, resultdata, costdata)
+        parameters_path / "foreign", zonedata, resultdata, costdata["freight"])
     ass_model.prepare_freight_network(
         costdata["vehicle_km_cost"], costdata["vehicle_hour_cost"])
     store_demand = StoreDemand(ass_model.freight_network, resultmatrices, 
@@ -78,7 +78,7 @@ def main(args):
                     for mode in param.truck_classes}
     
     commodities: dict[str, DomesticCommodity] = create_commodities(
-        parameters_path / "domestic", zonedata, resultdata, costdata)
+        parameters_path / "domestic", zonedata, resultdata, costdata["freight"])
     # Run domestic demand calculation
     for commodity in commodities.values():
         log.info(f"Calculating demand for purpose: {commodity.name}")

@@ -77,7 +77,7 @@ class FreightModelTest(unittest.TestCase):
             for ass_class, mtx in impedance[mtx_type].items():
                 impedance[mtx_type][ass_class] = mtx[:zonedata.nr_zones, :zonedata.nr_zones]
         commodities = create_commodities(
-            PARAMETERS_PATH / "domestic", zonedata, resultdata, costdata)
+            PARAMETERS_PATH / "domestic", zonedata, resultdata, costdata["freight"])
         self.assertEqual(len(commodities), 2)
 
         total_demand = {mode : numpy.zeros_like(impedance["truck"]["cost"])
@@ -148,7 +148,7 @@ class FreightModelTest(unittest.TestCase):
         cluster_border = {"EETLL": 50107, "SESTO": 50127}
 
         commodities = create_commodities(
-            PARAMETERS_PATH / "foreign", zonedata, resultdata, costdata)
+            PARAMETERS_PATH / "foreign", zonedata, resultdata, costdata["freight"])
         del commodities["kummuo_export"]
         del commodities["kummuo_import"]
         self.assertEqual(len(commodities), 2)

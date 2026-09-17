@@ -84,16 +84,6 @@
             "car_pax": 1.0
         }
     },
-    "toll_cost": {
-        "truck": 1.0,
-        "truck_ev": 1.0,
-        "truck_2n": 1.0,
-        "truck_2n_ev": 1.0,
-        "semi_trailer": 1.0,
-        "semi_trailer_ev": 1.0,
-        "trailer_truck": 1.0,
-        "trailer_truck_ev": 1.0
-    },
     "freight": {
         "kemiat": {
             "truck": {
