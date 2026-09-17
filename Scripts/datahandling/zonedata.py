@@ -128,7 +128,7 @@ class GridData:
         for func, cols in zone_variables.items():
             for col in cols:
                 if not isinstance(col, dict):
-                    aggs[col] = func
+                    aggs[col] = self._most_common if func == "first" else func
                     continue
                 total = col["total"]
                 aggs[total] = func
@@ -136,7 +136,7 @@ class GridData:
                 for share in col["shares"]:
                     aggs[share] = wa.avg
         for column in optional_agg:
-            aggs[column] = "first"
+            aggs[column] = self._most_common
 
         aggregated = self.data.groupby(self.submodel).agg(aggs)
         aggregated.index = aggregated.index.astype(int)
@@ -167,6 +167,13 @@ class GridData:
         zone_mapping = self.zone_mapping.reindex(aggregated.index)
         self._add_transformations(aggregated, car_dist_cost, electric_car_share)
         return aggregated, zone_mapping, self.zone_numbers
+
+    @staticmethod
+    def _most_common(values: pandas.Series):
+        modes = values.mode(dropna=True)
+        if modes.empty:
+            return values.iloc[0]
+        return modes.iloc[0]
 
     def export(self, path: Path):
         """Export aggregated grid data and geometries with Fiona."""
@@ -222,6 +229,8 @@ class GridData:
                              data: pandas.DataFrame,
                              car_dist_cost: Optional[float],
                              electric_car_share: Optional[Dict]):
+        data["time_car"] = 2 * 60 * data["dist_car"] / 20
+        data["cost_car"] = 2 * car_dist_cost * data["dist_car"]
         if electric_car_share is not None:
             car_shares = pandas.DataFrame(electric_car_share).T.reindex(
                 index=data["county"].values).fillna(
@@ -240,15 +249,10 @@ class GridData:
                 avg_size * data[f"sh_{hh}"], hh_pop)
             households += data[f"sh_pop_{hh}"] * data["population"] / avg_size
         data["households"] = households
-
-        data["pop_density"] = divide(data["population"], data["land_area"])
-        data["time_car"] = 2 * 60 * data["dist_car"] / 20
-        if car_dist_cost is not None:
-            data["cost_car"] = 2 * car_dist_cost * data["dist_car"]
-        data["density_pop_wrk"] = divide(
+        density_pop_wrk = divide(
             data["population"] + data["workplaces"], data["land_area"])
-        data["avg_walk_time"] = round(0.047583 * numpy.sqrt(data["density_pop_wrk"]))
-        data["avg_park_time"] = round(0.053891 * numpy.sqrt(data["density_pop_wrk"]))
+        data["avg_walk_time"] = round(0.047583 * numpy.sqrt(density_pop_wrk))
+        data["avg_park_time"] = round(0.053891 * numpy.sqrt(density_pop_wrk))
 
 class ZoneData:
     """Container for analysis zone data. 
@@ -345,7 +349,8 @@ class ZoneData:
             dummies[division_type].update(extra_dummies.get(division_type, []))
             for dummy in dummies[division_type]:
                 self[dummy] = self.dummy(division_type, dummy)
-        self["sqrt_pop_density"] = numpy.sqrt(self["pop_density"])
+        pop_density = divide(data["population"], data["land_area"])
+        self["sqrt_pop_density"] = numpy.sqrt(pop_density)
         self._calc_household_shares(share="sh")
         self._calc_household_shares(share="sh_pop")
 
