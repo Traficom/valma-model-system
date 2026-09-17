@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 from typing import Any, List, Sequence, Union, Dict, Optional
 from pathlib import Path
 from collections import defaultdict
@@ -7,7 +7,8 @@ import pandas
 import fiona
 import logging
 import json
-from shapely.geometry import shape
+from shapely.geometry import mapping, shape
+from shapely.ops import unary_union
 
 import parameters.zone as param
 import utils.log as log
@@ -34,8 +35,9 @@ class GridData:
                 zone_numbers: Sequence, model_area: str = "domestic",
                 data_type: str = "domestic_travel"
                 ):
-        self.data, self.mapping, self.geometry = _read_griddata(
+        self.data, self.mapping, self.geometry, self.crs = _read_griddata(
             data_path, submodel)
+        self.centroids = [geometry.centroid for geometry in self.geometry]
         self.submodel = submodel
         self.zone_mapping = self.data[submodel]
         self.data_type = data_type
@@ -66,7 +68,7 @@ class GridData:
         for zone in self.zone_numbers:
             actual_rows = numpy.flatnonzero(self.mapping.to_numpy() == zone)
             rows = actual_rows if actual_rows.size else numpy.array([0])
-            geometries = [self.geometry[index] for index in rows]
+            geometries = [self.centroids[index] for index in rows]
             distances = numpy.array([
                 [origin.distance(destination) for destination in geometries]
                 for origin in geometries
@@ -114,12 +116,13 @@ class GridData:
     def __setitem__(self, key: str, value):
         self.data[key] = value
 
-    def aggregate(self):
+    def aggregate(self,
+                   car_dist_cost: Optional[float] = None,
+                   electric_car_share: Optional[Dict] = None):
         zone_variables: dict = json.loads(
             (Path(__file__).parent / "zone_variables.json").read_text("utf-8")
         )[self.data_type]
         aggs = {}
-        shares: Dict[str, Dict[str, List[str]]] = {}
         optional_agg = [
             key for key in self.data.columns if "aggregate_results_" in key]
         for func, cols in zone_variables.items():
@@ -130,10 +133,8 @@ class GridData:
                 total = col["total"]
                 aggs[total] = func
                 wa = WeightedAverage(self.data[total])
-                shares[total] = defaultdict(list)
                 for share in col["shares"]:
                     aggs[share] = wa.avg
-                    shares[total][share.split("_")[1]].append(share)
         for column in optional_agg:
             aggs[column] = "first"
 
@@ -157,22 +158,97 @@ class GridData:
                     log.error(msg)
                     raise IndexError(msg)
             raise IndexError("Zone numbers did not match for zonedata")
-        for total in shares:
-            for share_type, type_shares in shares[total].items():
-                for share in type_shares:
-                    aggregated[share.replace("sh_", "")] = (
-                        aggregated[share] * aggregated[total])
-                if len(type_shares[0].split("_")) == 4:
-                    total_interval = "sh_{}_{}_{}".format(
-                        share_type, type_shares[0].split("_")[2],
-                        type_shares[-1].split("_")[3])
-                else:
-                    total_interval = f"sh_{share_type}_all"
-                aggregated[total_interval] = aggregated[type_shares].sum(axis="columns")
+        geometry = pandas.Series(self.geometry, index=self.data.index)
+        self.aggregated_geometry = geometry.groupby(self.mapping).agg(unary_union)
+        self.aggregated_geometry = self.aggregated_geometry.reindex(
+            aggregated.index)
+        aggregated["land_area"] = self.aggregated_geometry.map(
+            lambda geometry: geometry.area / 1_000_000)
         zone_mapping = self.zone_mapping.reindex(aggregated.index)
+        self._add_transformations(aggregated, car_dist_cost, electric_car_share)
         return aggregated, zone_mapping, self.zone_numbers
 
+    def export(self, path: Path):
+        """Export aggregated grid data and geometries with Fiona."""
+        data, _, _ = self.aggregate()
+        driver = {
+            ".gpkg": "GPKG",
+            ".shp": "ESRI Shapefile",
+            ".geojson": "GeoJSON",
+            ".json": "GeoJSON",
+        }.get(path.suffix.lower())
+        if driver is None:
+            raise ValueError(f"Unsupported spatial output format: {path.suffix}")
 
+        schema = {
+            "geometry": "Unknown",
+            "properties": {
+                column: self._fiona_type(data[column]) for column in data
+            },
+        }
+        options = {"layer": path.stem} if driver == "GPKG" else {}
+        with fiona.open(
+            path, "w", driver=driver, crs=self.crs, schema=schema,
+            **options) as destination:
+            for zone, row in data.iterrows():
+                properties = {
+                    column: self._fiona_value(value)
+                    for column, value in row.items()
+                }
+                destination.write({
+                    "geometry": mapping(self.aggregated_geometry[zone]),
+                    "properties": properties,
+                })
+
+        return path
+
+    @staticmethod
+    def _fiona_type(values: pandas.Series) -> str:
+        if pandas.api.types.is_bool_dtype(values):
+            return "bool"
+        if pandas.api.types.is_integer_dtype(values):
+            return "int"
+        if pandas.api.types.is_float_dtype(values):
+            return "float"
+        return "str"
+
+    @staticmethod
+    def _fiona_value(value: Any):
+        if pandas.isna(value):
+            return None
+        return value.item() if isinstance(value, numpy.generic) else value
+
+    def _add_transformations(self,
+                             data: pandas.DataFrame,
+                             car_dist_cost: Optional[float],
+                             electric_car_share: Optional[Dict]):
+        if electric_car_share is not None:
+            car_shares = pandas.DataFrame(electric_car_share).T.reindex(
+                index=data["county"].values).fillna(
+                    electric_car_share["default"])
+            car_shares.index = data.index
+            data["sh_bev"] = car_shares["bev"]
+            data["sh_phev"] = car_shares["phev"]
+            data["sh_icev"] = 1 - car_shares.sum(axis=1)
+
+        avg_hh_size = {"hh1": 1, "hh2": 2, "hh3": 4.13}
+        hh_pop = sum(avg_hh_size[hh] * data[f"sh_{hh}"]
+                     for hh in avg_hh_size)
+        households = 0
+        for hh, avg_size in avg_hh_size.items():
+            data[f"sh_pop_{hh}"] = divide(
+                avg_size * data[f"sh_{hh}"], hh_pop)
+            households += data[f"sh_pop_{hh}"] * data["population"] / avg_size
+        data["households"] = households
+
+        data["pop_density"] = divide(data["population"], data["land_area"])
+        data["time_car"] = 2 * 60 * data["dist_car"] / 20
+        if car_dist_cost is not None:
+            data["cost_car"] = 2 * car_dist_cost * data["dist_car"]
+        data["density_pop_wrk"] = divide(
+            data["population"] + data["workplaces"], data["land_area"])
+        data["avg_walk_time"] = round(0.047583 * numpy.sqrt(data["density_pop_wrk"]))
+        data["avg_park_time"] = round(0.053891 * numpy.sqrt(data["density_pop_wrk"]))
 
 class ZoneData:
     """Container for analysis zone data. 
@@ -213,9 +289,7 @@ class ZoneData:
 
     def _init_data(self, data, mapping, zone_numbers, model_area,
                  municipality_calibration: Dict[str, pandas.Series] = {},
-                 extra_dummies: Dict[str, Sequence[str]] = {},
-                 car_dist_cost: Optional[float] = None,
-                 electric_car_share: Optional[Dict] = None):
+                 extra_dummies: Dict[str, Sequence[str]] = {}):
         self._values = {}
         self.share = ShareChecker(self)
         Zone.counter = 0
@@ -228,6 +302,25 @@ class ZoneData:
             all_zone_numbers[self.zone_slice], name="analysis_zone_id")
         demand_aggs = ["municipality", "county", "submodel", "calibration_area", "pt_authority"]
         result_aggs = demand_aggs + [key for key in data if "aggregate_results_" in key]
+        source_shares = [
+            column for column in data
+            if column.startswith("sh_") and not column.startswith((
+                "sh_pop_", "sh_hh_", "sh_bev", "sh_phev", "sh_icev"))
+            and not column.endswith("_all")]
+        for share in source_shares:
+            data[share.replace("sh_", "", 1)] = data[share] * data["population"]
+        share_groups = defaultdict(list)
+        for share in source_shares:
+            share_parts = share.split("_")
+            share_groups[share_parts[1]].append(share)
+        for share_type, type_shares in share_groups.items():
+            if len(type_shares[0].split("_")) == 4:
+                total_interval = "sh_{}_{}_{}".format(
+                    share_type, type_shares[0].split("_")[2],
+                    type_shares[-1].split("_")[3])
+            else:
+                total_interval = f"sh_{share_type}_all"
+            data[total_interval] = data[type_shares].sum(axis="columns")
         self.demand_aggs = ZoneAggregations(data[demand_aggs])
         self.result_aggs = ZoneAggregations(data[result_aggs])
         for col in data:
@@ -240,55 +333,6 @@ class ZoneData:
             for number in self.zone_numbers}
         self.nr_zones = len(self.zone_numbers)
         self._municip_calib = municipality_calibration
-        self._add_transformations(
-            data, extra_dummies, car_dist_cost, electric_car_share)
-
-    def _add_transformations(self,
-                             data: pandas.DataFrame,
-                             extra_dummies: Dict[str, Sequence[str]],
-                             car_dist_cost: float,
-                             electric_car_share: Dict):
-        car_shares = pandas.DataFrame(electric_car_share).T.reindex(
-            index=self.demand_aggs.mappings["county"].values).fillna(
-                electric_car_share["default"])
-        car_shares.index = self.zone_numbers
-        self.share["sh_bev"] = car_shares["bev"]
-        self.share["sh_phev"] = car_shares["phev"]
-        self.share["sh_icev"] = 1 - car_shares.sum(axis=1)
-
-        # Convert household shares to population shares
-        avg_hh_size = {
-            "hh1": 1,
-            "hh2": 2,
-            "hh3": 4.13,  # Average size of 3+ households
-        }
-        hh_pop = sum(avg_hh_size[hh] * self[f"sh_{hh}"] for hh in avg_hh_size)
-        househoulds = 0
-        for hh, avg_size in avg_hh_size.items():
-            self.share[f"sh_pop_{hh}"] = divide(
-                avg_size*self[f"sh_{hh}"], hh_pop)
-            househoulds += self[f"sh_pop_{hh}"] * self["population"] / avg_size
-        self["households"] = househoulds
-
-        # Calculate household license shares
-        self._calc_household_shares(share="sh")
-        # Calculate population license shares
-        self._calc_household_shares(share="sh_pop")
-
-        self["pop_density"] = divide(data["population"], data["land_area"])
-        self["log_pop_density"] = numpy.log(self["pop_density"]+1)
-        self["sqrt_pop_density"] = numpy.sqrt(self["pop_density"])
-
-        self["dist_walk"] = data["dist_walk"]
-        self["dist_bike"] = data["dist_bike"]
-        self["time_car"] = 2 * 60 * data["dist_car"] / 20
-        self["cost_car"] = 2 * car_dist_cost * data["dist_car"]
-
-        self["density_pop_wrk"] = divide((data["population"] + data["workplaces"]),
-                                          data["land_area"])
-        self["avg_walk_time"] = round(0.047583 * numpy.sqrt(self["density_pop_wrk"]))
-        self["avg_park_time"] = round(0.053891 * numpy.sqrt(self["density_pop_wrk"]))
-
         dummies = {
             "zone": {},
             "municipality": {},
@@ -301,6 +345,9 @@ class ZoneData:
             dummies[division_type].update(extra_dummies.get(division_type, []))
             for dummy in dummies[division_type]:
                 self[dummy] = self.dummy(division_type, dummy)
+        self["sqrt_pop_density"] = numpy.sqrt(self["pop_density"])
+        self._calc_household_shares(share="sh")
+        self._calc_household_shares(share="sh_pop")
 
     def _calc_household_shares(self, share: str = "sh"):
         """Calculate household adult, childen and license shares.
@@ -531,7 +578,8 @@ def _read_griddata(path: Path, submodel: str):
         data = pandas.DataFrame(
             [record["properties"] for record in records],
             columns=list(colxn.schema["properties"]))
-        geometries = [shape(record["geometry"]).centroid for record in records]
+        geometries = [shape(record["geometry"]) for record in records]
+        crs = colxn.crs
     if "grid_id" not in data:
         raise IndexError(f"Grid data file {path} lacks grid_id")
     data.set_index("grid_id", inplace=True)
@@ -546,7 +594,7 @@ def _read_griddata(path: Path, submodel: str):
         data = data.iloc[order]
         geometries = [geometries[index] for index in order]
         log.warn("File {} is not sorted in ascending order".format(path))
-    return data, data[submodel], geometries
+    return data, data[submodel], geometries, crs
 
 
 def read_zonedata(path: Path,
