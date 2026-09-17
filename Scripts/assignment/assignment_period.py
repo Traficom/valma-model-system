@@ -664,16 +664,16 @@ class AssignmentPeriod(Period):
         log.info("Car assignment performed for scenario {}, {}".format(
             self.emme_scenario.id, self.name))
 
-    def _assign_trucks(self):
+    def _assign_trucks(self, truck_classes: Iterable = param.truck_classes):
         stopping_criteria = copy.deepcopy(param.stopping_criteria["coarse"])
         stopping_criteria["max_iterations"] = 0
-        for truck_spec in self._car_spec.truck_specs():
+        for truck_spec in self._car_spec.truck_specs(truck_classes):
             truck_spec["stopping_criteria"] = stopping_criteria
             self.emme_project.car_assignment(
                 truck_spec, self.emme_scenario)
         network = self.emme_scenario.get_network()
         modes = [self.assignment_modes[ass_class]
-                 for ass_class in param.truck_classes
+                 for ass_class in truck_classes
                  if ass_class in self.assignment_modes]
         for link in network.links():
             for mode in modes:

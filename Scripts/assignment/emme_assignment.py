@@ -204,7 +204,7 @@ class EmmeAssignmentModel(AssignmentModel):
                 overwrite=True, scenario=self.mod_scenario)
         self._create_attributes(
             self.mod_scenario,
-            list(param.truck_classes) + list(param.freight_modes),
+            list(param.truck_fleet) + list(param.freight_modes),
             self._extra, self._netfield)
         self.freight_network.prepare(
             car_dist_unit_cost, car_time_unit_cost, self.save_matrices)

@@ -4,17 +4,27 @@
         "bev": 0.04,
         "phev": 0.06,
         "van": 0.20,
-        "truck": 0.23,
-        "semi_trailer": 0.35,
-        "trailer_truck": 0.44,
+        "truck": 0.55,
+        "truck_ev": 0.43,
+        "truck_2n": 0.23,
+        "truck_2n_ev": 0.15,
+        "semi_trailer": 0.67,
+        "semi_trailer_ev": 0.54,
+        "trailer_truck": 0.85,
+        "trailer_truck_ev": 0.68,
         "diesel_train": 5.17,
         "electric_train": 2.94,
         "domestic_vessel": 54.2
     },
     "vehicle_hour_cost": {
-        "truck": 31.96,
+        "truck": 33.24,
+        "truck_ev": 29.53,
+        "truck_2n": 31.96,
+        "truck_2n_ev": 25.38,
         "semi_trailer": 35.11,
+        "semi_trailer_ev": 28.85,
         "trailer_truck": 36.0,
+        "trailer_truck_ev": 30.61,
         "diesel_train": 284.7,
         "electric_train": 316.7,
         "domestic_vessel": 208.8
@@ -77,26 +87,46 @@
     "freight": {
         "kemiat": {
             "truck": {
-                "truck": {
-                    "terminal_cost": 14.0,
-                    "domestic_distribution": 0.2,
-                    "foreign_distribution": 0.1,
-                    "avg_load": 5.76,
-                    "empty_share": 0.5
+                "empty_share": 0.5,
+                "fleet": {
+                    "truck": {
+                        "domestic_distribution": 0.1,
+                        "foreign_distribution": 0.05
+                    },
+                    "truck_ev": {
+                        "domestic_distribution": 0.1,
+                        "foreign_distribution": 0.1
+                    },
+                    "semi_trailer": {
+                        "domestic_distribution": 0.15,
+                        "foreign_distribution": 0.25
+                    },
+                    "semi_trailer_ev": {
+                        "domestic_distribution": 0.1,
+                        "foreign_distribution": 0.3
+                    },
+                    "trailer_truck": {
+                        "domestic_distribution": 0.3,
+                        "foreign_distribution": 0.2
+                    },
+                    "trailer_truck_ev": {
+                        "domestic_distribution": 0.25,
+                        "foreign_distribution": 0.1
+                    }
                 },
-                "semi_trailer": {
-                    "terminal_cost": 8.0,
-                    "domestic_distribution": 0.3,
-                    "foreign_distribution": 0.4,
-                    "avg_load": 15.01,
-                    "empty_share": 0.5
-                },
-                "trailer_truck": {
-                    "terminal_cost": 5.0,
-                    "domestic_distribution": 0.5,
-                    "foreign_distribution": 0.5,
-                    "avg_load": 30.24,
-                    "empty_share": 0.5
+                "param": {
+                    "truck": {
+                        "terminal_cost": 14.0,
+                        "avg_load": 5.76
+                    },
+                    "semi_trailer": {
+                        "terminal_cost": 8.0,
+                        "avg_load": 15.01
+                    },
+                    "trailer_truck": {
+                        "terminal_cost": 5.0,
+                        "avg_load": 30.24
+                    }
                 }
             },
             "freight_train": {

@@ -103,10 +103,11 @@ def main(args):
             domestic_tons = demand["truck"] + sum(aux_demand.values())
             dom_leg_tons = commodity.calc_trade_mode_share(
                 demand, trade_demand, fin_border_ids)
-            for mode in param.truck_classes:
-                total_demand[mode] += commodity.calc_vehicles(domestic_tons, mode)
+            for mode in commodity.truck_fleet:
+                ass_class = param.truck_fleet[mode]
+                total_demand[ass_class] += commodity.calc_vehicles(domestic_tons, mode)
                 for foreign_purpose in dom_leg_tons:
-                    total_demand[mode] += foreign_commodities[foreign_purpose].calc_vehicles(
+                    total_demand[ass_class] += foreign_commodities[foreign_purpose].calc_vehicles(
                         dom_leg_tons[foreign_purpose]["truck"], mode)
             write_domestic_leg_summary(dom_leg_tons, impedance, resultdata)
         commodity.write_summary(demand, aux_demand, impedance)
