@@ -17,10 +17,10 @@
         "domestic_vessel": 54.2
     },
     "vehicle_hour_cost": {
-        "truck": 31.96,
-        "truck_ev": 25.38,
-        "truck_3n": 33.24,
-        "truck_3n_ev": 29.53,
+        "truck": 33.24,
+        "truck_ev": 29.53,
+        "truck_2n": 31.96,
+        "truck_2n_ev": 25.38,
         "semi_trailer": 35.11,
         "semi_trailer_ev": 28.85,
         "trailer_truck": 36.0,
