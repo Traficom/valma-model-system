@@ -62,27 +62,41 @@ class GridData:
             "dist_bike": numpy.zeros(len(self.data)),
             "dist_car": numpy.zeros(len(self.data)),
         }
-        sizes = (self.data["workplaces"] + self.data["population"]).clip(lower=0)
-        population = self.data["population"]
+        sizes = numpy.clip(
+            self.data["workplaces"].to_numpy(dtype=float)
+            + self.data["population"].to_numpy(dtype=float),
+            0,
+            None,
+        )
+        population = self.data["population"].to_numpy(dtype=float)
+        mapping = self.mapping.to_numpy()
+        zone_rows = {
+            zone: numpy.flatnonzero(mapping == zone)
+            for zone in self.zone_numbers
+        }
 
         for zone in self.zone_numbers:
-            actual_rows = numpy.flatnonzero(self.mapping.to_numpy() == zone)
+            actual_rows = zone_rows[zone]
             rows = actual_rows if actual_rows.size else numpy.array([0])
-            geometries = [self.centroids[index] for index in rows]
-            distances = numpy.array([
-                [origin.distance(destination) for destination in geometries]
-                for origin in geometries
-            ], dtype=float) / 1000
+            coordinates = numpy.array([
+                (self.centroids[index].x, self.centroids[index].y)
+                for index in rows
+            ])
+            distances = numpy.linalg.norm(
+                coordinates[:, numpy.newaxis, :]
+                - coordinates[numpy.newaxis, :, :],
+                axis=2,
+            ) / 1000
             numpy.fill_diagonal(distances, 0.125)
 
-            zone_sizes = sizes.iloc[rows].to_numpy(dtype=float)
+            zone_sizes = sizes[rows]
             with numpy.errstate(divide="ignore", invalid="ignore"):
-                walk_utility = numpy.exp(-0.8 * distances + 1.5
-                                         + numpy.log(zone_sizes))
-                bike_utility = numpy.exp(-0.3 * distances - 0.5
-                                         + numpy.log(zone_sizes))
-                car_utility = numpy.exp(-0.1 * distances
-                                        + numpy.log(zone_sizes))
+                log_zone_sizes = numpy.log(zone_sizes)[:, numpy.newaxis]
+                walk_utility = numpy.exp(
+                    -0.8 * distances + 1.5 + log_zone_sizes)
+                bike_utility = numpy.exp(
+                    -0.3 * distances - 0.5 + log_zone_sizes)
+                car_utility = numpy.exp(-0.1 * distances + log_zone_sizes)
                 expsum = numpy.sum(
                     walk_utility + bike_utility + car_utility, axis=0)
                 
@@ -91,7 +105,7 @@ class GridData:
                 bike_probability = divide(bike_utility, expsum)
                 car_probability = divide(car_utility, expsum)
 
-                origin_probability = population.iloc[rows].to_numpy(dtype=float)
+                origin_probability = population[rows].copy()
                 origin_probability /= origin_probability.sum()
                 origin_probability[numpy.isnan(origin_probability)] = 1
 
@@ -230,7 +244,8 @@ class GridData:
                              car_dist_cost: Optional[float],
                              electric_car_share: Optional[Dict]):
         data["time_car"] = 2 * 60 * data["dist_car"] / 20
-        data["cost_car"] = 2 * car_dist_cost * data["dist_car"]
+        if car_dist_cost is not None:
+            data["cost_car"] = 2 * car_dist_cost * data["dist_car"]
         if electric_car_share is not None:
             car_shares = pandas.DataFrame(electric_car_share).T.reindex(
                 index=data["county"].values).fillna(
@@ -349,6 +364,8 @@ class ZoneData:
             dummies[division_type].update(extra_dummies.get(division_type, []))
             for dummy in dummies[division_type]:
                 self[dummy] = self.dummy(division_type, dummy)
+        self["density_pop_wrk"] = divide(
+            data["population"] + data["workplaces"], data["land_area"])
         pop_density = divide(data["population"], data["land_area"])
         self["sqrt_pop_density"] = numpy.sqrt(pop_density)
         self._calc_household_shares(share="sh")
