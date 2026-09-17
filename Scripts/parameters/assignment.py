@@ -424,8 +424,8 @@ truck_classes = (
 truck_fleet = {
     "truck": "truck",
     "truck_ev": "truck",
-    "truck_3n": "truck",
-    "truck_3n_ev": "truck",
+    "truck_2n": "truck",
+    "truck_2n_ev": "truck",
     "semi_trailer": "semi_trailer",
     "semi_trailer_ev": "semi_trailer",
     "trailer_truck": "trailer_truck",
@@ -450,8 +450,8 @@ assignment_modes = {
     "truck": 'k',
     "van": 'v',
     "truck_ev": "k",
-    "truck_3n": "k",
-    "truck_3n_ev": "k",
+    "truck_2n": "k",
+    "truck_2n_ev": "k",
     "semi_trailer_ev": "y",
     "trailer_truck_ev": "y"
 }
