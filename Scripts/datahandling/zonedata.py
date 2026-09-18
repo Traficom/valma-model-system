@@ -19,7 +19,8 @@ from models.logit import divide
 class GridData:
     """Container for unaggregated grid data.
     Grid level data is used to calculate within zone distances.
-    Grid data is then aggregated to zone level using input from zone_variables.json. 
+    Grid is aggregated to zone level using "input_zone_id" as 
+    grouping variable and rules from zone_variables.json. 
 
     Parameters
     ----------
@@ -47,14 +48,20 @@ class GridData:
         self.zone_slice = slice(*all_zone_numbers.searchsorted(area))
         self.zone_numbers = pandas.Index(
             all_zone_numbers[self.zone_slice], name="analysis_zone_id")
+        self.calc_land_area()
         self.calc_intra_dist()
+
+    def calc_land_area(self):
+        geometry = pandas.Series(self.geometry, index=self.data.index)
+        geom_area = geometry.map(
+            lambda geometry: geometry.area / 1_000_000)
+        self["land_area"] = geom_area * self["sh_land_area"]
 
     def calc_intra_dist(self):
         """Calculate within-zone distances from grid-cell attraction.
 
-        Distances are calculated in kilometres. The resulting values are
-        assigned to every grid cell in the corresponding analysis zone so
-        they are available to the normal grid-to-zone aggregation step.
+        Distances are calculated in kilometres. 
+        The resulting values are assigned to every grid cell.
         """
         log.info("Calculate intrazonal distances...")
         result = {
@@ -176,8 +183,6 @@ class GridData:
         self.aggregated_geometry = geometry.groupby(self.mapping).agg(unary_union)
         self.aggregated_geometry = self.aggregated_geometry.reindex(
             aggregated.index)
-        aggregated["land_area"] = self.aggregated_geometry.map(
-            lambda geometry: geometry.area / 1_000_000)
         zone_mapping = self.zone_mapping.reindex(aggregated.index)
         self._add_transformations(aggregated, car_dist_cost, electric_car_share)
         return aggregated, zone_mapping, self.zone_numbers
