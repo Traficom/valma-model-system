@@ -293,13 +293,15 @@ class EmmeAssignmentModel(AssignmentModel):
         resultdata.print_data(miles, "transit_kms.txt")
 
         # Aggregate and print vehicle kms and link lengths
-        kms = dict.fromkeys(param.car_classes, 0.0)
+        ass_classes = (param.car_classes if self.use_free_flow_speeds
+                       else param.private_classes + param.truck_classes)
+        kms = dict.fromkeys(ass_classes, 0.0)
         vdfs = {param.roadclasses[linktype].volume_delay_func
             for linktype in param.roadclasses}
         vdfs.add(0) # Links with car traffic prohibited
         vdf_kms = pandas.concat(
             {ass_class: pandas.Series(0.0, vdfs, name="veh_km")
-                for ass_class in param.car_classes},
+                for ass_class in ass_classes},
             names=["class", "v/d-func"])
         linktypes = (list(dict.fromkeys(param.roadtypes.values()))
                      + list(dict.fromkeys(param.railtypes.values())))
@@ -313,7 +315,7 @@ class EmmeAssignmentModel(AssignmentModel):
                     vdf = linktype - 90
                 else:
                     vdf = 0
-                for ass_class in param.car_classes:
+                for ass_class in ass_classes:
                     veh_kms = link[self._netfield(ass_class)] * link.length
                     kms[ass_class] += veh_kms
                     try:
