@@ -48,14 +48,7 @@ class GridData:
         self.zone_slice = slice(*all_zone_numbers.searchsorted(area))
         self.zone_numbers = pandas.Index(
             all_zone_numbers[self.zone_slice], name="analysis_zone_id")
-        self.calc_land_area()
         self.calc_intra_dist()
-
-    def calc_land_area(self):
-        geometry = pandas.Series(self.geometry, index=self.data.index)
-        geom_area = geometry.map(
-            lambda geometry: geometry.area / 1_000_000)
-        self["land_area"] = geom_area * self["sh_land_area"]
 
     def calc_intra_dist(self):
         """Calculate within-zone distances from grid-cell attraction.
@@ -82,23 +75,42 @@ class GridData:
             for zone in self.zone_numbers
         }
 
-        for zone in self.zone_numbers:
+        for zone_index, zone in enumerate(self.zone_numbers, start=1):
             actual_rows = zone_rows[zone]
-            rows = actual_rows[population[actual_rows] > 0]
-            if not rows.size:
+            origin_rows = actual_rows[population[actual_rows] > 0]
+            destination_rows = actual_rows[sizes[actual_rows] > 0]
+            if destination_rows.size > 300:
+                sample_positions = numpy.linspace(
+                    0, destination_rows.size - 1, 300, dtype=int)
+                destination_rows = destination_rows[sample_positions]
+            if not origin_rows.size or not destination_rows.size:
                 continue
-            coordinates = numpy.array([
+            origin_coordinates = numpy.array([
                 (self.centroids[index].x, self.centroids[index].y)
-                for index in rows
+                for index in origin_rows
+            ])
+            destination_coordinates = numpy.array([
+                (self.centroids[index].x, self.centroids[index].y)
+                for index in destination_rows
             ])
             distances = numpy.linalg.norm(
-                coordinates[:, numpy.newaxis, :]
-                - coordinates[numpy.newaxis, :, :],
+                origin_coordinates[:, numpy.newaxis, :]
+                - destination_coordinates[numpy.newaxis, :, :],
                 axis=2,
             ) / 1000
-            numpy.fill_diagonal(distances, 0.125)
+            destination_positions = numpy.searchsorted(
+                destination_rows, origin_rows)
+            valid_positions = destination_positions < destination_rows.size
+            safe_positions = numpy.minimum(
+                destination_positions, destination_rows.size - 1)
+            valid_positions &= (
+                destination_rows[safe_positions] == origin_rows)
+            distances[
+                numpy.flatnonzero(valid_positions),
+                destination_positions[valid_positions],
+            ] = 0.125
 
-            zone_sizes = sizes[rows]
+            zone_sizes = sizes[origin_rows]
             with numpy.errstate(divide="ignore", invalid="ignore"):
                 log_zone_sizes = numpy.log(zone_sizes)[:, numpy.newaxis]
                 walk_utility = numpy.exp(
@@ -114,7 +126,7 @@ class GridData:
                 bike_probability = divide(bike_utility, expsum)
                 car_probability = divide(car_utility, expsum)
 
-                origin_probability = population[rows].copy()
+                origin_probability = population[origin_rows].copy()
                 origin_probability /= origin_probability.sum()
                 origin_probability[numpy.isnan(origin_probability)] = 1
 
@@ -125,10 +137,9 @@ class GridData:
                     destination_probability = probability.sum(axis=0)
                     distances_by_origin = numpy.sum(
                         divide(probability, destination_probability) * distances,
-                        axis=0)
-                    if actual_rows.size:
-                        result[name][actual_rows] = numpy.sum(
-                            distances_by_origin * origin_probability)
+                        axis=1)
+                    result[name][actual_rows] = numpy.sum(
+                        distances_by_origin * origin_probability)
 
         for name, values in result.items():
             self[name] = pandas.Series(values, index=self.data.index)
@@ -162,12 +173,14 @@ class GridData:
             aggs[column] = self._most_common
 
         aggregated = self.data.groupby(self.submodel).agg(aggs)
-        aggregated.index = aggregated.index.astype(int)
+        aggregated.index = aggregated.index.astype(numpy.int64)
         aggregated.index.name = "analysis_zone_id"
-        zone_numbers = pandas.Index(self.zone_numbers, name="analysis_zone_id")
-        aggregated = aggregated.loc[zone_numbers[0]:zone_numbers[-1]]
-        if aggregated.index.size != zone_numbers.size or (
-                aggregated.index != zone_numbers).any():
+        zone_numbers = pandas.Index(
+            self.zone_numbers, dtype=numpy.int64,
+            name="analysis_zone_id")
+        if (aggregated.index.size != zone_numbers.size or
+            not aggregated.index.isin(zone_numbers).all() or
+            not zone_numbers.isin(aggregated.index).all()):
             for number in aggregated.index:
                 if int(number) not in zone_numbers:
                     msg = (f"Zone {number} from mapping {self.zone_mapping} "
@@ -181,6 +194,7 @@ class GridData:
                     log.error(msg)
                     raise IndexError(msg)
             raise IndexError("Zone numbers did not match for zonedata")
+        aggregated = aggregated.reindex(zone_numbers)
         geometry = pandas.Series(self.geometry, index=self.data.index)
         self.aggregated_geometry = geometry.groupby(self.mapping).agg(unary_union)
         self.aggregated_geometry = self.aggregated_geometry.reindex(
