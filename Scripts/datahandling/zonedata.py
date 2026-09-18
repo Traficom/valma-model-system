@@ -108,9 +108,9 @@ class GridData:
             with numpy.errstate(divide="ignore", invalid="ignore"):
                 log_zone_sizes = numpy.log(zone_sizes)[:, numpy.newaxis]
                 mode_parameters = {
-                    "dist_walk": (-0.8, 1.5),
-                    "dist_bike": (-0.3, -0.5),
-                    "dist_car": (-0.1, 0.0),
+                    "dist_walk": (-1.373, 0),
+                    "dist_bike": (-.4783, -2.184),
+                    "dist_car": (-.1347, -2.077),
                 }
                 utilities = {
                     name: numpy.exp(
