@@ -84,7 +84,9 @@ class GridData:
 
         for zone in self.zone_numbers:
             actual_rows = zone_rows[zone]
-            rows = actual_rows if actual_rows.size else numpy.array([0])
+            rows = actual_rows[population[actual_rows] > 0]
+            if not rows.size:
+                continue
             coordinates = numpy.array([
                 (self.centroids[index].x, self.centroids[index].y)
                 for index in rows
