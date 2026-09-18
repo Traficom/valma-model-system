@@ -42,7 +42,7 @@ class GridData:
         self.submodel = submodel
         self.zone_mapping = self.data[submodel]
         self.data_type = data_type
-        all_zone_numbers = numpy.array(zone_numbers)
+        all_zone_numbers = numpy.asarray(zone_numbers, dtype=numpy.int64)
         self.all_zone_numbers = all_zone_numbers
         area = param.purpose_areas[model_area]
         self.zone_slice = slice(*all_zone_numbers.searchsorted(area))
@@ -75,7 +75,7 @@ class GridData:
             for zone in self.zone_numbers
         }
 
-        for zone_index, zone in enumerate(self.zone_numbers, start=1):
+        for zone in self.zone_numbers:
             actual_rows = zone_rows[zone]
             origin_rows = actual_rows[population[actual_rows] > 0]
             destination_rows = actual_rows[sizes[actual_rows] > 0]
@@ -85,14 +85,8 @@ class GridData:
                 destination_rows = destination_rows[sample_positions]
             if not origin_rows.size or not destination_rows.size:
                 continue
-            origin_coordinates = numpy.array([
-                (self.centroids[index].x, self.centroids[index].y)
-                for index in origin_rows
-            ])
-            destination_coordinates = numpy.array([
-                (self.centroids[index].x, self.centroids[index].y)
-                for index in destination_rows
-            ])
+            origin_coordinates = self._coordinates(origin_rows)
+            destination_coordinates = self._coordinates(destination_rows)
             distances = numpy.linalg.norm(
                 origin_coordinates[:, numpy.newaxis, :]
                 - destination_coordinates[numpy.newaxis, :, :],
@@ -113,27 +107,28 @@ class GridData:
             zone_sizes = sizes[origin_rows]
             with numpy.errstate(divide="ignore", invalid="ignore"):
                 log_zone_sizes = numpy.log(zone_sizes)[:, numpy.newaxis]
-                walk_utility = numpy.exp(
-                    -0.8 * distances + 1.5 + log_zone_sizes)
-                bike_utility = numpy.exp(
-                    -0.3 * distances - 0.5 + log_zone_sizes)
-                car_utility = numpy.exp(-0.1 * distances + log_zone_sizes)
-                expsum = numpy.sum(
-                    walk_utility + bike_utility + car_utility, axis=0)
-                
-
-                walk_probability = divide(walk_utility, expsum)
-                bike_probability = divide(bike_utility, expsum)
-                car_probability = divide(car_utility, expsum)
+                mode_parameters = {
+                    "dist_walk": (-0.8, 1.5),
+                    "dist_bike": (-0.3, -0.5),
+                    "dist_car": (-0.1, 0.0),
+                }
+                utilities = {
+                    name: numpy.exp(
+                        coefficient * distances
+                        + intercept
+                        + log_zone_sizes
+                    )
+                    for name, (coefficient, intercept)
+                    in mode_parameters.items()
+                }
+                expsum = numpy.sum(list(utilities.values()), axis=0)
 
                 origin_probability = population[origin_rows].copy()
                 origin_probability /= origin_probability.sum()
                 origin_probability[numpy.isnan(origin_probability)] = 1
 
-                for name, probability in (
-                        ("dist_walk", walk_probability),
-                        ("dist_bike", bike_probability),
-                        ("dist_car", car_probability)):
+                for name, utility in utilities.items():
+                    probability = divide(utility, expsum)
                     destination_probability = probability.sum(axis=0)
                     distances_by_origin = numpy.sum(
                         divide(probability, destination_probability) * distances,
@@ -143,6 +138,12 @@ class GridData:
 
         for name, values in result.items():
             self[name] = pandas.Series(values, index=self.data.index)
+
+    def _coordinates(self, rows):
+        return numpy.array([
+            (self.centroids[index].x, self.centroids[index].y)
+            for index in rows
+        ])
 
     def __getitem__(self, key: str):
         return self.data[key]
@@ -175,25 +176,16 @@ class GridData:
         aggregated = self.data.groupby(self.submodel).agg(aggs)
         aggregated.index = aggregated.index.astype(numpy.int64)
         aggregated.index.name = "analysis_zone_id"
-        zone_numbers = pandas.Index(
-            self.zone_numbers, dtype=numpy.int64,
-            name="analysis_zone_id")
-        if (aggregated.index.size != zone_numbers.size or
-            not aggregated.index.isin(zone_numbers).all() or
-            not zone_numbers.isin(aggregated.index).all()):
-            for number in aggregated.index:
-                if int(number) not in zone_numbers:
-                    msg = (f"Zone {number} from mapping {self.zone_mapping} "
-                        + "not found in assignment")
-                    log.error(msg)
-                    raise IndexError(msg)
-            for number in zone_numbers:
-                if number not in aggregated.index:
-                    msg = (f"Assignment zone {number} not found in zonedata "
-                        + f"{self.zone_mapping}")
-                    log.error(msg)
-                    raise IndexError(msg)
-            raise IndexError("Zone numbers did not match for zonedata")
+        zone_numbers = self.zone_numbers
+        missing_zones = zone_numbers.difference(aggregated.index).tolist()
+        extra_zones = aggregated.index.difference(zone_numbers).tolist()
+        if missing_zones or extra_zones:
+            msg = (
+                f"Zone numbers did not match for zonedata: "
+                f"missing={missing_zones}, extra={extra_zones}"
+            )
+            log.error(msg)
+            raise IndexError(msg)
         aggregated = aggregated.reindex(zone_numbers)
         geometry = pandas.Series(self.geometry, index=self.data.index)
         self.aggregated_geometry = geometry.groupby(self.mapping).agg(unary_union)
@@ -213,25 +205,15 @@ class GridData:
     def export(self, path: Path):
         """Export aggregated grid data and geometries with Fiona."""
         data, _, _ = self.aggregate()
-        driver = {
-            ".gpkg": "GPKG",
-            ".shp": "ESRI Shapefile",
-            ".geojson": "GeoJSON",
-            ".json": "GeoJSON",
-        }.get(path.suffix.lower())
-        if driver is None:
-            raise ValueError(f"Unsupported spatial output format: {path.suffix}")
-
         schema = {
             "geometry": "Unknown",
             "properties": {
                 column: self._fiona_type(data[column]) for column in data
             },
         }
-        options = {"layer": path.stem} if driver == "GPKG" else {}
         with fiona.open(
-            path, "w", driver=driver, crs=self.crs, schema=schema,
-            **options) as destination:
+            path, "w", driver="GPKG", layer=path.stem,
+            crs=self.crs, schema=schema) as destination:
             for zone, row in data.iterrows():
                 properties = {
                     column: self._fiona_value(value)
