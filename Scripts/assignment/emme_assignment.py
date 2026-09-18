@@ -73,10 +73,6 @@ class EmmeAssignmentModel(AssignmentModel):
         self.separate_emme_scenarios = separate_emme_scenarios
         self.save_matrices = save_matrices
         self.use_free_flow_speeds = use_free_flow_speeds
-        self.transit_classes = (param.long_distance_transit_classes
-            if self.use_free_flow_speeds else param.simple_transit_classes)
-        self.simple_transit_classes = (param.long_dist_simple_classes
-            if self.use_free_flow_speeds else param.simple_transit_classes)
         self.delete_extra_matrices = delete_extra_matrices
         self._delete_strat_files = delete_strat_files
         self.time_periods = time_periods
@@ -297,8 +293,8 @@ class EmmeAssignmentModel(AssignmentModel):
         resultdata.print_data(miles, "transit_kms.txt")
 
         # Aggregate and print vehicle kms and link lengths
-        ass_classes = (param.car_classes + param.long_distance_transit_classes
-            if self.use_free_flow_speeds else param.simple_transport_classes)
+        ass_classes = (param.car_classes if self.use_free_flow_speeds
+                       else param.private_classes + param.truck_classes)
         kms = dict.fromkeys(ass_classes, 0.0)
         vdfs = {param.roadclasses[linktype].volume_delay_func
             for linktype in param.roadclasses}
@@ -307,7 +303,6 @@ class EmmeAssignmentModel(AssignmentModel):
             {ass_class: pandas.Series(0.0, vdfs, name="veh_km")
                 for ass_class in ass_classes},
             names=["class", "v/d-func"])
-        #The following line only works well in Python 3.7+
         linktypes = (list(dict.fromkeys(param.roadtypes.values()))
                      + list(dict.fromkeys(param.railtypes.values())))
         linklengths = pandas.Series(0.0, linktypes, name="length")
@@ -331,8 +326,16 @@ class EmmeAssignmentModel(AssignmentModel):
                     linklengths[param.railtypes[linktype]] += link.length
                 else:
                     linklengths[param.roadtypes[vdf]] += link.length / 2
+        transit_kms = defaultdict(float)
+        for ap in self.assignment_periods:
+            for tc in ap.assignment_modes:
+                if tc in param.transit_classes:
+                    vol_fac = param.volume_factors[tc][ap.name]
+                    for mode, km in ap.assignment_modes[tc].mode_kms.items():
+                        transit_kms[f"{tc}_{mode}"] += km / vol_fac
+        kms.update(transit_kms)
         resultdata.print_concat(vdf_kms, "vehicle_kilometers_by_road_class.txt")
-        for ass_class in ass_classes:
+        for ass_class in kms:
             resultdata.print_line(
                 "{}:\t{:1.0f}".format(ass_class, kms[ass_class]),
                 "vehicle_kilometers_by_mode")
@@ -562,7 +565,7 @@ class EmmeAssignmentModel(AssignmentModel):
         for ap in self.assignment_periods:
             node_hour_attrs[ap.name] = {}
             segment_hour_attrs[ap.name] = {}
-            for tc in self.simple_transit_classes:
+            for tc in param.simple_transit_classes:
                 for result in ap.assignment_modes[tc].node_results.values():
                     node_hour_attrs[ap.name][tc] = result[ap.name]
                     node_day_attrs[tc] = result["vrk"]
