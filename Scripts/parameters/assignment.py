@@ -326,7 +326,7 @@ volume_factors = {
     "transit_car_access": {
         "vrk": 1.0,
     },
-    "transit_car_access": {
+    "transit_taxi_access": {
         "vrk": 1.0,
     },
     "airplane_car_egress": {
@@ -335,7 +335,7 @@ volume_factors = {
     "transit_car_egress": {
         "vrk": 1.0,
     },
-    "transit_car_egress": {
+    "transit_taxi_egress": {
         "vrk": 1.0,
     },
 }
@@ -371,12 +371,12 @@ car_and_van_classes = car_classes + ("van",)
 private_classes = car_and_van_classes + ("bike",)
 car_access_classes = (
     "transit_car_access",
-    "transit_car_access",
+    "transit_taxi_access",
     "airplane_car_access",
 )
 car_egress_classes = (
     "transit_car_egress",
-    "transit_car_egress",
+    "transit_taxi_egress",
     "airplane_car_egress",
 )
 mixed_mode_classes = car_access_classes + car_egress_classes
@@ -400,7 +400,7 @@ simple_transport_classes = (private_classes
                             + truck_classes)
 transport_classes = simple_transport_classes + mixed_mode_classes
 intermodals = {
-    "transit": ["transit_car_access", "transit_car_access", "transit_car_egress"],
+    "transit": ["transit_car_access", "transit_taxi_access", "transit_taxi_egress"],
     "airplane": ["airplane_car_access", "airplane_car_egress"],
 }
 main_mode = 'h'
@@ -421,10 +421,10 @@ vot_classes = {
     "transit": "all",
     "airplane": "all",
     "transit_car_access": "all",
-    "transit_car_access": "all",
+    "transit_taxi_access": "all",
     "airplane_car_access": "all",
     "transit_car_egress": "all",
-    "transit_car_egress": "all",
+    "transit_taxi_egress": "all",
     "airplane_car_egress": "all",
 }
 local_transit_modes = [
@@ -441,10 +441,10 @@ long_dist_transit_modes = {
     "transit": ['e', 'j', 'd'],
     "airplane": ['l'],
     "transit_car_access": ['j'],
-    "transit_car_access": ['e', 'j'],
+    "transit_taxi_access": ['e', 'j'],
     "airplane_car_access": ['l'],
     "transit_car_egress": ['j'],
-    "transit_car_egress": ['e', 'j'],
+    "transit_taxi_egress": ['e', 'j'],
     "airplane_car_egress": ['l'],
 }
 aux_modes = [
@@ -567,10 +567,10 @@ mode_impedance = {
     "bike": "bike",
     "walk": "walk",
     "transit_car_access": "transit_car_access",
-    "transit_car_access": "transit_car_access",
+    "transit_taxi_access": "transit_taxi_access",
     "airplane_car_access": "airplane_car_access",
     "transit_car_egress": "transit_car_egress",
-    "transit_car_egress": "transit_car_egress",
+    "transit_taxi_egress": "transit_taxi_egress",
     "airplane_car_egress": "airplane_car_egress"
 
 }
@@ -586,10 +586,10 @@ mode_assignment_classes = {
     "bike": ["bike"],
     "walk": ["walk"],
     "transit_car_access": ["transit_car_access", "transit_car_egress"],
-    "transit_car_access": ["transit_car_access", "transit_car_egress"],
+    "transit_taxi_access": ["transit_taxi_access", "transit_taxi_egress"],
     "airplane_car_access": ["airplane_car_access", "airplane_car_egress"],
     "transit_car_egress": ["transit_car_egress", "transit_car_access"],
-    "transit_car_egress": ["transit_car_egress", "transit_car_access"],
+    "transit_taxi_egress": ["transit_taxi_egress", "transit_taxi_access"],
     "airplane_car_egress": ["airplane_car_egress", "airplane_car_access"],
     "truck": ["truck"],
     "semi_trailer": ["semi_trailer"],
