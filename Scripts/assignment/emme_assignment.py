@@ -534,7 +534,7 @@ class EmmeAssignmentModel(AssignmentModel):
             hour_attrs[ap.name] = {}
             for mode in ap.assignment_modes.values():
                 hour_attrs[ap.name][mode.name] = mode.volume_attr
-                day_attrs[mode.name] = self._netfield(mode.name)
+                day_attrs[mode.name] = f"{self._netfield(mode.name)}_transit_leg_volume"
         for attr in day_attrs:
             self.emme_project.create_network_field(
                 "LINK", "REAL", day_attrs[attr], f"{attr}_vol",
