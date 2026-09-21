@@ -206,7 +206,8 @@ class GridData:
         schema = {
             "geometry": "Unknown",
             "properties": {
-                column: self._fiona_type(data[column]) for column in data
+                "analysis_zone_id": "int",
+                **{column: self._fiona_type(data[column]) for column in data},
             },
         }
         with fiona.open(
@@ -217,6 +218,7 @@ class GridData:
                     column: self._fiona_value(value)
                     for column, value in row.items()
                 }
+                properties["analysis_zone_id"] = int(zone)
                 destination.write({
                     "geometry": mapping(self.aggregated_geometry[zone]),
                     "properties": properties,
@@ -241,8 +243,6 @@ class GridData:
         return value.item() if isinstance(value, numpy.generic) else value
 
     def _add_transformations(self, data: pandas.DataFrame):
-        data["time_car"] = 2 * 60 * data["dist_car"] / 20
-
         avg_hh_size = {"hh1": 1, "hh2": 2, "hh3": 4.13}
         hh_pop = sum(avg_hh_size[hh] * data[f"sh_{hh}"]
                      for hh in avg_hh_size)
@@ -294,15 +294,17 @@ class ZoneData:
     def __init__(self, *args, **kwargs):
         self._init_data(*args, **kwargs)
 
-    def _init_data(self, data, mapping, zone_numbers, model_area,
+    def _init_data(self, zone_data_path, zone_numbers, submodel="submodel",
+                 model_area="domestic",
                  municipality_calibration: Dict[str, pandas.Series] = {},
                  extra_dummies: Dict[str, Sequence[str]] = {},
                  car_dist_cost: Optional[float] = None,
                  electric_car_share: Optional[Dict] = None):
+        data = read_zonedata(zone_data_path, zone_numbers)
         self._values = {}
         self.share = ShareChecker(self)
         Zone.counter = 0
-        self.mapping = mapping
+        self.submodel = submodel
         all_zone_numbers = numpy.array(zone_numbers)
         self.all_zone_numbers = all_zone_numbers
         area = param.purpose_areas[model_area]
@@ -367,6 +369,7 @@ class ZoneData:
             data: pandas.DataFrame,
             car_dist_cost: Optional[float],
             electric_car_share: Optional[Dict]):
+        data["time_car"] = 2 * 60 * data["dist_car"] / 20
         if car_dist_cost is not None:
             data["cost_car"] = 2 * car_dist_cost * data["dist_car"]
         if electric_car_share is not None:
@@ -552,7 +555,7 @@ class ZoneData:
         for submodel in submodels:
             if submodel is None:
                 continue
-            if self.mapping.name == submodel.lower().replace('-', '_'):
+            if self.submodel == submodel.lower().replace('-', '_'):
                 return mapping == submodel
         else:
             return pandas.Series(True, self.zone_numbers)
