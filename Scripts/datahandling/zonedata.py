@@ -63,8 +63,8 @@ class GridData:
             "dist_car": numpy.zeros(len(self.data)),
         }
         sizes = numpy.clip(
-            self.data["workplaces"].to_numpy(dtype=float)
-            + self.data["population"].to_numpy(dtype=float),
+            self.data["population"].to_numpy(dtype=float)
+            + 2*self.data["workplaces"].to_numpy(dtype=float),
             0,
             None,
         )
