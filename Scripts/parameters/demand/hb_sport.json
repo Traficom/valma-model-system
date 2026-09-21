@@ -23,12 +23,12 @@
         }
     },
     "sec_dest_rate": {
-        "car_drv": 1.0327,
-        "car_pax": 1.0316,
+        "car_drive": 1.0327,
+        "car_passenger": 1.0316,
         "transit": 1.0102
     },
     "impedance_share": {
-        "car_drv": {
+        "car_drive": {
             "aht": [
                 0.09,
                 0.0477
@@ -42,7 +42,7 @@
                 0.1684
             ]
         },
-        "car_pax": {
+        "car_passenger": {
             "aht": [
                 0.09,
                 0.0477
@@ -91,15 +91,15 @@
     "parking_cost_share": 0.0,
     "car_cost_sharing": 1.0,
     "occupancy": {
-        "car_drv": 1.651,
-        "car_pax": 2.791
+        "car_drive": 1.651,
+        "car_passenger": 2.791
     },
     "distance_boundaries": {
-        "car_drv": [
+        "car_drive": [
             0,
             300
         ],
-        "car_pax": [
+        "car_passenger": [
             0,
             300
         ],
@@ -117,7 +117,7 @@
         ]
     },
     "destination_choice": {
-        "car_drv": {
+        "car_drive": {
             "attraction": {},
             "impedance": {
                 "time": -0.02128,
@@ -132,7 +132,7 @@
                 "sport_facility_outdoor": 0.115556
             }
         },
-        "car_pax": {
+        "car_passenger": {
             "attraction": {},
             "impedance": {
                 "time": -0.02344,
@@ -194,7 +194,7 @@
         }
     },
     "mode_choice": {
-        "car_drv": {
+        "car_drive": {
             "constant": -8.091,
             "generation": {},
             "attraction": {},
@@ -208,7 +208,7 @@
                 "sh_cars1_hh2": 5.4
             }
         },
-        "car_pax": {
+        "car_passenger": {
             "constant": -6.942,
             "generation": {},
             "attraction": {},
@@ -258,7 +258,7 @@
             "individual_dummy": {}
         },
         "scaling": {
-            "car_drv": {
+            "car_drive": {
                 "constant": 0.4763,
                 "individual_dummy": {
                     "sh_cars1_hh1": 0.4763,
@@ -266,7 +266,7 @@
                     "sh_cars1_hh2": 0.4763
                 }
             },
-            "car_pax": {
+            "car_passenger": {
                 "constant": 0.4763,
                 "individual_dummy": {
                     "sh_cars1_hh2": 0.4763,
@@ -292,10 +292,10 @@
             }
         },
         "calibration": {
-            "car_drv": {
+            "car_drive": {
                 "constant": 0.0
             },
-            "car_pax": {
+            "car_passenger": {
                 "constant": 0.0
             },
             "transit": {
