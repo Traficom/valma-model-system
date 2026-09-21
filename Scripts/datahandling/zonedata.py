@@ -151,9 +151,7 @@ class GridData:
     def __setitem__(self, key: str, value):
         self.data[key] = value
 
-    def aggregate(self,
-                   car_dist_cost: Optional[float] = None,
-                   electric_car_share: Optional[Dict] = None):
+    def aggregate(self):
         zone_variables: dict = json.loads(
             (Path(__file__).parent / "zone_variables.json").read_text("utf-8")
         )[self.data_type]
@@ -192,7 +190,7 @@ class GridData:
         self.aggregated_geometry = self.aggregated_geometry.reindex(
             aggregated.index)
         zone_mapping = self.zone_mapping.reindex(aggregated.index)
-        self._add_transformations(aggregated, car_dist_cost, electric_car_share)
+        self._add_transformations(aggregated)
         return aggregated, zone_mapping, self.zone_numbers
 
     @staticmethod
@@ -242,21 +240,8 @@ class GridData:
             return None
         return value.item() if isinstance(value, numpy.generic) else value
 
-    def _add_transformations(self,
-                             data: pandas.DataFrame,
-                             car_dist_cost: Optional[float],
-                             electric_car_share: Optional[Dict]):
+    def _add_transformations(self, data: pandas.DataFrame):
         data["time_car"] = 2 * 60 * data["dist_car"] / 20
-        if car_dist_cost is not None:
-            data["cost_car"] = 2 * car_dist_cost * data["dist_car"]
-        if electric_car_share is not None:
-            car_shares = pandas.DataFrame(electric_car_share).T.reindex(
-                index=data["county"].values).fillna(
-                    electric_car_share["default"])
-            car_shares.index = data.index
-            data["sh_bev"] = car_shares["bev"]
-            data["sh_phev"] = car_shares["phev"]
-            data["sh_icev"] = 1 - car_shares.sum(axis=1)
 
         avg_hh_size = {"hh1": 1, "hh2": 2, "hh3": 4.13}
         hh_pop = sum(avg_hh_size[hh] * data[f"sh_{hh}"]
@@ -311,7 +296,9 @@ class ZoneData:
 
     def _init_data(self, data, mapping, zone_numbers, model_area,
                  municipality_calibration: Dict[str, pandas.Series] = {},
-                 extra_dummies: Dict[str, Sequence[str]] = {}):
+                 extra_dummies: Dict[str, Sequence[str]] = {},
+                 car_dist_cost: Optional[float] = None,
+                 electric_car_share: Optional[Dict] = None):
         self._values = {}
         self.share = ShareChecker(self)
         Zone.counter = 0
@@ -322,6 +309,7 @@ class ZoneData:
         self.zone_slice = slice(*all_zone_numbers.searchsorted(area))
         self.zone_numbers = pandas.Index(
             all_zone_numbers[self.zone_slice], name="analysis_zone_id")
+        self._add_transformations(data, car_dist_cost, electric_car_share)
         demand_aggs = ["municipality", "county", "submodel", "calibration_area", "pt_authority"]
         result_aggs = demand_aggs + [key for key in data if "aggregate_results_" in key]
         source_shares = [
@@ -373,6 +361,22 @@ class ZoneData:
         self["sqrt_pop_density"] = numpy.sqrt(pop_density)
         self._calc_household_shares(share="sh")
         self._calc_household_shares(share="sh_pop")
+
+    @staticmethod
+    def _add_transformations(
+            data: pandas.DataFrame,
+            car_dist_cost: Optional[float],
+            electric_car_share: Optional[Dict]):
+        if car_dist_cost is not None:
+            data["cost_car"] = 2 * car_dist_cost * data["dist_car"]
+        if electric_car_share is not None:
+            car_shares = pandas.DataFrame(electric_car_share).T.reindex(
+                index=data["county"].values).fillna(
+                    electric_car_share["default"])
+            car_shares.index = data.index
+            data["sh_bev"] = car_shares["bev"]
+            data["sh_phev"] = car_shares["phev"]
+            data["sh_icev"] = 1 - car_shares.sum(axis=1)
 
     def _calc_household_shares(self, share: str = "sh"):
         """Calculate household adult, childen and license shares.
