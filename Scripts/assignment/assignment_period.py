@@ -538,7 +538,7 @@ class AssignmentPeriod(Period):
 
     def _calc_background_traffic(self, include_trucks: bool = False):
         """Calculate background traffic (buses)."""
-        bus_vol_attr = f"{self.netfield("bus")}_volume"
+        bus_vol_attr = f"{self.netfield('bus')}_volume"
         self.emme_project.create_network_field(
             "LINK", "REAL", bus_vol_attr, bus_vol_attr,
             overwrite=True, scenario=self.emme_scenario)
