@@ -15,7 +15,7 @@ from assignment.mock_assignment import MockAssignmentModel
 import utils.log as log
 import assignment.departure_time as dt
 from datahandling.resultdata import ResultsData
-from datahandling.zonedata import ZoneData
+from datahandling.zonedata import ZoneData, GridData
 from datahandling.matrixdata import MatrixData
 from demand.trips import DemandModel
 from demand.external import ExternalPurpose
@@ -101,9 +101,13 @@ class ModelSystem:
             municip_calib = pandas.read_csv(path, sep="\t",
                 index_col=["generation", "attraction"]).to_dict("series")
         log.info(f"Read zonedata from {zone_data_path}")
+        grid_data = GridData(zone_data_path, submodel, self.zone_numbers,
+                             model_area="domestic")
+        data, mapping, zone_numbers = grid_data.aggregate()
+        grid_data.export(Path(results_path / f"{submodel}.gpkg"))
         self._zone_datas = {
             model_area: ZoneData(
-                zone_data_path, self.zone_numbers, submodel, model_area,
+                data, submodel, zone_numbers, model_area,
                 municipality_calibration=municip_calib,
                 car_dist_cost=self.car_dist_cost["icev"],
                 electric_car_share=cost_data["car_shares"]

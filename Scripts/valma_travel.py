@@ -33,9 +33,9 @@ def main(args):
     base_matrices_path = Path(args.base_data_folder, DEMAND_MATRIX_FOLDER)
     freight_matrices_path = (Path(args.freight_matrix_path)
         if args.freight_matrix_path is not None else None)
+    zone_data_file = Path(args.zone_data_file)
     cost_data_file = Path(args.cost_data_file)
     result_data_folder = Path(args.result_data_folder, args.scenario_name)
-    zone_data_file = result_data_folder / f"{args.submodel}.gpkg"
     emme_project_path = Path(args.emme_project_file)
     log_extra = {
         "status": {

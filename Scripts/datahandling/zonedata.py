@@ -294,13 +294,12 @@ class ZoneData:
     def __init__(self, *args, **kwargs):
         self._init_data(*args, **kwargs)
 
-    def _init_data(self, zone_data_path, zone_numbers, submodel="submodel",
-                 model_area="domestic",
+    def _init_data(self, data, submodel, zone_numbers, model_area,
                  municipality_calibration: Dict[str, pandas.Series] = {},
                  extra_dummies: Dict[str, Sequence[str]] = {},
                  car_dist_cost: Optional[float] = None,
                  electric_car_share: Optional[Dict] = None):
-        data = read_zonedata(zone_data_path, zone_numbers)
+
         self._values = {}
         self.share = ShareChecker(self)
         Zone.counter = 0
