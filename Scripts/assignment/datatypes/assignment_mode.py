@@ -47,7 +47,7 @@ class AssignmentMode(ABC):
             else assignment_period.netfield(name)
         )
         self.emme_project.create_network_field(
-            "LINK", "REAL", self.volume_attr, f"{self.name}_vol",
+            "LINK", "REAL", self.volume_attr, self.volume_attr,
             overwrite=True, scenario=self.emme_scenario)
         self._save_matrices = save_matrices
         self._matrices: Dict[str, EmmeMatrix] = {}

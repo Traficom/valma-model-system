@@ -274,7 +274,7 @@ class MixedMode(TransitMode):
                     mode_cost["cost_perception_factor"] = self.vot_inv
         self.park_ride_results = f"#{self.name}_vrk_car_leg_volume"
         self.emme_project.create_network_field(
-            "LINK", "REAL", self.park_ride_results, self.name,
+            "LINK", "REAL", self.park_ride_results, self.park_ride_results,
             overwrite=True, scenario=self.emme_scenario)
         self.transit_spec["modes"].append(param.park_and_ride_mode)
         self.ntw_results_spec["on_links"] = {

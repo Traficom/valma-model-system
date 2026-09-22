@@ -541,7 +541,7 @@ class EmmeAssignmentModel(AssignmentModel):
                 )
         for attr in day_attrs:
             self.emme_project.create_network_field(
-                "LINK", "REAL", day_attrs[attr], f"{attr}_vol",
+                "LINK", "REAL", day_attrs[attr], day_attrs[attr],
                 overwrite=True, scenario=self.day_scenario, network=network)
         # save link volumes to result network
         for link in network.links():
