@@ -12,6 +12,8 @@
         "semi_trailer_ev": 0.54,
         "trailer_truck": 0.85,
         "trailer_truck_ev": 0.68,
+        "trailer_truck_76t": 0.98,
+        "trailer_truck_76ev": 0.81,
         "diesel_train": 5.17,
         "electric_train": 2.94,
         "domestic_vessel": 54.2
@@ -25,6 +27,8 @@
         "semi_trailer_ev": 28.85,
         "trailer_truck": 36.0,
         "trailer_truck_ev": 30.61,
+        "trailer_truck_76t": 37.21,
+        "trailer_truck_76ev": 32.59,
         "diesel_train": 284.7,
         "electric_train": 316.7,
         "domestic_vessel": 208.8
