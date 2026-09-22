@@ -547,7 +547,7 @@ class AssignmentPeriod(Period):
         background_traffic = param.background_traffic_attr.replace(
             "ul", "data")
         # calc @bus and data3
-        heavy = [self.netfield(ass_class) for ass_class in param.truck_classes]
+        heavy = [f"{self.netfield(ass_class)}_volume" for ass_class in param.truck_classes]
         for link in network.links():
             if link.type > 100: # If car or bus link
                 freq = 0

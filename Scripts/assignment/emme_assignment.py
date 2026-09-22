@@ -316,7 +316,7 @@ class EmmeAssignmentModel(AssignmentModel):
                 else:
                     vdf = 0
                 for ass_class in ass_classes:
-                    veh_kms = link[self._netfield(ass_class)] * link.length
+                    veh_kms = link[f"{self._netfield(ass_class)}_volume"] * link.length
                     kms[ass_class] += veh_kms
                     try:
                         vdf_kms[ass_class][vdf] += veh_kms
