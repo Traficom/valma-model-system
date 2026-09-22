@@ -87,10 +87,14 @@ class GridData:
                 continue
             origin_coordinates = self._coordinates(origin_rows)
             destination_coordinates = self._coordinates(destination_rows)
-            distances = numpy.linalg.norm(
-                origin_coordinates[:, numpy.newaxis, :]
-                - destination_coordinates[numpy.newaxis, :, :],
-                axis=2,
+            distances = numpy.sqrt(
+                sum(
+                    (
+                        origin_coordinates[:, axis, numpy.newaxis]
+                        - destination_coordinates[:, axis]
+                    ) ** 2
+                    for axis in (0, 1)
+                )
             ) / 1000
             destination_positions = numpy.searchsorted(
                 destination_rows, origin_rows)
