@@ -3,7 +3,7 @@ import numpy
 from pathlib import Path
 
 import utils.log as log
-from travel_iteration import ModelSystem
+from travel_iteration import ModelSystem, LOS_MATRIX_FOLDER
 from assignment.mock_assignment import MockAssignmentModel
 from datahandling.matrixdata import MatrixData
 from datatypes.demand import Demand
@@ -31,7 +31,7 @@ class ModelTest(unittest.TestCase):
         print("Testing model system...")
         log.initialize(Config())
         ass_model = MockAssignmentModel(MatrixData(
-            RESULTS_PATH / "Matrices" / "uusimaa"))
+            RESULTS_PATH / LOS_MATRIX_FOLDER / "uusimaa"))
         model = ModelSystem(
             ZONEDATA_PATH, COSTDATA_PATH, BASE_MATRICES_PATH, RESULTS_PATH,
             ass_model, "uusimaa", MODE_DEST_CALIBRATION_FILE,
@@ -64,7 +64,7 @@ class ModelTest(unittest.TestCase):
     def test_long_dist_models(self):
         print("Testing model system for long trips...")
         ass_model = MockAssignmentModel(
-            MatrixData(RESULTS_PATH / "Matrices" / "koko_suomi"),
+            MatrixData(RESULTS_PATH / LOS_MATRIX_FOLDER / "koko_suomi"),
             use_free_flow_speeds=True, time_periods={"vrk": "WholeDayPeriod"})
         model = ModelSystem(
             ZONEDATA_PATH, COSTDATA_PATH, BASE_MATRICES_PATH, RESULTS_PATH,
@@ -87,7 +87,7 @@ class ModelTest(unittest.TestCase):
         self.assertIsNotNone(impedances["cost"])
         self.assertIsNotNone(impedances["dist"])
         self.assertIs(type(impedances["time"]), dict)
-        self.assertEquals(len(impedances["time"]), 4)
+        self.assertEquals(len(impedances["time"]), 6)
         self.assertIsNotNone(impedances["time"]["transit"])
         self.assertIs(type(impedances["time"]["transit"]), numpy.ndarray)
         self.assertEquals(impedances["time"]["transit"].ndim, 2)

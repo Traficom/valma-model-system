@@ -9,7 +9,9 @@ import parameters.departure_time as param
 from parameters.assignment import (
     transport_classes, 
     volume_factors, 
-    mode_assignment_classes
+    mode_assignment_classes,
+    car_classes,
+    mixed_mode_classes
 )
 
 
@@ -49,7 +51,7 @@ class DepartureTimeModel:
             max_gap : float
                 Maximum gap for OD pair in car work demand matrix
         """
-        car_demand = next(iter(self.demand.values()))["car"]
+        car_demand = next(iter(self.demand.values()))["icev"]
         max_gap = numpy.abs(car_demand - self.old_car_demand).max()
         try:
             old_sum = self.old_car_demand.sum()
@@ -75,7 +77,7 @@ class DepartureTimeModel:
             Default is all assignment classes.
         """
         try:
-            self.old_car_demand = next(iter(self.demand.values()))["car"]
+            self.old_car_demand = next(iter(self.demand.values()))["icev"]
         except:  # In MockAssignmentModel, this can fail for various reasons
             pass
         n = self.nr_zones
@@ -100,9 +102,10 @@ class DepartureTimeModel:
             pass
         position: Sequence[int] = demand.position
         ass_classes = mode_assignment_classes[demand.mode]
-        for is_return, ass_class in enumerate(ass_classes):
+        for i, ass_class in enumerate(ass_classes):
             if len(position) == 2:
-                share: Dict[str, Any] = demand.purpose.demand_share[demand.mode]
+                share: Dict[str, Any] = demand.purpose.demand_share[ass_class]
+                is_return = i and ass_class in mixed_mode_classes
                 for ap in self.assignment_periods:
                     if ass_class in ap.assignment_modes:
                         mtx = demand.matrix.T if is_return else demand.matrix
@@ -131,11 +134,11 @@ class DepartureTimeModel:
         vol_fac = volume_factors[ass_class][time_period]
         try:
             large_mtx[r_0:r_n, c_0:c_n] += vol_fac * demand_share[0] * mtx
-            large_mtx[c_0:c_n, r_0:r_n] += vol_fac * demand_share[1] * mtx.T
+            large_mtx[c_0:c_n, r_0:r_n] += (vol_fac * demand_share[1] * mtx).T
         except ValueError:
             share = param.backup_demand_share[time_period]
             large_mtx[r_0:r_n, c_0:c_n] += vol_fac * share[0] * mtx
-            large_mtx[c_0:c_n, r_0:r_n] += vol_fac * share[1] * mtx.T
+            large_mtx[c_0:c_n, r_0:r_n] += (vol_fac * share[1] * mtx).T
             log.warn("{} {} matrix not matching {} demand shares. Resorted to backup demand shares.".format(
                 mtx.shape, ass_class, len(demand_share[0])))
         self.demand[time_period][ass_class] = large_mtx
@@ -148,9 +151,9 @@ class DepartureTimeModel:
         mtx: numpy.ndarray = demand.matrix
         tp: str = time_period
         (o, d1, d2) = demand.position
-        share = demand.purpose.demand_share[demand.mode][tp]
+        share = demand.purpose.demand_share[ass_class][tp]
         if demand.dest is not None:
-            share = demand.purpose.sec_dest_purpose.demand_share[demand.mode][tp]
+            share = demand.purpose.sec_dest_purpose.demand_share[ass_class][tp]
         colsum = mtx.sum(0)[:, numpy.newaxis]
         self._add_2d_demand(share[0], ass_class, tp, mtx, (d1, d2))
         self._add_2d_demand(share[1], ass_class, tp, colsum, (d2, o))
@@ -168,7 +171,9 @@ class DepartureTimeModel:
         if time_period in param.demand_share["freight"]["van"]:
             n = nr_zones
             mtx = self.demand[time_period]
-            car_demand = mtx["car"][0:n, 0:n] / volume_factors["car"][time_period]
+            car_demand = sum(
+                mtx[ass_class][0:n, 0:n] / volume_factors[ass_class][time_period]
+                for ass_class in car_classes)
             share = param.demand_share["freight"]["van"][time_period]
             self._add_2d_demand(share, "van", time_period, car_demand, (0, 0))
 

@@ -1,16 +1,55 @@
 {
     "vehicle_km_cost": {
-        "car": 0.12,
-        "car_electric": 0.04,
+        "icev": 0.12,
+        "bev": 0.04,
+        "phev": 0.06,
         "van": 0.20,
-        "truck": 0.23,
-        "semi_trailer": 0.35,
-        "trailer_truck": 0.44
+        "truck": 0.55,
+        "truck_ev": 0.43,
+        "truck_2n": 0.23,
+        "truck_2n_ev": 0.15,
+        "semi_trailer": 0.67,
+        "semi_trailer_ev": 0.54,
+        "trailer_truck": 0.85,
+        "trailer_truck_ev": 0.68,
+        "diesel_train": 5.17,
+        "electric_train": 2.94,
+        "domestic_vessel": 54.2
     },
     "vehicle_hour_cost": {
-        "truck": 31.96,
+        "truck": 33.24,
+        "truck_ev": 29.53,
+        "truck_2n": 31.96,
+        "truck_2n_ev": 25.38,
         "semi_trailer": 35.11,
-        "trailer_truck": 36.0
+        "semi_trailer_ev": 28.85,
+        "trailer_truck": 36.0,
+        "trailer_truck_ev": 30.61,
+        "diesel_train": 284.7,
+        "electric_train": 316.7,
+        "domestic_vessel": 208.8
+    },
+    "car_shares": {
+        "Uusimaa": {
+            "bev": 0,
+            "phev": 0
+        },
+        "Varsinais-Suomi": {
+            "bev": 0,
+            "phev": 0
+        },
+        "Pirkanmaa": {
+            "bev": 0,
+            "phev": 0
+        },
+        "Kanta-Hame": {
+            "bev": 0,
+            "phev": 0
+        },
+        "default": {
+            "bev": 0,
+            "phev": 0
+        }
     },
     "transit_cost": {
         "HSL": {
@@ -48,47 +87,63 @@
     "freight": {
         "kemiat": {
             "truck": {
-                "truck": {
-                    "terminal_cost": 14.0,
-                    "domestic_distribution": 0.2,
-                    "foreign_distribution": 0.1,
-                    "avg_load": 5.76,
-                    "empty_share": 0.5
+                "empty_share": 0.5,
+                "fleet": {
+                    "truck": {
+                        "domestic_distribution": 0.1,
+                        "foreign_distribution": 0.05
+                    },
+                    "truck_ev": {
+                        "domestic_distribution": 0.1,
+                        "foreign_distribution": 0.1
+                    },
+                    "semi_trailer": {
+                        "domestic_distribution": 0.15,
+                        "foreign_distribution": 0.25
+                    },
+                    "semi_trailer_ev": {
+                        "domestic_distribution": 0.1,
+                        "foreign_distribution": 0.3
+                    },
+                    "trailer_truck": {
+                        "domestic_distribution": 0.3,
+                        "foreign_distribution": 0.2
+                    },
+                    "trailer_truck_ev": {
+                        "domestic_distribution": 0.25,
+                        "foreign_distribution": 0.1
+                    }
                 },
-                "semi_trailer": {
-                    "terminal_cost": 8.0,
-                    "domestic_distribution": 0.3,
-                    "foreign_distribution": 0.4,
-                    "avg_load": 15.01,
-                    "empty_share": 0.5
-                },
-                "trailer_truck": {
-                    "terminal_cost": 5.0,
-                    "domestic_distribution": 0.5,
-                    "foreign_distribution": 0.5,
-                    "avg_load": 30.24,
-                    "empty_share": 0.5
+                "param": {
+                    "truck": {
+                        "terminal_cost": 14.0,
+                        "avg_load": 5.76
+                    },
+                    "semi_trailer": {
+                        "terminal_cost": 8.0,
+                        "avg_load": 15.01
+                    },
+                    "trailer_truck": {
+                        "terminal_cost": 5.0,
+                        "avg_load": 30.24
+                    }
                 }
             },
             "freight_train": {
-                "electric_train": {
-                    "time": 0.08,
-                    "dist": 0.03,
-                    "terminal_cost": 12.5
-                },
-                "diesel_train": {
-                    "time": 0.07,
-                    "dist": 0.06,
-                    "terminal_cost": 11.5
-                }
+                "time_J": 0.08,
+                "dist_J": 0.03,
+                "num_terminals_J": 12.5,
+                "time_D": 0.07,
+                "dist_D": 0.06,
+                "num_terminals_D": 11.5
             },
             "ship": {
-                "domestic_vessel": {
-                    "time": 0.0037,
-                    "dist": 0.0032,
-                    "terminal_cost": 22.0,
-                    "canal_cost": 1.0
-                },
+                "time_W": 0.0037,
+                "dist_W": 0.0032,
+                "num_terminals_W": 22.0,
+                "canal_cost": 1.0
+            },
+            "foreign_ship": {
                 "container_ship": {
                     "4": {
                         "time": 0.00199,

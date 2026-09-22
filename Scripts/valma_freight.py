@@ -20,6 +20,7 @@ from utils.freight_utils import (
 )
 from datahandling.traversaldata import transform_traversal_data
 from parameters.commodity import commodity_conversion
+from travel_iteration import DEMAND_MATRIX_FOLDER
 
 
 def main(args):
@@ -41,7 +42,8 @@ def main(args):
                                     first_matrix_id=args.first_matrix_id)
     zonedata = FreightZoneData(zone_data_file, ass_model.zone_numbers, "koko_suomi")
     resultdata = ResultsData(result_data_folder)
-    resultmatrices = MatrixData(result_data_folder / "Matrices" / "koko_suomi")
+    resultmatrices = MatrixData(
+        result_data_folder / DEMAND_MATRIX_FOLDER / "koko_suomi")
     costdata = json.loads(cost_data_file.read_text("utf-8"))
     
     # Set foreign purposes and fetch impedances
@@ -87,7 +89,13 @@ def main(args):
             store_demand.store(mode, demand[mode], omx_filename, commodity.name)
         if commodity.name in args.specify_commodity_names:
             ass_model.freight_network.save_network_volumes(commodity.name)
-        
+        for mode in impedance:
+            dist = 0
+            for imp_type in impedance[mode]:
+                if "dist" in imp_type:
+                    dist += impedance[mode][imp_type]
+            if isinstance(dist, numpy.ndarray):
+                impedance[mode]["dist"] = dist
         if "truck" in demand:
             # Calc aux tons and transform tons to vehicles
             ass_model.freight_network.output_traversal_matrix(set(demand), resultdata.path)
@@ -95,10 +103,11 @@ def main(args):
             domestic_tons = demand["truck"] + sum(aux_demand.values())
             dom_leg_tons = commodity.calc_trade_mode_share(
                 demand, trade_demand, fin_border_ids)
-            for mode in param.truck_classes:
-                total_demand[mode] += commodity.calc_vehicles(domestic_tons, mode)
+            for mode in commodity.truck_fleet:
+                ass_class = param.truck_fleet[mode]
+                total_demand[ass_class] += commodity.calc_vehicles(domestic_tons, mode)
                 for foreign_purpose in dom_leg_tons:
-                    total_demand[mode] += foreign_commodities[foreign_purpose].calc_vehicles(
+                    total_demand[ass_class] += foreign_commodities[foreign_purpose].calc_vehicles(
                         dom_leg_tons[foreign_purpose]["truck"], mode)
             write_domestic_leg_summary(dom_leg_tons, impedance, resultdata)
         commodity.write_summary(demand, aux_demand, impedance)

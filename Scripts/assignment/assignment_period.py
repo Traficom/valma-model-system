@@ -350,13 +350,29 @@ class AssignmentPeriod(Period):
         car_time_attr = self.netfield("car_time")
         main_mode = network.mode(param.main_mode)
         car_modes = {
-            network.mode(param.assignment_modes["car"]),
+            network.mode(param.assignment_modes["icev"]),
             network.mode(param.assignment_modes["truck"])
         }
+        long_dist_terminal_modes = {network.mode(mode_id) for mode_id in param.long_dist_terminal_modes}
         park_and_ride_mode = network.mode(param.park_and_ride_mode)
+        long_distance_nodes = set()
+        long_distance_lines = {line for line in network.transit_lines() if line.mode in long_dist_terminal_modes}
+        for line in long_distance_lines:
+            for segment in line.segments():
+                if segment.allow_boardings:
+                    if segment.i_node is not None:
+                        long_distance_nodes.add(segment.i_node.id)
+                    if segment.j_node is not None:
+                        long_distance_nodes.add(segment.j_node.id)
         car_time_zero = []
         for link in network.links():
             linktype = link.type % 100
+            this_link_modes = {segment.line.mode for segment in link.segments()}
+            is_transit_line_link = this_link_modes & long_dist_terminal_modes
+            connects_long_distance = (
+                link.i_node.id in long_distance_nodes
+                or link.j_node.id in long_distance_nodes)
+            is_park_and_ride_connector = connects_long_distance and not is_transit_line_link
             if link.type > 80 and linktype in param.roadclasses:
                 # Car link with standard attributes
                 roadclass = param.roadclasses[linktype]
@@ -394,6 +410,9 @@ class AssignmentPeriod(Period):
             else:
                 # Link with no car traffic
                 link.volume_delay_func = 0
+            if is_park_and_ride_connector:
+                # Park-and-ride connectors
+                link.volume_delay_func = 97
             if link["#buslane"]:
                 if (link.num_lanes == 3
                         and roadclass.num_lanes == ">=3"):
@@ -413,6 +432,10 @@ class AssignmentPeriod(Period):
                         log.error(msg)
                         raise ValueError(msg)
             if car_modes & link.modes:
+                link.modes |= {main_mode}
+                if not is_transit_line_link:
+                    link.modes |= {park_and_ride_mode}
+            elif is_park_and_ride_connector:
                 link.modes |= {main_mode, park_and_ride_mode}
             else:
                 link.modes -= {main_mode, park_and_ride_mode}
@@ -640,16 +663,16 @@ class AssignmentPeriod(Period):
         log.info("Car assignment performed for scenario {}, {}".format(
             self.emme_scenario.id, self.name))
 
-    def _assign_trucks(self):
+    def _assign_trucks(self, truck_classes: Iterable = param.truck_classes):
         stopping_criteria = copy.deepcopy(param.stopping_criteria["coarse"])
         stopping_criteria["max_iterations"] = 0
-        for truck_spec in self._car_spec.truck_specs():
+        for truck_spec in self._car_spec.truck_specs(truck_classes):
             truck_spec["stopping_criteria"] = stopping_criteria
             self.emme_project.car_assignment(
                 truck_spec, self.emme_scenario)
         network = self.emme_scenario.get_network()
         modes = [self.assignment_modes[ass_class]
-                 for ass_class in param.truck_classes
+                 for ass_class in truck_classes
                  if ass_class in self.assignment_modes]
         for link in network.links():
             for mode in modes:

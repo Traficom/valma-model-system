@@ -33,21 +33,35 @@ class FreightMode(AssignmentMode):
         self._dist_unit_cost = dist_unit_cost
         self._time_unit_cost = time_unit_cost
         self._include_toll_cost = include_toll_cost
-        self.dist = self._create_matrix("dist")
         self.aux_dist = self._create_matrix("aux_dist")
-        self.time = self._create_matrix("time")
         self.aux_time = self._create_matrix("aux_time")
         self.canal_cost = self._create_matrix("canal_cost")
+        modes = param.freight_modes[self.name]
+        self.dist = {m: self._create_matrix(f"dist_{m}") for m in modes}
+        self.time = {m: self._create_matrix(f"time_{m}") for m in modes}
+        self.terminal_cost = {m: self._create_matrix(f"terminal_cost_{m}")
+                              for m in modes}
         no_penalty = dict.fromkeys(
             ["global", "at_nodes", "on_lines", "on_segments"])
-        all_modes = {param.park_and_ride_mode: "truck access"}
-        modes = param.freight_modes[self.name]
-        all_modes.update(modes)
+        all_modes = [param.park_and_ride_mode, *modes]
         transitions = [{
             "mode": mode,
             "next_journey_level": i,
         } for i, mode in enumerate(all_modes)]
         journey_levels = [{
+            "description": "truck access",
+            "destinations_reachable": False,
+            "transition_rules": transitions,
+            "boarding_time": None,
+            "boarding_cost": no_penalty.copy(),
+            "waiting_time": None,
+        }]
+        all_modes = {**modes, param.park_and_ride_mode: "truck egress"}
+        transitions = [{
+            "mode": mode,
+            "next_journey_level": i,
+        } for i, mode in enumerate(all_modes, 1)]
+        journey_levels += [{
             "description": all_modes[mode],
             "destinations_reachable": True,
             "transition_rules": transitions,
@@ -57,8 +71,11 @@ class FreightMode(AssignmentMode):
         } for mode in all_modes]
         # Terminal cost is related to mode that changes the journey level,
         # hence "the other" mode
+        terminal_change_attrs = [param.terminal_change_attrs[mode]
+                                 for mode in modes]
         terminal_cost_attrs = ([param.terminal_cost_attr]
-                               + list(reversed(list(modes.values()))))
+                               + list(reversed(terminal_change_attrs))
+                               + [param.terminal_cost_attr])
         for jl, attr in zip(journey_levels, terminal_cost_attrs):
             jl["boarding_cost"]["on_lines"] = {
                 "penalty": attr,
@@ -82,10 +99,10 @@ class FreightMode(AssignmentMode):
             "boarding_time": no_penalty,
             "boarding_cost": no_penalty,
             "in_vehicle_time": {
-                "perception_factor": 1,
+                "perception_factor": param.freight_time_perception_attr,
             },
             "in_vehicle_cost": {
-                "penalty": param.background_traffic_attr,
+                "penalty": param.line_penalty_attr,
                 "perception_factor": 1,
             },
             "aux_transit_by_mode": [{
@@ -107,28 +124,43 @@ class FreightMode(AssignmentMode):
                 num_proc: param.performance_settings[num_proc],
             },
         }
-        self.result_spec = {
+        self.result_specs = [{
             "type": "EXTENDED_TRANSIT_MATRIX_RESULTS",
             "by_mode_subset": {
-                "modes": list(modes),
-                "distance": self.dist.id,
-                "actual_in_vehicle_times": self.time.id,
-                "actual_in_vehicle_costs": self.canal_cost.id,
+                "modes": [mode],
+                "distance": self.dist[mode].id,
+                "actual_in_vehicle_times": self.time[mode].id,
+                "actual_total_boarding_costs": self.terminal_cost[mode].id,
             },
-        }
-        self.local_result_spec = {
+        } for mode in modes]
+        self.result_specs.append({
             "type": "EXTENDED_TRANSIT_MATRIX_RESULTS",
             "by_mode_subset": {
                 "modes": [param.park_and_ride_mode],
                 "distance": self.aux_dist.id,
                 "actual_aux_transit_times": self.aux_time.id,
             },
+        })
+        self.canal_cost_spec = {
+            "type": "EXTENDED_TRANSIT_STRATEGY_ANALYSIS",
+            "trip_components": {
+                "in_vehicle": param.background_traffic_attr,
+            },
+            "sub_path_combination_operator": "+",
+            "sub_strategy_combination_operator": "average",
+            "selected_demand_and_transit_volumes": {
+                "sub_strategies_to_retain": "ALL",
+                "selection_threshold": {},
+            },
+            "results": {
+                "strategy_values": self.canal_cost.id,
+            }
         }
         if self._include_toll_cost:
             self.spec["aux_transit_by_mode"][0]["cost"] = "@toll_cost_vrk"
             self.spec["aux_transit_by_mode"][0]["cost_perception_factor"] = 1.0
             self.toll_cost = self._create_matrix("toll_cost")
-            self.local_result_spec["by_mode_subset"]["actual_aux_transit_costs"] = self.toll_cost.id
+            self.result_specs[-1]["by_mode_subset"]["actual_aux_transit_costs"] = self.toll_cost.id
         self.ntw_results_spec = {
             "type": "EXTENDED_TRANSIT_NETWORK_RESULTS",
             "analyzed_demand": self.demand.id,
@@ -142,17 +174,20 @@ class FreightMode(AssignmentMode):
 
     def get_matrices(self):
         mtxs = {
-            **self.dist.item,
             **self.aux_dist.item,
-            **self.time.item,
             **self.canal_cost.item,
         }
-        dist = self.dist.data
+        for mode in param.freight_modes[self.name]:
+            mtxs.update(self.dist[mode].item)
+            mtxs.update(self.time[mode].item)
+            mtxs[f"num_terminals_{mode}"] = (self.terminal_cost[mode].data
+                                             / param.freight_terminal_cost[self.name])
+        dist = sum(self.dist[mode].data
+                   for mode in param.freight_modes[self.name])
         aux_dist = self.aux_dist.data
         aux_cost = (self._time_unit_cost*self.aux_time.data/60
                     + self._dist_unit_cost*aux_dist)
-        aux_cost = numpy.where(
-            (aux_dist > dist*2) | (dist == 0), numpy.inf, aux_cost)
+        aux_cost = numpy.where(aux_dist > dist*2, numpy.inf, aux_cost)
         if self._include_toll_cost:
             aux_cost += self.toll_cost.data
         mtxs["aux_cost"] = aux_cost

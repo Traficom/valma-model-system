@@ -2,12 +2,13 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Tuple, Union, Optional, cast, Iterable
 from collections import defaultdict
 from pathlib import Path
+from itertools import chain
 import numpy
 import pandas
 from math import log10
 
 import utils.log as log
-from utils.print_links import geometries, Node, Link, Segment
+from utils.print_links import geometries, Node, Link, Line, Segment
 import utils.sum_24h as sum24
 import parameters.assignment as param
 from assignment.abstract_assignment import AssignmentModel
@@ -72,10 +73,6 @@ class EmmeAssignmentModel(AssignmentModel):
         self.separate_emme_scenarios = separate_emme_scenarios
         self.save_matrices = save_matrices
         self.use_free_flow_speeds = use_free_flow_speeds
-        self.transit_classes = (param.long_distance_transit_classes
-            if self.use_free_flow_speeds else param.simple_transit_classes)
-        self.simple_transit_classes = (param.long_dist_simple_classes
-            if self.use_free_flow_speeds else param.simple_transit_classes)
         self.delete_extra_matrices = delete_extra_matrices
         self._delete_strat_files = delete_strat_files
         self.time_periods = time_periods
@@ -188,19 +185,22 @@ class EmmeAssignmentModel(AssignmentModel):
             "TRANSIT_LINE", param.terminal_cost_attr, "terminal cost",
             overwrite=True, scenario=self.mod_scenario)
         self.emme_project.create_extra_attribute(
+            "TRANSIT_LINE", param.freight_time_perception_attr,
+            "freight time perception",
+            overwrite=True, scenario=self.mod_scenario)
+        self.emme_project.create_extra_attribute(
             "LINK", param.aux_commodity_flow_attr, "commodity flow",
             overwrite=True, scenario=self.mod_scenario)
         self.emme_project.create_extra_attribute(
             "TRANSIT_SEGMENT", param.commodity_flow_attr, "commodity flow",
             overwrite=True, scenario=self.mod_scenario)
-        for ass_class in param.freight_modes.values():
-            for attr in ass_class.values():
-                self.emme_project.create_extra_attribute(
-                    "TRANSIT_LINE", attr, "terminal cost",
-                    overwrite=True, scenario=self.mod_scenario)
+        for attr in param.terminal_change_attrs.values():
+            self.emme_project.create_extra_attribute(
+                "TRANSIT_LINE", attr, "terminal cost",
+                overwrite=True, scenario=self.mod_scenario)
         self._create_attributes(
             self.mod_scenario,
-            list(param.truck_classes) + list(param.freight_modes),
+            list(param.truck_fleet) + list(param.freight_modes),
             self._extra, self._netfield)
         self.freight_network.prepare(
             car_dist_unit_cost, car_time_unit_cost, self.save_matrices)
@@ -248,15 +248,15 @@ class EmmeAssignmentModel(AssignmentModel):
         return numpy.sqrt(
             sum((xy[:, axis] - xy[:, axis, None])**2 for axis in (0, 1)))
 
-    def aggregate_results(self, resultdata: ResultsData):
+    def aggregate_results(self, resultdata: ResultsData, linkdata: ResultsData):
         """Aggregate results to 24h and print vehicle kms.
 
         Parameters
         ----------
         resultdata : datahandling.resultdata.Resultdata
             Result data container to print to
-        mapping : pandas.Series
-            Mapping between municipality and county
+        linkdata : datahandling.resultdata.Resultdata
+            Link data container to print to
         """
         car_times = pandas.DataFrame(
             {ap.netfield("car_time"): ap.get_car_times()
@@ -293,8 +293,8 @@ class EmmeAssignmentModel(AssignmentModel):
         resultdata.print_data(miles, "transit_kms.txt")
 
         # Aggregate and print vehicle kms and link lengths
-        ass_classes = (param.car_classes + param.long_distance_transit_classes
-            if self.use_free_flow_speeds else param.simple_transport_classes)
+        ass_classes = (param.car_classes if self.use_free_flow_speeds
+                       else param.private_classes + param.truck_classes)
         kms = dict.fromkeys(ass_classes, 0.0)
         vdfs = {param.roadclasses[linktype].volume_delay_func
             for linktype in param.roadclasses}
@@ -303,7 +303,6 @@ class EmmeAssignmentModel(AssignmentModel):
             {ass_class: pandas.Series(0.0, vdfs, name="veh_km")
                 for ass_class in ass_classes},
             names=["class", "v/d-func"])
-        #The following line only works well in Python 3.7+
         linktypes = (list(dict.fromkeys(param.roadtypes.values()))
                      + list(dict.fromkeys(param.railtypes.values())))
         linklengths = pandas.Series(0.0, linktypes, name="length")
@@ -327,25 +326,34 @@ class EmmeAssignmentModel(AssignmentModel):
                     linklengths[param.railtypes[linktype]] += link.length
                 else:
                     linklengths[param.roadtypes[vdf]] += link.length / 2
+        transit_kms = defaultdict(float)
+        for ap in self.assignment_periods:
+            for tc in ap.assignment_modes:
+                if tc in param.transit_classes:
+                    vol_fac = param.volume_factors[tc][ap.name]
+                    for mode, km in ap.assignment_modes[tc].mode_kms.items():
+                        transit_kms[f"{tc}_{mode}"] += km / vol_fac
+        kms.update(transit_kms)
         resultdata.print_concat(vdf_kms, "vehicle_kilometers_by_road_class.txt")
-        for ass_class in ass_classes:
+        for ass_class in kms:
             resultdata.print_line(
                 "{}:\t{:1.0f}".format(ass_class, kms[ass_class]),
                 "vehicle_kilometers_by_mode")
         resultdata.print_data(linklengths, "link_lengths.txt")
 
         # Export link, node and segnment extra attributes to GeoPackage file
-        fname = "assignment_results.gpkg"
+        fname = f"assignment_results_{self.submodel}.gpkg"
         for geom_type, objects in (
                 (Node, network.nodes()),
                 (Link, network.links()),
-                (Segment, network.transit_segments())):
-            attrs = [attr.name for attr in self.day_scenario.extra_attributes()
-                if attr.type == geom_type.name]
-            attrs += [attr.name for attr in self.day_scenario.network_fields()
-                if attr.type == geom_type.name and attr.atype == "REAL"]
-            attrs += geom_type.attrs
-            resultdata.print_gpkg(
+                (Segment, network.transit_segments()),
+                (Line, network.transit_lines())):
+            obj = next(objects)
+            objects = chain([obj], objects)
+            attrs = {attr_name: type(getattr(obj, attr_name)).__name__.rstrip("0123456789_")
+                     for attr_name in self.day_scenario.attributes(geom_type.name)}
+            attrs.update({attr_name: "str" for attr_name in geom_type.special_attr_names})
+            linkdata.print_gpkg(
                 *geometries(attrs, objects, geom_type), fname, geom_type.name)
         log.info(f"EMME extra attributes exported to file {fname}")
 
@@ -556,7 +564,7 @@ class EmmeAssignmentModel(AssignmentModel):
         for ap in self.assignment_periods:
             node_hour_attrs[ap.name] = {}
             segment_hour_attrs[ap.name] = {}
-            for tc in self.simple_transit_classes:
+            for tc in param.simple_transit_classes:
                 for result in ap.assignment_modes[tc].node_results.values():
                     node_hour_attrs[ap.name][tc] = result[ap.name]
                     node_day_attrs[tc] = result["vrk"]
