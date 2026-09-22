@@ -188,9 +188,9 @@ class TransitMode(AssignmentMode):
             class_name=self.name)
 
         # Save aux volumes to network field
-        volax_attr = f"#aux_transit_{self.name}_{self.time_period}"
+        volax_attr = f"#aux_transit_{self.name}_{self.time_period}_volume"
         self.emme_project.create_network_field(
-            "LINK", "REAL", volax_attr, "aux transit volume",
+            "LINK", "REAL", volax_attr, volax_attr,
             overwrite=True, scenario=self.emme_scenario)
         network = self.emme_scenario.get_network()
         for link in network.links():
