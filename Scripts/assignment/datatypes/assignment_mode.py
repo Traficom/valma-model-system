@@ -44,7 +44,7 @@ class AssignmentMode(ABC):
         self.volume_attr = (
             f"{assignment_period.netfield(name)}_transit_leg_volume"
             if self.name in param.mixed_mode_classes
-            else assignment_period.netfield(name)
+            else f"{assignment_period.netfield(name)}_volume"
         )
         self.emme_project.create_network_field(
             "LINK", "REAL", self.volume_attr, self.volume_attr,

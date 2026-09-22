@@ -537,7 +537,7 @@ class EmmeAssignmentModel(AssignmentModel):
                 day_attrs[mode.name] = (
                     f"{self._netfield(mode.name)}_transit_leg_volume"
                     if mode.name in param.mixed_mode_classes
-                    else self._netfield(mode.name)
+                    else f"{self._netfield(mode.name)}_volume"
                 )
         for attr in day_attrs:
             self.emme_project.create_network_field(
