@@ -40,14 +40,12 @@ class GridData:
             data_path, submodel)
         self.centroids = [geometry.centroid for geometry in self.geometry]
         self.submodel = submodel
-        self.zone_mapping = self.data[submodel]
         self.data_type = data_type
         all_zone_numbers = numpy.asarray(zone_numbers, dtype=numpy.int64)
-        self.all_zone_numbers = all_zone_numbers
         area = param.purpose_areas[model_area]
-        self.zone_slice = slice(*all_zone_numbers.searchsorted(area))
+        zone_slice = slice(*all_zone_numbers.searchsorted(area))
         self.zone_numbers = pandas.Index(
-            all_zone_numbers[self.zone_slice], name="analysis_zone_id")
+            all_zone_numbers[zone_slice], name="analysis_zone_id")
         self.calc_intra_dist()
 
     def calc_intra_dist(self):
@@ -77,6 +75,8 @@ class GridData:
 
         for zone in self.zone_numbers:
             actual_rows = zone_rows[zone]
+            # Keep only origins and destination above zero and
+            # sample if too many destinations
             origin_rows = actual_rows[population[actual_rows] > 0]
             destination_rows = actual_rows[sizes[actual_rows] > 0]
             if destination_rows.size > 300:
@@ -96,19 +96,16 @@ class GridData:
                     for axis in (0, 1)
                 )
             ) / 1000
-            destination_positions = numpy.searchsorted(
-                destination_rows, origin_rows)
-            valid_positions = destination_positions < destination_rows.size
-            safe_positions = numpy.minimum(
-                destination_positions, destination_rows.size - 1)
-            valid_positions &= (
-                destination_rows[safe_positions] == origin_rows)
-            distances[
-                numpy.flatnonzero(valid_positions),
-                destination_positions[valid_positions],
-            ] = 0.125
-
+            # Replace diagonal zeros with distance
+            _, origin_positions, destination_positions = numpy.intersect1d(
+                origin_rows,
+                destination_rows,
+                return_indices=True,
+            )
+            distances[origin_positions, destination_positions] = 0.125
             zone_sizes = sizes[origin_rows]
+            # Choice model for intrazonal mode-dest
+            # Result is average intrazonal distance by mode
             with numpy.errstate(divide="ignore", invalid="ignore"):
                 log_zone_sizes = numpy.log(zone_sizes)[:, numpy.newaxis]
                 mode_parameters = {
@@ -141,19 +138,13 @@ class GridData:
                         distances_by_origin * origin_probability)
 
         for name, values in result.items():
-            self[name] = pandas.Series(values, index=self.data.index)
+            self.data[name] = pandas.Series(values, index=self.data.index)
 
     def _coordinates(self, rows):
         return numpy.array([
             (self.centroids[index].x, self.centroids[index].y)
             for index in rows
         ])
-
-    def __getitem__(self, key: str):
-        return self.data[key]
-
-    def __setitem__(self, key: str, value):
-        self.data[key] = value
 
     def aggregate(self):
         zone_variables: dict = json.loads(
@@ -193,9 +184,8 @@ class GridData:
         self.aggregated_geometry = geometry.groupby(self.mapping).agg(unary_union)
         self.aggregated_geometry = self.aggregated_geometry.reindex(
             aggregated.index)
-        zone_mapping = self.zone_mapping.reindex(aggregated.index)
         self._add_transformations(aggregated)
-        return aggregated, zone_mapping, self.zone_numbers
+        return aggregated
 
     @staticmethod
     def _most_common(values: pandas.Series):
@@ -204,9 +194,8 @@ class GridData:
             return values.iloc[0]
         return modes.iloc[0]
 
-    def export(self, path: Path):
+    def export(self, data, path: Path):
         """Export aggregated grid data and geometries with Fiona."""
-        data, _, _ = self.aggregate()
         schema = {
             "geometry": "Unknown",
             "properties": {
@@ -630,52 +619,3 @@ def _read_griddata(path: Path, submodel: str):
         geometries = [geometries[index] for index in order]
         log.warn("File {} is not sorted in ascending order".format(path))
     return data, data[submodel], geometries, crs
-
-
-def read_zonedata(path: Path,
-                  zone_numbers: numpy.ndarray):
-    """Read zone data from space-separated file.
-
-    Parameters
-    ----------
-    path : Path
-        Path to the .gpkg file
-    zone_numbers : ndarray
-        Zone numbers to compare with for validation
-
-    Returns
-    -------
-    pandas.DataFrame
-        Zone data
-    """
-    if not path.exists():
-        raise NameError(f"Path {path} not found.")
-    if path.suffix.lower() == ".csv":
-        data = pandas.read_csv(path)
-    else:
-        logging.getLogger("fiona").setLevel(logging.ERROR)
-        if len(fiona.listlayers(path)) > 1:
-            raise TypeError(f"Multiple layers found in file {path}")
-        with fiona.open(path, ignore_geometry=True) as colxn:
-            data = pandas.DataFrame(
-                [record["properties"] for record in colxn],
-                columns=list(colxn.schema["properties"]))
-    index_name = "analysis_zone_id"
-    if index_name not in data:
-        if "input_zone_id" not in data:
-            raise IndexError(
-                f"Aggregated zonedata file {path} lacks analysis_zone_id")
-        index_name = "input_zone_id"
-    data.set_index(index_name, inplace=True)
-    data.index = data.index.astype(int)
-    data.index.name = "analysis_zone_id"
-    requested_zones = pandas.Index(zone_numbers)
-    available_zones = data.index.intersection(requested_zones)
-    missing_zones = [zone for zone in requested_zones if zone not in data.index]
-    if missing_zones:
-        raise IndexError(
-            f"Zone numbers did not match for file {path}: "
-            f"missing {missing_zones}")
-    data = data.loc[available_zones].reindex(zone_numbers)
-    data = data.loc[zone_numbers]
-    return data

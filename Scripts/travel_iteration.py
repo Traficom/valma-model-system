@@ -103,11 +103,11 @@ class ModelSystem:
         log.info(f"Read zonedata from {zone_data_path}")
         grid_data = GridData(zone_data_path, submodel, self.zone_numbers,
                              model_area="domestic")
-        data, mapping, zone_numbers = grid_data.aggregate()
-        grid_data.export(Path(results_path / f"{submodel}.gpkg"))
+        data = grid_data.aggregate()
+        grid_data.export(data, Path(results_path / f"{submodel}.gpkg"))
         self._zone_datas = {
             model_area: ZoneData(
-                data, submodel, zone_numbers, model_area,
+                data, submodel, self.zone_numbers, model_area,
                 municipality_calibration=municip_calib,
                 car_dist_cost=self.car_dist_cost["icev"],
                 electric_car_share=cost_data["car_shares"]
