@@ -109,6 +109,7 @@ class ModelSystem:
             model_area: ZoneData(
                 data, submodel, self.zone_numbers, model_area,
                 municipality_calibration=municip_calib,
+                extra_dummies = extra_dummies,
                 car_dist_cost=self.car_dist_cost["icev"],
                 electric_car_share=cost_data["car_shares"]
             ) for model_area in ["domestic"]}

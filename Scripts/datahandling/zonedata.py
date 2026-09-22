@@ -287,7 +287,8 @@ class ZoneData:
     def __init__(self, *args, **kwargs):
         self._init_data(*args, **kwargs)
 
-    def _init_data(self, data, submodel, zone_numbers, model_area,
+    def _init_data(self, data, submodel, zone_numbers, 
+                 model_area: str = "domestic",
                  municipality_calibration: Dict[str, pandas.Series] = {},
                  extra_dummies: Dict[str, Sequence[str]] = {},
                  car_dist_cost: Optional[float] = None,
