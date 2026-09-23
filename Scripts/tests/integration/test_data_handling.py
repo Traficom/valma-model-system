@@ -34,14 +34,14 @@ class MatrixDataTest(unittest.TestCase):
 
     def test_constructor(self):
         log.initialize(Config())
-        m = MatrixData(BASE_MATRICES_PATH / "uusimaa")
+        m = MatrixData(RESULTS_PATH / "los_matrices" / "uusimaa")
         # Verify that the base folder exists
         self.assertTrue(os.path.isdir(m.path))
 
     def test_matrix_operations(self):
         log.initialize(Config())
-        m = MatrixData(BASE_MATRICES_PATH / "uusimaa")
-        MATRIX_TYPES = ["demand"]
+        m = MatrixData(RESULTS_PATH / "los_matrices" / "uusimaa")
+        MATRIX_TYPES = ["time"]
         for matrix_type in MATRIX_TYPES:
             print("validating matrix type", matrix_type)
             self._validate_matrix_operations(m, matrix_type)
