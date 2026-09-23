@@ -17,6 +17,7 @@ from parameters.assignment import (
     mode_impedance
 )
 import parameters.cost as cost
+from parameters.departure_time import demand_share
 import models.generation as generation
 from datatypes.demand import Demand
 from demand.foreign_external import ForeignExternalModel
@@ -746,3 +747,14 @@ class ForeignExternalPurpose(TourPurpose):
                 self._aggregate_results(access_mode, access_mode_mtx)
                 yield Demand(self, access_mode, access_mode_mtx)
             log.info(f"Demand calculated for {self.name}")
+
+class ExternalPurpose:
+    """Purpose descriptor for externally supplied traffic matrices."""
+
+    def __init__(self, zone_numbers: numpy.ndarray):
+        self.name = "external"
+        self.demand_share = demand_share["external"]
+        bounds = slice(*zone_numbers.searchsorted(param.purpose_areas["all"]))
+        self.bounds = bounds
+        self.dest_interval = bounds
+        self.sec_dest_rates = {}
