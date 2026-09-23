@@ -14,7 +14,7 @@ import openmatrix as omx # type: ignore
 from parameters.zone import purpose_areas
 
 
-class ForeignExternalModel:
+class ForeignTravelDemandModel:
     """Foreign external passenger traffic model.
     Parameters
     ----------

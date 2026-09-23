@@ -16,7 +16,7 @@ from parameters.car import car_ownership
 
 
 
-class DemandModel:
+class DomesticTravelDemandModel:
     """Container for private tour purposes and models.
 
     Parameters

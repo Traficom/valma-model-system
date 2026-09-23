@@ -7,7 +7,7 @@ import pandas
 
 from datahandling.resultdata import ResultsData
 from datahandling.zonedata import ZoneData
-from demand.domestic_travel import DemandModel
+from demand.domestic_travel import DomesticTravelDemandModel
 import utils.config
 import utils.log as log
 
@@ -35,7 +35,7 @@ def main(args):
         car_dist_cost=0.12,
         electric_car_share={"default": {"bev": 0.05, "phev": 0.05}})
     resultdata = ResultsData(result_data_folder)
-    dm = DemandModel(zonedata, resultdata, [])
+    dm = DomesticTravelDemandModel(zonedata, resultdata, [])
 
     # Run  simulation for one iteration.
     dm.calculate_individual_car_ownership()

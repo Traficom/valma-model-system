@@ -17,7 +17,7 @@ import assignment.departure_time as dt
 from datahandling.resultdata import ResultsData
 from datahandling.zonedata import ZoneData
 from datahandling.matrixdata import MatrixData
-from demand.domestic_travel import DemandModel
+from demand.domestic_travel import DomesticTravelDemandModel
 from datatypes.purpose import ExternalPurpose, TravelPurpose, TourPurpose, SecDestPurpose
 from datatypes.demand import Demand
 import parameters.assignment as param
@@ -171,7 +171,7 @@ class ModelSystem:
         self.convergence = []
 
     def _init_demand_model(self, tour_purposes: List[TourPurpose]):
-        return DemandModel(
+        return DomesticTravelDemandModel(
             self._zone_datas["domestic"], self.resultdata, tour_purposes)
 
     def _add_internal_demand(self, previous_iter_impedance, is_last_iteration):

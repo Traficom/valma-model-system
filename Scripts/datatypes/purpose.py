@@ -20,7 +20,7 @@ import parameters.cost as cost
 from parameters.departure_time import demand_share
 import models.generation as generation
 from datatypes.demand import Demand
-from demand.foreign_travel import ForeignExternalModel
+from demand.foreign_travel import ForeignTravelDemandModel
 from datatypes.histogram import TourLengthHistogram
 from utils.calibrate import attempt_calibration
 
@@ -708,7 +708,7 @@ class ForeignExternalPurpose(TourPurpose):
         self.tour_generation = specification["tour_generation"]
         self._zone_datas = zone_datas
         self.basematrices_path = basematrices_path
-        self.fem = ForeignExternalModel(
+        self.fem = ForeignTravelDemandModel(
             self, self._zone_datas, self._zone_datas, self.basematrices_path,
             self.generation_zone_data.all_zone_numbers)
 
