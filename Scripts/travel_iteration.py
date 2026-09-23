@@ -39,8 +39,6 @@ class ModelSystem:
         Path where input data for forecast year are found
     cost_data_path : Path
         Path where cost data for forecast year are found
-    base_zone_data_path : Path
-        Directory path where input data for base year are found
     base_matrices_path : Path
         Directory path where base demand matrices are found
     results_path : Path
