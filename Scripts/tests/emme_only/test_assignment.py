@@ -97,7 +97,7 @@ class EmmeAssignmentTest:
         nr_zones = self.ass_model.nr_zones
         car_matrix = numpy.full((nr_zones, nr_zones), 10.0)
         demand = {
-            "car": car_matrix,
+            "bev": car_matrix,
             "transit": car_matrix,
             "bike": car_matrix,
             "trailer_truck": car_matrix,
@@ -131,7 +131,7 @@ class EmmeAssignmentTest:
         nr_zones = self.ass_model.nr_zones
         car_matrix = numpy.full((nr_zones, nr_zones), 10.0)
         ass_classes = [
-            "car",
+            "bev",
             "transit",
             "airplane",
             "pt_car_acc",

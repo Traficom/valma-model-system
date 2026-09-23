@@ -14,7 +14,7 @@ from datahandling.matrixdata import MatrixData
 from datahandling.zonedata import ZoneData, FreightZoneData
 import parameters.assignment as param
 from valma_travel import BASE_ZONEDATA_FILE
-from valma_travel import LOS_MATRIX_FOLDER
+from valma_travel import LOS_MATRIX_FOLDER, DEMAND_MATRIX_FOLDER
 
 
 def main(args):
@@ -199,7 +199,7 @@ def main(args):
         if submodel != "koko_suomi":
             # Check base matrices
             base_matrices_path = Path(
-                args.base_data_folder, "Matrices", submodel)
+                args.base_data_folder, DEMAND_MATRIX_FOLDER, submodel)
             if not base_matrices_path.exists():
                 msg = "Baseline matrices' directory '{}' does not exist.".format(
                     base_matrices_path)
@@ -221,7 +221,8 @@ def main(args):
             args.scenario_name, args.long_dist_demand_forecast):
         if long_dist == "calc":
             long_dist_result_paths.append(
-                Path(args.result_data_folder, name, "Matrices", "koko_suomi"))
+                Path(args.result_data_folder, name, DEMAND_MATRIX_FOLDER,
+                     "koko_suomi"))
     model_types = (args.model_types if args.model_types
                    else ["passenger_transport" for _ in zone_data_files])
     electric_car_share = {"default": {"bev": 0.1, "phev": 0.2}}

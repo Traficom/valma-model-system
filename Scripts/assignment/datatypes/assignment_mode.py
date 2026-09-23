@@ -193,7 +193,7 @@ class WalkMode(SoftMode):
         }
         self.emme_project.transit_assignment(
             specification=spec, scenario=self.emme_scenario,
-            add_volumes=True, save_strategies=True, class_name=self.name)
+            add_volumes=False, save_strategies=True, class_name=self.name)
         self.emme_project.matrix_results(
             result_spec, scenario=self.emme_scenario,
             class_name=self.name)
