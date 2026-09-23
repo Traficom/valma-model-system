@@ -17,7 +17,7 @@ import assignment.departure_time as dt
 from datahandling.resultdata import ResultsData
 from datahandling.zonedata import ZoneData
 from datahandling.matrixdata import MatrixData
-from demand.trips import DemandModel
+from demand.domestic_travel import DemandModel
 from datatypes.purpose import ExternalPurpose, TravelPurpose, TourPurpose, SecDestPurpose
 from datatypes.demand import Demand
 import parameters.assignment as param

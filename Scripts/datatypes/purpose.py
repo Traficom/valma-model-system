@@ -20,7 +20,7 @@ import parameters.cost as cost
 from parameters.departure_time import demand_share
 import models.generation as generation
 from datatypes.demand import Demand
-from demand.foreign_external import ForeignExternalModel
+from demand.foreign_travel import ForeignExternalModel
 from datatypes.histogram import TourLengthHistogram
 from utils.calibrate import attempt_calibration
 

@@ -7,7 +7,7 @@ import pandas
 
 from datahandling.resultdata import ResultsData
 from datahandling.zonedata import ZoneData
-from demand.trips import DemandModel
+from demand.domestic_travel import DemandModel
 import utils.config
 import utils.log as log
 
