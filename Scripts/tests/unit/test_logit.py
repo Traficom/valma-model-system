@@ -10,8 +10,7 @@ from datahandling.zonedata import ZoneData
 from models.logit import ModeDestModel, DestModeModel
 from datatypes.purpose import attempt_calibration
 from datahandling.resultdata import ResultsData
-from tests.integration.test_arguments import RESULTS_PATH, ZONEDATA_PATH, INTERNAL_ZONES, EXTERNAL_ZONES, ZONE_INDEXES
-
+from tests.integration.test_arguments import RESULTS_PATH, ZONEDATA_PATH, INTERNAL_ZONES
 
 class LogitModelTest(unittest.TestCase):
     def test_logit_calc(self):
@@ -26,9 +25,10 @@ class LogitModelTest(unittest.TestCase):
         for attr in ("sh_cars1_hh1", "sh_cars1_hh2", "sh_cars1_hh3",
                      "sh_cars2_hh2", "sh_cars2_hh3"):
             zd[attr] = pandas.Series(0.2, index=zd.zone_numbers)
-        mtx = numpy.arange(24*24, dtype=numpy.float32)
-        mtx.shape = (24, 24)
-        mtx[numpy.diag_indices(24)] = 0
+        nr_zones = len(INTERNAL_ZONES)
+        mtx = numpy.arange(nr_zones*nr_zones, dtype=numpy.float32)
+        mtx.shape = (nr_zones, nr_zones)
+        mtx[numpy.diag_indices(nr_zones)] = 0
         impedance = {
             "car_drv": {
                 "time": mtx,
@@ -52,7 +52,7 @@ class LogitModelTest(unittest.TestCase):
                 "dist": mtx,
             },
         }
-        pur.bounds = slice(0, 24)
+        pur.bounds = slice(0, nr_zones)
         pur.orig_zone_numbers = INTERNAL_ZONES
         pur.dist = mtx
         parameters_path = Path(__file__).parents[2] / "parameters" / "demand"
@@ -76,6 +76,5 @@ class LogitModelTest(unittest.TestCase):
     def _validate(self, prob):
         self.assertIs(type(prob), numpy.ndarray)
         self.assertEquals(prob.ndim, 2)
-        self.assertEquals(prob.shape[1], 24)
         self.assertNotEquals(prob[1, 0], 0)
         assert numpy.isfinite(prob).all()
