@@ -11,9 +11,7 @@ import utils.log as log
 import assignment.emme_assignment as ass
 from datahandling.matrixdata import MatrixData
 from datahandling.resultdata import ResultsData
-from tests.integration.test_data_handling import (
-    TEST_DATA_PATH, COSTDATA_PATH
-)
+from tests.integration.test_arguments import TEST_DATA_PATH, COSTDATA_PATH
 from datahandling.traversaldata import transform_traversal_data
 from travel_iteration import LOS_MATRIX_FOLDER
 try:
