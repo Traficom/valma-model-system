@@ -155,7 +155,7 @@
             "impedance": {},
             "log": {
                 "attraction_size": 1,
-                "logsum": 0.7452
+                "logsum": 0.8011
             },
             "attraction_size": {
                 "workplaces": 1
@@ -164,52 +164,54 @@
     },
     "mode_choice": {
         "car_drv": {
-            "constant": -9.668,
+            "constant": -8.953,
             "generation": {},
             "attraction": {
                 "within_zone_inf": -1
             },
             "impedance": {
-                "gen_cost": -0.02781
+                "gen_cost": -0.03101
             },
             "log": {
-                "gen_cost": -1.857
+                "gen_cost": -1.449
             },
             "individual_dummy": {
-                "sh_cars1_hh1": 2.942,
-                "sh_cars2_hh2": 2.942,
-                "sh_cars1_hh2": 2.283
+                "sh_hh2_cars1_lic1": 2.688,
+                "sh_hh2_cars2_lic2": 2.688,
+                "sh_hh1_cars1_lic1": 2.688,
+                "sh_hh2_cars1_lic2": 2.137
             }
         },
         "car_pax": {
-            "constant": -10.44,
+            "constant": -10.01,
             "generation": {},
             "attraction": {
                 "within_zone_inf": -1
             },
             "impedance": {
-                "gen_cost": -0.02861
+                "gen_cost": -0.04919
             },
             "log": {
-                "gen_cost": -2.704
+                "gen_cost": -1.858
             },
             "individual_dummy": {
-                "sh_cars1_hh2": 1.219,
-                "sh_cars2_hh2": 1.219
+                "sh_hh2_cars1_lic2": 0.526,
+                "sh_hh2_cars2_lic2": 0.526,
+                "sh_hh2_cars1_lic1": 0.526
             }
         },
         "transit": {
-            "constant": -4.389,
+            "constant": -3.801,
             "generation": {
-                "HSL": 0.6021,
-                "Tampere": 0.4526,
-                "Turku": 0.04414
+                "HSL": 0.5977,
+                "Tampere": 0.4789,
+                "Turku": 0.06257
             },
             "attraction": {
                 "within_zone_inf": -1
             },
             "impedance": {
-                "logsum": 1.223
+                "logsum": 1.104
             },
             "log": {},
             "individual_dummy": {}
@@ -221,21 +223,21 @@
                 "within_zone_inf": -1
             },
             "impedance": {
-                "logsum": 1.223
+                "logsum": 1.104
             },
             "log": {},
             "individual_dummy": {}
         },
         "walk": {
-            "constant": -9.804,
+            "constant": -8.466,
             "generation": {
-                "Oulu": 0.9934
+                "Oulu": 0.9321
             },
             "attraction": {
                 "within_zone_inf": -1
             },
             "impedance": {
-                "dist": -0.6239
+                "dist": -0.6054
             },
             "log": {},
             "individual_dummy": {}

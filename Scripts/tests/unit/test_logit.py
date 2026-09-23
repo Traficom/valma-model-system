@@ -30,8 +30,8 @@ class LogitModelTest(unittest.TestCase):
         zd = ZoneData(
             ZONEDATA_PATH, zi, "uusimaa", car_dist_cost=0.12,
             electric_car_share={"default": {"bev": 0.1, "phev": 0.2}})
-        for attr in ("sh_cars1_hh1", "sh_cars1_hh2", "sh_cars1_hh3",
-                     "sh_cars2_hh2", "sh_cars2_hh3"):
+        for attr in ("sh_hh1_cars1_lic1", "sh_hh2_cars1_lic1", "sh_hh2_cars1_lic2",
+                     "sh_hh2_cars2_lic2"):
             zd[attr] = pandas.Series(0.2, index=zd.zone_numbers)
         mtx = numpy.arange(24*24, dtype=numpy.float32)
         mtx.shape = (24, 24)
