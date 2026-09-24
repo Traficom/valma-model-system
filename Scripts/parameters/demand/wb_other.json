@@ -17,12 +17,12 @@
         "hb_edu_student": 0.0319
     },
     "sec_dest_rate": {
-        "car_drive": 1.0264,
+        "car_driver": 1.0264,
         "car_passenger": 1.0503,
         "transit": 1.0
     },
     "impedance_share": {
-        "car_drive": {
+        "car_driver": {
             "aht": [
                 0.0352,
                 0.0118
@@ -86,7 +86,7 @@
     "car_cost_sharing": 0.0,
     "occupancy": {},
     "distance_boundaries": {
-        "car_drive": [
+        "car_driver": [
             0,
             100
         ],
@@ -108,7 +108,7 @@
         ]
     },
     "destination_choice": {
-        "car_drive": {
+        "car_driver": {
             "attraction": {},
             "impedance": {
                 "time": -0.1507
@@ -184,7 +184,7 @@
         }
     },
     "mode_choice": {
-        "car_drive": {
+        "car_driver": {
             "constant": -4.989,
             "generation": {},
             "attraction": {},
@@ -193,7 +193,7 @@
                 "logsum": 0.8215
             },
             "individual_dummy": {
-                "wb_other_parent_car_drive_share": 4.448
+                "wb_other_parent_car_driver_share": 4.448
             }
         },
         "car_passenger": {
@@ -239,10 +239,10 @@
             "individual_dummy": {}
         },
         "scaling": {
-            "car_drive": {
+            "car_driver": {
                 "constant": 0.8215,
                 "individual_dummy": {
-                    "wb_other_parent_car_drive_share": 0.8215
+                    "wb_other_parent_car_driver_share": 0.8215
                 }
             },
             "car_passenger": {
@@ -262,7 +262,7 @@
             }
         },
         "calibration": {
-            "car_drive": {
+            "car_driver": {
                 "constant": 0.0
             },
             "car_passenger": {

@@ -64,7 +64,7 @@ class DepartureTimeTest(unittest.TestCase):
                 ],
             },
         }
-        dem.mode = "car_drive"
+        dem.mode = "car_driver"
         dem.matrix = mtx
         dem.orig = 1
         dem.dest = None

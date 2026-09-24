@@ -190,7 +190,7 @@ class ModelSystem:
                     Impedance type (time/cost/dist)
                 value : dict
                     key : str
-                        Assignment class (car_drive/transit/...)
+                        Assignment class (car_driver/transit/...)
                     value : numpy.ndarray
                         Impedance (float 2-d matrix)
         is_last_iteration : bool (optional)
@@ -210,7 +210,7 @@ class ModelSystem:
                             purpose, mode, purpose_impedance)
                 else:
                     self._distribute_sec_dests(
-                        purpose, "car_drive", purpose_impedance)
+                        purpose, "car_driver", purpose_impedance)
             else:
                 for mode_demand in purpose.calc_demand(
                         previous_iter_impedance, is_last_iteration):

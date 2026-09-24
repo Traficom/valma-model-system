@@ -117,7 +117,7 @@ class TravelPurpose(Purpose):
             "parking_cost_share" : float
                 Share of drivers paying for parking at destination
             "occupancy" : dict
-                "car_drive" : float
+                "car_driver" : float
                     Average occupancy of car driver trips
                 "car_passenger" : float
                     Average occupancy of car passenger trips
@@ -234,10 +234,10 @@ class TravelPurpose(Purpose):
                 day_imp[mode][mtx_type] *= self.discount[mode][mtx_type]
         self._add_destination_impedances(day_imp)
         if self.occupancy:
-            if "car_drive" in day_imp:
-                day_imp["car_drive"]["cost"] *= (1 - self.cost_share
-                                               * (self.occupancy["car_drive"]-1)
-                                               / self.occupancy["car_drive"])
+            if "car_driver" in day_imp:
+                day_imp["car_driver"]["cost"] *= (1 - self.cost_share
+                                               * (self.occupancy["car_driver"]-1)
+                                               / self.occupancy["car_driver"])
             if "car_passenger" in day_imp:
                 day_imp["car_passenger"]["cost"] *= (self.cost_share
                                             / self.occupancy["car_passenger"])

@@ -23,12 +23,12 @@
         }
     },
     "sec_dest_rate": {
-        "car_drive": 1.1209,
+        "car_driver": 1.1209,
         "car_passenger": 1.0806,
         "transit": 1.0663
     },
     "impedance_share": {
-        "car_drive": {
+        "car_driver": {
             "aht": [
                 0.0609,
                 0.0093
@@ -91,11 +91,11 @@
     "parking_cost_share": 0.75,
     "car_cost_sharing": 0.25,
     "occupancy": {
-        "car_drive": 1.739,
+        "car_driver": 1.739,
         "car_passenger": 2.936
     },
     "distance_boundaries": {
-        "car_drive": [
+        "car_driver": [
             0,
             300
         ],
@@ -117,7 +117,7 @@
         ]
     },
     "destination_choice": {
-        "car_drive": {
+        "car_driver": {
             "attraction": {},
             "impedance": {
                 "time": -0.02521,
@@ -214,7 +214,7 @@
         }
     },
     "mode_choice": {
-        "car_drive": {
+        "car_driver": {
             "constant": 1.634,
             "generation": {},
             "attraction": {},
@@ -271,7 +271,7 @@
             "individual_dummy": {}
         },
         "scaling": {
-            "car_drive": {
+            "car_driver": {
                 "constant": 0.2427
             },
             "car_passenger": {
@@ -296,7 +296,7 @@
             }
         },
         "calibration": {
-            "car_drive": {
+            "car_driver": {
                 "constant": 0.0
             },
             "car_passenger": {
