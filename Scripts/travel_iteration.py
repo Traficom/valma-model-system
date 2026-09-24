@@ -152,10 +152,10 @@ class ModelSystem:
                 purpose_names.append(purpose.name)
                 if isinstance(purpose, SecDestPurpose):
                     sec_dest_purposes.append(purpose)
-                elif (isinstance(purpose, ForeignExternalPurpose) and 
-                      foreign_external_path.exists()):
-                    purpose.base_demand_path = foreign_external_path
-                    foreign_purposes.append(purpose)
+                elif (isinstance(purpose, ForeignExternalPurpose)):
+                    if foreign_external_path.exists():
+                        purpose.base_demand_path = foreign_external_path
+                        foreign_purposes.append(purpose)
                 elif purpose.orig == "home":
                     home_based_purposes.append(purpose)
                 else:
