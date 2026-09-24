@@ -182,9 +182,9 @@ class ZoneData:
         # - shares of population living in households ("sh_pop"),
         # with given number of *adults* and licenses.
         sh_lic = self["sh_adult_license"]
-        self.share[f"{share}_hh1_lic1"] = sh_lic * singles
-        self.share[f"{share}_hh2_lic1"] = 2 * sh_lic * (1-sh_lic) * couples
-        self.share[f"{share}_hh2_lic2"] = sh_lic**2 * couples
+        self.share[f"{share}_adults1_lic1"] = sh_lic * singles
+        self.share[f"{share}_adults2_lic1"] = 2 * sh_lic * (1-sh_lic) * couples
+        self.share[f"{share}_adults2_lic2"] = sh_lic**2 * couples
 
         if share == "sh_pop":
             # Share of population in 1-adult households that
