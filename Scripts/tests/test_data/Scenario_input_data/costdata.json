@@ -111,11 +111,15 @@
                     },
                     "trailer_truck": {
                         "domestic_distribution": 0.3,
-                        "foreign_distribution": 0.2
+                        "foreign_distribution": 0.15
                     },
                     "trailer_truck_ev": {
                         "domestic_distribution": 0.25,
                         "foreign_distribution": 0.1
+                    },
+                    "trailer_truck_76t": {
+                        "domestic_distribution": 0.0,
+                        "foreign_distribution": 0.05
                     }
                 },
                 "param": {
