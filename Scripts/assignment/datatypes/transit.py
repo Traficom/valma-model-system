@@ -188,9 +188,9 @@ class TransitMode(AssignmentMode):
             class_name=self.name)
 
         # Save aux volumes to network field
-        volax_attr = f"#aux_transit_{self.name}_{self.time_period}"
+        volax_attr = f"#aux_transit_{self.name}_{self.time_period}_volume"
         self.emme_project.create_network_field(
-            "LINK", "REAL", volax_attr, "aux transit volume",
+            "LINK", "REAL", volax_attr, volax_attr,
             overwrite=True, scenario=self.emme_scenario)
         network = self.emme_scenario.get_network()
         for link in network.links():
@@ -272,9 +272,9 @@ class MixedMode(TransitMode):
                 if mode_cost["mode"] == param.park_and_ride_mode:
                     mode_cost["cost"] = param.park_cost_attr_l
                     mode_cost["cost_perception_factor"] = self.vot_inv
-        self.park_ride_results = f"#park_and_ride_vol_{self.name}"
+        self.park_ride_results = f"#{self.name}_vrk_car_leg_volume"
         self.emme_project.create_network_field(
-            "LINK", "REAL", self.park_ride_results, self.name,
+            "LINK", "REAL", self.park_ride_results, self.park_ride_results,
             overwrite=True, scenario=self.emme_scenario)
         self.transit_spec["modes"].append(param.park_and_ride_mode)
         self.ntw_results_spec["on_links"] = {
