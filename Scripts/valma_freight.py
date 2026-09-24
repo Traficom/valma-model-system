@@ -70,10 +70,15 @@ def main(args):
     fin_border_ids = list(marine_export[1].values())
     marine_export, marine_import = None, None
 
-    # Prepare domestic model by splicing impedances and initializing final demand matrix 
+    # Prepare domestic model by splicing impedances, adding common dist key
+    # and initializing final demand matrix 
     for ass_class in list(impedance):
         for mtx_type, mtx in impedance[ass_class].items():
             impedance[ass_class][mtx_type] = mtx[:zonedata.nr_zones, :zonedata.nr_zones]
+        if ass_class in param.freight_modes:
+            impedance[ass_class]["dist"] = sum(
+                mtx for key, mtx in impedance[ass_class].items()
+                if key.startswith("dist_"))
     total_demand = {mode: numpy.zeros([zonedata.nr_zones, zonedata.nr_zones], dtype="float32")
                     for mode in param.truck_classes}
     
@@ -89,13 +94,6 @@ def main(args):
             store_demand.store(mode, demand[mode], omx_filename, commodity.name)
         if commodity.name in args.specify_commodity_names:
             ass_model.freight_network.save_network_volumes(commodity.name)
-        for mode in impedance:
-            dist = 0
-            for imp_type in impedance[mode]:
-                if "dist" in imp_type:
-                    dist += impedance[mode][imp_type]
-            if isinstance(dist, numpy.ndarray):
-                impedance[mode]["dist"] = dist
         if "truck" in demand:
             # Calc aux tons and transform tons to vehicles
             ass_model.freight_network.output_traversal_matrix(set(demand), resultdata.path)
