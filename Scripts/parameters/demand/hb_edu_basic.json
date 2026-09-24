@@ -164,9 +164,9 @@
                 "logsum": 0.5311
             },
             "individual_dummy": {
-                "sh_hh2_cars1_lic2": 1.585,
-                "sh_hh2_cars2_lic2": 1.585,
-                "sh_hh2_cars1_lic1": 1.585
+                "sh_hh2_lic2_cars1": 1.585,
+                "sh_hh2_lic2_cars2": 1.585,
+                "sh_hh2_lic1_cars1": 1.585
             }
         },
         "transit": {
@@ -209,9 +209,9 @@
             "car_pax": {
                 "constant": 0.5311,
                 "individual_dummy": {
-                    "sh_hh2_cars1_lic2": 0.5311,
-                    "sh_hh2_cars2_lic2": 0.5311,
-                    "sh_hh2_cars1_lic1": 0.5311
+                    "sh_hh2_lic2_cars1": 0.5311,
+                    "sh_hh2_lic2_cars2": 0.5311,
+                    "sh_hh2_lic1_cars1": 0.5311
                 }
             },
             "transit": {

@@ -5,7 +5,7 @@
 from typing import Any, Dict, Tuple, Union
 
 car_ownership = {
-    "hh1_lic1": {
+    "adults1_lic1": {
         "0": {
             "constant": 0.0,
             "generation": {},
@@ -51,7 +51,7 @@ car_ownership = {
             },
         }
     },
-    "hh2_lic1": {
+    "adults2_lic1": {
         "0": {
             "constant": 0.0,
             "generation": {},
@@ -97,7 +97,7 @@ car_ownership = {
             }
         },
     },
-    "hh2_lic2": {
+    "adults2_lic2": {
         "0": {
             "constant": 0.0,
             "generation": {},

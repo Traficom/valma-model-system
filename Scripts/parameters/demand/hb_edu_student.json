@@ -218,10 +218,10 @@
                 "logsum": 0.807
             },
             "individual_dummy": {
-                "sh_hh2_cars1_lic1": 4.079,
-                "sh_hh2_cars2_lic2": 4.079,
-                "sh_hh1_cars1_lic1": 4.079,
-                "sh_hh2_cars1_lic2": 3.37
+                "sh_hh2_lic1_cars1": 4.079,
+                "sh_hh2_lic2_cars2": 4.079,
+                "sh_hh1_lic1_cars1": 4.079,
+                "sh_hh2_lic2_cars1": 3.37
             }
         },
         "car_pax": {
@@ -233,9 +233,9 @@
                 "logsum": 0.807
             },
             "individual_dummy": {
-                "sh_hh2_cars1_lic2": 1.027,
-                "sh_hh2_cars2_lic2": 1.027,
-                "sh_hh2_cars1_lic1": 1.027
+                "sh_hh2_lic2_cars1": 1.027,
+                "sh_hh2_lic2_cars2": 1.027,
+                "sh_hh2_lic1_cars1": 1.027
             }
         },
         "transit": {
@@ -272,18 +272,18 @@
             "car_drv": {
                 "constant": 0.807,
                 "individual_dummy": {
-                    "sh_hh2_cars1_lic1": 0.807,
-                    "sh_hh2_cars2_lic2": 0.807,
-                    "sh_hh1_cars1_lic1": 0.807,
-                    "sh_hh2_cars1_lic2": 0.807
+                    "sh_hh2_lic1_cars1": 0.807,
+                    "sh_hh2_lic2_cars2": 0.807,
+                    "sh_hh1_lic1_cars1": 0.807,
+                    "sh_hh2_lic2_cars1": 0.807
                 }
             },
             "car_pax": {
                 "constant": 0.807,
                 "individual_dummy": {
-                    "sh_hh2_cars1_lic2": 0.807,
-                    "sh_hh2_cars2_lic2": 0.807,
-                    "sh_hh2_cars1_lic1": 0.807
+                    "sh_hh2_lic2_cars1": 0.807,
+                    "sh_hh2_lic2_cars2": 0.807,
+                    "sh_hh2_lic1_cars1": 0.807
                 }
             },
             "transit": {

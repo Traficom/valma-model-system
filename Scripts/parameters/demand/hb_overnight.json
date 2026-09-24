@@ -184,10 +184,10 @@
                 "gen_cost": -1.523
             },
             "individual_dummy": {
-                "sh_hh2_cars1_lic1": 3.268,
-                "sh_hh2_cars2_lic2": 3.268,
-                "sh_hh1_cars1_lic1": 3.268,
-                "sh_hh2_cars1_lic2": 3.2
+                "sh_hh2_lic1_cars1": 3.268,
+                "sh_hh2_lic2_cars2": 3.268,
+                "sh_hh1_lic1_cars1": 3.268,
+                "sh_hh2_lic2_cars1": 3.2
             }
         },
         "car_pax": {
@@ -205,9 +205,9 @@
                 "gen_cost": -1.633
             },
             "individual_dummy": {
-                "sh_hh2_cars1_lic2": 1.648,
-                "sh_hh2_cars2_lic2": 1.648,
-                "sh_hh2_cars1_lic1": 1.648
+                "sh_hh2_lic2_cars1": 1.648,
+                "sh_hh2_lic2_cars2": 1.648,
+                "sh_hh2_lic1_cars1": 1.648
             }
         },
         "transit": {
