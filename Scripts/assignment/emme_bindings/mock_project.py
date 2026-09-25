@@ -567,6 +567,11 @@ class Scenario:
     def zone_numbers(self):
         return sorted(self._network._centroids)
 
+    def attributes(self, obj_type: str):
+        names = set() # Add basic attributes here if necessary
+        names.add("id")
+        return list(names)
+
     def extra_attribute(self, idx: str):
         network = self.get_network()
         for attr_type in network._extra_attr:

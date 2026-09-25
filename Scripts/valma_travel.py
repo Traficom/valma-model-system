@@ -12,8 +12,6 @@ from travel_iteration import ModelSystem, LOS_MATRIX_FOLDER, DEMAND_MATRIX_FOLDE
 from datahandling.matrixdata import MatrixData
 
 
-BASE_ZONEDATA_FILE = "2016_zonedata.gpkg"
-
 
 def main(args):
     calculate_long_dist_demand = args.long_dist_demand_forecast == "calc"
@@ -29,7 +27,6 @@ def main(args):
     else:
         raise ArgumentTypeError(
             "Iteration number {} not valid".format(args.iterations))
-    base_zonedata_path = Path(args.base_data_folder, BASE_ZONEDATA_FILE)
     base_matrices_path = Path(args.base_data_folder, DEMAND_MATRIX_FOLDER)
     freight_matrices_path = (Path(args.freight_matrix_path)
         if args.freight_matrix_path is not None else None)
@@ -49,11 +46,6 @@ def main(args):
             "converged": 0,
         }
     }
-    # Check input data folders/files exist
-    # if not base_zonedata_path.is_dir():
-    #     raise NameError(
-    #         "Baseline zonedata directory '{}' does not exist.".format(
-    #             base_zonedata_path))
     if not base_matrices_path.is_dir():
         raise NameError(
             "Baseline matrix directory '{}' does not exist.".format(
@@ -118,8 +110,17 @@ def main(args):
             stored_speed_assignment.append(result_data_folder)
     except TypeError:
         pass
-    impedance = model.assign_base_demand(
-        iterations==0, args.car_end_assignment_only, stored_speed_assignment)
+    try:
+        impedance = model.assign_base_demand(
+            iterations==0, args.car_end_assignment_only,
+            stored_speed_assignment)
+    except Exception as error:
+        log.error("Error occurred while assigning base demand.", error)
+        if not args.save_matrices and not args.do_not_use_emme:
+            del_emme_matrices(ass_model)
+        if args.del_strat_files:
+            del_strat_files(emme_project_path)
+        return
     log_extra["status"]["state"] = "running"
     i = 1
     while i <= iterations:
@@ -149,24 +150,33 @@ def main(args):
     
     if not log_extra["status"]["converged"]: log.warn("Model has not converged")
 
-    # delete emme matrices
     if not args.save_matrices and not args.do_not_use_emme:
+        del_emme_matrices(ass_model)
+
+    if args.del_strat_files:
+        del_strat_files(emme_project_path)
+    log.info("Simulation ended.", extra=log_extra)
+
+
+def del_emme_matrices(ass_model: EmmeAssignmentModel):
+    try:
         matrix_ids = [mtx.id for mtx
                       in ass_model.emme_project.modeller.emmebank.matrices()]
         for idx in matrix_ids:
             ass_model.emme_project.modeller.emmebank.delete_matrix(idx)
         log.info("EMME matrices deleted")
+    except Exception as error:
+        log.error("Error occurred while deleting EMME matrices.", error)
 
-    # delete emme strategy files for scenarios
-    if args.del_strat_files:
-        db_path = emme_project_path.parent / "database"
-        for f in list(db_path.glob("STRAT_s*")) + list(db_path.glob("STRATS_s*/*")):
-            try:
-                f.unlink()
-            except:
-                log.info(f"Not able to remove file {f}.")
-        log.info(f"Removed strategy files in {db_path}")
-    log.info("Simulation ended.", extra=log_extra)
+
+def del_strat_files(emme_project_path: Path):
+    db_path = emme_project_path.parent / "database"
+    for f in list(db_path.glob("STRAT_s*")) + list(db_path.glob("STRATS_s*/*")):
+        try:
+            f.unlink()
+        except:
+            log.info(f"Not able to remove file {f}.")
+    log.info(f"Removed strategy files in {db_path}")
 
 
 if __name__ == "__main__":

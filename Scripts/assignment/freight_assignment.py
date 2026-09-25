@@ -18,7 +18,8 @@ class FreightAssignmentPeriod(AssignmentPeriod):
 
     def prepare(self, dist_unit_cost: Dict[str, float],
                 time_unit_cost: Dict[str, float], save_matrices: bool):
-        self._prepare_cars(dist_unit_cost, time_unit_cost, save_matrices)
+        self._prepare_cars(dist_unit_cost, time_unit_cost, save_matrices, 
+                           truck_classes=tuple(param.truck_fleet))
         network = self.emme_scenario.get_network()
         ass_classes = {mode: ass_class
                        for ass_class, modes in param.freight_modes.items()
@@ -48,11 +49,11 @@ class FreightAssignmentPeriod(AssignmentPeriod):
     def assign(self):
         self._set_car_vdfs(use_free_flow_speeds=True)
         self._init_truck_times()
-        self._assign_trucks()
+        self._assign_trucks(tuple(param.truck_fleet))
         self._set_freight_vdfs()
         self._assign_freight()
         return {tc: self.assignment_modes[tc].get_matrices()
-                for tc in param.truck_classes + tuple(param.freight_modes)}
+                for tc in tuple(param.truck_fleet) + tuple(param.freight_modes)}
 
     def save_network_volumes(self, commodity_class: str):
         """Save commodity-specific volumes in segment attribute.
@@ -80,7 +81,7 @@ class FreightAssignmentPeriod(AssignmentPeriod):
             for link in network.links():
                 link[link_attr] = link[param.aux_commodity_flow_attr]
             self.emme_scenario.publish_network(network)
-        for spec in self._car_spec.truck_specs():
+        for spec in self._car_spec.truck_specs(param.truck_classes):
             spec["stopping_criteria"] = self.stopping_criteria["coarse"]
             self.emme_project.car_assignment(spec, self.emme_scenario)
         link_attr = f"#{commodity_class}_truck"

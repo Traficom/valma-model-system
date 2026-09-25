@@ -538,16 +538,16 @@ class AssignmentPeriod(Period):
 
     def _calc_background_traffic(self, include_trucks: bool = False):
         """Calculate background traffic (buses)."""
-        bus_vol_attr = self.netfield("bus")
+        bus_vol_attr = f"{self.netfield('bus')}_volume"
         self.emme_project.create_network_field(
-            "LINK", "REAL", bus_vol_attr, f"{bus_vol_attr}_vol",
+            "LINK", "REAL", bus_vol_attr, bus_vol_attr,
             overwrite=True, scenario=self.emme_scenario)
         network = self.emme_scenario.get_network()
         # emme api has name "data3" for ul3
         background_traffic = param.background_traffic_attr.replace(
             "ul", "data")
         # calc @bus and data3
-        heavy = [self.netfield(ass_class) for ass_class in param.truck_classes]
+        heavy = [f"{self.netfield(ass_class)}_volume" for ass_class in param.truck_classes]
         for link in network.links():
             if link.type > 100: # If car or bus link
                 freq = 0
@@ -664,16 +664,16 @@ class AssignmentPeriod(Period):
         log.info("Car assignment performed for scenario {}, {}".format(
             self.emme_scenario.id, self.name))
 
-    def _assign_trucks(self):
+    def _assign_trucks(self, truck_classes: Iterable = param.truck_classes):
         stopping_criteria = copy.deepcopy(param.stopping_criteria["coarse"])
         stopping_criteria["max_iterations"] = 0
-        for truck_spec in self._car_spec.truck_specs():
+        for truck_spec in self._car_spec.truck_specs(truck_classes):
             truck_spec["stopping_criteria"] = stopping_criteria
             self.emme_project.car_assignment(
                 truck_spec, self.emme_scenario)
         network = self.emme_scenario.get_network()
         modes = [self.assignment_modes[ass_class]
-                 for ass_class in param.truck_classes
+                 for ass_class in truck_classes
                  if ass_class in self.assignment_modes]
         for link in network.links():
             for mode in modes:

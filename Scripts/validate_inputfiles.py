@@ -13,12 +13,10 @@ from assignment.mock_assignment import MockAssignmentModel
 from datahandling.matrixdata import MatrixData
 from datahandling.zonedata import ZoneData, FreightZoneData
 import parameters.assignment as param
-from valma_travel import BASE_ZONEDATA_FILE
-from valma_travel import LOS_MATRIX_FOLDER
+from valma_travel import LOS_MATRIX_FOLDER, DEMAND_MATRIX_FOLDER
 
 
 def main(args):
-    base_zonedata_path = Path(args.base_data_folder, BASE_ZONEDATA_FILE)
     emme_project_files: Union[str,List[str]] = args.emme_project_files
     first_scenario_ids: Union[int,List[int]] = args.first_scenario_ids
     zone_data_files: Union[str,List[str]] = args.zone_data_files
@@ -46,14 +44,6 @@ def main(args):
                + "vs. number of zone-data-files")
         log.error(msg)
         raise ValueError(msg)
-
-    # Check basedata input
-    # log.info("Checking base inputdata...")
-    # if not (args.end_assignment_only or base_zonedata_path.exists()):
-    #     msg = "Baseline zonedata file '{}' does not exist.".format(
-    #         base_zonedata_path)
-    #     log.error(msg)
-    #     raise ValueError(msg)
 
     zone_numbers: Dict[str, numpy.array] = {}
 
@@ -199,7 +189,7 @@ def main(args):
         if submodel != "koko_suomi":
             # Check base matrices
             base_matrices_path = Path(
-                args.base_data_folder, "Matrices", submodel)
+                args.base_data_folder, DEMAND_MATRIX_FOLDER, submodel)
             if not base_matrices_path.exists():
                 msg = "Baseline matrices' directory '{}' does not exist.".format(
                     base_matrices_path)
@@ -221,7 +211,8 @@ def main(args):
             args.scenario_name, args.long_dist_demand_forecast):
         if long_dist == "calc":
             long_dist_result_paths.append(
-                Path(args.result_data_folder, name, "Matrices", "koko_suomi"))
+                Path(args.result_data_folder, name, DEMAND_MATRIX_FOLDER,
+                     "koko_suomi"))
     model_types = (args.model_types if args.model_types
                    else ["passenger_transport" for _ in zone_data_files])
     electric_car_share = {"default": {"bev": 0.1, "phev": 0.2}}

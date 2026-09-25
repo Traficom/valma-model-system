@@ -11,11 +11,8 @@ import utils.log as log
 import assignment.emme_assignment as ass
 from datahandling.matrixdata import MatrixData
 from datahandling.resultdata import ResultsData
-from tests.integration.test_data_handling import (
-    TEST_DATA_PATH, COSTDATA_PATH
-)
+from tests.integration.test_arguments import TEST_DATA_PATH, COSTDATA_PATH, LOS_MATRIX_FOLDER
 from datahandling.traversaldata import transform_traversal_data
-from travel_iteration import LOS_MATRIX_FOLDER
 try:
     from assignment.emme_bindings.emme_project import EmmeProject
     import inro.emme.desktop.app as _app
@@ -99,7 +96,7 @@ class EmmeAssignmentTest:
         nr_zones = self.ass_model.nr_zones
         car_matrix = numpy.full((nr_zones, nr_zones), 10.0)
         demand = {
-            "car": car_matrix,
+            "bev": car_matrix,
             "transit": car_matrix,
             "bike": car_matrix,
             "trailer_truck": car_matrix,
@@ -133,7 +130,7 @@ class EmmeAssignmentTest:
         nr_zones = self.ass_model.nr_zones
         car_matrix = numpy.full((nr_zones, nr_zones), 10.0)
         ass_classes = [
-            "car",
+            "bev",
             "transit",
             "airplane",
             "pt_car_acc",

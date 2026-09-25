@@ -421,6 +421,18 @@ truck_classes = (
     "semi_trailer",
     "trailer_truck",
 )
+truck_fleet = {
+    "truck": "truck",
+    "truck_ev": "truck",
+    "truck_2n": "truck",
+    "truck_2n_ev": "truck",
+    "semi_trailer": "semi_trailer",
+    "semi_trailer_ev": "semi_trailer",
+    "trailer_truck": "trailer_truck",
+    "trailer_truck_ev": "trailer_truck",
+    "trailer_truck_76t": "trailer_truck",
+    "trailer_truck_76ev": "trailer_truck"
+}
 simple_transport_classes = (private_classes
                             + simple_transit_classes
                             + truck_classes)
@@ -439,6 +451,13 @@ assignment_modes = {
     "semi_trailer": 'y',
     "truck": 'k',
     "van": 'v',
+    "truck_ev": "k",
+    "truck_2n": "k",
+    "truck_2n_ev": "k",
+    "semi_trailer_ev": "y",
+    "trailer_truck_ev": "y",
+    "trailer_truck_76t": "y",
+    "trailer_truck_76ev": "y"
 }
 local_transit_modes = [
     'b',
@@ -511,7 +530,7 @@ freight_marine_modes = {
     }
 }
 external_modes = [
-    "car_drv",
+    "car_driver",
     "transit",
     "truck",
     "trailer_truck",
@@ -591,8 +610,8 @@ roadtypes = {
 }
 # modes in choice model : impedance
 mode_impedance = {
-    "car_drv": ["icev", "bev", "phev"],
-    "car_pax": ["icev", "bev", "phev"],
+    "car_driver": ["icev", "bev", "phev"],
+    "car_passenger": ["icev", "bev", "phev"],
     "transit": ["transit"],
     "airplane": ["airplane"],
     "bike": ["bike"],
@@ -608,11 +627,11 @@ mode_impedance = {
 # If the mode has two assignment classes, demand
 # will be transposed for the second one.
 mode_assignment_classes = {
-    "car_drv": ["icev", "bev", "phev"],
+    "car_driver": ["icev", "bev", "phev"],
     "icev": ["icev"],
     "bev": ["bev"],
     "phev": ["phev"],
-    "car_pax": [],
+    "car_passenger": [],
     "transit": ["transit"],
     "airplane": ["airplane"],
     "bike": ["bike"],

@@ -23,8 +23,8 @@
         }
     },
     "sec_dest_rate": {
-        "car_drv": 1.0834,
-        "car_pax": 1.1938,
+        "car_driver": 1.0834,
+        "car_passenger": 1.1938,
         "transit": 1.0407
     },
     "impedance_share": {
@@ -34,13 +34,13 @@
                 1.0
               ]
             },
-        "car_drv": {
+        "car_driver": {
             "vrk": [
                 1.0,
                 1.0
               ]
             },
-        "car_pax": {
+        "car_passenger": {
             "vrk": [
                 1.0,
                 1.0
@@ -93,8 +93,8 @@
     "parking_cost_share": 0.5,
     "car_cost_sharing": 0.0,
     "occupancy": {
-        "car_drv": 1.171,
-        "car_pax": 2.483
+        "car_driver": 1.171,
+        "car_passenger": 2.483
     },
     "tour_duration": {
         "pt_car_acc": 1.12,
@@ -108,11 +108,11 @@
             0,
             30
         ],
-        "car_drv": [
+        "car_driver": [
             0,
             9999
         ],
-        "car_pax": [
+        "car_passenger": [
             0,
             9999
         ],
@@ -163,7 +163,7 @@
         }
     },
     "mode_choice": {
-        "car_drv": {
+        "car_driver": {
             "constant": -9.668,
             "generation": {},
             "attraction": {
@@ -181,7 +181,7 @@
                 "sh_cars1_hh2": 2.283
             }
         },
-        "car_pax": {
+        "car_passenger": {
             "constant": -10.44,
             "generation": {},
             "attraction": {
@@ -241,10 +241,10 @@
             "individual_dummy": {}
         },
         "calibration": {
-            "car_drv": {
+            "car_driver": {
                 "constant": 0.0
             },
-            "car_pax": {
+            "car_passenger": {
                 "constant": 0.0
             },
             "transit": {
@@ -381,13 +381,13 @@
                 1.0
               ]
         },
-        "car_drv": {
+        "car_driver": {
             "vrk": [
                 1.0,
                 1.0
               ]
         },
-        "car_pax": {
+        "car_passenger": {
             "vrk": [
                 1.0,
                 1.0

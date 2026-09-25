@@ -17,9 +17,11 @@ import assignment.departure_time as dt
 from datahandling.resultdata import ResultsData
 from datahandling.zonedata import ZoneData, GridData
 from datahandling.matrixdata import MatrixData
-from demand.trips import DemandModel
-from demand.external import ExternalPurpose
-from datatypes.purpose import TravelPurpose, TourPurpose, SecDestPurpose
+from demand.travel import TravelDemandModel
+from datatypes.purpose import (
+    ExternalPurpose, ForeignExternalPurpose, TravelPurpose, TourPurpose,
+    SecDestPurpose,
+)
 from datatypes.demand import Demand
 import parameters.assignment as param
 import parameters.zone as zone_param
@@ -39,8 +41,6 @@ class ModelSystem:
         Path where input data for forecast year are found
     cost_data_path : Path
         Path where cost data for forecast year are found
-    base_zone_data_path : Path
-        Directory path where input data for base year are found
     base_matrices_path : Path
         Directory path where base demand matrices are found
     results_path : Path
@@ -133,11 +133,10 @@ class ModelSystem:
         home_based_purposes = []
         sec_dest_purposes = []
         other_purposes = []
+        foreign_purposes = []
         purpose_names = []
         for file in parameters_path.glob("*.json"):
             specification = json.loads(file.read_text("utf-8"))
-            if specification["name"] == "hb_abroad_other" and not foreign_external_path.exists():
-                continue
             for dummies in mode_dummies.values():
                 for subarea in dummies:
                     for mode, coeff in dummies[subarea].items():
@@ -152,13 +151,17 @@ class ModelSystem:
                                           ["attraction"][subarea]) = coeff
             purpose = TravelPurpose(
                 specification, self._zone_datas, self.resultdata,
-                cost_data["cost_changes"], foreign_external_path)
+                cost_data["cost_changes"])
             required_time_periods = sorted(
                 {tp for m in purpose.impedance_share.values() for tp in m})
             if required_time_periods == sorted(assignment_model.time_periods):
                 purpose_names.append(purpose.name)
                 if isinstance(purpose, SecDestPurpose):
                     sec_dest_purposes.append(purpose)
+                elif (isinstance(purpose, ForeignExternalPurpose)):
+                    if foreign_external_path.exists():
+                        purpose.base_demand_path = foreign_external_path
+                        foreign_purposes.append(purpose)
                 elif purpose.orig == "home":
                     home_based_purposes.append(purpose)
                 else:
@@ -168,7 +171,7 @@ class ModelSystem:
             log.error(msg)
             raise ValueError(msg)
         self.dm = self._init_demand_model(
-            home_based_purposes + other_purposes + sec_dest_purposes)
+            home_based_purposes + other_purposes + sec_dest_purposes + foreign_purposes)           
         self.dm.calculate_car_ownership()
         self.travel_modes = {mode: True for purpose in self.dm.tour_purposes
             for mode in purpose.modes}  # Dict instead of set, to preserve order
@@ -180,7 +183,7 @@ class ModelSystem:
         self.convergence = []
 
     def _init_demand_model(self, tour_purposes: List[TourPurpose]):
-        return DemandModel(
+        return TravelDemandModel(
             self._zone_datas["domestic"], self.resultdata, tour_purposes)
 
     def _add_internal_demand(self, previous_iter_impedance, is_last_iteration):
@@ -198,13 +201,14 @@ class ModelSystem:
                     Impedance type (time/cost/dist)
                 value : dict
                     key : str
-                        Assignment class (car_drv/transit/...)
+                        Assignment class (car_driver/transit/...)
                     value : numpy.ndarray
                         Impedance (float 2-d matrix)
         is_last_iteration : bool (optional)
             If this is the last iteration, 
             secondary destinations are calculated for all modes
         """
+        daily_matrices = {}
         log.info("Demand calculation started...")
         for purpose in self.dm.tour_purposes:
             if isinstance(purpose, SecDestPurpose):
@@ -217,35 +221,64 @@ class ModelSystem:
                             purpose, mode, purpose_impedance)
                 else:
                     self._distribute_sec_dests(
-                        purpose, "car_drv", purpose_impedance)
+                        purpose, "car_driver", purpose_impedance)
             else:
                 for mode_demand in purpose.calc_demand(
                         previous_iter_impedance, is_last_iteration):
                     self.dtm.add_demand(mode_demand)
+                    if is_last_iteration and not self.ass_model.use_free_flow_speeds:
+                        if mode_demand.mode in daily_matrices:
+                            daily_matrices[mode_demand.mode] += mode_demand.matrix
+                        else:
+                            daily_matrices[mode_demand.mode] = mode_demand.matrix
         previous_iter_impedance.clear()
         log.info("Demand calculation completed")
 
+        # Save daily demand matrices
+        if is_last_iteration and not self.ass_model.use_free_flow_speeds:
+            for mode in daily_matrices:
+                daily_matrices[mode] += daily_matrices[mode].T # Convert from tours to trips
+            with self.demand_matrices.open(
+                    "demand", "vrk", self.zone_numbers, m='w') as mtx:
+                for mode in daily_matrices:
+                    mtx[mode] = daily_matrices[mode]
+
     def _add_external_demand(self,
                              long_dist_matrices: MatrixData,
-                             long_dist_classes: Iterable[str]):
+                             long_dist_classes: Iterable[str]
+                             ) -> Dict[str, numpy.ndarray]:
+        """Add external demand in departure time model.
+
+        Also return matrices, if they are to be saved to omx.
+
+        Parameters
+        ----------
+        long_dist_matrices : MatrixData
+            MatrixData object where long-distance demand is found
+        long_dist_classes : Iterable[str]
+            Assignment classes for which long-distance demand is added
+
+        Returns
+        -------
+        dict
+            key : str
+                Assignment class (bev/phev/icev/transit)
+            value : numpy.ndarray
+                Demand matrix (float 2-d matrix)
+        """
         class_list = ", ".join(long_dist_classes)
         log.info(f"Getting external demand matrices for {class_list}...")
         zone_numbers = self.ass_model.zone_numbers
-        matrices_to_add = {}
+        matrices_to_save = {}
         with long_dist_matrices.open(
                 "demand", "vrk", zone_numbers,
                 self._zone_datas["domestic"].mapping, long_dist_classes) as mtx:
             for ass_class in long_dist_classes:
                 demand = Demand(self.external_purpose, ass_class, mtx[ass_class])
                 self.dtm.add_demand(demand)
-                if ass_class in param.car_classes + param.local_transit_classes:
-                    matrices_to_add[ass_class] = demand.matrix
-            log.info(f"Demand imported from {long_dist_matrices.path}")
-        if matrices_to_add:
-            with self.demand_matrices.open(
-                    "demand", "vrk", zone_numbers, m='w') as mtx:
-                for ass_class in matrices_to_add:
-                    mtx[ass_class] = matrices_to_add[ass_class]
+                matrices_to_save[ass_class] = demand.matrix
+        log.info(f"Demand imported from {long_dist_matrices.path}")
+        return matrices_to_save
 
     # possibly merge with init
     def assign_base_demand(self, 
@@ -367,10 +400,25 @@ class ModelSystem:
         self._add_internal_demand(previous_iter_impedance, iteration=="last")
         if (not self.ass_model.use_free_flow_speeds
                 and not isinstance(self.ass_model, MockAssignmentModel)):
-            matrices = (self.basematrices if self.long_dist_matrices is None
-                else self.long_dist_matrices)
-            self._add_external_demand(
-                matrices, param.car_classes + param.local_transit_classes)
+            # Add long car and transit trips
+            long_dist_classes = param.car_classes + param.local_transit_classes
+            zone_numbers = self.ass_model.zone_numbers
+            if self.long_dist_matrices is None:
+                with self.basematrices.open(
+                        "long_dist_demand", "vrk", zone_numbers,
+                        transport_classes=long_dist_classes) as mtx:
+                    for ass_class in long_dist_classes:
+                        self.dtm.add_demand(Demand(
+                            self.external_purpose, ass_class, mtx[ass_class]))
+                log.info(f"Demand imported from {self.basematrices.path}")
+            else:
+                matrices_to_add = self._add_external_demand(
+                    self.long_dist_matrices, long_dist_classes)
+                # Save submodel-aggregated version of matrices to omx
+                with self.demand_matrices.open(
+                        "long_dist_demand", "vrk", zone_numbers, m='w') as mtx:
+                    for ass_class in matrices_to_add:
+                        mtx[ass_class] = matrices_to_add[ass_class]
 
         # Add vans and save demand matrices
         zd = self._zone_datas["domestic"]

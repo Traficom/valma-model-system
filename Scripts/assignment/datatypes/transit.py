@@ -188,9 +188,9 @@ class TransitMode(AssignmentMode):
             class_name=self.name)
 
         # Save aux volumes to network field
-        volax_attr = f"#aux_transit_{self.name}_{self.time_period}"
+        volax_attr = f"#aux_transit_{self.name}_{self.time_period}_volume"
         self.emme_project.create_network_field(
-            "LINK", "REAL", volax_attr, "aux transit volume",
+            "LINK", "REAL", volax_attr, volax_attr,
             overwrite=True, scenario=self.emme_scenario)
         network = self.emme_scenario.get_network()
         for link in network.links():
@@ -199,6 +199,7 @@ class TransitMode(AssignmentMode):
         # Save volumes in network fields
         self.segment_results: Dict[str, str] = defaultdict(dict)
         self.node_results: Dict[str, str] = defaultdict(dict)
+        self.mode_kms = dict.fromkeys(self.transit_spec["modes"], 0.0)
         for result, temp_result_attr in param.segment_results.items():
             for scenario, tp in (
                     (self.day_scenario, "vrk"),
@@ -216,16 +217,23 @@ class TransitMode(AssignmentMode):
                     self.emme_project.create_network_field(
                         "NODE", "REAL", node_result_attr, f"{self.name} {result}",
                         overwrite=True, scenario=scenario, network=network)
-            for segment in network.transit_segments():
-                # Save segment volumes to network field
-                vol = segment[temp_result_attr]
-                segment[result_attr] = vol
-                # Sum volumes on link and node level
-                if result == "transit_volumes":
-                    if segment.link is not None:
-                        segment.link[self.volume_attr] += vol
-                else:
-                    segment.i_node[node_result_attr] += vol
+            for link in network.links():
+                link_vols = defaultdict(float)
+                for segment in link.segments():
+                    # Save segment volumes to network field
+                    vol = segment[temp_result_attr]
+                    segment[result_attr] = vol
+                    # Sum volumes on link and node level
+                    if result == "transit_volumes":
+                        link[self.volume_attr] += vol
+                        mode = segment.line.mode.id
+                        if mode in self.mode_kms:
+                            link_vols[mode] += vol
+                    else:
+                        link.i_node[node_result_attr] += vol
+                if link.i_node[param.submodel_attr] == 2:
+                    for mode, vol in link_vols.items():
+                        self.mode_kms[mode] += vol * link.length
         self._save_link_results(network)
         self.emme_scenario.publish_network(network)
 
@@ -264,9 +272,9 @@ class MixedMode(TransitMode):
                 if mode_cost["mode"] == param.park_and_ride_mode:
                     mode_cost["cost"] = param.park_cost_attr_l
                     mode_cost["cost_perception_factor"] = self.vot_inv
-        self.park_ride_results = f"#park_and_ride_vol_{self.name}"
+        self.park_ride_results = f"#{self.name}_vrk_car_leg_volume"
         self.emme_project.create_network_field(
-            "LINK", "REAL", self.park_ride_results, self.name,
+            "LINK", "REAL", self.park_ride_results, self.park_ride_results,
             overwrite=True, scenario=self.emme_scenario)
         self.transit_spec["modes"].append(param.park_and_ride_mode)
         self.ntw_results_spec["on_links"] = {
