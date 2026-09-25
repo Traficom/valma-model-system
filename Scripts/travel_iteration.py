@@ -39,8 +39,6 @@ class ModelSystem:
         Path where input data for forecast year are found
     cost_data_path : Path
         Path where cost data for forecast year are found
-    base_zone_data_path : Path
-        Directory path where input data for base year are found
     base_matrices_path : Path
         Directory path where base demand matrices are found
     results_path : Path
@@ -190,7 +188,7 @@ class ModelSystem:
                     Impedance type (time/cost/dist)
                 value : dict
                     key : str
-                        Assignment class (car_drv/transit/...)
+                        Assignment class (car_driver/transit/...)
                     value : numpy.ndarray
                         Impedance (float 2-d matrix)
         is_last_iteration : bool (optional)
@@ -210,7 +208,7 @@ class ModelSystem:
                             purpose, mode, purpose_impedance)
                 else:
                     self._distribute_sec_dests(
-                        purpose, "car_drv", purpose_impedance)
+                        purpose, "car_driver", purpose_impedance)
             else:
                 for mode_demand in purpose.calc_demand(
                         previous_iter_impedance, is_last_iteration):

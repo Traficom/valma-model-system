@@ -32,7 +32,7 @@ def update_diagonal_cost(impedance: dict) -> dict:
         else:
             for imp_type in impedance[mode]:
                 if "time" in imp_type or "aux_cost" in imp_type:
-                    numpy.fill_diagonal(impedance[mode][imp_type], numpy.inf)
+                    numpy.fill_diagonal(impedance[mode][imp_type], 999999)
     return impedance
 
 

@@ -316,7 +316,7 @@ class EmmeAssignmentModel(AssignmentModel):
                 else:
                     vdf = 0
                 for ass_class in ass_classes:
-                    veh_kms = link[self._netfield(ass_class)] * link.length
+                    veh_kms = link[f"{self._netfield(ass_class)}_volume"] * link.length
                     kms[ass_class] += veh_kms
                     try:
                         vdf_kms[ass_class][vdf] += veh_kms
@@ -534,10 +534,14 @@ class EmmeAssignmentModel(AssignmentModel):
             hour_attrs[ap.name] = {}
             for mode in ap.assignment_modes.values():
                 hour_attrs[ap.name][mode.name] = mode.volume_attr
-                day_attrs[mode.name] = self._netfield(mode.name)
+                day_attrs[mode.name] = (
+                    f"{self._netfield(mode.name)}_transit_leg_volume"
+                    if mode.name in param.mixed_mode_classes
+                    else f"{self._netfield(mode.name)}_volume"
+                )
         for attr in day_attrs:
             self.emme_project.create_network_field(
-                "LINK", "REAL", day_attrs[attr], f"{attr}_vol",
+                "LINK", "REAL", day_attrs[attr], day_attrs[attr],
                 overwrite=True, scenario=self.day_scenario, network=network)
         # save link volumes to result network
         for link in network.links():

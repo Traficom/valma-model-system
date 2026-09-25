@@ -84,8 +84,8 @@
     },
     "cost_changes": {
         "cost": {
-            "car_drv": 1.0,
-            "car_pax": 1.0
+            "car_driver": 1.0,
+            "car_passenger": 1.0
         }
     },
     "freight": {
@@ -111,11 +111,15 @@
                     },
                     "trailer_truck": {
                         "domestic_distribution": 0.3,
-                        "foreign_distribution": 0.2
+                        "foreign_distribution": 0.15
                     },
                     "trailer_truck_ev": {
                         "domestic_distribution": 0.25,
                         "foreign_distribution": 0.1
+                    },
+                    "trailer_truck_76t": {
+                        "domestic_distribution": 0.0,
+                        "foreign_distribution": 0.05
                     }
                 },
                 "param": {
