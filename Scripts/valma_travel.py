@@ -76,7 +76,7 @@ def main(args):
             raise NameError(
                 ".emp project file not found in given '{}' location.".format(
                     emme_project_path))
-        log.info("Initializing Emme...")
+        log.info("Initializing EmmeAssignmentModel...")
         from assignment.emme_bindings.emme_project import EmmeProject
         ep = EmmeProject(emme_project_path)
         ep.try_open_db(args.submodel)
@@ -90,7 +90,6 @@ def main(args):
     # Initialize model system (wrapping Assignment-model,
     # and providing demand calculations as Python modules)
     # Read input matrices (.omx) and zonedata (.csv)
-    log.info("Initializing matrices and models...", extra=log_extra)
     model_args = (zone_data_file, cost_data_file,
                   base_matrices_path, result_data_folder, ass_model, args.submodel,
                   args.mode_dest_calibration_file, args.municipality_calibration_file,

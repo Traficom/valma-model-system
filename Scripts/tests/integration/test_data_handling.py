@@ -4,7 +4,7 @@ import os
 import numpy
 
 import utils.log as log
-from datahandling.zonedata import ZoneData
+from datahandling.zonedata import GridData, ZoneData
 from datahandling.matrixdata import MatrixData
 import parameters.assignment as param
 from tests.integration.test_arguments import (
@@ -52,12 +52,12 @@ class MatrixDataTest(unittest.TestCase):
         expanded_zones = numpy.insert(ZONE_INDEXES, 3, 8)
         expanded_internal = numpy.insert(INTERNAL_ZONES, 3, 8)
         mapping = pandas.Series(expanded_internal, expanded_internal)
-        mapping[300] = 202
+        mapping[300] = 213
         for key in emme_scenarios:
             print("Opening matrix for time period", key)
             with matrix_data.open(
-                    matrix_type, key, expanded_zones, mapping) as mtx:
-                for ass_class in param.simple_transport_classes:
+                matrix_type, key, expanded_zones, mapping, param.car_classes) as mtx:
+                for ass_class in param.car_classes:
                     a = mtx[ass_class]
 
 
@@ -70,8 +70,11 @@ class ZoneDataTest(unittest.TestCase):
         return df
 
     def test_csv_file_read(self):
-        zdata = ZoneData(
-            ZONEDATA_PATH, ZONE_INDEXES, "uusimaa", car_dist_cost=0.12,
-            electric_car_share={"default": {"bev": 0.1, "phev": 0.2}})
-        self.assertIsNotNone(zdata["population"])
-        self.assertIsNotNone(zdata["workplaces"])
+        grid_data = GridData(ZONEDATA_PATH, "uusimaa", 
+                             ZONE_INDEXES,  model_area="domestic")
+        data = grid_data.aggregate()
+        zone_data = ZoneData(data, "uusimaa", ZONE_INDEXES, 
+                             "domestic", car_dist_cost=0.12, 
+                             electric_car_share={"default": {"bev": 0.1, "phev": 0.2}})
+        self.assertIsNotNone(zone_data["population"])
+        self.assertIsNotNone(zone_data["workplaces"])

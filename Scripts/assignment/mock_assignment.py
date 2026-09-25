@@ -19,7 +19,7 @@ class MockAssignmentModel(AssignmentModel):
                  delete_extra_matrices: bool = False,
                  delete_strat_files: bool = False):
         self.matrices = matrices
-        log.info("Reading matrices from " + str(self.matrices.path))
+        log.info("Reading LOS matrices from " + str(self.matrices.path))
         self.use_free_flow_speeds = use_free_flow_speeds
         end_ass_classes = ((param.private_classes + param.local_transit_classes)
             if delete_extra_matrices else param.transport_classes)

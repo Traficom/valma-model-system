@@ -6,11 +6,12 @@ import unittest
 import json
 from pathlib import Path
 
-from datahandling.zonedata import ZoneData
+from datahandling.zonedata import GridData, ZoneData
 from models.logit import ModeDestModel, DestModeModel
 from datatypes.purpose import attempt_calibration
 from datahandling.resultdata import ResultsData
-from tests.integration.test_arguments import RESULTS_PATH, ZONEDATA_PATH, INTERNAL_ZONES
+from tests.integration.test_arguments import RESULTS_PATH, ZONEDATA_PATH, ZONE_INDEXES,
+
 
 class LogitModelTest(unittest.TestCase):
     def test_logit_calc(self):
@@ -18,14 +19,15 @@ class LogitModelTest(unittest.TestCase):
         class Purpose:
             pass
         pur = Purpose()
-        zi = numpy.array(INTERNAL_ZONES)
-        zd = ZoneData(
-            ZONEDATA_PATH, zi, "uusimaa", car_dist_cost=0.12,
+        grid_data = GridData(ZONEDATA_PATH, "uusimaa", ZONE_INDEXES,  model_area="domestic")
+        data = grid_data.aggregate()
+        zd = ZoneData(data, "uusimaa", ZONE_INDEXES, "domestic",
+            car_dist_cost=0.12, 
             electric_car_share={"default": {"bev": 0.1, "phev": 0.2}})
         for attr in ("sh_cars1_hh1", "sh_cars1_hh2", "sh_cars1_hh3",
                      "sh_cars2_hh2", "sh_cars2_hh3"):
             zd[attr] = pandas.Series(0.2, index=zd.zone_numbers)
-        nr_zones = len(INTERNAL_ZONES)
+        nr_zones = len(ZONE_INDEXES)
         mtx = numpy.arange(nr_zones*nr_zones, dtype=numpy.float32)
         mtx.shape = (nr_zones, nr_zones)
         mtx[numpy.diag_indices(nr_zones)] = 0
