@@ -9,6 +9,7 @@ COSTDATA_PATH = TEST_DATA_PATH / "Scenario_input_data" / "costdata.json"
 MODE_DEST_CALIBRATION_FILE = TEST_DATA_PATH / "Scenario_input_data" / "mode_dest_calibration.json"
 MUNICIPALITY_CALIBRATION_FILE = TEST_DATA_PATH / "Scenario_input_data" / "municipality_calibration.txt"
 BASE_MATRICES_PATH = TEST_DATA_PATH / "Scenario_input_data" / "demand_matrices"
+LOS_MATRIX_FOLDER = RESULTS_PATH / "los_matrices"
 INTERNAL_ZONES = [
     202, 1344, 1755, 2037, 2129, 2224, 2333, 2413, 2519, 2621, 2707, 2814, 2918,
     3000, 3003, 3203, 3302, 3416, 3639, 3705, 3800, 4013, 4102, 4202]
