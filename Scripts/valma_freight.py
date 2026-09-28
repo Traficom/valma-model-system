@@ -82,7 +82,7 @@ def main(args):
     total_vehicles = {mode: numpy.zeros([zonedata.nr_zones, zonedata.nr_zones], dtype="float32")
                       for mode in param.truck_classes}
     total_tons = {mode: numpy.zeros([zonedata.nr_zones, zonedata.nr_zones], dtype="float32")
-                  for mode in tuple(param.freight_modes) + ("truck",)}
+                  for mode in param.freight_modes}
     
     commodities: dict[str, DomesticCommodity] = create_commodities(
         parameters_path / "domestic", zonedata, resultdata, costdata["freight"])
@@ -91,7 +91,8 @@ def main(args):
         log.info(f"Calculating demand for purpose: {commodity.name}")
         demand = commodity.calc_traffic(impedance, args.logistics_iterations)
         for mode in demand:
-            total_tons[mode] += demand[mode]
+            if mode in total_tons:
+                total_tons[mode] += demand[mode]
             omx_filename = ("freight_demand_tons" if commodity.name
                             in args.specify_commodity_names else "")
             store_demand.store(mode, demand[mode], omx_filename, commodity.name)
