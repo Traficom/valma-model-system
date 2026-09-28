@@ -15,7 +15,7 @@ from assignment.mock_assignment import MockAssignmentModel
 import utils.log as log
 import assignment.departure_time as dt
 from datahandling.resultdata import ResultsData
-from datahandling.zonedata import ZoneData
+from datahandling.zonedata import ZoneData, GridData
 from datahandling.matrixdata import MatrixData
 from demand.travel import TravelDemandModel
 from datatypes.purpose import (
@@ -77,12 +77,7 @@ class ModelSystem:
         self.ass_model = cast(Union[MockAssignmentModel,EmmeAssignmentModel], assignment_model) #type checker hint
         self.zone_numbers: numpy.ndarray = self.ass_model.zone_numbers
 
-        # Input data
-        self.basematrices = MatrixData(base_matrices_path / submodel)
-        self.long_dist_matrices = (MatrixData(long_dist_matrices_path)
-            if long_dist_matrices_path is not None else None)
-        self.freight_matrices = (MatrixData(freight_matrices_path)
-            if freight_matrices_path is not None else None)
+        log.info(f"Read input cost data from {cost_data_path}.")
         cost_data: dict = json.loads(cost_data_path.read_text("utf-8"))
         self.car_dist_cost = cost_data["vehicle_km_cost"]
         self.car_time_cost = cost_data["vehicle_hour_cost"]
@@ -92,6 +87,7 @@ class ModelSystem:
             mode_dummies = {}
             dest_dummies = {}
         else:
+            log.info(f"Read calibration files from {mode_dest_calibration_path}")
             path = Path(mode_dest_calibration_path)
             calibration_data: dict = json.loads(path.read_text("utf-8"))
             mode_dummies = calibration_data["mode_choice_calibration"]
@@ -100,17 +96,29 @@ class ModelSystem:
         if municipality_calibration_path is None:
             municip_calib = {}
         else:
+            log.info(f"Read calibration files from {municipality_calibration_path}")
             path = Path(municipality_calibration_path)
             municip_calib = pandas.read_csv(path, sep="\t",
                 index_col=["generation", "attraction"]).to_dict("series")
+        log.info(f"Read zonedata from {zone_data_path}")
+        grid_data = GridData(zone_data_path, submodel, self.zone_numbers,
+                             model_area="domestic")
+        data = grid_data.aggregate()
+        grid_data.export(data, Path(results_path / f"{submodel}.gpkg"))
         self._zone_datas = {
             model_area: ZoneData(
-                zone_data_path, self.zone_numbers, submodel,
-                model_area=model_area, municipality_calibration=municip_calib,
-                extra_dummies=extra_dummies,
+                data, submodel, self.zone_numbers, model_area,
+                municipality_calibration=municip_calib,
+                extra_dummies = extra_dummies,
                 car_dist_cost=self.car_dist_cost["icev"],
                 electric_car_share=cost_data["car_shares"]
             ) for model_area in ["domestic"]}
+        log.info(f"Read matrix data.")
+        self.basematrices = MatrixData(base_matrices_path / submodel)
+        self.long_dist_matrices = (MatrixData(long_dist_matrices_path)
+                                   if long_dist_matrices_path is not None else None)
+        self.freight_matrices = (MatrixData(freight_matrices_path)
+                                 if freight_matrices_path is not None else None)
 
         # Output data
         self.resultdata = ResultsData(

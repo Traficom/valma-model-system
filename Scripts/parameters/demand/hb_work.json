@@ -147,8 +147,7 @@
         },
         "transit": {
             "attraction": {
-                "within_zone_inf": -1,
-                "sh_office": 1.531
+                "within_zone_inf": -1
             },
             "impedance": {
                 "time": -0.01051,

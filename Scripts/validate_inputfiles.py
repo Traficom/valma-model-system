@@ -11,7 +11,7 @@ import utils.log as log
 from utils.validate_network import validate
 from assignment.mock_assignment import MockAssignmentModel
 from datahandling.matrixdata import MatrixData
-from datahandling.zonedata import ZoneData, FreightZoneData
+from datahandling.zonedata import GridData, ZoneData, FreightZoneData
 import parameters.assignment as param
 from valma_travel import LOS_MATRIX_FOLDER, DEMAND_MATRIX_FOLDER
 
@@ -226,12 +226,16 @@ def main(args):
             log.error(msg)
             raise ValueError(msg)
         zonedata_args = Path(data_path), zone_numbers[submodel], submodel
-        forecast_zonedata = (FreightZoneData(*zonedata_args)
-                             if model_type == "goods_transport"
-                             else ZoneData(
-                                 *zonedata_args, car_dist_cost=0.12,
-                                 electric_car_share=electric_car_share))
-
+        if model_type == "goods_transport":
+            forecast_zonedata = FreightZoneData(*zonedata_args)
+        else:
+            grid_data = GridData(data_path, submodel, 
+                                zone_numbers[submodel], model_area="domestic")
+            data = grid_data.aggregate() 
+            forecast_zonedata = ZoneData(
+                data, submodel, zone_numbers[submodel],
+                model_area="domestic", car_dist_cost=0.12,
+                electric_car_share={"default": {"bev": 0.05, "phev": 0.05}})
         # Check long-distance base matrices
         if long_dist_forecast not in ("calc", "base"):
             long_dist_classes = (param.car_classes

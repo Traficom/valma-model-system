@@ -117,9 +117,9 @@
                 "attraction_size": 1
             },
             "attraction_size": {
-                "wrk_shop": 1,
-                "wrk_recreation": 1.188153,
-                "wrk_hospitality": 1.239862
+                "wrk_g": 1,
+                "wrk_r": 1.188153,
+                "wrk_i": 1.239862
             }
         },
         "car_passenger": {
@@ -131,9 +131,9 @@
                 "attraction_size": 1
             },
             "attraction_size": {
-                "wrk_shop": 1,
-                "wrk_recreation": 1.188153,
-                "wrk_hospitality": 1.239862
+                "wrk_g": 1,
+                "wrk_r": 1.188153,
+                "wrk_i": 1.239862
             }
         },
         "transit": {
@@ -147,9 +147,9 @@
                 "attraction_size": 1
             },
             "attraction_size": {
-                "wrk_shop": 1,
-                "wrk_recreation": 1.188153,
-                "wrk_hospitality": 1.239862
+                "wrk_g": 1,
+                "wrk_r": 1.188153,
+                "wrk_i": 1.239862
             }
         },
         "bike": {
@@ -163,9 +163,9 @@
                 "attraction_size": 1
             },
             "attraction_size": {
-                "wrk_shop": 1,
-                "wrk_recreation": 1.188153,
-                "wrk_hospitality": 1.239862
+                "wrk_g": 1,
+                "wrk_r": 1.188153,
+                "wrk_i": 1.239862
             }
         },
         "walk": {
@@ -177,9 +177,9 @@
                 "attraction_size": 1
             },
             "attraction_size": {
-                "wrk_shop": 1,
-                "wrk_recreation": 1.188153,
-                "wrk_hospitality": 1.239862
+                "wrk_g": 1,
+                "wrk_r": 1.188153,
+                "wrk_i": 1.239862
             }
         }
     },
