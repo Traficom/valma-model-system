@@ -7,11 +7,12 @@ from travel_iteration import ModelSystem
 from assignment.mock_assignment import MockAssignmentModel
 from datahandling.matrixdata import MatrixData
 from datatypes.demand import Demand
-from tests.integration.test_data_handling import (
+from tests.integration.test_arguments import (
     TEST_DATA_PATH,
     RESULTS_PATH,
     ZONEDATA_PATH,
     COSTDATA_PATH,
+    LOS_MATRIX_FOLDER,
     BASE_MATRICES_PATH,
     MODE_DEST_CALIBRATION_FILE,
     MUNICIPALITY_CALIBRATION_FILE
@@ -31,7 +32,7 @@ class ModelTest(unittest.TestCase):
         print("Testing model system...")
         log.initialize(Config())
         ass_model = MockAssignmentModel(MatrixData(
-            RESULTS_PATH / "Matrices" / "uusimaa"))
+            RESULTS_PATH / LOS_MATRIX_FOLDER / "uusimaa"))
         model = ModelSystem(
             ZONEDATA_PATH, COSTDATA_PATH, BASE_MATRICES_PATH, RESULTS_PATH,
             ass_model, "uusimaa", MODE_DEST_CALIBRATION_FILE,
@@ -56,15 +57,15 @@ class ModelTest(unittest.TestCase):
 
         # Check that model result does not change
         self.assertAlmostEquals(
-            model.mode_share[0]["car_drv"],
-            0.3460777483779709)
+            model.mode_share[0]["car_driver"],
+            0.3879022870087542)
         
         print("Model system test done")
 
     def test_long_dist_models(self):
         print("Testing model system for long trips...")
         ass_model = MockAssignmentModel(
-            MatrixData(RESULTS_PATH / "Matrices" / "koko_suomi"),
+            MatrixData(RESULTS_PATH / LOS_MATRIX_FOLDER / "koko_suomi"),
             use_free_flow_speeds=True, time_periods={"vrk": "WholeDayPeriod"})
         model = ModelSystem(
             ZONEDATA_PATH, COSTDATA_PATH, BASE_MATRICES_PATH, RESULTS_PATH,
@@ -76,8 +77,8 @@ class ModelTest(unittest.TestCase):
 
         # Check that model result does not change
         self.assertAlmostEquals(
-            model.mode_share[0]["car_drv"],
-            0.0653610422669455)
+            model.mode_share[0]["car_driver"],
+            0.06769995901094676)
 
     def _validate_impedances(self, impedances):
         self.assertIsNotNone(impedances)
@@ -87,7 +88,7 @@ class ModelTest(unittest.TestCase):
         self.assertIsNotNone(impedances["cost"])
         self.assertIsNotNone(impedances["dist"])
         self.assertIs(type(impedances["time"]), dict)
-        self.assertEquals(len(impedances["time"]), 4)
+        self.assertEquals(len(impedances["time"]), 6)
         self.assertIsNotNone(impedances["time"]["transit"])
         self.assertIs(type(impedances["time"]["transit"]), numpy.ndarray)
         self.assertEquals(impedances["time"]["transit"].ndim, 2)

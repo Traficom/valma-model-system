@@ -115,14 +115,14 @@ class TruckMode(VehicleMode):
         cost = self.dist_unit_cost*self.dist.data + self.time.data/self.vot_inv
         if self._include_toll_cost:
             cost += self.toll_cost.data
-        m = {"cost": cost, **self.time.item, **self.dist.item}
+        mtxs = {"cost": cost, **self.time.item, **self.dist.item}
         if self._include_toll_cost:
-            m.update(self.toll_cost.item)
+            mtxs.update(self.toll_cost.item)
+        path_not_found = self.gen_cost.data > 999999
         self._soft_release_matrices()
         # fix the emme path analysis results
         # (dist and cost are zero if path not found but we want it to
         # be the default value 999999)
-        path_not_found = cost > 999999
-        for mtx_type in ("time", "dist"):
-            m[mtx_type][path_not_found] = 999999
-        return m
+        for mtx in mtxs.values():
+            mtx[path_not_found] = 999999
+        return mtxs

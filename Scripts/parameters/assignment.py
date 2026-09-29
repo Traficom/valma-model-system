@@ -98,6 +98,7 @@ volume_delay_funcs = {
     "fd11": "length*(60/ul2)+el1",
     "fd90": "length*(60/ul2)",
     "fd91": "length*(60/ul2)",
+    "fd97": "length*(60/5)",
     "fd99": "length*(60/ul2)",
     # Bike functions
     "fd70": "length*(60/19)",
@@ -149,9 +150,9 @@ performance_settings = {
 }
 congested_time_weight = 1.5
 freight_terminal_cost = {
-    'D': 0,
-    'J': 0,
-    'W': 0
+    "freight_train": 5000,
+    "timber_train": 5000,
+    "ship": 40000,
 }
 # Headway standard deviation function parameters for different transit modes
 headway_sd_func = {
@@ -259,7 +260,21 @@ aux_time_perception_factor_truck = 30
 # Factors for 24-h expansion of volumes
 # TODO: Trucks and vans
 volume_factors = {
-    "car": {
+    "icev": {
+        "aht": 0.439,
+        "pt": 0.098,
+        "iht": 0.378,
+        "it": 0.3,
+        "vrk": 1.0,
+    },
+    "bev": {
+        "aht": 0.439,
+        "pt": 0.098,
+        "iht": 0.378,
+        "it": 0.3,
+        "vrk": 1.0,
+    },
+    "phev": {
         "aht": 0.439,
         "pt": 0.098,
         "iht": 0.378,
@@ -374,7 +389,9 @@ time_periods = {
     "it": "TransitAssignmentPeriod",
 }
 car_classes = (
-    "car",
+    "icev",
+    "bev",
+    "phev",
 )
 car_and_van_classes = car_classes + ("van",)
 private_classes = car_and_van_classes + ("bike",)
@@ -404,6 +421,18 @@ truck_classes = (
     "semi_trailer",
     "trailer_truck",
 )
+truck_fleet = {
+    "truck": "truck",
+    "truck_ev": "truck",
+    "truck_2n": "truck",
+    "truck_2n_ev": "truck",
+    "semi_trailer": "semi_trailer",
+    "semi_trailer_ev": "semi_trailer",
+    "trailer_truck": "trailer_truck",
+    "trailer_truck_ev": "trailer_truck",
+    "trailer_truck_76t": "trailer_truck",
+    "trailer_truck_76ev": "trailer_truck"
+}
 simple_transport_classes = (private_classes
                             + simple_transit_classes
                             + truck_classes)
@@ -415,26 +444,20 @@ intermodals = {
 main_mode = 'h'
 bike_mode = 'f'
 assignment_modes = {
-    "car": 'c',
+    "icev": 'c',
+    "bev": 'c',
+    "phev": 'c',
     "trailer_truck": 'y',
     "semi_trailer": 'y',
     "truck": 'k',
     "van": 'v',
-}
-vot_classes = {
-    "car": "all",
-    "trailer_truck": "trailer_truck",
-    "semi_trailer": "semi_trailer",
-    "truck": "truck",
-    "van": "business",
-    "transit": "all",
-    "airplane": "all",
-    "pt_car_acc": "all",
-    "pt_taxi_acc": "all",
-    "airpl_car_acc": "all",
-    "pt_car_egr": "all",
-    "pt_taxi_egr": "all",
-    "airpl_car_egr": "all",
+    "truck_ev": "k",
+    "truck_2n": "k",
+    "truck_2n_ev": "k",
+    "semi_trailer_ev": "y",
+    "trailer_truck_ev": "y",
+    "trailer_truck_76t": "y",
+    "trailer_truck_76ev": "y"
 }
 local_transit_modes = [
     'b',
@@ -449,25 +472,42 @@ local_transit_modes = [
 long_dist_transit_modes = {
     "transit": ['e', 'j', 'd'],
     "airplane": ['l'],
-    "pt_car_acc": ['j'],
-    "pt_taxi_acc": ['e', 'j'],
+    "pt_car_acc": ['j', 'd'],
+    "pt_taxi_acc": ['e', 'j', 'd'],
     "airpl_car_acc": ['l'],
-    "pt_car_egr": ['j'],
-    "pt_taxi_egr": ['e', 'j'],
+    "pt_car_egr": ['j', 'd'],
+    "pt_taxi_egr": ['e', 'j', 'd'],
     "airpl_car_egr": ['l'],
+}
+long_dist_terminal_modes = {
+    'l', 'j', 'd'
 }
 aux_modes = [
     'a'
 ]
 park_and_ride_mode = 'u'
+terminal_modes = {
+    "freight_train": 'F',
+    "timber_train": 'T',
+    "ship": 'F',
+}
 freight_modes = {
     "freight_train": {
-        'D': "@d_train_term_cost",
-        'J': "@e_train_term_cost",
+        'D': "diesel_train",
+        'J': "electric_train",
+    },
+    "timber_train": {
+        'D': "diesel_train",
+        'J': "electric_train",
     },
     "ship": {
-        'W': "@ship_term_cost",
+        'W': "domestic_vessel",
     },
+}
+terminal_change_attrs = {
+    'D': "@d_train_term_cost",
+    'J': "@e_train_term_cost",
+    'W': "@ship_term_cost",
 }
 freight_marine_modes = {
     "container_ship": {
@@ -490,7 +530,7 @@ freight_marine_modes = {
     }
 }
 external_modes = [
-    "car_drv",
+    "car_driver",
     "transit",
     "truck",
     "trailer_truck",
@@ -539,6 +579,7 @@ is_in_transit_zone_attr = "ui1"
 keep_stops_attr = "#keep_stops"
 submodel_attr = "#subarea"
 terminal_cost_attr = "@freight_term_cost"
+freight_time_perception_attr = "@freight_time_perc"
 aux_transit_time_attr = "@walk_time"
 aux_car_time_attr = "@car_time"
 park_cost_attr_n = "#park_cost_n"
@@ -569,27 +610,28 @@ roadtypes = {
 }
 # modes in choice model : impedance
 mode_impedance = {
-    "car_drv": "car", 
-    "car_pax": "car",
-    "transit": "transit",
-    "airplane": "airplane",
-    "bike": "bike",
-    "walk": "walk",
-    "pt_car_acc": "pt_car_acc",
-    "pt_taxi_acc": "pt_taxi_acc",
-    "airpl_car_acc": "airpl_car_acc",
-    "pt_car_egr": "pt_car_egr",
-    "pt_taxi_egr": "pt_taxi_egr",
-    "airpl_car_egr": "airpl_car_egr"
-
+    "car_driver": ["icev", "bev", "phev"],
+    "car_passenger": ["icev", "bev", "phev"],
+    "transit": ["transit"],
+    "airplane": ["airplane"],
+    "bike": ["bike"],
+    "walk": ["walk"],
+    "pt_car_acc": ["pt_car_acc"],
+    "pt_taxi_acc": ["pt_taxi_acc"],
+    "airpl_car_acc": ["airpl_car_acc"],
+    "pt_car_egr": ["pt_car_egr"],
+    "pt_taxi_egr": ["pt_taxi_egr"],
+    "airpl_car_egr": ["airpl_car_egr"],
 }
 # Modes in choice model : [assignment classes]
 # If the mode has two assignment classes, demand
 # will be transposed for the second one.
 mode_assignment_classes = {
-    "car_drv": ["car"], 
-    "car_pax": [],
-    "car": ["car"],
+    "car_driver": ["icev", "bev", "phev"],
+    "icev": ["icev"],
+    "bev": ["bev"],
+    "phev": ["phev"],
+    "car_passenger": [],
     "transit": ["transit"],
     "airplane": ["airplane"],
     "bike": ["bike"],
@@ -599,5 +641,8 @@ mode_assignment_classes = {
     "airpl_car_acc": ["airpl_car_acc", "airpl_car_egr"],
     "pt_car_egr": ["pt_car_egr", "pt_car_acc"],
     "pt_taxi_egr": ["pt_taxi_egr", "pt_taxi_acc"],
-    "airpl_car_egr": ["airpl_car_egr", "airpl_car_acc"]
+    "airpl_car_egr": ["airpl_car_egr", "airpl_car_acc"],
+    "truck": ["truck"],
+    "semi_trailer": ["semi_trailer"],
+    "trailer_truck": ["trailer_truck"],
 }

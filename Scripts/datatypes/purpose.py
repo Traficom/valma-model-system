@@ -17,11 +17,13 @@ from parameters.assignment import (
     mode_impedance
 )
 import parameters.cost as cost
+from parameters.departure_time import demand_share
 import models.generation as generation
 from datatypes.demand import Demand
-from demand.foreign_external import ForeignExternalModel
 from datatypes.histogram import TourLengthHistogram
 from utils.calibrate import attempt_calibration
+from utils.matrix_calibration import fratar
+import openmatrix as omx # type: ignore
 
 
 class Purpose:
@@ -87,8 +89,7 @@ class TravelPurpose(Purpose):
                  specification,
                  zone_datas,
                  resultdata = None,
-                 mtx_adjustment = None,
-                 foreign_external_path = None):
+                 mtx_adjustment = None):
         """Create purpose for two-way tour or for secondary destination of tour.
 
         Parameters
@@ -117,9 +118,9 @@ class TravelPurpose(Purpose):
             "parking_cost_share" : float
                 Share of drivers paying for parking at destination
             "occupancy" : dict
-                "car_drv" : float
+                "car_driver" : float
                     Average occupancy of car driver trips
-                "car_pax" : float
+                "car_passenger" : float
                     Average occupancy of car passenger trips
             "car_cost_sharing" : float
                 Share of car cost that is shared among passengers
@@ -135,9 +136,6 @@ class TravelPurpose(Purpose):
             Writer object for result directory
         mtx_adjustment : dict (optional)
             Dict of matrix adjustments for testing elasticities
-        foreign_external_path : Path
-            Path to base matrices for calculating foreign external demand
-            (only used in foreign external tour purpose)
         """
         Purpose.__init__(self, specification, zone_datas, resultdata)
         self.impedance_share = specification["impedance_share"]
@@ -153,6 +151,10 @@ class TravelPurpose(Purpose):
         self.generated_distance: Dict[str, numpy.array] = {}
         self.attracted_tours: Dict[str, numpy.array] = {}
         self.attracted_distance: Dict[str, numpy.array] = {}
+        try:
+            self.sources = specification["source"]
+        except KeyError:
+            pass
 
     def transform_impedance(self, impedance):
         """Perform transformation from time period dependent matrices
@@ -186,17 +188,21 @@ class TravelPurpose(Purpose):
         rows = self.bounds
         cols = self.dest_interval
         day_imp = defaultdict(lambda: defaultdict(float))
-        for mode in self.impedance_share:
+        for mode in self.modes:
             share_sum = 0
-            ass_class = mode_impedance[mode]
-            for time_period in self.impedance_share[mode]:
-                for mtx_type in impedance[time_period]:
-                    if ass_class in impedance[time_period][mtx_type]:
-                        imp = impedance[time_period][mtx_type][ass_class]
-                        share = self.impedance_share[mode][time_period]
-                        share_sum += sum(share)
-                        day_imp[mode][mtx_type] += share[0] * imp[rows, cols]
-                        day_imp[mode][mtx_type] += share[1] * imp[cols, rows].T
+            for ass_class in mode_impedance[mode]:
+                for time_period in self.impedance_share[mode]:
+                    for mtx_type in impedance[time_period]:
+                        if ass_class in impedance[time_period][mtx_type]:
+                            imp = impedance[time_period][mtx_type][ass_class]
+                            share = self.impedance_share[ass_class][time_period]
+                            share_sum += sum(share)
+                            day_imp[mode][mtx_type] += share[0] * imp[rows, cols]
+                            day_imp[mode][mtx_type] += share[1] * imp[cols, rows].T
+            try:
+                share_sum = share_sum.mean()
+            except AttributeError:
+                pass
             if mode in day_imp and abs(share_sum/len(day_imp[mode]) - 2) > 0.001:
                 raise ValueError(f"False impedance shares: {self.name} : {mode}")
         day_imp = {mode: dict(day_imp[mode]) for mode in day_imp}
@@ -226,15 +232,16 @@ class TravelPurpose(Purpose):
                 day_imp[mode][mtx_type] *= self.discount[mode][mtx_type]
         self._add_destination_impedances(day_imp)
         if self.occupancy:
-            if "car_drv" in day_imp:
-                day_imp["car_drv"]["cost"] *= (1 - self.cost_share
-                                               * (self.occupancy["car_drv"]-1)
-                                               / self.occupancy["car_drv"])
-            day_imp["car_pax"]["cost"] *= (self.cost_share
-                                           / self.occupancy["car_pax"])
+            if "car_driver" in day_imp:
+                day_imp["car_driver"]["cost"] *= (1 - self.cost_share
+                                               * (self.occupancy["car_driver"]-1)
+                                               / self.occupancy["car_driver"])
+            if "car_passenger" in day_imp:
+                day_imp["car_passenger"]["cost"] *= (self.cost_share
+                                            / self.occupancy["car_passenger"])
         for mode in day_imp:
             if "vrk" in self.impedance_share[mode] and mode != "walk":
-                vot = cost.value_of_time[mode_impedance[mode]]
+                vot = cost.value_of_time[mode_impedance[mode][0]]
                 day_imp[mode]["gen_cost"] = (day_imp[mode].pop("cost")
                                              + vot*day_imp[mode].pop("time")/60)
                 log.info(f"Generalized cost calculated for {self.name} {mode}.")
@@ -249,8 +256,7 @@ class TravelPurpose(Purpose):
         ozd = self.generation_zone_data
         for mode in day_imp:
             for mtx_type in day_imp[mode]:
-                ass_class = mode_impedance[mode]
-                label = f"{mtx_type}_{ass_class}"
+                label = f"{mtx_type}_{mode.split('_')[0]}"
                 if label in ("time_car", "cost_car", "dist_walk", "dist_bike"):
                     # Get intra-zonal impendances from zone data
                     numpy.fill_diagonal(day_imp[mode][mtx_type], dzd[label])
@@ -261,21 +267,15 @@ class TravelPurpose(Purpose):
                                           * numpy.asarray(dzd["avg_park_cost"]))
 
     def __new__(cls, *args):
-        if cls is not TravelPurpose:
-            return super(TravelPurpose, cls).__new__(cls)
         specification = args[0]
         attempt_calibration(specification)
         if "sec_dest" in specification:
-            purpose = SecDestPurpose(*args)
+            purpose_cls = SecDestPurpose
         elif specification["name"] == "hb_abroad_other":
-            purpose = ForeignExternalPurpose(*args)
+            purpose_cls = ForeignExternalPurpose
         else:
-            purpose = TourPurpose(*args)
-        try:
-            purpose.sources = specification["source"]
-        except KeyError:
-            pass
-        return purpose
+            purpose_cls = TourPurpose
+        return object.__new__(purpose_cls)
 
 
 class TourPurpose(TravelPurpose):
@@ -307,6 +307,15 @@ class TourPurpose(TravelPurpose):
             self.model = logit.DestModeModel(*args)
         else:
             log.error(f"Unknown struct in {self.name} parameters.")
+        imp_sh = self.impedance_share
+        zd = self.generation_zone_data
+        for mode in list(imp_sh):
+            for ass_cl in mode_impedance[mode]:
+                # Split impedance and demand shares by vehicle type
+                veh_share = (numpy.asarray(zd[f"sh_{ass_cl}"])[:, numpy.newaxis]
+                             if len(mode_impedance[mode]) > 1 else 1.0)
+                imp_sh[ass_cl] = {tp: [veh_share * share for share in tp_sh]
+                                  for tp, tp_sh in imp_sh[mode].items()}
         for mode in self.impedance_share:
             if mode not in self.demand_share:
                 self.demand_share[mode] = self.impedance_share[mode]
@@ -685,7 +694,7 @@ class ForeignExternalPurpose(TourPurpose):
         Path to base matrices for calculating foreign external demand
     """
 
-    def __init__(self, specification, zone_datas, resultdata, mtx_adjustment, basematrices_path):
+    def __init__(self, specification, zone_datas, resultdata, mtx_adjustment, *args):
         attempt_calibration(specification)
         TourPurpose.__init__(
             self, specification, zone_datas, resultdata, mtx_adjustment)
@@ -695,10 +704,6 @@ class ForeignExternalPurpose(TourPurpose):
         self.dest_mappings = []
         self.tour_generation = specification["tour_generation"]
         self._zone_datas = zone_datas
-        self.basematrices_path = basematrices_path
-        self.fem = ForeignExternalModel(
-            self, self._zone_datas, self._zone_datas, self.basematrices_path,
-            self.generation_zone_data.all_zone_numbers)
 
     @property
     def dest_zone_numbers(self):
@@ -707,8 +712,7 @@ class ForeignExternalPurpose(TourPurpose):
     def _add_destination_impedances(self, day_imp):
         pass
 
-    def calc_demand(
-            self, impedance, is_last_iteration: bool) -> Iterator[Demand]:
+    def calc_demand(self, impedance, is_last_iteration: bool) -> Iterator[Demand]:
         """Calculate purpose specific demand matrices.
 
         Parameters
@@ -718,7 +722,8 @@ class ForeignExternalPurpose(TourPurpose):
                 Type (time/cost/dist) : dict
                     Mode (car/transit/bike/...) : numpy.ndarray
         is_last_iteration : bool
-            Whether to calculate and store accessibility indicators
+            Whether this is the final model iteration. Included to match the
+            common purpose demand-calculation interface.
 
         Yields
         -------
@@ -728,10 +733,48 @@ class ForeignExternalPurpose(TourPurpose):
         purpose_impedance = self.transform_impedance(impedance)
         # Calculate probabilities for all access modes of the main mode
         access_mode_probs = self._calc_connection_prob(purpose_impedance)
+        with omx.open_file(self.base_demand_path, "r") as matrix_file:
+            base_matrices = {
+                mode: numpy.array(matrix_file[mode]).clip(0.000001, None)
+                for mode in self.intermodals
+            }
+            omx_zone_numbers = matrix_file.mapping("zone_number")
         for main_mode in self.intermodals:
-            foreign_ext_mtx = self.fem.calc_foreign_external_traffic(main_mode)
+            foreign_ext_mtx = self.calc_mode_demand(
+                main_mode, base_matrices[main_mode], omx_zone_numbers)
             for access_mode, probs in access_mode_probs[main_mode].items():
                 access_mode_mtx = foreign_ext_mtx * probs.T
                 self._aggregate_results(access_mode, access_mode_mtx)
                 yield Demand(self, access_mode, access_mode_mtx)
             log.info(f"Demand calculated for {self.name}")
+
+    def calc_mode_demand(
+            self, mode: str, base_matrix: numpy.ndarray,
+            omx_zone_numbers) -> numpy.ndarray:
+        """Calculate a foreign external passenger matrix for a mode."""
+        generation = pandas.Series(self.tour_generation[mode])
+        zone_data = self._zone_datas["domestic"].get_foreign_external_data()
+        production = (generation * zone_data).sum(1) + 0.001
+        demand = fratar(production, base_matrix.sum(0), base_matrix)
+
+        desired_dest_zones = self.generation_zone_data.all_zone_numbers[
+            self.dest_interval]
+        new_demand = numpy.zeros((demand.shape[0], len(desired_dest_zones)))
+        index_by_zone = {index: int(zone) for index, zone in omx_zone_numbers.items()}
+        for column, zone in enumerate(desired_dest_zones):
+            source_column = index_by_zone.get(int(zone))
+            if source_column is not None:
+                new_demand[:, column] = demand[:, source_column]
+        new_demand[new_demand < 0.0001] = 0
+        return new_demand
+
+class ExternalPurpose:
+    """Purpose descriptor for externally supplied traffic matrices."""
+
+    def __init__(self, zone_numbers: numpy.ndarray):
+        self.name = "external"
+        self.demand_share = demand_share["external"]
+        bounds = slice(*zone_numbers.searchsorted(param.purpose_areas["all"]))
+        self.bounds = bounds
+        self.dest_interval = bounds
+        self.sec_dest_rates = {}

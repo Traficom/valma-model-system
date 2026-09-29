@@ -11,6 +11,7 @@ from datahandling.resultdata import ResultsData
 from datahandling.matrixdata import read_omx_item
 import utils.log as log
 import parameters.zone as param
+from parameters.assignment import truck_fleet
 from parameters.commodity import commodity_conversion
 import models.logit as logit
 from models.logistics import (LogisticsModule, TradeRouteModule,
@@ -82,6 +83,12 @@ class FreightCommodity(Purpose):
             Mode (truck/trailer_truck...) : unit cost name
                 unit cost name : unit cost value
     """
+    def __init__(self, specification, zone_data, resultdata, costdata):
+        Purpose.__init__(self, specification, zone_data, resultdata)
+        self.costdata = costdata
+        self.empty_share = costdata["truck"]["empty_share"]
+        self.truck_fleet = costdata["truck"]["fleet"]
+        self.truck_param = costdata["truck"]["param"]
 
     def _transform_road_cost(self, cost: numpy.ndarray) -> numpy.ndarray:
         """Transform vehicle cost (incl. driver cost) to ton cost.
@@ -97,11 +104,11 @@ class FreightCommodity(Purpose):
             Ton-specific cost matrix
         """
         return sum(
-            ((1+params["empty_share"]) * truck_overhead_cost * cost
-             / params["avg_load"]
-             + params["terminal_cost"])
-            * params[self._truck_distribution]
-            for params in self.costdata["truck"].values())
+            ((1+self.empty_share) * truck_overhead_cost * cost
+             / self.truck_param[truck_fleet[mode]]["avg_load"]
+             + self.truck_param[truck_fleet[mode]]["terminal_cost"])
+            * distrib[self._truck_distribution]
+            for mode, distrib in self.truck_fleet.items())
 
     def calc_vehicles(self, matrix: numpy.ndarray, ass_class: str):
         """Calculate vehicle matrix from ton matrix using ton-to-vehicles
@@ -119,17 +126,16 @@ class FreightCommodity(Purpose):
         numpy.ndarray
             vehicle matrix
         """
-        costdata = self.costdata["truck"][ass_class]
-        vehicles = (matrix * costdata[self._truck_distribution]
-                    / costdata["avg_load"] / 365)
-        vehicles += vehicles.T * costdata["empty_share"]
+        vehicles = (matrix * self.truck_fleet[ass_class][self._truck_distribution]
+                    / self.truck_param[truck_fleet[ass_class]]["avg_load"] / 365)
+        vehicles += vehicles.T * self.empty_share
         return vehicles
 
 
 class DomesticCommodity(FreightCommodity):
     def __init__(self, specification, zone_data, resultdata, costdata):
-        Purpose.__init__(self, specification, zone_data, resultdata)
-        self.costdata = costdata
+        FreightCommodity.__init__(self, specification, zone_data, resultdata, 
+                                  costdata)
         self.modes: List[str] = list(specification["mode_choice"])
         args = (self, specification, self.generation_zone_data,
                 self.attraction_zone_data, resultdata)
@@ -162,18 +168,13 @@ class DomesticCommodity(FreightCommodity):
                 Type (cost/aux_cost) : numpy.ndarray
         """
         costs = {}
-        truck = "truck"
-        if truck in self.modes:
-            costs[truck] = {"cost": self._transform_road_cost(
-                impedance[truck]["cost"])}
-        train = "freight_train"
-        if train in self.modes:
-            costs[train] = self._calc_ton_cost(
-                impedance[train], self.costdata[train]["diesel_train"])
-        ship = "ship"
-        if ship in self.modes:
-            costs[ship] = self._calc_ton_cost(
-                impedance[ship], self.costdata[ship]["domestic_vessel"])
+        for mode in self.modes:
+            if mode == "truck":
+                costs[mode] = {"cost": self._transform_road_cost(
+                    impedance[mode]["cost"])}
+            else:
+                costs[mode] = self._calc_ton_cost(
+                    impedance[mode], self.costdata[mode])
         for mode, mode_costs in costs.items():
             if not self.model or "aux_cost" not in self.model.mode_choice_param[mode]["impedance"]:
                 mode_costs["cost"] += mode_costs.pop("aux_cost", 0)
@@ -201,7 +202,6 @@ class DomesticCommodity(FreightCommodity):
             auxiliary road cost : numpy.ndarray
             impedance type cost : numpy.ndarray
         """
-        impedance["terminal_cost"] = numpy.ones_like(impedance["dist"])
         cost = sum(
             impedance[mtx_type] * unit_costs[mtx_type]
             for mtx_type in unit_costs)
@@ -377,8 +377,8 @@ class DomesticCommodity(FreightCommodity):
 
 class ForeignCommodity(FreightCommodity):
     def __init__(self, specification, zone_data, resultdata, costdata):
-        Purpose.__init__(self, specification, zone_data, resultdata)
-        self.costdata = costdata
+        FreightCommodity.__init__(self, specification, zone_data, resultdata, 
+                                  costdata)
         match specification["struct"]:
             case "export":
                 self.is_export = True
@@ -474,9 +474,7 @@ class ForeignCommodity(FreightCommodity):
         inf_mtx = numpy.full_like(
             next(iter(impedance.values()))["frequency"], numpy.inf)
         ship_info = {}
-        for mode in self.costdata["ship"].keys():
-            if mode == "domestic_vessel":
-                continue
+        for mode in self.costdata["foreign_ship"].keys():
             ship_info[mode] = {
                 "cost": inf_mtx.copy(),
                 "draught": inf_mtx.copy(),
@@ -485,11 +483,11 @@ class ForeignCommodity(FreightCommodity):
             port_draughts = numpy.array(
                 [port_draught_limit[mode].get(port, numpy.inf)
                 for port in fin_ports])
-            for draught in map(int, self.costdata["ship"][mode]):
+            for draught in map(int, self.costdata["foreign_ship"][mode]):
                 time = (impedance[mode]["dist"]
                         / ship_draught_speed[mode][draught]
                         * 60)
-                unit_costs = self.costdata["ship"][mode][f"{draught}"]
+                unit_costs = self.costdata["foreign_ship"][mode][f"{draught}"]
                 cost = (unit_costs["time"]*time
                         + unit_costs["dist"]*impedance[mode]["dist"]
                         + unit_costs["terminal_cost"])

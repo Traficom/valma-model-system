@@ -56,7 +56,7 @@ class WholeDayPeriod(AssignmentPeriod):
             save_extra_matrices=save_matrices,
             transit_classes=param.simple_transit_classes,
             mixed_classes=param.mixed_mode_classes,
-            dist_unit_cost=dist_unit_cost["car"])
+            dist_unit_cost=dist_unit_cost["icev"])
 
     def init_assign(self):
         log.info("Pedestrian assignment started...")
