@@ -73,9 +73,14 @@ class FreightModelTest(unittest.TestCase):
         # Run test foreign trade choice model
         trade_demand, foreign_purposes, fin_borders = self.run_trade_route_choice(
             zonedata, resultdata, costdata, impedance)
-        for mtx_type in impedance.keys():
-            for ass_class, mtx in impedance[mtx_type].items():
-                impedance[mtx_type][ass_class] = mtx[:zonedata.nr_zones, :zonedata.nr_zones]
+        for ass_class in list(impedance):
+            for mtx_type, mtx in impedance[ass_class].items():
+                impedance[ass_class][mtx_type] = mtx[:zonedata.nr_zones, :zonedata.nr_zones]
+            if ass_class in param.freight_modes:
+                impedance[ass_class]["dist"] = sum(
+                    mtx for key, mtx in impedance[ass_class].items()
+                    if key.startswith("dist_"))
+            
         commodities = create_commodities(
             PARAMETERS_PATH / "domestic", zonedata, resultdata, costdata["freight"])
         self.assertEqual(len(commodities), 2)
@@ -110,13 +115,6 @@ class FreightModelTest(unittest.TestCase):
                         demand_trade[foreign_purpose]["truck"], mode)
                 total_demand[ass_class] += vehicles["domestic"][ass_class] + vehicles["foreign"][ass_class]
             self._assert_calc_vehicle_results(vehicles, commodity.name)
-            for mode in impedance:
-                dist = 0
-                for imp_type in impedance[mode]:
-                    if "dist" in imp_type:
-                        dist += impedance[mode][imp_type]
-                if isinstance(dist, numpy.ndarray):
-                    impedance[mode]["dist"] = dist
             commodity.write_summary(demand, aux_demand, impedance)
             commodity.write_zone_summary(demand)
             write_domestic_leg_summary(demand_trade, impedance, resultdata)

@@ -23,8 +23,8 @@
         }
     },
     "sec_dest_rate": {
-        "car_drv": 1.0491,
-        "car_pax": 1.0277,
+        "car_driver": 1.0491,
+        "car_passenger": 1.0277,
         "transit": 1.0483
     },
     "impedance_share": {
@@ -75,8 +75,8 @@
     "parking_cost_share": 1.0,
     "car_cost_sharing": 1.0,
     "occupancy": {
-        "car_drv": 1.822,
-        "car_pax": 2.836
+        "car_driver": 1.822,
+        "car_passenger": 2.836
     },
     "tour_duration": {
         "pt_car_acc": 9.0,
@@ -90,11 +90,11 @@
             0,
             30
         ],
-        "car_drv": [
+        "car_driver": [
             0,
             9999
         ],
-        "car_pax": [
+        "car_passenger": [
             0,
             9999
         ],
@@ -158,7 +158,7 @@
     "access_mode_choice": {
         "airplane": {
             "airplane": {
-                "constant": -0.2421,
+                "constant": -2.1852,
                 "generation": {},
                 "attraction": {},
                 "impedance": {
@@ -170,7 +170,7 @@
                 "individual_dummy": {}
             },
             "airpl_car_acc": {
-                "constant": -4.9269,
+                "constant": -0.7195,
                 "generation": {},
                 "attraction": {},
                 "impedance": {
@@ -215,7 +215,7 @@
         },
         "transit": {
             "transit": {
-                "constant": 0,
+                "constant": -2.2930,
                 "generation": {},
                 "attraction": {},
                 "impedance": {
@@ -227,7 +227,7 @@
                 "individual_dummy": {}
             },
             "pt_car_acc": {
-                "constant": -4.182,
+                "constant": 1.2763,
                 "generation": {},
                 "attraction": {},
                 "impedance": {
@@ -243,7 +243,7 @@
                 }
             },
             "pt_taxi_acc": {
-                "constant": -3.296,
+                "constant": -0.4609,
                 "generation": {},
                 "attraction": {},
                 "impedance": {
@@ -278,13 +278,13 @@
                 1.0
               ]
         },
-        "car_drv": {
+        "car_driver": {
             "vrk": [
                 1.0,
                 1.0
               ]
         },
-        "car_pax": {
+        "car_passenger": {
             "vrk": [
                 1.0,
                 1.0

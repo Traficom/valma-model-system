@@ -530,7 +530,7 @@ freight_marine_modes = {
     }
 }
 external_modes = [
-    "car_drv",
+    "car_driver",
     "transit",
     "truck",
     "trailer_truck",
@@ -610,8 +610,8 @@ roadtypes = {
 }
 # modes in choice model : impedance
 mode_impedance = {
-    "car_drv": ["icev", "bev", "phev"],
-    "car_pax": ["icev", "bev", "phev"],
+    "car_driver": ["icev", "bev", "phev"],
+    "car_passenger": ["icev", "bev", "phev"],
     "transit": ["transit"],
     "airplane": ["airplane"],
     "bike": ["bike"],
@@ -627,11 +627,11 @@ mode_impedance = {
 # If the mode has two assignment classes, demand
 # will be transposed for the second one.
 mode_assignment_classes = {
-    "car_drv": ["icev", "bev", "phev"],
+    "car_driver": ["icev", "bev", "phev"],
     "icev": ["icev"],
     "bev": ["bev"],
     "phev": ["phev"],
-    "car_pax": [],
+    "car_passenger": [],
     "transit": ["transit"],
     "airplane": ["airplane"],
     "bike": ["bike"],

@@ -12,8 +12,6 @@ from travel_iteration import ModelSystem, LOS_MATRIX_FOLDER, DEMAND_MATRIX_FOLDE
 from datahandling.matrixdata import MatrixData
 
 
-BASE_ZONEDATA_FILE = "2016_zonedata.gpkg"
-
 
 def main(args):
     calculate_long_dist_demand = args.long_dist_demand_forecast == "calc"
@@ -29,7 +27,6 @@ def main(args):
     else:
         raise ArgumentTypeError(
             "Iteration number {} not valid".format(args.iterations))
-    base_zonedata_path = Path(args.base_data_folder, BASE_ZONEDATA_FILE)
     base_matrices_path = Path(args.base_data_folder, DEMAND_MATRIX_FOLDER)
     freight_matrices_path = (Path(args.freight_matrix_path)
         if args.freight_matrix_path is not None else None)
@@ -49,11 +46,6 @@ def main(args):
             "converged": 0,
         }
     }
-    # Check input data folders/files exist
-    # if not base_zonedata_path.is_dir():
-    #     raise NameError(
-    #         "Baseline zonedata directory '{}' does not exist.".format(
-    #             base_zonedata_path))
     if not base_matrices_path.is_dir():
         raise NameError(
             "Baseline matrix directory '{}' does not exist.".format(

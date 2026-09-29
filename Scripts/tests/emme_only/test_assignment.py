@@ -11,11 +11,8 @@ import utils.log as log
 import assignment.emme_assignment as ass
 from datahandling.matrixdata import MatrixData
 from datahandling.resultdata import ResultsData
-from tests.integration.test_data_handling import (
-    TEST_DATA_PATH, COSTDATA_PATH
-)
+from tests.integration.test_arguments import TEST_DATA_PATH, COSTDATA_PATH, LOS_MATRIX_FOLDER
 from datahandling.traversaldata import transform_traversal_data
-from travel_iteration import LOS_MATRIX_FOLDER
 try:
     from assignment.emme_bindings.emme_project import EmmeProject
     import inro.emme.desktop.app as _app
@@ -177,11 +174,14 @@ class EmmeAssignmentTest:
         demand = {mode: numpy.full((nr_zones, nr_zones), 10.0) for mode in freight_modes}
         truck_loads = (2, 4, 5)
         truck_loads = dict(zip(param.truck_classes, truck_loads))
-        total_demand = {mode: numpy.full((nr_zones, nr_zones), 0.0)
+        total_vehicles = {mode: numpy.full((nr_zones, nr_zones), 0.0)
                     for mode in param.truck_classes}
+        total_tons = {mode: numpy.full((nr_zones, nr_zones), 0.0)
+                    for mode in tuple(param.freight_modes) + ("truck",)}
         for purpose in purposes:
             for mode in freight_modes:
                 self.ass_model.freight_network.set_matrix(mode, demand[mode])
+                total_tons[mode] += demand[mode]
             self.ass_model.freight_network.save_network_volumes(purpose)
             self.ass_model.freight_network.output_traversal_matrix(
                 set(demand), self.resultdata.path)
@@ -189,10 +189,13 @@ class EmmeAssignmentTest:
                 self.resultdata.path, self.ass_model.zone_numbers)
             demand["truck"] += sum(aux_demand.values())
             for mode in param.truck_classes:
-                total_demand[mode] += demand["truck"] / truck_loads[mode]
-        for ass_class in total_demand:
-            self.ass_model.freight_network.set_matrix(ass_class, total_demand[ass_class])
+                total_vehicles[mode] += demand["truck"] / truck_loads[mode]
+        for ass_class in total_vehicles:
+            self.ass_model.freight_network.set_matrix(ass_class, total_vehicles[ass_class])
         self.ass_model.freight_network._assign_trucks()
+        for ass_class in param.freight_modes:
+            self.ass_model.freight_network.set_matrix(ass_class, total_tons[ass_class])
+        self.ass_model.freight_network.save_network_volumes("tons")
 
 if emme_available:
     em = EmmeAssignmentTest()

@@ -3,15 +3,16 @@ import numpy
 from pathlib import Path
 
 import utils.log as log
-from travel_iteration import ModelSystem, LOS_MATRIX_FOLDER
+from travel_iteration import ModelSystem
 from assignment.mock_assignment import MockAssignmentModel
 from datahandling.matrixdata import MatrixData
 from datatypes.demand import Demand
-from tests.integration.test_data_handling import (
+from tests.integration.test_arguments import (
     TEST_DATA_PATH,
     RESULTS_PATH,
     ZONEDATA_PATH,
     COSTDATA_PATH,
+    LOS_MATRIX_FOLDER,
     BASE_MATRICES_PATH,
     MODE_DEST_CALIBRATION_FILE,
     MUNICIPALITY_CALIBRATION_FILE
@@ -56,8 +57,8 @@ class ModelTest(unittest.TestCase):
 
         # Check that model result does not change
         self.assertAlmostEquals(
-            model.mode_share[0]["car_drv"],
-            0.3987091710694545)
+            model.mode_share[0]["car_driver"],
+            0.3984597392199508)
         
         print("Model system test done")
 
@@ -76,8 +77,8 @@ class ModelTest(unittest.TestCase):
 
         # Check that model result does not change
         self.assertAlmostEquals(
-            model.mode_share[0]["car_drv"],
-            0.06920414989030275)
+            model.mode_share[0]["car_driver"],
+            0.06915803160510264)
 
     def _validate_impedances(self, impedances):
         self.assertIsNotNone(impedances)

@@ -23,12 +23,11 @@
         }
     },
     "sec_dest_rate": {
-        "car_drv": 1.0161,
-        "car_pax": 1.0076,
+        "car_driver": 1.0161,
         "transit": 1.0000
     },
     "impedance_share": {
-        "car_drv": {
+        "car_driver": {
             "aht": [
                 0.2837,
                 0.2128
@@ -77,10 +76,10 @@
     "parking_cost_share": 0.0,
     "car_cost_sharing": 1.0,
     "occupancy": {
-        "car_drv": 1.81
+        "car_driver": 1.81
     },
     "distance_boundaries": {
-        "car_drv": [
+        "car_driver": [
             0,
             100
         ],
@@ -98,7 +97,7 @@
         ]
     },
     "destination_choice": {
-        "car_drv": {
+        "car_driver": {
             "attraction": {},
             "impedance": {
                 "time": -0.005754,
@@ -164,7 +163,7 @@
         }
     },
     "mode_choice": {
-        "car_drv": {
+        "car_driver": {
             "constant": -4.72,
             "generation": {},
             "attraction": {},
@@ -210,7 +209,7 @@
             "individual_dummy": {}
         },
         "scaling": {
-            "car_drv": {
+            "car_driver": {
                 "constant": 0.3648,
                 "individual_dummy": {
                     "sh_hh2_lic1_cars1": 0.3648,
@@ -230,7 +229,7 @@
             }
         },
         "calibration": {
-            "car_drv": {
+            "car_driver": {
                 "constant": 0.0
             },
             "transit": {

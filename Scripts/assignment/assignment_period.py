@@ -538,16 +538,16 @@ class AssignmentPeriod(Period):
 
     def _calc_background_traffic(self, include_trucks: bool = False):
         """Calculate background traffic (buses)."""
-        bus_vol_attr = self.netfield("bus")
+        bus_vol_attr = f"{self.netfield('bus')}_volume"
         self.emme_project.create_network_field(
-            "LINK", "REAL", bus_vol_attr, f"{bus_vol_attr}_vol",
+            "LINK", "REAL", bus_vol_attr, bus_vol_attr,
             overwrite=True, scenario=self.emme_scenario)
         network = self.emme_scenario.get_network()
         # emme api has name "data3" for ul3
         background_traffic = param.background_traffic_attr.replace(
             "ul", "data")
         # calc @bus and data3
-        heavy = [self.netfield(ass_class) for ass_class in param.truck_classes]
+        heavy = [f"{self.netfield(ass_class)}_volume" for ass_class in param.truck_classes]
         for link in network.links():
             if link.type > 100: # If car or bus link
                 freq = 0

@@ -17,9 +17,11 @@ import assignment.departure_time as dt
 from datahandling.resultdata import ResultsData
 from datahandling.zonedata import ZoneData
 from datahandling.matrixdata import MatrixData
-from demand.trips import DemandModel
-from demand.external import ExternalPurpose
-from datatypes.purpose import TravelPurpose, TourPurpose, SecDestPurpose
+from demand.travel import TravelDemandModel
+from datatypes.purpose import (
+    ExternalPurpose, ForeignExternalPurpose, TravelPurpose, TourPurpose,
+    SecDestPurpose,
+)
 from datatypes.demand import Demand
 import parameters.assignment as param
 import parameters.zone as zone_param
@@ -39,8 +41,6 @@ class ModelSystem:
         Path where input data for forecast year are found
     cost_data_path : Path
         Path where cost data for forecast year are found
-    base_zone_data_path : Path
-        Directory path where input data for base year are found
     base_matrices_path : Path
         Directory path where base demand matrices are found
     results_path : Path
@@ -125,11 +125,10 @@ class ModelSystem:
         home_based_purposes = []
         sec_dest_purposes = []
         other_purposes = []
+        foreign_purposes = []
         purpose_names = []
         for file in parameters_path.glob("*.json"):
             specification = json.loads(file.read_text("utf-8"))
-            if specification["name"] == "hb_abroad_other" and not foreign_external_path.exists():
-                continue
             for dummies in mode_dummies.values():
                 for subarea in dummies:
                     for mode, coeff in dummies[subarea].items():
@@ -144,13 +143,17 @@ class ModelSystem:
                                           ["attraction"][subarea]) = coeff
             purpose = TravelPurpose(
                 specification, self._zone_datas, self.resultdata,
-                cost_data["cost_changes"], foreign_external_path)
+                cost_data["cost_changes"])
             required_time_periods = sorted(
                 {tp for m in purpose.impedance_share.values() for tp in m})
             if required_time_periods == sorted(assignment_model.time_periods):
                 purpose_names.append(purpose.name)
                 if isinstance(purpose, SecDestPurpose):
                     sec_dest_purposes.append(purpose)
+                elif (isinstance(purpose, ForeignExternalPurpose)):
+                    if foreign_external_path.exists():
+                        purpose.base_demand_path = foreign_external_path
+                        foreign_purposes.append(purpose)
                 elif purpose.orig == "home":
                     home_based_purposes.append(purpose)
                 else:
@@ -160,7 +163,7 @@ class ModelSystem:
             log.error(msg)
             raise ValueError(msg)
         self.dm = self._init_demand_model(
-            home_based_purposes + other_purposes + sec_dest_purposes)
+            home_based_purposes + other_purposes + sec_dest_purposes + foreign_purposes)           
         self.dm.calculate_car_ownership()
         self.travel_modes = {mode: True for purpose in self.dm.tour_purposes
             for mode in purpose.modes}  # Dict instead of set, to preserve order
@@ -172,7 +175,7 @@ class ModelSystem:
         self.convergence = []
 
     def _init_demand_model(self, tour_purposes: List[TourPurpose]):
-        return DemandModel(
+        return TravelDemandModel(
             self._zone_datas["domestic"], self.resultdata, tour_purposes)
 
     def _add_internal_demand(self, previous_iter_impedance, is_last_iteration):
@@ -190,7 +193,7 @@ class ModelSystem:
                     Impedance type (time/cost/dist)
                 value : dict
                     key : str
-                        Assignment class (car_drv/transit/...)
+                        Assignment class (car_driver/transit/...)
                     value : numpy.ndarray
                         Impedance (float 2-d matrix)
         is_last_iteration : bool (optional)
@@ -210,7 +213,7 @@ class ModelSystem:
                             purpose, mode, purpose_impedance)
                 else:
                     self._distribute_sec_dests(
-                        purpose, "car_drv", purpose_impedance)
+                        purpose, "car_driver", purpose_impedance)
             else:
                 for mode_demand in purpose.calc_demand(
                         previous_iter_impedance, is_last_iteration):

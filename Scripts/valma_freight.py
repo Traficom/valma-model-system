@@ -70,12 +70,19 @@ def main(args):
     fin_border_ids = list(marine_export[1].values())
     marine_export, marine_import = None, None
 
-    # Prepare domestic model by splicing impedances and initializing final demand matrix 
+    # Prepare domestic model by splicing impedances, adding common dist key
+    # and initializing final demand matrix 
     for ass_class in list(impedance):
         for mtx_type, mtx in impedance[ass_class].items():
             impedance[ass_class][mtx_type] = mtx[:zonedata.nr_zones, :zonedata.nr_zones]
-    total_demand = {mode: numpy.zeros([zonedata.nr_zones, zonedata.nr_zones], dtype="float32")
-                    for mode in param.truck_classes}
+        if ass_class in param.freight_modes:
+            impedance[ass_class]["dist"] = sum(
+                mtx for key, mtx in impedance[ass_class].items()
+                if key.startswith("dist_"))
+    total_vehicles = {mode: numpy.zeros([zonedata.nr_zones, zonedata.nr_zones], dtype="float32")
+                      for mode in param.truck_classes}
+    total_tons = {mode: numpy.zeros([zonedata.nr_zones, zonedata.nr_zones], dtype="float32")
+                  for mode in param.freight_modes}
     
     commodities: dict[str, DomesticCommodity] = create_commodities(
         parameters_path / "domestic", zonedata, resultdata, costdata["freight"])
@@ -84,18 +91,13 @@ def main(args):
         log.info(f"Calculating demand for purpose: {commodity.name}")
         demand = commodity.calc_traffic(impedance, args.logistics_iterations)
         for mode in demand:
+            if mode in total_tons:
+                total_tons[mode] += demand[mode]
             omx_filename = ("freight_demand_tons" if commodity.name
                             in args.specify_commodity_names else "")
             store_demand.store(mode, demand[mode], omx_filename, commodity.name)
         if commodity.name in args.specify_commodity_names:
             ass_model.freight_network.save_network_volumes(commodity.name)
-        for mode in impedance:
-            dist = 0
-            for imp_type in impedance[mode]:
-                if "dist" in imp_type:
-                    dist += impedance[mode][imp_type]
-            if isinstance(dist, numpy.ndarray):
-                impedance[mode]["dist"] = dist
         if "truck" in demand:
             # Calc aux tons and transform tons to vehicles
             ass_model.freight_network.output_traversal_matrix(set(demand), resultdata.path)
@@ -105,20 +107,23 @@ def main(args):
                 demand, trade_demand, fin_border_ids)
             for mode in commodity.truck_fleet:
                 ass_class = param.truck_fleet[mode]
-                total_demand[ass_class] += commodity.calc_vehicles(domestic_tons, mode)
+                total_vehicles[ass_class] += commodity.calc_vehicles(domestic_tons, mode)
                 for foreign_purpose in dom_leg_tons:
-                    total_demand[ass_class] += foreign_commodities[foreign_purpose].calc_vehicles(
+                    total_vehicles[ass_class] += foreign_commodities[foreign_purpose].calc_vehicles(
                         dom_leg_tons[foreign_purpose]["truck"], mode)
             write_domestic_leg_summary(dom_leg_tons, impedance, resultdata)
         commodity.write_summary(demand, aux_demand, impedance)
         commodity.write_zone_summary(demand)
-    write_vehicle_summary(total_demand, impedance, resultdata)
+    write_vehicle_summary(total_vehicles, impedance, resultdata)
     resultdata.flush()
     
     log.info("Starting end assigment")
-    for ass_class in total_demand:
-        store_demand.store(ass_class, total_demand[ass_class], "freight_demand")
+    for ass_class in total_vehicles:
+        store_demand.store(ass_class, total_vehicles[ass_class], "freight_demand")
     ass_model.freight_network._assign_trucks()
+    for ass_class in param.freight_modes:
+        store_demand.store(ass_class, total_tons[ass_class], "freight_tons")
+    ass_model.freight_network.save_network_volumes("tons")
     log.info("Simulation ready.")
 
 
