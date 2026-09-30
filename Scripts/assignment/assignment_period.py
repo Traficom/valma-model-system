@@ -757,6 +757,8 @@ class AssignmentPeriod(Period):
                     # Estimated waiting time addition caused by headway dev
                     segment["@wait_time_dev"] = (headway_sd**2
                                                 / (2.0*line[effective_hdw_attr]))
+            else:
+                line[effective_hdw_attr] = 10
         self.emme_scenario.publish_network(network)
 
     def _assign_transit(self, transit_classes=param.local_transit_classes,
