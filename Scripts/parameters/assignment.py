@@ -78,6 +78,13 @@ transit_delay_funcs = {
         "it": 6,
         "vrk": 6,
     },
+    ("freight", "PDCGJROLW"): {
+        "aht": 6,
+        "pt": 6,
+        "iht": 6,
+        "it": 6,
+        "vrk": 6,
+    },
 }
 vdf_temp = ("(put(60/ul2)*(1+{}*put((volau+volad)/{})/"
             + "(ul1-get(2))))*(get(2).le.put(ul1*{}))*length+(get(2).gt."
