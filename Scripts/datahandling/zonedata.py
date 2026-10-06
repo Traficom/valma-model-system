@@ -160,10 +160,10 @@ class ZoneData:
             Whether to calculate household ("sh") or population ("sh_pop")
             shares
         """
-        # Calculate household adult number share
+        # Calculate household adult number share (as shares of household population)
         avg_two_adult_share = {
-            "hh2": 0.926,
-            "hh3": 0.949,
+            "hh2": 0.979,
+            "hh3": 0.977,
         }
         singles_no_children = self[f"{share}_hh1"]
         singles_children = sum(
