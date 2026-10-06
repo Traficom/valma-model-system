@@ -229,7 +229,7 @@ def main(args):
         if model_type == "goods_transport":
             forecast_zonedata = FreightZoneData(*zonedata_args)
         else:
-            grid_data = GridData(data_path, submodel, 
+            grid_data = GridData(Path(data_path), submodel, 
                                 zone_numbers[submodel], model_area="domestic")
             data = grid_data.aggregate() 
             forecast_zonedata = ZoneData(
