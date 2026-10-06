@@ -172,10 +172,17 @@ class GridData:
         zone_numbers = self.zone_numbers
         missing_zones = zone_numbers.difference(aggregated.index).tolist()
         extra_zones = aggregated.index.difference(zone_numbers).tolist()
-        if missing_zones or extra_zones:
+        if missing_zones:
             msg = (
-                f"Zone numbers did not match for zonedata: "
-                f"missing={missing_zones}, extra={extra_zones}"
+                f"Zonedata column {self.submodel} is missing Zone IDs that exist in assignment model. "
+                f"Missing Zone IDs: {missing_zones}. "
+            )
+            log.error(msg)
+            raise IndexError(msg)
+        if extra_zones:
+            msg = (
+                f"Zonedata column {self.submodel} contains Zone IDs not found from assignment model. "
+                f"Extra Zone IDs: {extra_zones}"
             )
             log.error(msg)
             raise IndexError(msg)
