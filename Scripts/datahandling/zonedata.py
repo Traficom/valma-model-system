@@ -181,11 +181,10 @@ class GridData:
             raise IndexError(msg)
         aggregated = aggregated.reindex(zone_numbers)
         geometry = pandas.Series(self.geometry, index=self.data.index)
-        self.aggregated_geometry = geometry.groupby(self.mapping).agg(unary_union)
-        self.aggregated_geometry = self.aggregated_geometry.reindex(
-            aggregated.index)
+        aggregated_geometry = geometry.groupby(self.mapping).agg(unary_union)
+        aggregated_geometry = aggregated_geometry.reindex(aggregated.index)
         self._add_transformations(aggregated)
-        return aggregated
+        return aggregated, aggregated_geometry, self.crs
 
     @staticmethod
     def _most_common(values: pandas.Series):
@@ -193,47 +192,6 @@ class GridData:
         if modes.empty:
             return values.iloc[0]
         return modes.iloc[0]
-
-    def export(self, data, path: Path):
-        """Export aggregated grid data and geometries with Fiona."""
-        schema = {
-            "geometry": "Unknown",
-            "properties": {
-                "analysis_zone_id": "int",
-                **{column: self._fiona_type(data[column]) for column in data},
-            },
-        }
-        with fiona.open(
-            path, "w", driver="GPKG", layer=path.stem,
-            crs=self.crs, schema=schema) as destination:
-            for zone, row in data.iterrows():
-                properties = {
-                    column: self._fiona_value(value)
-                    for column, value in row.items()
-                }
-                properties["analysis_zone_id"] = int(zone)
-                destination.write({
-                    "geometry": mapping(self.aggregated_geometry[zone]),
-                    "properties": properties,
-                })
-
-        return path
-
-    @staticmethod
-    def _fiona_type(values: pandas.Series) -> str:
-        if pandas.api.types.is_bool_dtype(values):
-            return "bool"
-        if pandas.api.types.is_integer_dtype(values):
-            return "int"
-        if pandas.api.types.is_float_dtype(values):
-            return "float"
-        return "str"
-
-    @staticmethod
-    def _fiona_value(value: Any):
-        if pandas.isna(value):
-            return None
-        return value.item() if isinstance(value, numpy.generic) else value
 
     def _add_transformations(self, data: pandas.DataFrame):
         avg_hh_size = {"hh1": 1, "hh2": 2, "hh3": 4.13}
@@ -249,6 +207,48 @@ class GridData:
             data["population"] + data["workplaces"], data["land_area"])
         data["avg_walk_time"] = round(0.047583 * numpy.sqrt(density_pop_wrk))
         data["avg_park_time"] = round(0.053891 * numpy.sqrt(density_pop_wrk))
+
+def export_zones(data, geom, crs, path: Path):
+    """Export aggregated grid data and geometries with Fiona."""
+    schema = {
+        "geometry": "Unknown",
+        "properties": {
+            "analysis_zone_id": "int",
+            **{column: _fiona_type(data[column]) for column in data},
+        },
+    }
+    with fiona.open(
+        path, "w", driver="GPKG", layer=path.stem,
+        crs=crs, schema=schema) as destination:
+        for zone, row in data.iterrows():
+            properties = {
+                column: _fiona_value(value)
+                for column, value in row.items()
+            }
+            properties["analysis_zone_id"] = int(zone)
+            destination.write({
+                "geometry": mapping(geom[zone]),
+                "properties": properties,
+            })
+
+    return path
+
+@staticmethod
+def _fiona_type(values: pandas.Series) -> str:
+    if pandas.api.types.is_bool_dtype(values):
+        return "bool"
+    if pandas.api.types.is_integer_dtype(values):
+        return "int"
+    if pandas.api.types.is_float_dtype(values):
+        return "float"
+    return "str"
+
+@staticmethod
+def _fiona_value(value: Any):
+    if pandas.isna(value):
+        return None
+    return value.item() if isinstance(value, numpy.generic) else value
+
 
 class ZoneData:
     """Container for analysis zone data. 

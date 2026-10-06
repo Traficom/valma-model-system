@@ -231,7 +231,7 @@ def main(args):
         else:
             grid_data = GridData(Path(data_path), submodel, 
                                 zone_numbers[submodel], model_area="domestic")
-            data = grid_data.aggregate() 
+            data, geom, crs = grid_data.aggregate() 
             forecast_zonedata = ZoneData(
                 data, submodel, zone_numbers[submodel],
                 model_area="domestic", car_dist_cost=0.12,

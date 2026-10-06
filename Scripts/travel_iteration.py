@@ -15,7 +15,7 @@ from assignment.mock_assignment import MockAssignmentModel
 import utils.log as log
 import assignment.departure_time as dt
 from datahandling.resultdata import ResultsData
-from datahandling.zonedata import ZoneData, GridData
+from datahandling.zonedata import ZoneData, GridData, export_zones
 from datahandling.matrixdata import MatrixData
 from demand.travel import TravelDemandModel
 from datatypes.purpose import (
@@ -103,8 +103,9 @@ class ModelSystem:
         log.info(f"Read zonedata from {zone_data_path}")
         grid_data = GridData(zone_data_path, submodel, self.zone_numbers,
                              model_area="domestic")
-        data = grid_data.aggregate()
-        grid_data.export(data, Path(results_path / f"{submodel}.gpkg"))
+        data, geom, crs = grid_data.aggregate()
+        export_zones(data, geom, crs,
+                     Path(results_path / f"{submodel}.gpkg"))
         self._zone_datas = {
             model_area: ZoneData(
                 data, submodel, self.zone_numbers, model_area,

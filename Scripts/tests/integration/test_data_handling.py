@@ -72,7 +72,7 @@ class ZoneDataTest(unittest.TestCase):
     def test_csv_file_read(self):
         grid_data = GridData(ZONEDATA_PATH, "uusimaa", 
                              ZONE_INDEXES,  model_area="domestic")
-        data = grid_data.aggregate()
+        data, geom, crs = grid_data.aggregate()
         zone_data = ZoneData(data, "uusimaa", ZONE_INDEXES, 
                              "domestic", car_dist_cost=0.12, 
                              electric_car_share={"default": {"bev": 0.1, "phev": 0.2}})
