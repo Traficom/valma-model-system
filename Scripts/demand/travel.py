@@ -64,11 +64,11 @@ class TravelDemandModel:
         # mode-choice models.
         # They represent shares of the population living
         # in households with given number of cars, licences and *persons*.
-        hh_cars1_adult1 = zd["sh_pop_adults1_lic1"] * prob["adults1_lic1"]["1"]
+        hh_cars1_adult1 = zd["sh_pop_adults1_lic1"] * (prob["adults1_lic1"]["1"] + prob["adults1_lic1"]["2"])
         zd.share["sh_hh1_lic1_cars1"] = (zd["sh_hh_1_adult_no_children"]
                                          * hh_cars1_adult1)
         zd.share["sh_hh2_lic1_cars1"] = (zd["sh_hh_1_adult_children"] * hh_cars1_adult1
-                                         + zd["sh_pop_adults2_lic1"] * prob["adults2_lic1"]["1"])
+                                         + zd["sh_pop_adults2_lic1"] * (prob["adults2_lic1"]["1"] + prob["adults2_lic1"]["2"]))
         zd.share["sh_hh2_lic2_cars1"] = zd["sh_pop_adults2_lic2"] * prob["adults2_lic2"]["1"]
         zd.share["sh_hh2_lic2_cars2"] = zd["sh_pop_adults2_lic2"] * prob["adults2_lic2"]["2"]
         zd.share["sh_car"] = (zd["sh_hh1_lic1_cars1"] +

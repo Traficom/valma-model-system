@@ -24,31 +24,55 @@ car_ownership = {
                 "sh_income_100_*sh_hh_1_adult_children": 0,
             },
             "calibration": {
-                "constant": 0.315740549
+                "constant": 0.337379356
             }
         },
         "1": {
-            "constant": 3.253071,
+            "constant": 3.119002,
             "generation": {
-                "sqrt_pop_density": -0.025225,
+                "sqrt_pop_density": -0.024650,
             },
             "individual_dummy": {
-                "sh_income_0_19*sh_hh_1_adult_no_children": -1.579144,
-                "sh_income_20_39*sh_hh_1_adult_no_children": -0.781682,
+                "sh_income_0_19*sh_hh_1_adult_no_children": -1.508132,
+                "sh_income_20_39*sh_hh_1_adult_no_children": -0.726566,
                 "sh_income_40_59*sh_hh_1_adult_no_children": 0,
                 "sh_income_60_79*sh_hh_1_adult_no_children": 0,
                 "sh_income_80_99*sh_hh_1_adult_no_children": 0,
                 "sh_income_100_*sh_hh_1_adult_no_children": 0,
-                "sh_income_0_19*sh_hh_1_adult_children": -1.579144+0.710698,
-                "sh_income_20_39*sh_hh_1_adult_children": -0.781682+0.710698,
-                "sh_income_40_59*sh_hh_1_adult_children": 0.710698,
-                "sh_income_60_79*sh_hh_1_adult_children": 0.710698,
-                "sh_income_80_99*sh_hh_1_adult_children": 0.710698,
-                "sh_income_100_*sh_hh_1_adult_children": 0.710698,
+                "sh_income_0_19*sh_hh_1_adult_children": -1.508132+0.730772,
+                "sh_income_20_39*sh_hh_1_adult_children": -0.726566+0.730772,
+                "sh_income_40_59*sh_hh_1_adult_children": 0.730772,
+                "sh_income_60_79*sh_hh_1_adult_children": 0.730772,
+                "sh_income_80_99*sh_hh_1_adult_children": 0.730772,
+                "sh_income_100_*sh_hh_1_adult_children": 0.730772,
             },
             "calibration": {
-                "constant": -0.102169711
+                "constant": -0.07545219
             },
+        },
+        "2": {
+            "constant": 0.422826,
+            "generation": {
+                "sqrt_pop_density": -0.026257,
+                "sh_row_or_detached": 1.293953
+            },
+            "individual_dummy": {
+                "sh_income_0_19*sh_hh_1_adult_no_children": -2.697716,
+                "sh_income_20_39*sh_hh_1_adult_no_children": -1.585601,
+                "sh_income_40_59*sh_hh_1_adult_no_children": 0,
+                "sh_income_60_79*sh_hh_1_adult_no_children": 0,
+                "sh_income_80_99*sh_hh_1_adult_no_children": 0,
+                "sh_income_100_*sh_hh_1_adult_no_children": 0,
+                "sh_income_0_19*sh_hh_1_adult_children": -2.697716+0.124026,
+                "sh_income_20_39*sh_hh_1_adult_children": -1.585601+0.124026,
+                "sh_income_40_59*sh_hh_1_adult_children": 0.124026,
+                "sh_income_60_79*sh_hh_1_adult_children": 0.124026,
+                "sh_income_80_99*sh_hh_1_adult_children": 0.124026,
+                "sh_income_100_*sh_hh_1_adult_children": 0.124026,
+            },
+            "calibration": {
+                "constant": -0.505117138
+            }
         }
     },
     "adults2_lic1": {
@@ -70,32 +94,55 @@ car_ownership = {
                 "sh_income_100_*sh_hh_2_adults_children": 0,
             },
             "calibration": {
-                "constant": 0.318705801
+                "constant": 0.592041377
             }
         },
         "1": {
-            "constant": 3.423883,
+            "constant": 3.179193,
             "generation": {
-                "sqrt_pop_density": -0.022518 ,
+                "sqrt_pop_density": -0.021561,
             },
             "individual_dummy": {
-                "sh_income_0_19*sh_hh_2_adults_no_children": -0.925358,
-                "sh_income_20_39*sh_hh_2_adults_no_children": -0.273038 ,
+                "sh_income_0_19*sh_hh_2_adults_no_children": -0.748000,
+                "sh_income_20_39*sh_hh_2_adults_no_children": 0,
                 "sh_income_40_59*sh_hh_2_adults_no_children": 0,
                 "sh_income_60_79*sh_hh_2_adults_no_children": 0,
                 "sh_income_80_99*sh_hh_2_adults_no_children": 0,
                 "sh_income_100_*sh_hh_2_adults_no_children": 0,
-                "sh_income_0_19*sh_hh_2_adults_children": -0.925358+0.022007,
-                "sh_income_20_39*sh_hh_2_adults_children": -0.273038+0.022007,
-                "sh_income_40_59*sh_hh_2_adults_children": 0.022007,
-                "sh_income_60_79*sh_hh_2_adults_children": 0.022007,
-                "sh_income_80_99*sh_hh_2_adults_children": 0.022007,
-                "sh_income_100_*sh_hh_2_adults_children": 0.022007,
+                "sh_income_0_19*sh_hh_2_adults_children": -0.748000,
+                "sh_income_20_39*sh_hh_2_adults_children": 0,
+                "sh_income_40_59*sh_hh_2_adults_children": 0,
+                "sh_income_60_79*sh_hh_2_adults_children": 0,
+                "sh_income_80_99*sh_hh_2_adults_children": 0,
+                "sh_income_100_*sh_hh_2_adults_children": 0,
             },
             "calibration": {
-                "constant": -0.017934711
+                "constant": 0.332252175
             }
         },
+        "2": {
+            "constant": 1.688364,
+            "generation": {
+                "sqrt_pop_density": -0.042779
+            },
+            "individual_dummy": {
+                "sh_income_0_19*sh_hh_2_adults_no_children": -2.163883,
+                "sh_income_20_39*sh_hh_2_adults_no_children": -0.685833,
+                "sh_income_40_59*sh_hh_2_adults_no_children": 0,
+                "sh_income_60_79*sh_hh_2_adults_no_children": 0,
+                "sh_income_80_99*sh_hh_2_adults_no_children": 0,
+                "sh_income_100_*sh_hh_2_adults_no_children": 0,
+                "sh_income_0_19*sh_hh_2_adults_children": -2.163883,
+                "sh_income_20_39*sh_hh_2_adults_children": -0.685833,
+                "sh_income_40_59*sh_hh_2_adults_children": 0,
+                "sh_income_60_79*sh_hh_2_adults_children": 0,
+                "sh_income_80_99*sh_hh_2_adults_children": 0,
+                "sh_income_100_*sh_hh_2_adults_children": 0,
+            },
+            "calibration": {
+                "constant": -0.172594228
+            }
+        }
     },
     "adults2_lic2": {
         "0": {
@@ -116,7 +163,7 @@ car_ownership = {
                 "sh_income_100_*sh_hh_2_adults_children": 0,
             },
             "calibration": {
-                "constant": -0.379571216
+                "constant": -0.399036083
             }
         },
         "1": {
@@ -139,7 +186,7 @@ car_ownership = {
                 "sh_income_100_*sh_hh_2_adults_children": 0.374802,
             },
             "calibration": {
-                "constant": -0.045729366
+                "constant": -0.044919673
             }
         },
         "2": {
@@ -163,7 +210,7 @@ car_ownership = {
                 "sh_income_100_*sh_hh_2_adults_children": 1.104780+0.542211,
             },
             "calibration": {
-                "constant": 0.090096016
+                "constant": 0.106516046
             }
         }
     }
