@@ -31,7 +31,7 @@ def main(args):
             columns=list(colxn.schema["properties"]))
     grid_data = GridData(args.zone_data_file, args.submodel, 
                          data["input_zone_id"], model_area="domestic")
-    zone_data = grid_data.aggregate() 
+    zone_data, geom, crs = grid_data.aggregate() 
     zonedata = ZoneData(
         zone_data, args.submodel, data["input_zone_id"],
         model_area="domestic", car_dist_cost=0.12,
