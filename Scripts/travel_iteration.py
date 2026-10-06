@@ -77,7 +77,12 @@ class ModelSystem:
         self.ass_model = cast(Union[MockAssignmentModel,EmmeAssignmentModel], assignment_model) #type checker hint
         self.zone_numbers: numpy.ndarray = self.ass_model.zone_numbers
 
-        log.info(f"Read input cost data from {cost_data_path}.")
+        # Input data
+        self.basematrices = MatrixData(base_matrices_path / submodel)
+        self.long_dist_matrices = (MatrixData(long_dist_matrices_path)
+            if long_dist_matrices_path is not None else None)
+        self.freight_matrices = (MatrixData(freight_matrices_path)
+            if freight_matrices_path is not None else None)
         cost_data: dict = json.loads(cost_data_path.read_text("utf-8"))
         self.car_dist_cost = cost_data["vehicle_km_cost"]
         self.car_time_cost = cost_data["vehicle_hour_cost"]
@@ -114,12 +119,6 @@ class ModelSystem:
                 car_dist_cost=self.car_dist_cost["icev"],
                 electric_car_share=cost_data["car_shares"]
             ) for model_area in ["domestic"]}
-        log.info(f"Read matrix data.")
-        self.basematrices = MatrixData(base_matrices_path / submodel)
-        self.long_dist_matrices = (MatrixData(long_dist_matrices_path)
-                                   if long_dist_matrices_path is not None else None)
-        self.freight_matrices = (MatrixData(freight_matrices_path)
-                                 if freight_matrices_path is not None else None)
 
         # Output data
         self.resultdata = ResultsData(
