@@ -92,7 +92,6 @@ class ModelSystem:
             mode_dummies = {}
             dest_dummies = {}
         else:
-            log.info(f"Read calibration files from {mode_dest_calibration_path}")
             path = Path(mode_dest_calibration_path)
             calibration_data: dict = json.loads(path.read_text("utf-8"))
             mode_dummies = calibration_data["mode_choice_calibration"]
@@ -101,11 +100,9 @@ class ModelSystem:
         if municipality_calibration_path is None:
             municip_calib = {}
         else:
-            log.info(f"Read calibration files from {municipality_calibration_path}")
             path = Path(municipality_calibration_path)
             municip_calib = pandas.read_csv(path, sep="\t",
                 index_col=["generation", "attraction"]).to_dict("series")
-        log.info(f"Read zonedata from {zone_data_path}")
         grid_data = GridData(zone_data_path, submodel, self.zone_numbers,
                              model_area="domestic")
         data, geom, crs = grid_data.aggregate()
