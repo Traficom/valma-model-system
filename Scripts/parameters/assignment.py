@@ -559,6 +559,7 @@ transit_impedance_matrices = {
         "fw_time": "actual_first_waiting_times",
     },
     "by_mode_subset": {
+        "dist": "distance",
         "inv_time": "actual_in_vehicle_times",
         "board_time": "actual_total_boarding_times",
         "perc_bcost": "perceived_total_boarding_costs",
