@@ -131,6 +131,7 @@ class AssignmentPeriod(Period):
         """
         self._prepare_cars(dist_unit_cost, time_unit_cost, save_matrices)
         self._prepare_walk_and_bike(save_matrices=False)
+        self._end_assignment_classes.add("walk")
         self._prepare_transit(day_scenario, save_matrices, save_matrices)
 
     def _prepare_cars(self, dist_unit_cost: Dict[str, float],
@@ -248,6 +249,8 @@ class AssignmentPeriod(Period):
         log.info(f"--- END-ASSIGNING PERIOD {self.name.upper()} ---")
         self._set_bike_vdfs()
         self._assign_bikes()
+        if "walk" in self._end_assignment_classes:
+            self.walk_mode.assign()
         self._set_car_vdfs()
         if not self._separate_emme_scenarios:
             self._calc_background_traffic(include_trucks=True)
