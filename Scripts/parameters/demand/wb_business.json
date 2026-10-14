@@ -13,12 +13,12 @@
         "hb_work": 0.0674
     },
     "sec_dest_rate": {
-        "car_drv": 1.1013,
-        "car_pax": 1.0309,
+        "car_driver": 1.1013,
+        "car_passenger": 1.0309,
         "transit": 1.0009
     },
     "impedance_share": {
-        "car_drv": {
+        "car_driver": {
             "aht": [
                 0.2841,
                 0.0415
@@ -32,7 +32,7 @@
                 0.1982
             ]
         },
-        "car_pax": {
+        "car_passenger": {
             "aht": [
                 0.2841,
                 0.0415
@@ -82,11 +82,11 @@
     "car_cost_sharing": 0.0,
     "occupancy": {},
     "distance_boundaries": {
-        "car_drv": [
+        "car_driver": [
             0,
             300
         ],
-        "car_pax": [
+        "car_passenger": [
             0,
             300
         ],
@@ -104,7 +104,7 @@
         ]
     },
     "destination_choice": {
-        "car_drv": {
+        "car_driver": {
             "attraction": {},
             "impedance": {
                 "time": -0.05265
@@ -116,7 +116,7 @@
                 "workplaces": 1
             }
         },
-        "car_pax": {
+        "car_passenger": {
             "attraction": {},
             "impedance": {
                 "time": -0.04474
@@ -170,7 +170,7 @@
         }
     },
     "mode_choice": {
-        "car_drv": {
+        "car_driver": {
             "constant": -2.531,
             "generation": {},
             "attraction": {},
@@ -179,10 +179,10 @@
                 "logsum": 1
             },
             "individual_dummy": {
-                "wb_business_parent_car_drv_share": 2.732
+                "wb_business_parent_car_driver_share": 2.732
             }
         },
-        "car_pax": {
+        "car_passenger": {
             "constant": -2.671,
             "generation": {},
             "attraction": {},
@@ -225,13 +225,13 @@
             "individual_dummy": {}
         },
         "scaling": {
-            "car_drv": {
+            "car_driver": {
                 "constant": 1,
                 "individual_dummy": {
-                    "wb_business_parent_car_drv_share": 1
+                    "wb_business_parent_car_driver_share": 1
                 }
             },
-            "car_pax": {
+            "car_passenger": {
                 "constant": 1
             },
             "transit": {
@@ -248,10 +248,10 @@
             }
         },
         "calibration": {
-            "car_drv": {
+            "car_driver": {
                 "constant": 0.0
             },
-            "car_pax": {
+            "car_passenger": {
                 "constant": 0.0
             },
             "transit": {

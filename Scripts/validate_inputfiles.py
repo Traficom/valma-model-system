@@ -13,12 +13,10 @@ from assignment.mock_assignment import MockAssignmentModel
 from datahandling.matrixdata import MatrixData
 from datahandling.zonedata import ZoneData, FreightZoneData
 import parameters.assignment as param
-from valma_travel import BASE_ZONEDATA_FILE
 from valma_travel import LOS_MATRIX_FOLDER, DEMAND_MATRIX_FOLDER
 
 
 def main(args):
-    base_zonedata_path = Path(args.base_data_folder, BASE_ZONEDATA_FILE)
     emme_project_files: Union[str,List[str]] = args.emme_project_files
     first_scenario_ids: Union[int,List[int]] = args.first_scenario_ids
     zone_data_files: Union[str,List[str]] = args.zone_data_files
@@ -46,14 +44,6 @@ def main(args):
                + "vs. number of zone-data-files")
         log.error(msg)
         raise ValueError(msg)
-
-    # Check basedata input
-    # log.info("Checking base inputdata...")
-    # if not (args.end_assignment_only or base_zonedata_path.exists()):
-    #     msg = "Baseline zonedata file '{}' does not exist.".format(
-    #         base_zonedata_path)
-    #     log.error(msg)
-    #     raise ValueError(msg)
 
     zone_numbers: Dict[str, numpy.array] = {}
 

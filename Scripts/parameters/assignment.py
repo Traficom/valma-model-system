@@ -78,6 +78,13 @@ transit_delay_funcs = {
         "it": 6,
         "vrk": 6,
     },
+    ("freight", "PDCGJROLW"): {
+        "aht": 6,
+        "pt": 6,
+        "iht": 6,
+        "it": 6,
+        "vrk": 6,
+    },
 }
 vdf_temp = ("(put(60/ul2)*(1+{}*put((volau+volad)/{})/"
             + "(ul1-get(2))))*(get(2).le.put(ul1*{}))*length+(get(2).gt."
@@ -420,7 +427,9 @@ truck_fleet = {
     "semi_trailer": "semi_trailer",
     "semi_trailer_ev": "semi_trailer",
     "trailer_truck": "trailer_truck",
-    "trailer_truck_ev": "trailer_truck"
+    "trailer_truck_ev": "trailer_truck",
+    "trailer_truck_76t": "trailer_truck",
+    "trailer_truck_76ev": "trailer_truck"
 }
 simple_transport_classes = (private_classes
                             + simple_transit_classes
@@ -519,7 +528,7 @@ freight_marine_modes = {
     }
 }
 external_modes = [
-    "car_drv",
+    "car_driver",
     "transit",
     "truck",
     "trailer_truck",
@@ -599,8 +608,8 @@ roadtypes = {
 }
 # modes in choice model : impedance
 mode_impedance = {
-    "car_drv": ["icev", "bev", "phev"],
-    "car_pax": ["icev", "bev", "phev"],
+    "car_driver": ["icev", "bev", "phev"],
+    "car_passenger": ["icev", "bev", "phev"],
     "transit": ["transit"],
     "airplane": ["airplane"],
     "bike": ["bike"],
@@ -616,11 +625,11 @@ mode_impedance = {
 # If the mode has two assignment classes, demand
 # will be transposed for the second one.
 mode_assignment_classes = {
-    "car_drv": ["icev", "bev", "phev"],
+    "car_driver": ["icev", "bev", "phev"],
     "icev": ["icev"],
     "bev": ["bev"],
     "phev": ["phev"],
-    "car_pax": [],
+    "car_passenger": [],
     "transit": ["transit"],
     "airplane": ["airplane"],
     "bike": ["bike"],

@@ -2,27 +2,23 @@ import unittest
 import pandas
 import os
 import numpy
-from pathlib import Path
 
 import utils.log as log
 from datahandling.zonedata import ZoneData
 from datahandling.matrixdata import MatrixData
-from travel_iteration import DEMAND_MATRIX_FOLDER
 import parameters.assignment as param
-
-
-TEST_DATA_PATH = Path(__file__).parent.parent / "test_data"
-RESULTS_PATH = TEST_DATA_PATH / "Results" / "test"
-ZONEDATA_PATH = TEST_DATA_PATH / "Scenario_input_data" / "zonedata_test.gpkg"
-COSTDATA_PATH = TEST_DATA_PATH / "Scenario_input_data" / "costdata.json"
-MODE_DEST_CALIBRATION_FILE = TEST_DATA_PATH / "Scenario_input_data" / "mode_dest_calibration.json"
-MUNICIPALITY_CALIBRATION_FILE = TEST_DATA_PATH / "Scenario_input_data" / "municipality_calibration.txt"
-BASE_MATRICES_PATH = TEST_DATA_PATH / "Scenario_input_data" / DEMAND_MATRIX_FOLDER
-INTERNAL_ZONES = [
-    202, 1344, 1755, 2037, 2129, 2224, 2333, 2413, 2519, 2621, 2707, 2814, 2918,
-    3000, 3003, 3203, 3302, 3416, 3639, 3705, 3800, 4013, 4102, 4202]
-EXTERNAL_ZONES = [7043, 8284, 12614, 17278, 19401, 23678, 50107, 50127, 60021, 60031]
-ZONE_INDEXES = numpy.array(INTERNAL_ZONES + EXTERNAL_ZONES)
+from tests.integration.test_arguments import (
+    TEST_DATA_PATH,
+    RESULTS_PATH,
+    ZONEDATA_PATH,
+    COSTDATA_PATH,
+    MODE_DEST_CALIBRATION_FILE,
+    MUNICIPALITY_CALIBRATION_FILE,
+    BASE_MATRICES_PATH,
+    INTERNAL_ZONES,
+    EXTERNAL_ZONES,
+    ZONE_INDEXES,
+)
 
 # Integration tests for validating that we can read the matrices from OMX
 #  and CSV files correctly. Assumes that the matrix is fixed and the
@@ -38,14 +34,14 @@ class MatrixDataTest(unittest.TestCase):
 
     def test_constructor(self):
         log.initialize(Config())
-        m = MatrixData(BASE_MATRICES_PATH / "uusimaa")
+        m = MatrixData(RESULTS_PATH / "los_matrices" / "uusimaa")
         # Verify that the base folder exists
         self.assertTrue(os.path.isdir(m.path))
 
     def test_matrix_operations(self):
         log.initialize(Config())
-        m = MatrixData(BASE_MATRICES_PATH / "uusimaa")
-        MATRIX_TYPES = ["demand"]
+        m = MatrixData(RESULTS_PATH / "los_matrices" / "uusimaa")
+        MATRIX_TYPES = ["time"]
         for matrix_type in MATRIX_TYPES:
             print("validating matrix type", matrix_type)
             self._validate_matrix_operations(m, matrix_type)

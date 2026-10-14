@@ -22,6 +22,10 @@ def fratar(prod, attr, trips, max_iter=10):
     pandas DataFrame 
         Fratared trip matrix
     """
+    prod = numpy.asarray(prod)
+    attr = numpy.asarray(attr)
+    trips = numpy.asarray(trips)
+
     # Run 2D balancing
     for _ in range(max_iter):
         rowsum = trips.sum(axis=1)

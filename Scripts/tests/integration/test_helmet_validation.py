@@ -2,7 +2,7 @@ import unittest
 
 from validate_inputfiles import main
 import utils.log as log
-from tests.integration.test_data_handling import (
+from tests.integration.test_arguments import (
     TEST_DATA_PATH, ZONEDATA_PATH, COSTDATA_PATH)
 
 
