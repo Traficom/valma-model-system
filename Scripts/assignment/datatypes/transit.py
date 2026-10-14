@@ -167,7 +167,7 @@ class TransitMode(AssignmentMode):
         pass
 
     def get_matrices(self):
-        transfer_penalty = (param.transfer_penalty[self.name]
+        transfer_penalty = (param.transfer_penalty
                             * (self.num_board.data > 0)).astype("float32")
         cost = self.inv_cost.data + self.board_cost.data
         time = self.gen_cost.data - self.vot_inv*cost - transfer_penalty
