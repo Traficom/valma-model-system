@@ -8,7 +8,11 @@ import utils.log as log
 from assignment.emme_assignment import EmmeAssignmentModel
 from assignment.mock_assignment import MockAssignmentModel
 from assignment.assignment_period import AssignmentPeriod
-from travel_iteration import ModelSystem, LOS_MATRIX_FOLDER, DEMAND_MATRIX_FOLDER
+from travel_iteration import (
+    ModelSystem,
+    LOS_MATRIX_FOLDER,
+    DEMAND_MATRIX_FOLDER,
+    BUSINESS_AND_OVERNIGHT_FOLDER)
 from datahandling.matrixdata import MatrixData
 
 
@@ -65,7 +69,9 @@ def main(args):
         kwargs["time_periods"] = {"vrk": "WholeDayPeriod"}
     if args.do_not_use_emme:
         log.info("Initializing MockAssignmentModel...")
-        mock_result_path = result_data_folder / LOS_MATRIX_FOLDER / args.submodel
+        subfolder = (BUSINESS_AND_OVERNIGHT_FOLDER
+                     if calculate_long_dist_demand else args.submodel)
+        mock_result_path = result_data_folder / LOS_MATRIX_FOLDER / subfolder
         if not mock_result_path.is_dir():
             raise NameError(
                 "Mock Results directory {} does not exist.".format(
