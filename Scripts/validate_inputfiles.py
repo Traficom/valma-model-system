@@ -13,7 +13,10 @@ from assignment.mock_assignment import MockAssignmentModel
 from datahandling.matrixdata import MatrixData
 from datahandling.zonedata import ZoneData, FreightZoneData
 import parameters.assignment as param
-from valma_travel import LOS_MATRIX_FOLDER, DEMAND_MATRIX_FOLDER
+from valma_travel import (
+    LOS_MATRIX_FOLDER,
+    DEMAND_MATRIX_FOLDER,
+    BUSINESS_AND_OVERNIGHT_FOLDER)
 
 
 def main(args):
@@ -77,8 +80,10 @@ def main(args):
 
         # Check network
         if args.do_not_use_emme:
+            subfolder = (BUSINESS_AND_OVERNIGHT_FOLDER if calc_long_dist_demand
+                         else args.scenario_name[i])
             mock_result_path = Path(
-                args.result_data_folder, args.scenario_name[i],
+                args.result_data_folder, subfolder,
                 LOS_MATRIX_FOLDER, args.submodel[i])
             if not mock_result_path.exists():
                 msg = "Mock Results directory {} does not exist.".format(
