@@ -130,10 +130,10 @@ class ZoneData:
         self["sqrt_pop_density"] = numpy.sqrt(self["pop_density"])
         
         # Two-way intrazonal distances from building distances
-        self["dist_walk"] = data["intra_dist_walk"] * 2
-        self["dist_bike"] = data["intra_dist_bike"] * 2
-        self["time_car"] = 2 * 60 * data["intra_dist_car"] / 20
-        self["cost_car"] = 2 * car_dist_cost * data["intra_dist_car"]
+        self["dist_walk"] = data["avg_intra_dist"] * 2
+        self["dist_bike"] = data["avg_intra_dist"] * 2
+        self["time_car"] = 2 * 60 * data["avg_intra_dist"] / 20
+        self["cost_car"] = 2 * car_dist_cost * data["avg_intra_dist"]
         self["density_pop_wrk"] = divide((data["population"] + data["workplaces"]),
                                           data["land_area"])
 
