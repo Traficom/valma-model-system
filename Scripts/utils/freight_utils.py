@@ -25,6 +25,8 @@ def update_diagonal_cost(impedance: dict) -> dict:
     for mode in impedance:
         if mode in truck_fleet:
             for imp_type in ("cost", "dist"):
+                if imp_type not in impedance[mode]:
+                    continue
                 mtx = impedance[mode][imp_type]
                 diag_values = numpy.min(
                     numpy.where(mtx > 0, mtx, numpy.inf), axis=1)
