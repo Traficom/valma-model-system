@@ -90,13 +90,14 @@ class FreightCommodity(Purpose):
         self.truck_fleet = costdata["truck"]["fleet"]
         self.truck_param = costdata["truck"]["param"]
 
-    def _transform_road_cost(self, cost: numpy.ndarray) -> numpy.ndarray:
+    def _transform_road_cost(self, cost: numpy.ndarray | Dict[str, numpy.ndarray],
+                             ) -> numpy.ndarray:
         """Transform vehicle cost (incl. driver cost) to ton cost.
 
         Parameters
         ----------
-        cost : numpy.ndarray
-            Vehicle-specific cost matrix from truck assignment
+        cost : numpy.ndarray or Dict[str, numpy.ndarray]
+            Vehicle-specific cost matrix from truck assignment.
 
         Returns
         ----------
@@ -104,7 +105,8 @@ class FreightCommodity(Purpose):
             Ton-specific cost matrix
         """
         return sum(
-            ((1+self.empty_share) * truck_overhead_cost * cost
+            ((1+self.empty_share) * truck_overhead_cost
+             * (cost[mode] if isinstance(cost, dict) else cost)
              / self.truck_param[truck_fleet[mode]]["avg_load"]
              + self.truck_param[truck_fleet[mode]]["terminal_cost"])
             * distrib[self._truck_distribution]
@@ -171,7 +173,8 @@ class DomesticCommodity(FreightCommodity):
         for mode in self.modes:
             if mode == "truck":
                 costs[mode] = {"cost": self._transform_road_cost(
-                    impedance[mode]["cost"])}
+                    {truck_mode: impedance[truck_mode]["cost"]
+                     for truck_mode in self.truck_fleet})}
             else:
                 costs[mode] = self._calc_ton_cost(
                     impedance[mode], self.costdata[mode])
