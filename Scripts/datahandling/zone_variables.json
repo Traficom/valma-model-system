@@ -24,10 +24,28 @@
             {
                 "total": "workplaces",
                 "shares": [
-                    "sh_wrk_healthcare",
-                    "sh_wrk_shop",
-                    "sh_wrk_hospitality",
-                    "sh_wrk_recreation"
+                    "sh_wrk_a",
+                    "sh_wrk_b",
+                    "sh_wrk_c",
+                    "sh_wrk_d",
+                    "sh_wrk_e",
+                    "sh_wrk_f",
+                    "sh_wrk_g",
+                    "sh_wrk_h",
+                    "sh_wrk_i",
+                    "sh_wrk_j",
+                    "sh_wrk_k",
+                    "sh_wrk_l",
+                    "sh_wrk_m",
+                    "sh_wrk_n",
+                    "sh_wrk_o",
+                    "sh_wrk_p",
+                    "sh_wrk_q",
+                    "sh_wrk_r",
+                    "sh_wrk_s",
+                    "sh_wrk_t",
+                    "sh_wrk_u",
+                    "sh_wrk_x"
                 ]
             },
             "sport_facility_indoor",
@@ -36,17 +54,14 @@
             "students_comprehensive",
             "students_upper_secondary",
             "students_higher_education",
+            "students_vocational",
             "land_area"
         ],
         "mean": [
             "avg_park_cost",
             "avg_park_time",
             "avg_walk_time",
-            "car_density",
-            "intra_dist_walk",
-            "intra_dist_bike",
-            "intra_dist_car",
-            "sh_office",
+            "avg_intra_dist",
             "sh_row_or_detached"
         ],
         "first": [

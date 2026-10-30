@@ -101,7 +101,6 @@ class ZoneData:
         self.share["sh_bev"] = car_shares["bev"]
         self.share["sh_phev"] = car_shares["phev"]
         self.share["sh_icev"] = 1 - car_shares.sum(axis=1)
-        self["car_density"].clip(upper=1, inplace=True)
         self.share["share_female"] = pandas.Series(
             0.5, self.zone_numbers, dtype=numpy.float32)
         self.share["share_male"] = pandas.Series(
@@ -131,10 +130,10 @@ class ZoneData:
         self["sqrt_pop_density"] = numpy.sqrt(self["pop_density"])
         
         # Two-way intrazonal distances from building distances
-        self["dist_walk"] = data["intra_dist_walk"] * 2
-        self["dist_bike"] = data["intra_dist_bike"] * 2
-        self["time_car"] = 2 * 60 * data["intra_dist_car"] / 20
-        self["cost_car"] = 2 * car_dist_cost * data["intra_dist_car"]
+        self["dist_walk"] = data["avg_intra_dist"] * 2
+        self["dist_bike"] = data["avg_intra_dist"] * 2
+        self["time_car"] = 2 * 60 * data["avg_intra_dist"] / 20
+        self["cost_car"] = 2 * car_dist_cost * data["avg_intra_dist"]
         self["density_pop_wrk"] = divide((data["population"] + data["workplaces"]),
                                           data["land_area"])
 
@@ -401,7 +400,7 @@ def read_zonedata(path: Path,
         data = pandas.DataFrame(
             [record["properties"] for record in colxn],
             columns=list(colxn.schema["properties"]))
-    data.set_index("input_zone_id", inplace=True)
+    data.set_index("zone_id", inplace=True)
     if data.index.hasnans:
         msg = "Row with only spaces or tabs in file {}".format(path)
         log.error(msg)
