@@ -68,7 +68,6 @@ def main(args):
         trade_demand[commodity.name] = demand
     resultdata.flush()
     fin_border_ids = list(marine_export[1].values())
-    marine_export = marine_import = marine_data = None
 
     # Prepare domestic model by splicing impedances, adding common dist key
     # and initializing final demand matrix 
@@ -113,10 +112,8 @@ def main(args):
                     total_vehicles[ass_class] += foreign_commodities[foreign_purpose].calc_vehicles(
                         dom_leg_tons[foreign_purpose]["truck"], mode)
             write_domestic_leg_summary(dom_leg_tons, impedance, resultdata)
-            domestic_tons = dom_leg_tons = None
         commodity.write_summary(demand, aux_demand, impedance)
         commodity.write_zone_summary(demand)
-        demand = aux_demand = None
     write_vehicle_summary(total_vehicles, impedance, resultdata)
     resultdata.flush()
     
