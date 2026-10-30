@@ -68,7 +68,6 @@ def main(args):
         trade_demand[commodity.name] = demand
     resultdata.flush()
     fin_border_ids = list(marine_export[1].values())
-    marine_export, marine_import = None, None
 
     # Prepare domestic model by splicing impedances, adding common dist key
     # and initializing final demand matrix 
@@ -98,10 +97,11 @@ def main(args):
             store_demand.store(mode, demand[mode], omx_filename, commodity.name)
         if commodity.name in args.specify_commodity_names:
             ass_model.freight_network.save_network_volumes(commodity.name)
+        # Calc aux tons
+        ass_model.freight_network.output_traversal_matrix(set(demand), resultdata.path)
+        aux_demand = transform_traversal_data(resultdata.path, zonedata.zone_numbers)
         if "truck" in demand:
-            # Calc aux tons and transform tons to vehicles
-            ass_model.freight_network.output_traversal_matrix(set(demand), resultdata.path)
-            aux_demand = transform_traversal_data(resultdata.path, zonedata.zone_numbers)
+            # transform tons to vehicles
             domestic_tons = demand["truck"] + sum(aux_demand.values())
             dom_leg_tons = commodity.calc_trade_mode_share(
                 demand, trade_demand, fin_border_ids)
@@ -117,10 +117,11 @@ def main(args):
     write_vehicle_summary(total_vehicles, impedance, resultdata)
     resultdata.flush()
     
-    log.info("Starting end assigment")
+    log.info("Performing end assigment for vehicles")
     for ass_class in total_vehicles:
         store_demand.store(ass_class, total_vehicles[ass_class], "freight_demand")
     ass_model.freight_network._assign_trucks()
+    log.info("Performing end assigment for tons")
     for ass_class in param.freight_modes:
         store_demand.store(ass_class, total_tons[ass_class], "freight_tons")
     ass_model.freight_network.save_network_volumes("tons")

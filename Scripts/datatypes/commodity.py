@@ -260,6 +260,7 @@ class DomesticCommodity(FreightCommodity):
         if self.route_params and iterations > 0:
             demand["truck"], _ = self.run_logistics_module(
                 demand["truck"], impedance, iterations)
+        self.dist = None
         return demand
 
     def run_logistics_module(self, demand_truck: numpy.ndarray,
