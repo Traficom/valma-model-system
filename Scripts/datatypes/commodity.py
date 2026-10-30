@@ -90,14 +90,36 @@ class FreightCommodity(Purpose):
         self.truck_fleet = costdata["truck"]["fleet"]
         self.truck_param = costdata["truck"]["param"]
 
-    def _transform_road_cost(self, cost: numpy.ndarray | Dict[str, numpy.ndarray],
+    def _transform_road_cost(self, cost: numpy.ndarray, mode: str
                              ) -> numpy.ndarray:
         """Transform vehicle cost (incl. driver cost) to ton cost.
 
         Parameters
         ----------
-        cost : numpy.ndarray or Dict[str, numpy.ndarray]
-            Vehicle-specific cost matrix from truck assignment.
+        cost : numpy.ndarray
+            Vehicle-specific cost matrix from truck assignment
+        mode : str
+            Truck fleet mode (truck/trailer_truck...)
+
+        Returns
+        ----------
+        numpy.ndarray
+            Ton-specific cost matrix
+        """
+        param = self.truck_param[truck_fleet[mode]]
+        return ((1+self.empty_share) * truck_overhead_cost * cost
+                / param["avg_load"] + param["terminal_cost"])
+
+    def _sum_road_ton_cost(self, cost: Dict[str, numpy.ndarray]
+                           ) -> numpy.ndarray:
+        """Transform vehicle costs to ton costs and weighted sum 
+        over the truck fleet.
+
+        Parameters
+        ----------
+        cost : Dict[str, numpy.ndarray]
+            Truck fleet mode (truck/trailer_truck...) :
+                vehicle-specific cost matrix from truck assignment
 
         Returns
         ----------
@@ -105,10 +127,7 @@ class FreightCommodity(Purpose):
             Ton-specific cost matrix
         """
         return sum(
-            ((1+self.empty_share) * truck_overhead_cost
-             * (cost[mode] if isinstance(cost, dict) else cost)
-             / self.truck_param[truck_fleet[mode]]["avg_load"]
-             + self.truck_param[truck_fleet[mode]]["terminal_cost"])
+            self._transform_road_cost(cost[mode], mode)
             * distrib[self._truck_distribution]
             for mode, distrib in self.truck_fleet.items())
 
@@ -172,7 +191,7 @@ class DomesticCommodity(FreightCommodity):
         costs = {}
         for mode in self.modes:
             if mode == "truck":
-                costs[mode] = {"cost": self._transform_road_cost(
+                costs[mode] = {"cost": self._sum_road_ton_cost(
                     {truck_mode: impedance[truck_mode]["cost"]
                      for truck_mode in self.truck_fleet})}
             else:
@@ -208,7 +227,8 @@ class DomesticCommodity(FreightCommodity):
         cost = sum(
             impedance[mtx_type] * unit_costs[mtx_type]
             for mtx_type in unit_costs)
-        aux_cost = self._transform_road_cost(impedance["aux_cost"])
+        aux_cost = self._sum_road_ton_cost(
+            dict.fromkeys(self.truck_fleet, impedance["aux_cost"]))
         return {
             "cost": cost,
             "aux_cost": aux_cost,
@@ -438,7 +458,8 @@ class ForeignCommodity(FreightCommodity):
         if not self.is_export:
             masks = masks[::-1]
 
-        truck_cost = self._transform_road_cost(impedance["truck"]["cost"])
+        truck_cost = self._sum_road_ton_cost(
+            dict.fromkeys(self.truck_fleet, impedance["truck"]["cost"]))
         impedance_legs = {
             leg: {"truck": {"cost": truck_cost[numpy.ix_(masks[i], masks[i+1])]}}
                   for i, leg in enumerate(leg_names)}
