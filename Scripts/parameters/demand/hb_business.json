@@ -263,57 +263,59 @@
     "access_mode_choice": {
         "airplane": {
             "airplane": {
-                "constant": -2,
+                "constant": 0,
                 "generation": {},
                 "attraction": {},
                 "impedance": {
-                    "gen_cost": -0.00945
+                    "gen_cost": -0.009207
                 },
                 "log": {
-                    "gen_cost": -2.563
+                    "gen_cost": -1.884
                 },
                 "individual_dummy": {}
             },
             "airplane_car_access": {
-                "constant": -4.182,
+                "constant": -16.28,
                 "generation": {},
                 "attraction": {},
                 "impedance": {
-                    "gen_cost": -0.00945
+                    "gen_cost": -0.009207
                 },
                 "log": {
-                    "gen_cost": -2.563
+                    "gen_cost": -1.884
                 },
                 "individual_dummy": {
-                    "sh_cars1_hh1": 4.133,
-                    "sh_cars2_hh2": 4.133,
-                    "sh_cars1_hh2": 3.168
+                    "sh_hh2_lic1_cars1": 14.23,
+                    "sh_hh2_lic2_cars2": 14.23,
+                    "sh_hh1_lic1_cars1": 14.23,
+                    "sh_hh2_lic2_cars1": 12.34
                 }
             },
             "airplane_taxi_access": {
-                "constant": -3.296,
+                "constant": -4.567,
                 "generation": {},
                 "attraction": {},
                 "impedance": {
-                    "gen_cost": -0.00945
+                    "gen_cost": -0.009207
                 },
                 "log": {
-                    "gen_cost": -2.563
+                    "gen_cost": -1.884
                 },
                 "individual_dummy": {
-                    "sh_cars1_hh2": 1.567,
-                    "sh_cars2_hh2": 1.567
+                    "sh_hh2_lic2_cars1": 1.789,
+                    "sh_hh2_lic2_cars2": 1.789,
+                    "sh_hh2_lic1_cars1": 1.789
                 }
             },
             "airplane_car_egress": {
-                "constant": -2.918,
+                "constant": -3.333,
                 "generation": {},
                 "attraction": {},
                 "impedance": {
-                    "gen_cost": -0.00945
+                    "gen_cost": -0.009207
                 },
                 "log": {
-                    "gen_cost": -2.563
+                    "gen_cost": -1.884
                 },
                 "individual_dummy": {}
             }
@@ -324,53 +326,55 @@
                 "generation": {},
                 "attraction": {},
                 "impedance": {
-                    "gen_cost": -0.00945
+                    "gen_cost": -0.009207
                 },
                 "log": {
-                    "gen_cost": -2.563
+                    "gen_cost": -1.884
                 },
                 "individual_dummy": {}
             },
             "transit_car_access": {
-                "constant": -4.182,
+                "constant": -16.28,
                 "generation": {},
                 "attraction": {},
                 "impedance": {
-                    "gen_cost": -0.00945
+                    "gen_cost": -0.009207
                 },
                 "log": {
-                    "gen_cost": -2.563
+                    "gen_cost": -1.884
                 },
                 "individual_dummy": {
-                    "sh_cars1_hh1": 4.133,
-                    "sh_cars2_hh2": 4.133,
-                    "sh_cars1_hh2": 3.168
+                    "sh_hh2_lic1_cars1": 14.23,
+                    "sh_hh2_lic2_cars2": 14.23,
+                    "sh_hh1_lic1_cars1": 14.23,
+                    "sh_hh2_lic2_cars1": 12.34
                 }
             },
             "transit_taxi_access": {
-                "constant": -3.296,
+                "constant": -4.567,
                 "generation": {},
                 "attraction": {},
                 "impedance": {
-                    "gen_cost": -0.00945
+                    "gen_cost": -0.009207
                 },
                 "log": {
-                    "gen_cost": -2.563
+                    "gen_cost": -1.884
                 },
                 "individual_dummy": {
-                    "sh_cars1_hh2": 1.567,
-                    "sh_cars2_hh2": 1.567
+                    "sh_hh2_lic2_cars1": 1.789,
+                    "sh_hh2_lic2_cars2": 1.789,
+                    "sh_hh2_lic1_cars1": 1.789
                 }
             },
             "transit_taxi_egress": {
-                "constant": -2.918,
+                "constant": -3.333,
                 "generation": {},
                 "attraction": {},
                 "impedance": {
-                    "gen_cost": -0.00945
+                    "gen_cost": -0.009207
                 },
                 "log": {
-                    "gen_cost": -2.563
+                    "gen_cost": -1.884
                 },
                 "individual_dummy": {}
             }
