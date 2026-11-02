@@ -75,3 +75,24 @@ class ZoneDataTest(unittest.TestCase):
             electric_car_share={"default": {"bev": 0.1, "phev": 0.2}})
         self.assertIsNotNone(zdata["population"])
         self.assertIsNotNone(zdata["workplaces"])
+
+    def test_municipality_calibration(self):
+        calib = pandas.DataFrame(
+            {"generation": ["Espoo"], "attraction": ["Helsinki"],
+             "car_driver": [0.5], "bike": [-0.5]}
+        ).set_index(["generation", "attraction"]).to_dict("series")
+        zdata = ZoneData(
+            ZONEDATA_PATH, ZONE_INDEXES, "uusimaa",
+            municipality_calibration=calib, car_dist_cost=0.12,
+            electric_car_share={"default": {"bev": 0.1, "phev": 0.2}})
+        mun = zdata.demand_aggs.mappings["municipality"].to_numpy()
+        espoo_to_helsinki = numpy.ix_(mun == "Espoo", mun == "Helsinki")
+        helsinki_to_espoo = numpy.ix_(mun == "Helsinki", mun == "Espoo")
+        # Mode names with underscores must find their column
+        car = zdata["municipality_calibration_car_driver"]
+        numpy.testing.assert_allclose(car[espoo_to_helsinki], 0.5)
+        numpy.testing.assert_allclose(car[helsinki_to_espoo], 0.0)
+        bike = zdata["municipality_calibration_bike"]
+        numpy.testing.assert_allclose(bike[espoo_to_helsinki], -0.5)
+        # Modes without a column are not calibrated
+        self.assertEqual(zdata["municipality_calibration_walk"], 0)
