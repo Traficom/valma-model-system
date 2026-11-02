@@ -623,27 +623,26 @@ class AssignmentPeriod(Period):
     def _assign_cars(self, 
                      stopping_criteria: Dict[str, Union[int, float]]):
         """Perform car traffic assignment for one scenario."""
-        if self.use_stored_speeds:
-            log.info("Car assignment with stored speeds started...")
+        max_iterations = stopping_criteria["max_iterations"]
+        if max_iterations == 0:
+            if self.use_stored_speeds:
+                log.info("Car assignment with stored speeds started...")
+            else:
+                log.info("Car assignment with free-flow speeds started...")
             for car_spec in self._car_spec.separate_light_specs():
                 car_spec["stopping_criteria"] = stopping_criteria
                 self.emme_project.car_assignment(car_spec, self.emme_scenario)
         else:
-            max_iterations = stopping_criteria["max_iterations"]
-            if max_iterations == 0:
-                log.info("Car assignment with free-flow speeds started...")
-            else:
-                log.info("Car assignment started...")
+            log.info("Car assignment started...")
             car_spec = self._car_spec.light_spec()
             car_spec["stopping_criteria"] = stopping_criteria
             assign_report = self.emme_project.car_assignment(
                 car_spec, self.emme_scenario)
-            if max_iterations > 0:
-                log.info("Stopping criteria: {}, iteration {} / {}".format(
-                    assign_report["stopping_criterion"],
-                    len(assign_report["iterations"]), max_iterations))
-                if assign_report["stopping_criterion"] == "MAX_ITERATIONS":
-                    log.warn("Car assignment not fully converged")
+            log.info("Stopping criteria: {}, iteration {} / {}".format(
+                assign_report["stopping_criterion"],
+                len(assign_report["iterations"]), max_iterations))
+            if assign_report["stopping_criterion"] == "MAX_ITERATIONS":
+                log.warn("Car assignment not fully converged")
         network = self.emme_scenario.get_network()
         if not self.use_stored_speeds:
             time_attr = self.netfield("car_time")

@@ -66,7 +66,7 @@ def write_vehicle_summary(demand: dict, impedance: dict, resultdata: ResultsData
         "Vehicle trips (day)": numpy.array([
             numpy.sum(demand[mode]) for mode in modes], dtype=numpy.int32),
         "Vehicle mileage (vkm/day)": numpy.array([
-            numpy.sum(impedance[mode]["dist"]*demand[mode])
+            numpy.sum(impedance["truck"]["dist"]*demand[mode])
             for mode in modes], dtype=numpy.int64)
     })
     filename = "freight_vehicle_summary.txt"
