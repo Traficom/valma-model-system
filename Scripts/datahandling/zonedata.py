@@ -302,10 +302,12 @@ class ZoneData:
                     return mtx
                 else:
                     return (mtx > int(lower)) & (mtx <= int(upper))
-            elif "municipality_calibration" in key:
+            elif key.startswith("municipality_calibration_"):
                 try:
                     # Try to find mode-specific calibration matrix
-                    calib = self._municip_calib[key.split('_')[-1]]
+                    # (mode name may contain underscores, e.g. car_driver)
+                    calib = self._municip_calib[
+                        key.removeprefix("municipality_calibration_")]
                 except KeyError:
                     return 0
                 else:
