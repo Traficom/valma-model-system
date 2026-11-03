@@ -32,21 +32,21 @@ def create_emme_project(args):
             "centroids": 3400,
             "regular_nodes": 55000,
             "links": 150000,
-            "transit_lines": 3300,
+            "transit_lines": 24000,
             "transit_segments": 320000,
         },
         "koko_suomi": {
             "centroids": 10000,
             "regular_nodes": 120000,
             "links": 350000,
-            "transit_lines": 8000,
+            "transit_lines": 29000,
             "transit_segments": 700000,
         },
         "koko_suomi_kunta": {
             "centroids": 320,
             "regular_nodes": 50000,
             "links": 130000,
-            "transit_lines": 8000,
+            "transit_lines": 29000,
             "transit_segments": 500000,
         }
     }
