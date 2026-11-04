@@ -2,10 +2,12 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any, Dict, Union, Iterable
 import os
-import sys
-# Fiona will search for projection data when setting CRS
-os.environ["PROJ_DATA"] = (sys.exec_prefix
-                           + "\\Lib\\site-packages\\fiona\\proj_data")
+import importlib.util
+# Fiona will search for projection data when setting CRS. Locate fiona's
+# own install rather than assuming it sits under sys.exec_prefix, which
+# is not true in a venv built with --system-site-packages.
+os.environ["PROJ_DATA"] = os.path.join(
+    os.path.dirname(importlib.util.find_spec("fiona").origin), "proj_data")
 import fiona
 from fiona.crs import from_epsg
 import pandas
