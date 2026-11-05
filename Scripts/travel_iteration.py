@@ -61,6 +61,10 @@ class ModelSystem:
     freight_matrices_path: Path (optional)
         Directory path where freight demand is found.
         If None, freight demand is taken from base matrices.
+    bike_and_walk_config: Path (optional)
+        Directory with walk.toml and bike.toml for valma_bike_and_walk.
+        If given, walk and bike LOS come from it wherever it routes,
+        and walk and bike demand is assigned with it at the end.
     """
 
     def __init__(self,
@@ -73,7 +77,8 @@ class ModelSystem:
                  mode_dest_calibration_path: Optional[str] = None,
                  municipality_calibration_path: Optional[str] = None,
                  long_dist_matrices_path: Optional[Path] = None,
-                 freight_matrices_path: Optional[Path] = None):
+                 freight_matrices_path: Optional[Path] = None,
+                 bike_and_walk_config: Optional[Path] = None):
         self.ass_model = cast(Union[MockAssignmentModel,EmmeAssignmentModel], assignment_model) #type checker hint
         self.zone_numbers: numpy.ndarray = self.ass_model.zone_numbers
 
@@ -120,6 +125,19 @@ class ModelSystem:
             results_path / DEMAND_MATRIX_FOLDER / submodel)
         self.los_matrices = MatrixData(
             results_path / LOS_MATRIX_FOLDER / submodel)
+
+        # Walk and bike LOS and link volumes from valma_bike_and_walk.
+        # Imported only when used, so the model runs without the package.
+        self._bike_and_walk = None
+        self._bike_and_walk_los: Dict[str, Dict[str, Dict[str, numpy.ndarray]]] = {}
+        if bike_and_walk_config is not None:
+            from valma_bike_and_walk import valma as bike_and_walk
+            self._bike_and_walk = bike_and_walk.Setup(
+                config_dir=Path(bike_and_walk_config),
+                zone_data_file=Path(zone_data_path),
+                submodel=submodel,
+                output_dir=results_path / "bike_and_walk")
+
         parameters_path = Path(__file__).parent / "parameters" / "demand"
         foreign_external_path = self.basematrices.path / "ext_foreign_passenger_vrk.omx"
         home_based_purposes = []
@@ -173,6 +191,47 @@ class ModelSystem:
         self.external_purpose = ExternalPurpose(numpy.array(self.zone_numbers))
         self.mode_share: List[Dict[str,Any]] = []
         self.convergence = []
+
+    def _set_bike_and_walk_los(self, tp: str, soft_mode_impedance):
+        """Lay valma_bike_and_walk LOS over the period's own walk and bike LOS.
+
+        Called once per period with the walk and bike LOS its initial
+        assignment returns. Cells it does not route keep these values.
+        """
+        if self._bike_and_walk is None or not soft_mode_impedance:
+            return
+        from valma_bike_and_walk import valma as bike_and_walk
+        baseline = {mtx_type: soft_mode_impedance[mtx_type]
+                    for mtx_type in ("time", "dist")
+                    if mtx_type in soft_mode_impedance}
+        self._bike_and_walk_los[tp] = bike_and_walk.skims(
+            self._bike_and_walk, self.zone_numbers, baseline)
+
+    def _use_bike_and_walk_los(self, tp: str, impedance):
+        """Replace walk and bike LOS in one period's impedance, in place."""
+        for mtx_type, mode_mtx in self._bike_and_walk_los.get(tp, {}).items():
+            for mode, mtx in mode_mtx.items():
+                if mode in impedance.get(mtx_type, {}):
+                    impedance[mtx_type][mode] = mtx.copy()
+        return impedance
+
+    def _assign_bike_and_walk(self, matrices: MatrixData):
+        """Assign walk and bike demand from `matrices` with valma_bike_and_walk."""
+        if self._bike_and_walk is None:
+            return
+        from valma_bike_and_walk import valma as bike_and_walk
+        periods = [ap.name for ap in self.ass_model.assignment_periods]
+        demand = {}
+        for tp in dict.fromkeys(periods + ["vrk"]):
+            path = matrices.path / f"demand_{tp}.omx"
+            if path.is_file():
+                demand[tp] = path
+        if not demand:
+            log.warn(f"No demand matrices in {matrices.path}; "
+                     + "walk and bike demand not assigned")
+            return
+        log.info("Assigning walk and bike demand with valma_bike_and_walk...")
+        bike_and_walk.assign(self._bike_and_walk, demand)
 
     def _init_demand_model(self, tour_purposes: List[TourPurpose]):
         return TravelDemandModel(
@@ -325,7 +384,7 @@ class ModelSystem:
                     for ass_class in ap.assignment_modes:
                         self.dtm.demand[tp][ass_class] = mtx[ass_class]
             if not is_car_end_assignment:
-                ap.init_assign()
+                self._set_bike_and_walk_los(tp, ap.init_assign())
         if self.long_dist_matrices is not None:
             self.dtm.init_demand(param.long_dist_simple_classes)
             self._add_external_demand(
@@ -344,6 +403,7 @@ class ModelSystem:
             impedance[tp] = (ap.end_assign(not is_car_end_assignment)
                              if is_end_assignment
                              else ap.assign(self.ass_classes))
+            self._use_bike_and_walk_los(tp, impedance[tp])
             validate_assignment(impedance[tp], tp, self.ass_classes, 
                                 self.zone_numbers, self.resultdata)
             if is_end_assignment:
@@ -351,6 +411,8 @@ class ModelSystem:
                     self._save_to_omx(impedance[tp], tp)
                 impedance.clear()
         if is_end_assignment:
+            if not is_car_end_assignment:
+                self._assign_bike_and_walk(self.basematrices)
             self.ass_model.aggregate_results(self.resultdata, self.linkdata)
             self.resultdata.flush()
         return impedance
@@ -451,11 +513,16 @@ class ModelSystem:
             tp = ap.name
             impedance[tp] = (ap.end_assign() if iteration=="last"
                              else ap.assign(self.ass_classes))
+            self._use_bike_and_walk_los(tp, impedance[tp])
             if iteration=="last":
                 if not isinstance(self.ass_model, MockAssignmentModel):
                     self._save_to_omx(impedance[tp], tp)
                 impedance.clear()
         if iteration=="last":
+            # Demand matrices are saved only with EMME; with the mock
+            # assignment, any found would be from some earlier run.
+            if not isinstance(self.ass_model, MockAssignmentModel):
+                self._assign_bike_and_walk(self.demand_matrices)
             self.ass_model.aggregate_results(self.resultdata, self.linkdata)
             self.resultdata.flush()
         return impedance

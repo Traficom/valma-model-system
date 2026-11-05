@@ -65,7 +65,7 @@ class WholeDayPeriod(AssignmentPeriod):
         self._set_bike_vdfs()
         self._assign_bikes()
         self._set_car_vdfs(use_free_flow_speeds=True)
-        return []
+        return self.get_soft_mode_impedances()
 
     def get_soft_mode_impedances(self):
         return self._get_impedances([self.bike_mode.name, self.walk_mode.name])

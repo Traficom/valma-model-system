@@ -95,7 +95,8 @@ def main(args):
                   base_matrices_path, result_data_folder, ass_model, args.submodel,
                   args.mode_dest_calibration_file, args.municipality_calibration_file,
                   long_dist_matrices_path, freight_matrices_path)
-    model = ModelSystem(*model_args)
+    model = ModelSystem(
+        *model_args, bike_and_walk_config=args.bike_and_walk_config)
     log_extra["status"]["results"] = model.mode_share
 
     # Run traffic assignment simulation for N iterations,
@@ -295,6 +296,12 @@ if __name__ == "__main__":
         "--zone-data-file",
         type=str,
         help="Path to folder containing forecast zonedata"),
+    parser.add_argument(
+        "--bike-and-walk-config",
+        type=str,
+        help=("Folder with walk.toml and bike.toml for valma_bike_and_walk. "
+              + "If given, walk and bike LOS and link volumes come from it "
+              + "instead of EMME.")),
     parser.add_argument(
         "--cost-data-file",
         type=str,
