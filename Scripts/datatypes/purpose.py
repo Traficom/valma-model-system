@@ -257,9 +257,19 @@ class TravelPurpose(Purpose):
         for mode in day_imp:
             for mtx_type in day_imp[mode]:
                 label = f"{mtx_type}_{mode.split('_')[0]}"
-                if label in ("time_car", "cost_car", "dist_walk", "dist_bike"):
+                mtx = day_imp[mode][mtx_type]
+                if label in ("time_car", "cost_car"):
                     # Get intra-zonal impendances from zone data
-                    numpy.fill_diagonal(day_imp[mode][mtx_type], dzd[label])
+                    numpy.fill_diagonal(mtx, dzd[label])
+                elif label in ("dist_walk", "dist_bike"):
+                    # Keep intra-zonal distances the skims provide
+                    # (valma_bike_and_walk routes within zones). EMME
+                    # leaves the diagonal at 0, so those zones fall back
+                    # to zone data, as before.
+                    diag = numpy.diagonal(mtx)
+                    zone_diag = numpy.asarray(dzd[label])[:diag.size]
+                    numpy.fill_diagonal(
+                        mtx, numpy.where(diag > 0, diag, zone_diag))
             if "car" in mode:
                 day_imp[mode]["time"] += numpy.asarray(ozd["avg_walk_time"])[:, numpy.newaxis]
                 day_imp[mode]["time"] += numpy.asarray(dzd["avg_park_time"] + dzd["avg_walk_time"])
