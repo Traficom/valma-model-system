@@ -215,10 +215,19 @@ class ModelSystem:
                     impedance[mtx_type][mode] = mtx.copy()
         return impedance
 
-    def _assign_bike_and_walk(self, matrices: MatrixData):
-        """Assign walk and bike demand from `matrices` with valma_bike_and_walk."""
+    def _assign_bike_and_walk(self, matrices: MatrixData) -> dict:
+        """Assign walk and bike demand from `matrices` with valma_bike_and_walk.
+
+        Returns
+        -------
+        dict
+            key : str
+                Mode (walk/bike)
+            value : valma_bike_and_walk.valma.ModeVolumes
+                Volumes file and person kms per time period
+        """
         if self._bike_and_walk is None:
-            return
+            return {}
         from valma_bike_and_walk import valma as bike_and_walk
         periods = [ap.name for ap in self.ass_model.assignment_periods]
         demand = {}
@@ -229,9 +238,35 @@ class ModelSystem:
         if not demand:
             log.warn(f"No demand matrices in {matrices.path}; "
                      + "walk and bike demand not assigned")
-            return
+            return {}
         log.info("Assigning walk and bike demand with valma_bike_and_walk...")
-        bike_and_walk.assign(self._bike_and_walk, demand)
+        return bike_and_walk.assign(self._bike_and_walk, demand)
+
+    def _aggregate_results(self, bike_and_walk_volumes: dict):
+        """Aggregate and print assignment results.
+
+        With valma_bike_and_walk, EMME's own walk and bike link volumes
+        are left out, and kms from valma_bike_and_walk reported instead:
+        the daily ones in vehicle_kilometers_by_mode.txt, beside the other
+        modes, and every period in bike_and_walk_kilometers.txt. They are
+        person kms over the whole route, not only inside the submodel area.
+        """
+        exclude = ("walk", "bike") if self._bike_and_walk is not None else ()
+        self.ass_model.aggregate_results(
+            self.resultdata, self.linkdata, exclude_classes=exclude)
+        if bike_and_walk_volumes:
+            for mode, volumes in bike_and_walk_volumes.items():
+                if "vrk" in volumes.kilometres:
+                    self.resultdata.print_line(
+                        "{}:\t{:1.0f}".format(mode, volumes.kilometres["vrk"]),
+                        "vehicle_kilometers_by_mode")
+                log.info(f"{mode.capitalize()} link volumes in {volumes.gpkg}")
+            self.resultdata.print_data(
+                pandas.DataFrame({
+                    mode: pandas.Series(volumes.kilometres)
+                    for mode, volumes in bike_and_walk_volumes.items()}),
+                "bike_and_walk_kilometers.txt")
+        self.resultdata.flush()
 
     def _init_demand_model(self, tour_purposes: List[TourPurpose]):
         return TravelDemandModel(
@@ -411,10 +446,9 @@ class ModelSystem:
                     self._save_to_omx(impedance[tp], tp)
                 impedance.clear()
         if is_end_assignment:
-            if not is_car_end_assignment:
-                self._assign_bike_and_walk(self.basematrices)
-            self.ass_model.aggregate_results(self.resultdata, self.linkdata)
-            self.resultdata.flush()
+            volumes = ({} if is_car_end_assignment
+                       else self._assign_bike_and_walk(self.basematrices))
+            self._aggregate_results(volumes)
         return impedance
 
     def run_iteration(self, previous_iter_impedance, iteration=None):
@@ -521,10 +555,9 @@ class ModelSystem:
         if iteration=="last":
             # Demand matrices are saved only with EMME; with the mock
             # assignment, any found would be from some earlier run.
-            if not isinstance(self.ass_model, MockAssignmentModel):
-                self._assign_bike_and_walk(self.demand_matrices)
-            self.ass_model.aggregate_results(self.resultdata, self.linkdata)
-            self.resultdata.flush()
+            volumes = ({} if isinstance(self.ass_model, MockAssignmentModel)
+                       else self._assign_bike_and_walk(self.demand_matrices))
+            self._aggregate_results(volumes)
         return impedance
 
     def _save_demand_to_omx(self, ap: AssignmentPeriod):

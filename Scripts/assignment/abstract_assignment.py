@@ -30,7 +30,8 @@ class AssignmentModel:
         pass
 
     @abstractmethod
-    def aggregate_results(self, resultdatawriter, linkdatawriter):
+    def aggregate_results(self, resultdatawriter, linkdatawriter,
+                          exclude_classes=()):
         pass
 
     @abstractmethod

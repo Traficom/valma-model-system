@@ -109,6 +109,37 @@ class BikeAndWalkTest(unittest.TestCase):
             tp: folder / f"demand_{tp}.omx"
             for tp in ("aht", "pt", "iht", "it")})
 
+    def test_kms_come_from_valma_bike_and_walk(self):
+        model, ass_model = self._model()
+        volumes = {
+            "bike": bike_and_walk.ModeVolumes(
+                gpkg=RESULTS_PATH / "bike_volumes.gpkg",
+                npz=RESULTS_PATH / "link_volumes_bike.npz",
+                kilometres={"aht": 100.0, "vrk": 1234.4},
+                trips={"aht": 10.0, "vrk": 120.0}),
+            "walk": bike_and_walk.ModeVolumes(
+                gpkg=RESULTS_PATH / "walk_volumes.gpkg",
+                npz=RESULTS_PATH / "link_volumes_walk.npz",
+                kilometres={"aht": 50.0, "vrk": 600.0},
+                trips={"aht": 30.0, "vrk": 400.0}),
+        }
+        with mock.patch.object(ass_model, "aggregate_results") as aggregate:
+            model._aggregate_results(volumes)
+
+        # EMME's own walk and bike volumes are left out of its reporting ...
+        self.assertEqual(
+            set(aggregate.call_args.kwargs["exclude_classes"]), {"walk", "bike"})
+        # ... and ours take their place.
+        folder = model.resultdata.path
+        lines = (folder / "vehicle_kilometers_by_mode.txt").read_text()
+        self.assertIn("bike:\t1234", lines)
+        self.assertIn("walk:\t600", lines)
+        table = (folder / "bike_and_walk_kilometers.txt").read_text()
+        self.assertIn("1234.4", table)
+        for name in ("vehicle_kilometers_by_mode.txt",
+                     "bike_and_walk_kilometers.txt"):
+            (folder / name).unlink()
+
 
 if __name__ == "__main__":
     unittest.main()

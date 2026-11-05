@@ -15,6 +15,22 @@ from assignment.abstract_assignment import AssignmentModel
 from assignment.datatypes.emme_matrix import EmmeMatrix
 import assignment.off_peak_period as periods
 from assignment.freight_assignment import FreightAssignmentPeriod
+
+
+def _is_volume_of(attr_name: str, ass_classes: Iterable[str]) -> bool:
+    """Whether an extra attribute holds link volumes of one of `ass_classes`.
+
+    Matches the per-period and daily volumes ("#bike_aht_volume",
+    "#walk_vrk_volume") and the temporary assignment result ("@bike").
+    """
+    for ass_class in ass_classes:
+        if attr_name == f"@{ass_class}" or (
+                attr_name.startswith(f"#{ass_class}_")
+                and attr_name.endswith("_volume")):
+            return True
+    return False
+
+
 if TYPE_CHECKING:
     from assignment.emme_bindings.emme_project import EmmeProject
     from datahandling.resultdata import ResultsData
@@ -248,7 +264,8 @@ class EmmeAssignmentModel(AssignmentModel):
         return numpy.sqrt(
             sum((xy[:, axis] - xy[:, axis, None])**2 for axis in (0, 1)))
 
-    def aggregate_results(self, resultdata: ResultsData, linkdata: ResultsData):
+    def aggregate_results(self, resultdata: ResultsData, linkdata: ResultsData,
+                          exclude_classes: Iterable[str] = ()):
         """Aggregate results to 24h and print vehicle kms.
 
         Parameters
@@ -257,7 +274,13 @@ class EmmeAssignmentModel(AssignmentModel):
             Result data container to print to
         linkdata : datahandling.resultdata.Resultdata
             Link data container to print to
+        exclude_classes : Iterable of str (optional)
+            Assignment classes whose link volumes come from elsewhere
+            (walk and bike from valma_bike_and_walk). They are left out of
+            vehicle kms and of the link GeoPackage, so EMME's own volumes
+            for them are not reported next to the ones that are used.
         """
+        exclude_classes = set(exclude_classes)
         car_times = pandas.DataFrame(
             {ap.netfield("car_time"): ap.get_car_times()
                 for ap in self.assignment_periods})
@@ -293,8 +316,10 @@ class EmmeAssignmentModel(AssignmentModel):
         resultdata.print_data(miles, "transit_kms.txt")
 
         # Aggregate and print vehicle kms and link lengths
-        ass_classes = (param.car_classes if self.use_free_flow_speeds
-                       else param.private_classes + param.truck_classes)
+        ass_classes = [ass_class for ass_class
+            in (param.car_classes if self.use_free_flow_speeds
+                else param.private_classes + param.truck_classes)
+            if ass_class not in exclude_classes]
         kms = dict.fromkeys(ass_classes, 0.0)
         vdfs = {param.roadclasses[linktype].volume_delay_func
             for linktype in param.roadclasses}
@@ -351,7 +376,8 @@ class EmmeAssignmentModel(AssignmentModel):
             obj = next(objects)
             objects = chain([obj], objects)
             attrs = {attr_name: type(getattr(obj, attr_name)).__name__.rstrip("0123456789_")
-                     for attr_name in self.day_scenario.attributes(geom_type.name)}
+                     for attr_name in self.day_scenario.attributes(geom_type.name)
+                     if not _is_volume_of(attr_name, exclude_classes)}
             attrs.update({attr_name: "str" for attr_name in geom_type.special_attr_names})
             linkdata.print_gpkg(
                 *geometries(attrs, objects, geom_type), fname, geom_type.name)
