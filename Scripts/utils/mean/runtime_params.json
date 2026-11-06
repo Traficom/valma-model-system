@@ -1,0 +1,27 @@
+{
+    "LOG_LEVEL": "INFO",
+    "LOG_FORMAT": "TEXT",
+    "SCENARIO_NAME": "mean",
+    "SUBMODEL": "koko_suomi",
+    "ZONE_DATA_FILE": "Z:/K11-share/Ennusteajot/VLE_uudet/pop_forecast_mean/forecast_mean_zonedata_pop_lic_inc_updated_2060_col_replaced.gpkg",
+    "LEM_VERSION": "v0.0.1",
+    "ITERATIONS": 15,
+    "MAX_GAP": 1.0,
+    "REL_GAP": 0.01,
+    "BASE_DATA_FOLDER": "",
+    "COST_DATA_FILE": "Z:/K11-share/Ennusteajot/nykytila2/results/",
+    "RESULT_DATA_FOLDER": "",
+    "EMME_PROJECT_FILE": "",
+    "FIRST_SCENARIO_ID": 1,
+    "FIRST_MATRIX_ID": 100,
+    "LONG_DIST_DEMAND_FORECAST": "base",
+    "SPECIFY_COMMODITY_NAMES": [],
+    "PROJECT_NAME": "fleet_size",
+    "NUMBER_OF_EMME_SCENARIOS": 5,
+    "TRADE_DEMAND_FILE": "",
+    "LOGISTICS_ITERATIONS": 0,
+    "OPTIONAL_FLAGS": [
+        "DO_NOT_USE_EMME",
+        "DELETE_EXTRA_MATRICES"
+    ]
+}

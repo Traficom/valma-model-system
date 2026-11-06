@@ -99,6 +99,15 @@ class TravelDemandModel:
         result = {}
         for hh_size, model in self.car_ownership_models.items():
             result[f"households"] = self.zone_data[f"households"]
+            result['hh_1'] = self.zone_data['singles']
+            result['hh_2'] = self.zone_data['couples']
+            result['_adult_no_children'] = self.zone_data['singles_no_children']
+            result['_adult_children'] = self.zone_data['singles_children']
+            result['_adults_no_children'] = self.zone_data['couples_no_children']
+            result['_adults_children'] = self.zone_data['couples_children']
+            result['hh1_lic1'] = self.zone_data["sh_adults1_lic1"]
+            result['hh2_lic1'] = self.zone_data["sh_adults2_lic1"]
+            result['hh2_lic2'] = self.zone_data["sh_adults2_lic2"]
             result[f"sh_{hh_size}"] = self.zone_data[f"sh_{hh_size}"]
             for segment in model.param["0"]["individual_dummy"]:
                 prob[f"{hh_size}*{segment}"] = model.calc_segment_prob(segment)
