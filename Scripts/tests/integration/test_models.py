@@ -12,7 +12,8 @@ from tests.integration.test_arguments import (
     RESULTS_PATH,
     ZONEDATA_PATH,
     COSTDATA_PATH,
-    LOS_MATRIX_FOLDER,
+    LOS_MATRIX_PATH,
+    DEMAND_MATRIX_PATH,
     BASE_MATRICES_PATH,
     MODE_DEST_CALIBRATION_FILE,
     MUNICIPALITY_CALIBRATION_FILE
@@ -31,8 +32,9 @@ class ModelTest(unittest.TestCase):
     def test_models(self):
         print("Testing model system...")
         log.initialize(Config())
-        ass_model = MockAssignmentModel(MatrixData(
-            RESULTS_PATH / LOS_MATRIX_FOLDER / "uusimaa"))
+        ass_model = MockAssignmentModel(
+            MatrixData(LOS_MATRIX_PATH / "uusimaa"),
+            MatrixData(DEMAND_MATRIX_PATH / "uusimaa"))
         model = ModelSystem(
             ZONEDATA_PATH, COSTDATA_PATH, BASE_MATRICES_PATH, RESULTS_PATH,
             ass_model, "uusimaa", MODE_DEST_CALIBRATION_FILE,
@@ -65,7 +67,8 @@ class ModelTest(unittest.TestCase):
     def test_long_dist_models(self):
         print("Testing model system for long trips...")
         ass_model = MockAssignmentModel(
-            MatrixData(RESULTS_PATH / LOS_MATRIX_FOLDER / "koko_suomi"),
+            MatrixData(LOS_MATRIX_PATH / "koko_suomi"),
+            MatrixData(DEMAND_MATRIX_PATH / "koko_suomi"),
             use_free_flow_speeds=True, time_periods={"vrk": "WholeDayPeriod"})
         model = ModelSystem(
             ZONEDATA_PATH, COSTDATA_PATH, BASE_MATRICES_PATH, RESULTS_PATH,

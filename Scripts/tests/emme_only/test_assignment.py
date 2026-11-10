@@ -11,7 +11,7 @@ import utils.log as log
 import assignment.emme_assignment as ass
 from datahandling.matrixdata import MatrixData
 from datahandling.resultdata import ResultsData
-from tests.integration.test_arguments import TEST_DATA_PATH, COSTDATA_PATH, LOS_MATRIX_FOLDER
+from tests.integration.test_arguments import TEST_DATA_PATH, COSTDATA_PATH, LOS_MATRIX_PATH
 from datahandling.traversaldata import transform_traversal_data
 try:
     from assignment.emme_bindings.emme_project import EmmeProject
@@ -114,7 +114,7 @@ class EmmeAssignmentTest:
             travel_cost[ap.name] = ap.end_assign()
         self.ass_model.aggregate_results(self.resultdata, self.linkdata)
         self.resultdata.flush()
-        costs_files = MatrixData(RESULTS_PATH / LOS_MATRIX_FOLDER)
+        costs_files = MatrixData(LOS_MATRIX_PATH)
         for time_period in travel_cost:
             for mtx_type in travel_cost[time_period]:
                 zone_numbers = self.ass_model.zone_numbers
@@ -147,7 +147,7 @@ class EmmeAssignmentTest:
             ap.init_assign()
             ap.assign_trucks_init()
             travel_cost = ap.end_assign()
-            costs_files = MatrixData(RESULTS_PATH / LOS_MATRIX_FOLDER)
+            costs_files = MatrixData(LOS_MATRIX_PATH)
             for mtx_type in travel_cost:
                 zone_numbers = self.ass_model.zone_numbers
                 with costs_files.open(mtx_type, ap.name, zone_numbers, m='w') as mtx:
