@@ -85,13 +85,17 @@ def main(args):
             mock_result_path = Path(
                 args.result_data_folder, subfolder,
                 LOS_MATRIX_FOLDER, args.submodel[i])
+            mock_demand_path = Path(
+                args.result_data_folder, subfolder,
+                DEMAND_MATRIX_FOLDER, args.submodel[i])
             if not mock_result_path.exists():
                 msg = "Mock Results directory {} does not exist.".format(
                     mock_result_path)
                 log.error(msg)
                 raise NameError(msg)
             assignment_model = MockAssignmentModel(
-                MatrixData(mock_result_path), time_periods=time_periods)
+                MatrixData(mock_result_path), MatrixData(mock_demand_path),
+                time_periods=time_periods)
             zone_numbers[args.submodel[i]] = assignment_model.zone_numbers
         else:
             if not os.path.isfile(emp_path):
@@ -217,7 +221,7 @@ def main(args):
         if long_dist == "calc":
             long_dist_result_paths.append(
                 Path(args.result_data_folder, name, DEMAND_MATRIX_FOLDER,
-                     "koko_suomi"))
+                     BUSINESS_AND_OVERNIGHT_FOLDER))
     model_types = (args.model_types if args.model_types
                    else ["passenger_transport" for _ in zone_data_files])
     electric_car_share = {"default": {"bev": 0.1, "phev": 0.2}}

@@ -72,11 +72,14 @@ def main(args):
         subfolder = (BUSINESS_AND_OVERNIGHT_FOLDER
                      if calculate_long_dist_demand else args.submodel)
         mock_result_path = result_data_folder / LOS_MATRIX_FOLDER / subfolder
+        mock_demand_path = result_data_folder / DEMAND_MATRIX_FOLDER / subfolder
         if not mock_result_path.is_dir():
             raise NameError(
                 "Mock Results directory {} does not exist.".format(
                     mock_result_path))
-        ass_model = MockAssignmentModel(MatrixData(mock_result_path), **kwargs)
+        ass_model = MockAssignmentModel(
+            MatrixData(mock_result_path), MatrixData(mock_demand_path),
+            **kwargs)
     else:
         if not emme_project_path.is_file():
             raise NameError(
