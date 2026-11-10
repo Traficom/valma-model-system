@@ -81,13 +81,13 @@ def main(args):
         # Check network
         if args.do_not_use_emme:
             subfolder = (BUSINESS_AND_OVERNIGHT_FOLDER if calc_long_dist_demand
-                         else args.scenario_name[i])
+                         else args.submodel[i])
             mock_result_path = Path(
-                args.result_data_folder, subfolder,
-                LOS_MATRIX_FOLDER, args.submodel[i])
+                args.result_data_folder, args.scenario_name[i],
+                LOS_MATRIX_FOLDER, subfolder)
             mock_demand_path = Path(
-                args.result_data_folder, subfolder,
-                DEMAND_MATRIX_FOLDER, args.submodel[i])
+                args.result_data_folder, args.scenario_name[i],
+                DEMAND_MATRIX_FOLDER, subfolder)
             if not mock_result_path.exists():
                 msg = "Mock Results directory {} does not exist.".format(
                     mock_result_path)
