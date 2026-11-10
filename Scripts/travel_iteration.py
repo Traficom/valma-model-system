@@ -137,10 +137,6 @@ class ModelSystem:
                 zone_data_file=Path(zone_data_path),
                 submodel=submodel,
                 output_dir=results_path / "bike_and_walk")
-            # EMME's own end-of-run bike assignment would only produce LOS
-            # and volumes that are replaced by ours, so skip it.
-            for ap in self.ass_model.assignment_periods:
-                ap.assign_bikes_at_end = False
 
         parameters_path = Path(__file__).parent / "parameters" / "demand"
         foreign_external_path = self.basematrices.path / "ext_foreign_passenger_vrk.omx"
@@ -411,6 +407,12 @@ class ModelSystem:
         # create attributes and background variables to network
         self.ass_model.prepare_network(
             self.car_dist_cost, self.car_time_cost, car_time_files)
+        if self._bike_and_walk is not None:
+            # EMME's own end-of-run bike assignment would only produce LOS
+            # and volumes that are replaced by ours, so skip it. EMME
+            # creates its periods in prepare_network, so not earlier.
+            for ap in self.ass_model.assignment_periods:
+                ap.assign_bikes_at_end = False
         self.dtm = dt.DirectDepartureTimeModel(self.ass_model)
 
         self.ass_model.calc_transit_cost(self.transit_cost)
