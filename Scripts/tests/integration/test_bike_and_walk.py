@@ -98,6 +98,25 @@ class BikeAndWalkTest(unittest.TestCase):
             numpy.testing.assert_array_equal(
                 numpy.diag(impedance["pt"]["dist"]["walk"]), INTRAZONAL_KM)
 
+    def test_emme_bike_end_assignment_is_skipped(self):
+        model, ass_model = self._model()
+        for ap in ass_model.assignment_periods:
+            self.assertFalse(ap.assign_bikes_at_end)
+
+    def test_periods_without_own_los_get_the_one_that_exists(self):
+        model, _ = self._model()
+        ours = numpy.full((2, 2), 3.0, dtype=numpy.float32)
+        model._bike_and_walk_los = {"pt": {"time": {"bike": ours}}}
+        emme = numpy.full((2, 2), 999999.0, dtype=numpy.float32)
+        impedance = {"time": {"bike": emme, "car_work": emme}}
+        model._use_bike_and_walk_los("aht", impedance)
+        numpy.testing.assert_array_equal(impedance["time"]["bike"], ours)
+        self.assertIs(impedance["time"]["car_work"], emme)
+        # Modes the period did not return are not added.
+        impedance = {"time": {"car_work": emme}}
+        model._use_bike_and_walk_los("aht", impedance)
+        self.assertNotIn("bike", impedance["time"])
+
     def test_demand_files_go_to_valma_bike_and_walk(self):
         with mock.patch.object(bike_and_walk, "assign") as assign:
             model, _ = self._model()

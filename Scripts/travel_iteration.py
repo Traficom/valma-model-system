@@ -137,6 +137,10 @@ class ModelSystem:
                 zone_data_file=Path(zone_data_path),
                 submodel=submodel,
                 output_dir=results_path / "bike_and_walk")
+            # EMME's own end-of-run bike assignment would only produce LOS
+            # and volumes that are replaced by ours, so skip it.
+            for ap in self.ass_model.assignment_periods:
+                ap.assign_bikes_at_end = False
 
         parameters_path = Path(__file__).parent / "parameters" / "demand"
         foreign_external_path = self.basematrices.path / "ext_foreign_passenger_vrk.omx"
@@ -208,8 +212,16 @@ class ModelSystem:
             self._bike_and_walk, self.zone_numbers, baseline)
 
     def _use_bike_and_walk_los(self, tp: str, impedance):
-        """Replace walk and bike LOS in one period's impedance, in place."""
-        for mtx_type, mode_mtx in self._bike_and_walk_los.get(tp, {}).items():
+        """Replace walk and bike LOS in one period's impedance, in place.
+
+        Walk and bike LOS do not depend on the period, so a period whose
+        initial assignment returned none (e.g. aht, when only pt computes
+        soft-mode LOS) gets the one period's LOS that exists.
+        """
+        los = self._bike_and_walk_los.get(tp)
+        if los is None and len(self._bike_and_walk_los) == 1:
+            los = next(iter(self._bike_and_walk_los.values()))
+        for mtx_type, mode_mtx in (los or {}).items():
             for mode, mtx in mode_mtx.items():
                 if mode in impedance.get(mtx_type, {}):
                     impedance[mtx_type][mode] = mtx.copy()

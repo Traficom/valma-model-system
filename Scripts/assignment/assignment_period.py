@@ -73,6 +73,9 @@ class AssignmentPeriod(Period):
                                            + param.local_transit_classes
             if delete_extra_matrices else param.simple_transport_classes)
         self.assignment_modes: Dict[str, AssignmentMode] = {}
+        # Whether end_assign runs EMME's bike assignment. Turned off when
+        # bike LOS and volumes come from valma_bike_and_walk.
+        self.assign_bikes_at_end = True
 
     def extra(self, attr: str) -> str:
         """Add prefix "@" and time-period suffix.
@@ -246,8 +249,15 @@ class AssignmentPeriod(Period):
                 Assignment class (car/transit/...) : numpy 2-d matrix
         """
         log.info(f"--- END-ASSIGNING PERIOD {self.name.upper()} ---")
-        self._set_bike_vdfs()
-        self._assign_bikes()
+        if self.assign_bikes_at_end:
+            self._set_bike_vdfs()
+            self._assign_bikes()
+        else:
+            # Bike LOS and volumes come from valma_bike_and_walk; the
+            # matrices only need to exist for _get_impedances.
+            log.info("Bike assignment skipped (bike LOS and volumes "
+                     "from valma_bike_and_walk)")
+            self.bike_mode.init_matrices()
         self._set_car_vdfs()
         if not self._separate_emme_scenarios:
             self._calc_background_traffic(include_trucks=True)
