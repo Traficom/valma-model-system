@@ -1,5 +1,5 @@
 {
-    "LEM_VERSION": "v1.0.0-alpha.3",
+    "LEM_VERSION": "v1.0.0",
     "LOG_LEVEL": "INFO",
     "LOG_FORMAT": "TEXT",
     "PROJECT_NAME": "testproject",
@@ -13,6 +13,7 @@
     "BASE_DATA_FOLDER": "",
     "ZONE_DATA_FILE": "",
     "COST_DATA_FILE": "",
+    "TRADE_DEMAND_FILE": "",
     "LONG_DIST_DEMAND_FORECAST": "base",
     "ITERATIONS": 15,
     "LOGISTICS_ITERATIONS": 0,

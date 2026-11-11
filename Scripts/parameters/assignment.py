@@ -78,6 +78,13 @@ transit_delay_funcs = {
         "it": 6,
         "vrk": 6,
     },
+    ("freight", "PDCGJROLW"): {
+        "aht": 6,
+        "pt": 6,
+        "iht": 6,
+        "it": 6,
+        "vrk": 6,
+    },
 }
 vdf_temp = ("(put(60/ul2)*(1+{}*put((volau+volad)/{})/"
             + "(ul1-get(2))))*(get(2).le.put(ul1*{}))*length+(get(2).gt."
@@ -98,6 +105,7 @@ volume_delay_funcs = {
     "fd11": "length*(60/ul2)+el1",
     "fd90": "length*(60/ul2)",
     "fd91": "length*(60/ul2)",
+    "fd97": "length*(60/5)",
     "fd99": "length*(60/ul2)",
     # Bike functions
     "fd70": "length*(60/19)",
@@ -149,9 +157,9 @@ performance_settings = {
 }
 congested_time_weight = 1.5
 freight_terminal_cost = {
-    'D': 0,
-    'J': 0,
-    'W': 0
+    "freight_train": 5000,
+    "timber_train": 5000,
+    "ship": 40000,
 }
 # Headway standard deviation function parameters for different transit modes
 headway_sd_func = {
@@ -235,16 +243,7 @@ long_dist_boarding_penalty = {
     'j': 25, # Long-distance train
     'l': 25, # Airplane
 }
-transfer_penalty = {
-    "transit": 10,
-    "airplane": 10,
-    "pt_car_acc": 10,
-    "pt_taxi_acc": 10,
-    "airpl_car_acc": 10,
-    "pt_car_egr": 10,
-    "pt_taxi_egr": 10,
-    "airpl_car_egr": 10,
-}
+transfer_penalty = 10
 extra_waiting_time = {
     "penalty": "@wait_time_dev",
     "perception_factor": 3.5
@@ -260,30 +259,30 @@ aux_time_perception_factor_truck = 30
 # TODO: Trucks and vans
 volume_factors = {
     "icev": {
-        "aht": 0.439,
-        "pt": 0.098,
-        "iht": 0.378,
+        "aht": 0.434,
+        "pt": 0.099,
+        "iht": 0.375,
         "it": 0.3,
         "vrk": 1.0,
     },
     "bev": {
         "aht": 0.439,
-        "pt": 0.098,
-        "iht": 0.378,
+        "pt": 0.099,
+        "iht": 0.375,
         "it": 0.3,
         "vrk": 1.0,
     },
     "phev": {
         "aht": 0.439,
-        "pt": 0.098,
-        "iht": 0.378,
+        "pt": 0.099,
+        "iht": 0.375,
         "it": 0.3,
         "vrk": 1.0,
     },
     "transit": {
         "aht": 0.517,
         "pt": 0.167,
-        "iht": 0.414,
+        "iht": 0.383,
         "it": 0.238,
         "vrk": 1.0,
     },
@@ -296,15 +295,15 @@ volume_factors = {
     },
     "bike": {
         "aht": 0.547,
-        "pt": 0.110,
-        "iht": 0.364,
+        "pt": 0.112,
+        "iht": 0.356,
         "it": 0.3,
         "vrk": 1.0,
     },
     "walk": {
-        "aht": 0.540,
+        "aht": 0.528,
         "pt": 0.118,
-        "iht": 0.323,
+        "iht": 0.331,
         "it": 0.3,
         "vrk": 1.0,
     },
@@ -343,22 +342,22 @@ volume_factors = {
         "it": 0.238,
         "vrk": 1.0,
     },
-    "airpl_car_acc": {
+    "airplane_car_access": {
         "vrk": 1.0,
     },
-    "pt_car_acc": {
+    "transit_car_access": {
         "vrk": 1.0,
     },
-    "pt_taxi_acc": {
+    "transit_taxi_access": {
         "vrk": 1.0,
     },
-    "airpl_car_egr": {
+    "airplane_car_egress": {
         "vrk": 1.0,
     },
-    "pt_car_egr": {
+    "transit_car_egress": {
         "vrk": 1.0,
     },
-    "pt_taxi_egr": {
+    "transit_taxi_egress": {
         "vrk": 1.0,
     },
 }
@@ -395,14 +394,14 @@ car_classes = (
 car_and_van_classes = car_classes + ("van",)
 private_classes = car_and_van_classes + ("bike",)
 car_access_classes = (
-    "pt_car_acc",
-    "pt_taxi_acc",
-    "airpl_car_acc",
+    "transit_car_access",
+    "transit_taxi_access",
+    "airplane_car_access",
 )
 car_egress_classes = (
-    "pt_car_egr",
-    "pt_taxi_egr",
-    "airpl_car_egr",
+    "transit_car_egress",
+    "transit_taxi_egress",
+    "airplane_car_egress",
 )
 mixed_mode_classes = car_access_classes + car_egress_classes
 long_dist_simple_classes = (
@@ -420,13 +419,25 @@ truck_classes = (
     "semi_trailer",
     "trailer_truck",
 )
+truck_fleet = {
+    "truck": "truck",
+    "truck_ev": "truck",
+    "truck_2n": "truck",
+    "truck_2n_ev": "truck",
+    "semi_trailer": "semi_trailer",
+    "semi_trailer_ev": "semi_trailer",
+    "trailer_truck": "trailer_truck",
+    "trailer_truck_ev": "trailer_truck",
+    "trailer_truck_76t": "trailer_truck",
+    "trailer_truck_76ev": "trailer_truck"
+}
 simple_transport_classes = (private_classes
                             + simple_transit_classes
                             + truck_classes)
 transport_classes = simple_transport_classes + mixed_mode_classes
 intermodals = {
-    "transit": ["pt_car_acc", "pt_taxi_acc", "pt_taxi_egr"],
-    "airplane": ["airpl_car_acc", "airpl_car_egr"],
+    "transit": ["transit_car_access", "transit_taxi_access", "transit_taxi_egress"],
+    "airplane": ["airplane_car_access", "airplane_car_egress"],
 }
 main_mode = 'h'
 bike_mode = 'f'
@@ -438,6 +449,13 @@ assignment_modes = {
     "semi_trailer": 'y',
     "truck": 'k',
     "van": 'v',
+    "truck_ev": "k",
+    "truck_2n": "k",
+    "truck_2n_ev": "k",
+    "semi_trailer_ev": "y",
+    "trailer_truck_ev": "y",
+    "trailer_truck_76t": "y",
+    "trailer_truck_76ev": "y"
 }
 local_transit_modes = [
     'b',
@@ -452,25 +470,42 @@ local_transit_modes = [
 long_dist_transit_modes = {
     "transit": ['e', 'j', 'd'],
     "airplane": ['l'],
-    "pt_car_acc": ['j'],
-    "pt_taxi_acc": ['e', 'j'],
-    "airpl_car_acc": ['l'],
-    "pt_car_egr": ['j'],
-    "pt_taxi_egr": ['e', 'j'],
-    "airpl_car_egr": ['l'],
+    "transit_car_access": ['j', 'd'],
+    "transit_taxi_access": ['e', 'j', 'd'],
+    "airplane_car_access": ['l'],
+    "transit_car_egress": ['j', 'd'],
+    "transit_taxi_egress": ['e', 'j', 'd'],
+    "airplane_car_egress": ['l'],
+}
+long_dist_terminal_modes = {
+    'l', 'j', 'd'
 }
 aux_modes = [
     'a'
 ]
 park_and_ride_mode = 'u'
+terminal_modes = {
+    "freight_train": 'F',
+    "timber_train": 'T',
+    "ship": 'F',
+}
 freight_modes = {
     "freight_train": {
-        'D': "@d_train_term_cost",
-        'J': "@e_train_term_cost",
+        'D': "diesel_train",
+        'J': "electric_train",
+    },
+    "timber_train": {
+        'D': "diesel_train",
+        'J': "electric_train",
     },
     "ship": {
-        'W': "@ship_term_cost",
+        'W': "domestic_vessel",
     },
+}
+terminal_change_attrs = {
+    'D': "@d_train_term_cost",
+    'J': "@e_train_term_cost",
+    'W': "@ship_term_cost",
 }
 freight_marine_modes = {
     "container_ship": {
@@ -493,7 +528,7 @@ freight_marine_modes = {
     }
 }
 external_modes = [
-    "car_drv",
+    "car_driver",
     "transit",
     "truck",
     "trailer_truck",
@@ -533,15 +568,16 @@ ship_attrs = {
     "dist": "ut1",
     "frequency": "ut2",
 }
-boarding_penalty_attr = "@boa_"
-long_dist_boarding_penalty_attr = "@bld_"
+boarding_penalty_attr = "@board_penalty"
+long_dist_boarding_penalty_attr = "@long_d_board_pen"
 dist_fare_attr = "@dist_fare"
 board_fare_attr = "@board_fare"
-board_long_dist_attr = "@board_long_dist"
+long_dist_boarding_cost_attr = "@board_long_dist"
 is_in_transit_zone_attr = "ui1"
 keep_stops_attr = "#keep_stops"
 submodel_attr = "#subarea"
 terminal_cost_attr = "@freight_term_cost"
+freight_time_perception_attr = "@freight_time_perc"
 aux_transit_time_attr = "@walk_time"
 aux_car_time_attr = "@car_time"
 park_cost_attr_n = "#park_cost_n"
@@ -572,38 +608,38 @@ roadtypes = {
 }
 # modes in choice model : impedance
 mode_impedance = {
-    "car_drv": ["icev", "bev", "phev"],
-    "car_pax": ["icev", "bev", "phev"],
+    "car_driver": ["icev", "bev", "phev"],
+    "car_passenger": ["icev", "bev", "phev"],
     "transit": ["transit"],
     "airplane": ["airplane"],
     "bike": ["bike"],
     "walk": ["walk"],
-    "pt_car_acc": ["pt_car_acc"],
-    "pt_taxi_acc": ["pt_taxi_acc"],
-    "airpl_car_acc": ["airpl_car_acc"],
-    "pt_car_egr": ["pt_car_egr"],
-    "pt_taxi_egr": ["pt_taxi_egr"],
-    "airpl_car_egr": ["airpl_car_egr"],
+    "transit_car_access": ["transit_car_access"],
+    "transit_taxi_access": ["transit_taxi_access"],
+    "airplane_car_access": ["airplane_car_access"],
+    "transit_car_egress": ["transit_car_egress"],
+    "transit_taxi_egress": ["transit_taxi_egress"],
+    "airplane_car_egress": ["airplane_car_egress"],
 }
 # Modes in choice model : [assignment classes]
 # If the mode has two assignment classes, demand
 # will be transposed for the second one.
 mode_assignment_classes = {
-    "car_drv": ["icev", "bev", "phev"],
+    "car_driver": ["icev", "bev", "phev"],
     "icev": ["icev"],
     "bev": ["bev"],
     "phev": ["phev"],
-    "car_pax": [],
+    "car_passenger": [],
     "transit": ["transit"],
     "airplane": ["airplane"],
     "bike": ["bike"],
     "walk": ["walk"],
-    "pt_car_acc": ["pt_car_acc", "pt_car_egr"],
-    "pt_taxi_acc": ["pt_taxi_acc", "pt_taxi_egr"],
-    "airpl_car_acc": ["airpl_car_acc", "airpl_car_egr"],
-    "pt_car_egr": ["pt_car_egr", "pt_car_acc"],
-    "pt_taxi_egr": ["pt_taxi_egr", "pt_taxi_acc"],
-    "airpl_car_egr": ["airpl_car_egr", "airpl_car_acc"],
+    "transit_car_access": ["transit_car_access", "transit_car_egress"],
+    "transit_taxi_access": ["transit_taxi_access", "transit_taxi_egress"],
+    "airplane_car_access": ["airplane_car_access", "airplane_car_egress"],
+    "transit_car_egress": ["transit_car_egress", "transit_car_access"],
+    "transit_taxi_egress": ["transit_taxi_egress", "transit_taxi_access"],
+    "airplane_car_egress": ["airplane_car_egress", "airplane_car_access"],
     "truck": ["truck"],
     "semi_trailer": ["semi_trailer"],
     "trailer_truck": ["trailer_truck"],

@@ -41,9 +41,13 @@ class AssignmentMode(ABC):
         self.emme_scenario = assignment_period.emme_scenario
         self.emme_project = assignment_period.emme_project
         self.time_period = assignment_period.name
-        self.volume_attr = assignment_period.netfield(name)
+        self.volume_attr = (
+            f"{assignment_period.netfield(name)}_transit_leg_volume"
+            if self.name in param.mixed_mode_classes
+            else f"{assignment_period.netfield(name)}_volume"
+        )
         self.emme_project.create_network_field(
-            "LINK", "REAL", self.volume_attr, f"{self.name}_vol",
+            "LINK", "REAL", self.volume_attr, self.volume_attr,
             overwrite=True, scenario=self.emme_scenario)
         self._save_matrices = save_matrices
         self._matrices: Dict[str, EmmeMatrix] = {}
