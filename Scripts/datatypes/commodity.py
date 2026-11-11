@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import List, Dict
+from typing import Iterable, List, Dict
 from pathlib import Path
 import json
 import numpy # type: ignore
@@ -11,13 +11,15 @@ from datahandling.resultdata import ResultsData
 from datahandling.matrixdata import read_omx_item
 import utils.log as log
 import parameters.zone as param
+from parameters.assignment import truck_fleet
 from parameters.commodity import commodity_conversion
 import models.logit as logit
-from utils.freight_costs import calc_cost, get_foreign_ship_cost
 from models.logistics import (LogisticsModule, TradeRouteModule,
                               run_logistics_model, run_trade_model)
-from parameters.marine_ship import leg_names
+from parameters.marine_ship import (leg_names, port_draught_limit,
+                                    ship_draught_speed)
 from parameters.zone import clusters
+from parameters.cost import truck_overhead_cost
 
 
 def create_commodities(parameters_path: Path, zonedata: FreightZoneData,
@@ -84,51 +86,50 @@ class FreightCommodity(Purpose):
     def __init__(self, specification, zone_data, resultdata, costdata):
         Purpose.__init__(self, specification, zone_data, resultdata)
         self.costdata = costdata
-        self.model_category = list(zone_data)[0]
-        self.modes: List[str] = list(specification["mode_choice"])
-        args = (self, specification, self.generation_zone_data,
-                self.attraction_zone_data, resultdata)
-        if specification["struct"] == "dest>mode":
-            self.model = logit.DestModeModel(*args)
-        elif specification["struct"] == "mode>dest":
-            self.model = logit.ModeDestModel(*args)
-        else:
-            self.model = None
-        self.route_params = specification.get("route_choice", None)
-        self.is_export = {"export": True, "import": False}.get(
-            specification["struct"])
+        self.empty_share = costdata["truck"]["empty_share"]
+        self.truck_fleet = costdata["truck"]["fleet"]
+        self.truck_param = costdata["truck"]["param"]
 
-        if (self.model is None and self.model_category == "domestic"
-            or self.is_export is None and self.model_category == "foreign"):
-            msg = f"Purpose {self.name} has invalid struct in specification"
-            log.error(msg)
-            raise ValueError(msg)
-        elif self.route_params is None and self.model_category == "foreign":
-            msg = f"Purpose {self.name} is missing route choice specification"
-            log.error(msg)
-            raise ValueError(msg)
-
-    def get_costs(self, impedance: dict):
-        """Fetch calculated costs for each mode in model's mode choice.
+    def _transform_road_cost(self, cost: numpy.ndarray, mode: str
+                             ) -> numpy.ndarray:
+        """Transform vehicle cost (incl. driver cost) to ton cost.
 
         Parameters
         ----------
-        impedance : dict
-            Mode (truck/train/...) : dict
-                Type (time/dist/toll_cost/canal_cost) : numpy 2d matrix
+        cost : numpy.ndarray
+            Vehicle-specific cost matrix from truck assignment
+        mode : str
+            Truck fleet mode (truck/trailer_truck...)
 
         Returns
-        -------
-        dict
-            Mode (truck/freight_train/...) : cost : numpy.ndarray
+        ----------
+        numpy.ndarray
+            Ton-specific cost matrix
         """
-        costs = {mode: calc_cost(
-                    mode, self.costdata, impedance[mode], self.model_category)
-                 for mode in self.modes}
-        for mode, mode_costs in costs.items():
-            if not self.model or "aux_cost" not in self.model.mode_choice_param[mode]["impedance"]:
-                mode_costs["cost"] += mode_costs.pop("aux_cost", 0)
-        return costs
+        param = self.truck_param[truck_fleet[mode]]
+        return ((1+self.empty_share) * truck_overhead_cost * cost
+                / param["avg_load"] + param["terminal_cost"])
+
+    def _sum_road_ton_cost(self, cost: Dict[str, numpy.ndarray]
+                           ) -> numpy.ndarray:
+        """Transform vehicle costs to ton costs and weighted sum 
+        over the truck fleet.
+
+        Parameters
+        ----------
+        cost : Dict[str, numpy.ndarray]
+            Truck fleet mode (truck/trailer_truck...) :
+                vehicle-specific cost matrix from truck assignment
+
+        Returns
+        ----------
+        numpy.ndarray
+            Ton-specific cost matrix
+        """
+        return sum(
+            self._transform_road_cost(cost[mode], mode)
+            * distrib[self._truck_distribution]
+            for mode, distrib in self.truck_fleet.items())
 
     def calc_vehicles(self, matrix: numpy.ndarray, ass_class: str):
         """Calculate vehicle matrix from ton matrix using ton-to-vehicles
@@ -146,14 +147,92 @@ class FreightCommodity(Purpose):
         numpy.ndarray
             vehicle matrix
         """
-        costdata = self.costdata["truck"][ass_class]
-        vehicles = (matrix * costdata[f"{self.model_category}_distribution"]
-                    / costdata["avg_load"] / 365)
-        vehicles += vehicles.T * costdata["empty_share"]
+        vehicles = (matrix * self.truck_fleet[ass_class][self._truck_distribution]
+                    / self.truck_param[truck_fleet[ass_class]]["avg_load"] / 365)
+        vehicles += vehicles.T * self.empty_share
         return vehicles
 
 
 class DomesticCommodity(FreightCommodity):
+    def __init__(self, specification, zone_data, resultdata, costdata):
+        FreightCommodity.__init__(self, specification, zone_data, resultdata, 
+                                  costdata)
+        self.modes: List[str] = list(specification["mode_choice"])
+        args = (self, specification, self.generation_zone_data,
+                self.attraction_zone_data, resultdata)
+        match specification["struct"]:
+            case "dest>mode":
+                self.model = logit.DestModeModel(*args)
+            case "mode>dest":
+                self.model = logit.ModeDestModel(*args)
+            case _:
+                msg = f"Commodity {self.name} has invalid struct in specification"
+                log.error(msg)
+                raise ValueError(msg)
+        self.route_params = specification.get("route_choice", None)
+        self._truck_distribution = "domestic_distribution"
+
+    def calc_costs(self, impedance: Dict[str, Dict[str, numpy.ndarray]]
+                   ) -> Dict[str, Dict[str, numpy.ndarray]]:
+        """Calculate ton costs for each transport mode.
+
+        Parameters
+        ----------
+        impedance : dict
+            Mode (truck/train/...) : dict
+                Type (time/dist/toll_cost/canal_cost) : numpy 2d matrix
+
+        Returns
+        -------
+        dict
+            Mode (truck/freight_train/...) : dict
+                Type (cost/aux_cost) : numpy.ndarray
+        """
+        costs = {}
+        for mode in self.modes:
+            if mode == "truck":
+                costs[mode] = {"cost": self._sum_road_ton_cost(
+                    {truck_mode: impedance[truck_mode]["cost"]
+                     for truck_mode in self.truck_fleet})}
+            else:
+                costs[mode] = self._calc_ton_cost(
+                    impedance[mode], self.costdata[mode])
+        for mode, mode_costs in costs.items():
+            if not self.model or "aux_cost" not in self.model.mode_choice_param[mode]["impedance"]:
+                mode_costs["cost"] += mode_costs.pop("aux_cost", 0)
+        return costs
+
+    def _calc_ton_cost(self, impedance: Dict[str, numpy.ndarray],
+                       unit_costs: Dict[str, float]) -> Dict[str, numpy.ndarray]:
+        """Calculate ton cost for train and ship.
+
+        Check whether auxiliary mode distance is over twice as long
+        as main mode distance or if main mode mode has not been used
+        at all. In such cases, assign inf for said OD pairs.
+        Otherwise calculate actual auxiliary cost.
+
+        Parameters
+        ----------
+        impedance : Dict[str, numpy.ndarray]
+            Type (time/dist/toll_cost) : numpy 2d matrix
+        unit_costs : Dict[str, float]
+            Impedance type (time/dist/toll_cost) : unit cost value
+
+        Returns
+        ----------
+        Dict[str, numpy.ndarray]
+            auxiliary road cost : numpy.ndarray
+            impedance type cost : numpy.ndarray
+        """
+        cost = sum(
+            impedance[mtx_type] * unit_costs[mtx_type]
+            for mtx_type in unit_costs)
+        aux_cost = self._sum_road_ton_cost(
+            dict.fromkeys(self.truck_fleet, impedance["aux_cost"]))
+        return {
+            "cost": cost,
+            "aux_cost": aux_cost,
+        }
 
     def calc_traffic(self, impedance: dict, iterations: int = 0):
         """Calculate freight traffic matrix.
@@ -171,7 +250,7 @@ class DomesticCommodity(FreightCommodity):
         dict
             Mode (truck/train/...) : calculated demand (numpy 2d matrix)
         """
-        costs = self.get_costs(impedance)
+        costs = self.calc_costs(impedance)
         self.dist = costs[self.modes[0]]["cost"]
         nr_zones = self.attraction_zone_data.nr_zones
         probs = self.model.calc_prob(costs)
@@ -181,6 +260,7 @@ class DomesticCommodity(FreightCommodity):
         if self.route_params and iterations > 0:
             demand["truck"], _ = self.run_logistics_module(
                 demand["truck"], impedance, iterations)
+        self.dist = None
         return demand
 
     def run_logistics_module(self, demand_truck: numpy.ndarray,
@@ -214,7 +294,7 @@ class DomesticCommodity(FreightCommodity):
         lc_indices = numpy.array([zone_index_map.get(id, None)
                                 for id in list(lc_sizes.index)])
         lc_sizes = lc_sizes.to_numpy()
-        cost = self.get_costs(impedance)
+        cost = self.calc_costs(impedance)
         model = LogisticsModule(cost, self.route_params, lc_indices, lc_sizes)
         for i in range(1, iterations + 1):
             demand_truck, per_route = run_logistics_model(model, demand_truck, i)
@@ -285,7 +365,7 @@ class DomesticCommodity(FreightCommodity):
         mode_ton_dist = numpy.array([numpy.sum(demand[mode] * impedance[mode]["dist"])
                                     for mode in modes], dtype=numpy.int64)
         costs = {mode: numpy.nan_to_num(c["cost"], posinf=0)
-                for mode, c in self.get_costs(impedance).items()}
+                for mode, c in self.calc_costs(impedance).items()}
         df = pandas.DataFrame(data={
             "Commodity": [self.name] * len(modes),
             "Mode": modes,
@@ -320,8 +400,22 @@ class DomesticCommodity(FreightCommodity):
 
 
 class ForeignCommodity(FreightCommodity):
+    def __init__(self, specification, zone_data, resultdata, costdata):
+        FreightCommodity.__init__(self, specification, zone_data, resultdata, 
+                                  costdata)
+        match specification["struct"]:
+            case "export":
+                self.is_export = True
+            case "import":
+                self.is_export = False
+            case _:
+                msg = f"Commodity {self.name} has invalid struct in specification"
+                log.error(msg)
+                raise ValueError(msg)
+        self.route_params = specification["route_choice"]
+        self._truck_distribution = "foreign_distribution"
 
-    def form_impedance_legs(self, impedance: dict,
+    def _form_impedance_legs(self, impedance: dict,
                             ship_imps: dict,
                             fin_border_ids: dict,
                             cluster_border_ids: dict) -> dict:
@@ -365,14 +459,12 @@ class ForeignCommodity(FreightCommodity):
         if not self.is_export:
             masks = masks[::-1]
 
-        costs = self.get_costs(impedance)
-        impedance_legs = {l: {} for l in leg_names}
-        for i, imp_leg in enumerate(impedance_legs.values()):
-            imp_leg["truck"] = {imp_type: mtx[numpy.ix_(masks[i], masks[i+1])]
-                                for imp_type, mtx in costs["truck"].items()}
-        ship_costs = get_foreign_ship_cost(
-            self.costdata, ship_imps, self.model_category, fin_border_ids,
-            self.is_export)
+        truck_cost = self._sum_road_ton_cost(
+            dict.fromkeys(self.truck_fleet, impedance["truck"]["cost"]))
+        impedance_legs = {
+            leg: {"truck": {"cost": truck_cost[numpy.ix_(masks[i], masks[i+1])]}}
+                  for i, leg in enumerate(leg_names)}
+        ship_costs = self._calc_foreign_ship_cost(ship_imps, fin_border_ids)
         impedance_legs["leg_two"].update(ship_costs)
 
         # Retain leg two truck cost only for designated land border pairs
@@ -385,6 +477,55 @@ class ForeignCommodity(FreightCommodity):
             mask = mask.T
         impedance_legs["leg_two"]["truck"]["cost"][mask.to_numpy()] = numpy.inf
         return impedance_legs
+
+    def _calc_foreign_ship_cost(self, impedance: Dict[str, dict],
+                               fin_ports: Iterable[str]):
+        """Fetch smallest general cost for each marine ship in unit costs.
+
+        Parameters
+        ----------
+        impedance : Dict[str, dict]
+            Sub ship mode (general_cargo/container_ship...) : attribute
+                Type (dist) : numpy 2d matrix
+        fin_ports : iterable of str
+            Finland border id (FIHEL/FISKV...) : str
+
+        Returns
+        -------
+        dict
+            Marine ship type (general_cargo/container ship...) : matrix
+                Mtx type (cost/mode/draught) : numpy.ndarray
+        """
+        inf_mtx = numpy.full_like(
+            next(iter(impedance.values()))["frequency"], numpy.inf)
+        ship_info = {}
+        for mode in self.costdata["foreign_ship"].keys():
+            ship_info[mode] = {
+                "cost": inf_mtx.copy(),
+                "draught": inf_mtx.copy(),
+                "frequency": impedance[mode]["frequency"]
+            }
+            port_draughts = numpy.array(
+                [port_draught_limit[mode].get(port, numpy.inf)
+                for port in fin_ports])
+            for draught in map(int, self.costdata["foreign_ship"][mode]):
+                time = (impedance[mode]["dist"]
+                        / ship_draught_speed[mode][draught]
+                        * 60)
+                unit_costs = self.costdata["foreign_ship"][mode][f"{draught}"]
+                cost = (unit_costs["time"]*time
+                        + unit_costs["dist"]*impedance[mode]["dist"]
+                        + unit_costs["terminal_cost"])
+                # Evaluate whether ship type can enter Finnish ports
+                too_shallow_ports = draught > port_draughts
+                if self.is_export:
+                    cost[too_shallow_ports, :] = numpy.inf
+                else:
+                    cost[:, too_shallow_ports] = numpy.inf
+                is_cheaper = cost < ship_info[mode]["cost"]
+                ship_info[mode]["cost"][is_cheaper] = cost[is_cheaper]
+                ship_info[mode]["draught"][is_cheaper] = draught
+        return ship_info
 
     def run_trade_route_module(self, impedance: dict,
                                ship_imps: dict,
@@ -416,7 +557,7 @@ class ForeignCommodity(FreightCommodity):
             Leg name (one/two/three) : Mode
                 Name (truck/container_ship...) : numpy 2d array
         """
-        impedance_legs = self.form_impedance_legs(
+        impedance_legs = self._form_impedance_legs(
             impedance, ship_imps, fin_border_ids, cluster_border_ids)
         demand, trade_mappings = read_omx_item(trade_demand_path, self.name)
 

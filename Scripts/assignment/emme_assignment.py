@@ -2,12 +2,13 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Tuple, Union, Optional, cast, Iterable
 from collections import defaultdict
 from pathlib import Path
+from itertools import chain
 import numpy
 import pandas
 from math import log10
 
 import utils.log as log
-from utils.print_links import geometries, Node, Link, Segment
+from utils.print_links import geometries, Node, Link, Line, Segment
 import utils.sum_24h as sum24
 import parameters.assignment as param
 from assignment.abstract_assignment import AssignmentModel
@@ -184,19 +185,22 @@ class EmmeAssignmentModel(AssignmentModel):
             "TRANSIT_LINE", param.terminal_cost_attr, "terminal cost",
             overwrite=True, scenario=self.mod_scenario)
         self.emme_project.create_extra_attribute(
+            "TRANSIT_LINE", param.freight_time_perception_attr,
+            "freight time perception",
+            overwrite=True, scenario=self.mod_scenario)
+        self.emme_project.create_extra_attribute(
             "LINK", param.aux_commodity_flow_attr, "commodity flow",
             overwrite=True, scenario=self.mod_scenario)
         self.emme_project.create_extra_attribute(
             "TRANSIT_SEGMENT", param.commodity_flow_attr, "commodity flow",
             overwrite=True, scenario=self.mod_scenario)
-        for ass_class in param.freight_modes.values():
-            for attr in ass_class.values():
-                self.emme_project.create_extra_attribute(
-                    "TRANSIT_LINE", attr, "terminal cost",
-                    overwrite=True, scenario=self.mod_scenario)
+        for attr in param.terminal_change_attrs.values():
+            self.emme_project.create_extra_attribute(
+                "TRANSIT_LINE", attr, "terminal cost",
+                overwrite=True, scenario=self.mod_scenario)
         self._create_attributes(
             self.mod_scenario,
-            list(param.truck_classes) + list(param.freight_modes),
+            list(param.truck_fleet) + list(param.freight_modes),
             self._extra, self._netfield)
         self.freight_network.prepare(
             car_dist_unit_cost, car_time_unit_cost, self.save_matrices)
@@ -312,7 +316,7 @@ class EmmeAssignmentModel(AssignmentModel):
                 else:
                     vdf = 0
                 for ass_class in ass_classes:
-                    veh_kms = link[self._netfield(ass_class)] * link.length
+                    veh_kms = link[f"{self._netfield(ass_class)}_volume"] * link.length
                     kms[ass_class] += veh_kms
                     try:
                         vdf_kms[ass_class][vdf] += veh_kms
@@ -342,12 +346,13 @@ class EmmeAssignmentModel(AssignmentModel):
         for geom_type, objects in (
                 (Node, network.nodes()),
                 (Link, network.links()),
-                (Segment, network.transit_segments())):
-            attrs = [attr.name for attr in self.day_scenario.extra_attributes()
-                if attr.type == geom_type.name]
-            attrs += [attr.name for attr in self.day_scenario.network_fields()
-                if attr.type == geom_type.name and attr.atype == "REAL"]
-            attrs += geom_type.attrs
+                (Segment, network.transit_segments()),
+                (Line, network.transit_lines())):
+            obj = next(objects)
+            objects = chain([obj], objects)
+            attrs = {attr_name: type(getattr(obj, attr_name)).__name__.rstrip("0123456789_")
+                     for attr_name in self.day_scenario.attributes(geom_type.name)}
+            attrs.update({attr_name: "str" for attr_name in geom_type.special_attr_names})
             linkdata.print_gpkg(
                 *geometries(attrs, objects, geom_type), fname, geom_type.name)
         log.info(f"EMME extra attributes exported to file {fname}")
@@ -482,18 +487,17 @@ class EmmeAssignmentModel(AssignmentModel):
             "TRANSIT_LINE", param.board_fare_attr,
             "boarding fare attribute", overwrite=True, scenario=scenario)
         self.emme_project.create_extra_attribute(
-            "TRANSIT_LINE", param.board_long_dist_attr,
+            "TRANSIT_LINE", param.long_dist_boarding_cost_attr,
             "long distance boarding fare attribute", overwrite=True,
             scenario=scenario)
-        for transit_class in param.transfer_penalty:
-            self.emme_project.create_extra_attribute(
-                "TRANSIT_LINE", param.boarding_penalty_attr+transit_class,
-                "boarding penalty attribute", overwrite=True,
-                scenario=scenario)
-            self.emme_project.create_extra_attribute(
-                "TRANSIT_LINE", param.long_dist_boarding_penalty_attr+transit_class,
-                "long distance boarding penalty attribute", overwrite=True,
-                scenario=scenario)
+        self.emme_project.create_extra_attribute(
+            "TRANSIT_LINE", param.boarding_penalty_attr,
+            "boarding penalty attribute", overwrite=True,
+            scenario=scenario)
+        self.emme_project.create_extra_attribute(
+            "TRANSIT_LINE", param.long_dist_boarding_penalty_attr,
+            "long distance boarding penalty attribute", overwrite=True,
+            scenario=scenario)
         # Create transit segment attributes
         self.emme_project.create_extra_attribute(
             "TRANSIT_SEGMENT", param.dist_fare_attr,
@@ -529,10 +533,14 @@ class EmmeAssignmentModel(AssignmentModel):
             hour_attrs[ap.name] = {}
             for mode in ap.assignment_modes.values():
                 hour_attrs[ap.name][mode.name] = mode.volume_attr
-                day_attrs[mode.name] = self._netfield(mode.name)
+                day_attrs[mode.name] = (
+                    f"{self._netfield(mode.name)}_transit_leg_volume"
+                    if mode.name in param.mixed_mode_classes
+                    else f"{self._netfield(mode.name)}_volume"
+                )
         for attr in day_attrs:
             self.emme_project.create_network_field(
-                "LINK", "REAL", day_attrs[attr], f"{attr}_vol",
+                "LINK", "REAL", day_attrs[attr], day_attrs[attr],
                 overwrite=True, scenario=self.day_scenario, network=network)
         # save link volumes to result network
         for link in network.links():

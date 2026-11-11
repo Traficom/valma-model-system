@@ -13,12 +13,13 @@ from assignment.mock_assignment import MockAssignmentModel
 from datahandling.matrixdata import MatrixData
 from datahandling.zonedata import ZoneData, FreightZoneData
 import parameters.assignment as param
-from valma_travel import BASE_ZONEDATA_FILE
-from valma_travel import LOS_MATRIX_FOLDER, DEMAND_MATRIX_FOLDER
+from valma_travel import (
+    LOS_MATRIX_FOLDER,
+    DEMAND_MATRIX_FOLDER,
+    BUSINESS_AND_OVERNIGHT_FOLDER)
 
 
 def main(args):
-    base_zonedata_path = Path(args.base_data_folder, BASE_ZONEDATA_FILE)
     emme_project_files: Union[str,List[str]] = args.emme_project_files
     first_scenario_ids: Union[int,List[int]] = args.first_scenario_ids
     zone_data_files: Union[str,List[str]] = args.zone_data_files
@@ -46,14 +47,6 @@ def main(args):
                + "vs. number of zone-data-files")
         log.error(msg)
         raise ValueError(msg)
-
-    # Check basedata input
-    # log.info("Checking base inputdata...")
-    # if not (args.end_assignment_only or base_zonedata_path.exists()):
-    #     msg = "Baseline zonedata file '{}' does not exist.".format(
-    #         base_zonedata_path)
-    #     log.error(msg)
-    #     raise ValueError(msg)
 
     zone_numbers: Dict[str, numpy.array] = {}
 
@@ -87,16 +80,22 @@ def main(args):
 
         # Check network
         if args.do_not_use_emme:
+            subfolder = (BUSINESS_AND_OVERNIGHT_FOLDER if calc_long_dist_demand
+                         else args.submodel[i])
             mock_result_path = Path(
                 args.result_data_folder, args.scenario_name[i],
-                LOS_MATRIX_FOLDER, args.submodel[i])
+                LOS_MATRIX_FOLDER, subfolder)
+            mock_demand_path = Path(
+                args.result_data_folder, args.scenario_name[i],
+                DEMAND_MATRIX_FOLDER, subfolder)
             if not mock_result_path.exists():
                 msg = "Mock Results directory {} does not exist.".format(
                     mock_result_path)
                 log.error(msg)
                 raise NameError(msg)
             assignment_model = MockAssignmentModel(
-                MatrixData(mock_result_path), time_periods=time_periods)
+                MatrixData(mock_result_path), MatrixData(mock_demand_path),
+                time_periods=time_periods)
             zone_numbers[args.submodel[i]] = assignment_model.zone_numbers
         else:
             if not os.path.isfile(emp_path):
@@ -180,7 +179,7 @@ def main(args):
                 for key in nr_new_attr:
                     nr_new_attr[key] *= len(time_periods) + 1
             nr_new_attr["links"] += nr_veh_classes + 7
-            nr_new_attr["transit_lines"] += 2 * nr_transit_classes + 5
+            nr_new_attr["transit_lines"] += 7
             nr_new_attr["transit_segments"] += 6
             dim = emmebank.dimensions
             dim["nodes"] = dim["centroids"] + dim["regular_nodes"]
@@ -222,7 +221,7 @@ def main(args):
         if long_dist == "calc":
             long_dist_result_paths.append(
                 Path(args.result_data_folder, name, DEMAND_MATRIX_FOLDER,
-                     "koko_suomi"))
+                     BUSINESS_AND_OVERNIGHT_FOLDER))
     model_types = (args.model_types if args.model_types
                    else ["passenger_transport" for _ in zone_data_files])
     electric_car_share = {"default": {"bev": 0.1, "phev": 0.2}}

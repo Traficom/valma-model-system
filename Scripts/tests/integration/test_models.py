@@ -7,11 +7,13 @@ from travel_iteration import ModelSystem, LOS_MATRIX_FOLDER
 from assignment.mock_assignment import MockAssignmentModel
 from datahandling.matrixdata import MatrixData
 from datatypes.demand import Demand
-from tests.integration.test_data_handling import (
+from tests.integration.test_arguments import (
     TEST_DATA_PATH,
     RESULTS_PATH,
     ZONEDATA_PATH,
     COSTDATA_PATH,
+    LOS_MATRIX_PATH,
+    DEMAND_MATRIX_PATH,
     BASE_MATRICES_PATH,
     MODE_DEST_CALIBRATION_FILE,
     MUNICIPALITY_CALIBRATION_FILE
@@ -30,8 +32,9 @@ class ModelTest(unittest.TestCase):
     def test_models(self):
         print("Testing model system...")
         log.initialize(Config())
-        ass_model = MockAssignmentModel(MatrixData(
-            RESULTS_PATH / LOS_MATRIX_FOLDER / "uusimaa"))
+        ass_model = MockAssignmentModel(
+            MatrixData(LOS_MATRIX_PATH / "uusimaa"),
+            MatrixData(DEMAND_MATRIX_PATH / "uusimaa"))
         model = ModelSystem(
             ZONEDATA_PATH, COSTDATA_PATH, BASE_MATRICES_PATH, RESULTS_PATH,
             ass_model, "uusimaa", MODE_DEST_CALIBRATION_FILE,
@@ -56,15 +59,16 @@ class ModelTest(unittest.TestCase):
 
         # Check that model result does not change
         self.assertAlmostEquals(
-            model.mode_share[0]["car_drv"],
-            0.38088759049753584)
+            model.mode_share[0]["car_driver"],
+            0.40557095079464156)
         
         print("Model system test done")
 
     def test_long_dist_models(self):
         print("Testing model system for long trips...")
         ass_model = MockAssignmentModel(
-            MatrixData(RESULTS_PATH / LOS_MATRIX_FOLDER / "koko_suomi"),
+            MatrixData(LOS_MATRIX_PATH / "koko_suomi"),
+            MatrixData(DEMAND_MATRIX_PATH / "koko_suomi"),
             use_free_flow_speeds=True, time_periods={"vrk": "WholeDayPeriod"})
         model = ModelSystem(
             ZONEDATA_PATH, COSTDATA_PATH, BASE_MATRICES_PATH, RESULTS_PATH,
@@ -76,8 +80,8 @@ class ModelTest(unittest.TestCase):
 
         # Check that model result does not change
         self.assertAlmostEquals(
-            model.mode_share[0]["car_drv"],
-            0.06961998773694267)
+            model.mode_share[0]["car_driver"],
+            0.07109134661087858)
 
     def _validate_impedances(self, impedances):
         self.assertIsNotNone(impedances)

@@ -212,43 +212,38 @@ class TradeRouteModule(FreightDetourInference):
                         constants_mtx[:, idx] += class_items["dummy"]
         return constants_mtx
 
-    def calculate_probabilities(self) -> Tuple[np.ndarray]:
-        """Calculate choice probabilities.
+    def calculate_probabilities(self, util_one: np.ndarray, util_two: np.ndarray,
+                                util_three: np.ndarray) -> np.ndarray:
+        """Calculate route choice probabilities for given origins and destinations.
+
+        Parameters
+        ----------
+        util_one : np.ndarray
+            leg one utilities (origins, origin bcp)
+        util_two : np.ndarray
+            leg two utilities (origin bcp, dest bcp * leg2 modes)
+        util_three : np.ndarray
+            leg three utilities (dest bcp * leg2 modes, destinations)
 
         Returns
         -------
-        Tuple[np.ndarray]
-            probability of choosing origin bcp i
-            probability of choosing leg2 bcp j given choice of i
+        np.ndarray
+            probability of each route, axes = origins, origin bcp,
+            dest bcp * leg2 modes, destinations
         """
-        add_constant = (False, True, False)
-        util_one, util_two, util_three = [
-            self.calculate_utilities(leg_name, add_constant[i])
-            for i, leg_name in enumerate(leg_names)]
-        util_three = np.concatenate([util_three] * self.len_leg_two, axis=0)
-        
-        # axes = origins, origin bcp, dest bcp * leg2 modes, destinations
         route_util = (
             util_one[:, :, None, None]
             + util_two[None, :, :, None]
             + util_three[None, None, :, :]
         )
-
         n_origin, n_orig_alt, n_dest_bcp_alt, n_dest = route_util.shape
         route_flat = route_util.reshape(n_origin, n_orig_alt * n_dest_bcp_alt, n_dest)
         route_probs_flat = self.softmax(route_flat, axis=1)
-        route_probs = route_probs_flat.reshape(route_util.shape)
-        
-        prob_origin_bcp = np.sum(route_probs, axis=2)
-        prob_origin_bcp_marginal = prob_origin_bcp[:, :, None]
-        prob_leg2_given_bcp = np.zeros_like(route_probs)
-        np.divide(route_probs, prob_origin_bcp_marginal, 
-                  out=prob_leg2_given_bcp,
-                  where=prob_origin_bcp_marginal > 0.0)
-        return prob_origin_bcp, prob_leg2_given_bcp
+        return route_probs_flat.reshape(route_util.shape)
 
     def route_demand(self, demand: np.ndarray) -> Tuple[np.ndarray]:
         """Distribute demand across logit route alternatives and aggregate flows.
+        Process origins and destinations in sequential batches to save memory.
         
         Parameters
         ----------
@@ -260,29 +255,35 @@ class TradeRouteModule(FreightDetourInference):
         Tuple[np.ndarray]
             leg specific routed demand flow
         """
-        prob_orig_bcp, prob_dest_bcp = self.calculate_probabilities()
+        add_constant = (False, True, False)
+        util_one, util_two, util_three = [
+            self.calculate_utilities(leg_name, add_constant[i])
+            for i, leg_name in enumerate(leg_names)]
+        util_three = np.concatenate([util_three] * self.len_leg_two, axis=0)
+        n_orig, n_orig_alt = util_one.shape
+        n_dest_bcp_alt, n_dest = util_three.shape
         
-        # swap destinations to axis 1 for demand multiplication
-        prob_orig_bcp = np.moveaxis(prob_orig_bcp, 2, 1)
-        prob_dest_bcp = np.moveaxis(prob_dest_bcp, 3, 1)
-        demand_routed = (
-            demand[:, :, None, None]
-            * prob_orig_bcp[:, :, :, None]
-            * prob_dest_bcp
-        )
-        
-        # axes now = (n_orig, n_dest, n_orig_alt, n_dest_bcp_alt)
-        # keep axes defining each leg segment, sum out the rest
-        flow_leg1 = np.sum(demand_routed, axis=(1, 3))
-        flow_leg2 = np.sum(demand_routed, axis=(0, 1))
-        flow_leg3 = np.sum(demand_routed, axis=(0, 2))
-        
-        # leg3 still has leg2 mode alternatives. Collapse and sum dest bcp inflow 
-        n_dest, n_dest_bcp_modes = flow_leg3.shape
-        n_dest_bcp = int(n_dest_bcp_modes / self.len_leg_two)
-        flow_leg3 = flow_leg3.reshape(n_dest, self.len_leg_two, n_dest_bcp)
-        flow_leg3 = np.sum(flow_leg3, axis=1).T
-        return flow_leg1, flow_leg2, flow_leg3
+        # Result matrices. Use float64 keep rounding error from building up over batches
+        flow_leg1 = np.zeros((n_orig, n_orig_alt))
+        flow_leg2 = np.zeros((n_orig_alt, n_dest_bcp_alt))
+        flow_leg3 = np.zeros((n_dest_bcp_alt, n_dest))
+
+        for orig_start in range(0, n_orig, self.batch_size):
+            orig = slice(orig_start, orig_start + self.batch_size)
+            for dest_start in range(0, n_dest, self.batch_size):
+                dest = slice(dest_start, dest_start + self.batch_size)
+                route_probs = self.calculate_probabilities(
+                    util_one[orig], util_two, util_three[:, dest])
+                # axes = origins, origin bcp, dest bcp * leg2 modes, destinations
+                demand_routed = route_probs * demand[orig, None, None, dest]
+                flow_leg1[orig] += demand_routed.sum(axis=(2, 3))
+                flow_leg2 += demand_routed.sum(axis=(0, 3))
+                flow_leg3[:, dest] += demand_routed.sum(axis=(0, 1))
+
+        # leg3 still has leg2 mode alternatives. Collapse and sum dest bcp inflow
+        flow_leg3 = flow_leg3.reshape(self.len_leg_two, -1, n_dest).sum(axis=0)
+        return tuple(flow.astype(np.float32)
+                     for flow in (flow_leg1, flow_leg2, flow_leg3))
 
 def run_logistics_model(model: LogisticsModule, demand: np.ndarray, 
                         iteration: int) -> Tuple[np.ndarray]:

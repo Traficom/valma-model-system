@@ -41,54 +41,59 @@ class FreightModelTest(unittest.TestCase):
         resultdata = ResultsData(RESULTS_PATH)
         with open(COSTDATA_PATH) as file:
             costdata = json.load(file)
-        
-        time_impedance = omx.open_file(TEST_MATRICES / "freight_time.omx", "r")
-        dist_impedance = omx.open_file(TEST_MATRICES / "freight_dist.omx", "r")
-        cost_impedance = omx.open_file(TEST_MATRICES / "freight_cost.omx", "r")
-        impedance = {
-            "truck": {
-                "cost": numpy.array(cost_impedance["truck"]),
-                "dist": numpy.array(dist_impedance["truck"]),
-            },
-            "freight_train": {
-                "time": numpy.array(time_impedance["freight_train"]),
-                "dist": numpy.array(dist_impedance["freight_train"]),
-                "aux_cost": numpy.array(cost_impedance["freight_train_aux"]),
-                "aux_dist": numpy.array(dist_impedance["freight_train_aux"]),
-            },
-            "ship": {
-                "time": numpy.array(time_impedance["ship"]),
-                "dist": numpy.array(dist_impedance["ship"]),
-                "aux_cost": numpy.array(cost_impedance["ship_aux"]),
-                "aux_dist": numpy.array(dist_impedance["ship_aux"]),
-                "canal_cost": numpy.zeros([len(ZONE_NUMBERS), len(ZONE_NUMBERS)])
-            }
-        }
-        impedance["semi_trailer"] = deepcopy(impedance["truck"])
-        impedance["trailer_truck"] = deepcopy(impedance["truck"])
+        impedance = {"truck": {}, "freight_train": {}, "ship": {}}
+        with omx.open_file(TEST_MATRICES / "freight_time.omx", "r") as time_impedance:
+            impedance["freight_train"]["time_D"] = numpy.array(time_impedance["freight_train"])
+            impedance["ship"]["time_W"] = numpy.array(time_impedance["ship"])
+        with omx.open_file(TEST_MATRICES / "freight_dist.omx", "r") as dist_impedance:
+            impedance["truck"]["dist"] = numpy.array(dist_impedance["truck"])
+            impedance["freight_train"]["dist_D"] = numpy.array(dist_impedance["freight_train"])
+            impedance["ship"]["dist_W"] = numpy.array(dist_impedance["ship"])
+            impedance["freight_train"]["aux_dist"] = numpy.array(dist_impedance["freight_train_aux"])
+            impedance["ship"]["aux_dist"] = numpy.array(dist_impedance["ship_aux"])
+        with omx.open_file(TEST_MATRICES / "freight_cost.omx", "r") as cost_impedance:
+            impedance["truck"]["cost"] = numpy.array(cost_impedance["truck"])
+            impedance["freight_train"]["aux_cost"] = numpy.array(cost_impedance["freight_train_aux"])
+            impedance["ship"]["aux_cost"] = numpy.array(cost_impedance["ship_aux"])
+        zero_mtx = numpy.zeros_like(impedance["truck"]["cost"])
+        impedance["ship"]["canal_cost"] = zero_mtx.copy()
+        impedance["freight_train"]["time_J"] = zero_mtx.copy()
+        impedance["freight_train"]["dist_J"] = zero_mtx.copy()
+        one_mtx = numpy.ones_like(impedance["truck"]["cost"])
+        impedance["freight_train"]["num_terminals_D"] = one_mtx.copy()
+        impedance["freight_train"]["num_terminals_J"] = zero_mtx.copy()
+        impedance["ship"]["num_terminals_W"] = one_mtx.copy()
+
+        truck_modes = list(param.truck_fleet)
+        truck_modes.remove("truck")
+        for mode in truck_modes:
+            impedance[mode] = deepcopy(impedance["truck"])
         impedance = update_diagonal_cost(impedance)
 
         # Run test foreign trade choice model
         trade_demand, foreign_purposes, fin_borders = self.run_trade_route_choice(
             zonedata, resultdata, costdata, impedance)
-        for mtx_type in impedance.keys():
-            for ass_class, mtx in impedance[mtx_type].items():
-                impedance[mtx_type][ass_class] = mtx[:zonedata.nr_zones, :zonedata.nr_zones]
+        for ass_class in list(impedance):
+            for mtx_type, mtx in impedance[ass_class].items():
+                impedance[ass_class][mtx_type] = mtx[:zonedata.nr_zones, :zonedata.nr_zones]
+            if ass_class in param.freight_modes:
+                impedance[ass_class]["dist"] = sum(
+                    mtx for key, mtx in impedance[ass_class].items()
+                    if key.startswith("dist_"))
+            
         commodities = create_commodities(
-            PARAMETERS_PATH / "domestic", zonedata, resultdata,
-            costdata["freight"])
+            PARAMETERS_PATH / "domestic", zonedata, resultdata, costdata["freight"])
         self.assertEqual(len(commodities), 2)
 
         total_demand = {mode : numpy.zeros_like(impedance["truck"]["cost"])
                         for mode in param.truck_classes}
         iterations = 1
-        mapping = {zone: idx for idx, zone in enumerate(zonedata.zone_numbers)}
-        
+
         # Run test domestic demand model
         for commodity in commodities.values():
             demand = commodity.calc_traffic(impedance)
             demand_trade = commodity.calc_trade_mode_share(demand, trade_demand, fin_borders)
-            costs = commodity.get_costs(impedance)
+            costs = commodity.calc_costs(impedance)
             self._assert_calc_demand_results(demand, costs)
             
             # Calculate test vehicles
@@ -102,12 +107,13 @@ class FreightModelTest(unittest.TestCase):
                              for mode in param.truck_classes}
                 for model_type in ("domestic", "foreign")
             }
-            for mode in param.truck_classes:
-                vehicles["domestic"][mode] += commodity.calc_vehicles(ton_demand, mode)
+            for mode in commodity.truck_fleet:
+                ass_class = param.truck_fleet[mode]
+                vehicles["domestic"][ass_class] += commodity.calc_vehicles(ton_demand, mode)
                 for foreign_purpose in demand_trade:
-                    vehicles["foreign"][mode] += foreign_purposes[foreign_purpose].calc_vehicles(
+                    vehicles["foreign"][ass_class] += foreign_purposes[foreign_purpose].calc_vehicles(
                         demand_trade[foreign_purpose]["truck"], mode)
-                total_demand[mode] += vehicles["domestic"][mode] + vehicles["foreign"][mode]
+                total_demand[ass_class] += vehicles["domestic"][ass_class] + vehicles["foreign"][ass_class]
             self._assert_calc_vehicle_results(vehicles, commodity.name)
             commodity.write_summary(demand, aux_demand, impedance)
             commodity.write_zone_summary(demand)
@@ -124,11 +130,11 @@ class FreightModelTest(unittest.TestCase):
                 detour_total = numpy.sum(per_route[:-1])
                 direct_total = per_route[-1]
                 if commodity.name == "kemlaa":
-                    self.assertAlmostEqual(detour_total, 19.52376, places=3)
-                    self.assertAlmostEqual(direct_total, 12913.464, places=3)
+                    self.assertAlmostEqual(detour_total, 19.632174, places=3)
+                    self.assertAlmostEqual(direct_total, 12184.16, places=3)
                 elif commodity.name == "kummuo":
-                    self.assertAlmostEqual(detour_total, 26.133245, places=3)
-                    self.assertAlmostEqual(direct_total, 15725.467, places=3)
+                    self.assertAlmostEqual(detour_total, 25.982021, places=3)
+                    self.assertAlmostEqual(direct_total, 14829.445, places=3)
 
         write_vehicle_summary(total_demand, impedance, resultdata)
         resultdata.flush()
@@ -140,8 +146,7 @@ class FreightModelTest(unittest.TestCase):
         cluster_border = {"EETLL": 50107, "SESTO": 50127}
 
         commodities = create_commodities(
-            PARAMETERS_PATH / "foreign", zonedata, resultdata,
-            costdata["freight"])
+            PARAMETERS_PATH / "foreign", zonedata, resultdata, costdata["freight"])
         del commodities["kummuo_export"]
         del commodities["kummuo_import"]
         self.assertEqual(len(commodities), 2)
@@ -182,16 +187,16 @@ class FreightModelTest(unittest.TestCase):
         dom_vehicles = vehicles["domestic"]
         for_vehicles = vehicles["foreign"] 
         if purpose_name == "kemlaa":
-            self.assertAlmostEqual(numpy.sum(dom_vehicles["truck"]), 2.1024585, places=3)
-            self.assertAlmostEqual(numpy.sum(for_vehicles["truck"]), 0.032649778, places=3)
-            self.assertAlmostEqual(numpy.sum(dom_vehicles["semi_trailer"]), 1.2102093, places=3)
-            self.assertAlmostEqual(numpy.sum(for_vehicles["semi_trailer"]), 0.05011665, places=3)
-            self.assertAlmostEqual(numpy.sum(dom_vehicles["trailer_truck"]), 1.0011706, places=3)
-            self.assertAlmostEqual(numpy.sum(for_vehicles["trailer_truck"]), 0.031095028, places=3)
+            self.assertAlmostEqual(numpy.sum(dom_vehicles["truck"]), 1.9982584, places=3)
+            self.assertAlmostEqual(numpy.sum(for_vehicles["truck"]), 0.0478322, places=3)
+            self.assertAlmostEqual(numpy.sum(dom_vehicles["semi_trailer"]), 0.95852494, places=3)
+            self.assertAlmostEqual(numpy.sum(for_vehicles["semi_trailer"]), 0.067302875, places=3)
+            self.assertAlmostEqual(numpy.sum(dom_vehicles["trailer_truck"]), 1.0467067, places=3)
+            self.assertAlmostEqual(numpy.sum(for_vehicles["trailer_truck"]), 0.018221792, places=3)
         elif purpose_name == "kummuo":
-            self.assertAlmostEqual(numpy.sum(dom_vehicles["truck"]), 2.5046012, places=3)
+            self.assertAlmostEqual(numpy.sum(dom_vehicles["truck"]), 2.37663, places=3)
             self.assertAlmostEqual(numpy.sum(for_vehicles["truck"]), 0.0, places=3)
-            self.assertAlmostEqual(numpy.sum(dom_vehicles["semi_trailer"]), 1.4416891, places=3)
+            self.assertAlmostEqual(numpy.sum(dom_vehicles["semi_trailer"]), 1.1400224, places=3)
             self.assertAlmostEqual(numpy.sum(for_vehicles["semi_trailer"]), 0.0, places=3)
-            self.assertAlmostEqual(numpy.sum(dom_vehicles["trailer_truck"]), 1.1926672, places=3)
+            self.assertAlmostEqual(numpy.sum(dom_vehicles["trailer_truck"]), 1.2449015, places=3)
             self.assertAlmostEqual(numpy.sum(for_vehicles["trailer_truck"]), 0.0, places=3)

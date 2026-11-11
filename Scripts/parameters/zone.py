@@ -16,7 +16,7 @@ tour_length_intervals = (0, 3, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100,
 
 # Finnish ports and land border control points
 finland_border_points = {
-    "FIHEL": {"name": "Vuosaari", "id": 524},
+    "FIHEL": {"name": "Vuosaari", "id": 601},
     "FISKV": {"name": "Skoljdvik", "id": 3607},
     "FIHKO": {"name": "Hanko", "id": 4102},
     "FIINK": {"name": "Inkoo", "id": 4201},
@@ -29,14 +29,14 @@ finland_border_points = {
     "FILPP": {"name": "Lappeenranta", "id": 15172},
     "FIHMN": {"name": "KotkaHamina", "id": 19401},
     "FIVAL": {"name": "Vaalimaa", "id": 19705},
-    "FIJOE": {"name": "Joensuu", "id": 20128},
+    "FIJOE": {"name": "Joensuu", "id": 20129},
     "FISII": {"name": "Siilinjarvi", "id": 22126},
     "FIVRK": {"name": "Varkaus", "id": 22623},
-    "FIVAR": {"name": "Vartius", "id": 26946},
+    "FIVAR": {"name": "Vartius", "id": 26944},
     "FIKOK": {"name": "Kokkola", "id": 27964},
     "FITOR": {"name": "Tornio", "id": 28615},
     "FIKEM": {"name": "Kemi", "id": 28700},
-    "FIKIL": {"name": "Kilpisjarvi", "id": 30219},
+    "FIKIL": {"name": "Kilpisjarvi", "id": 30218},
     "FIKAS": {"name": "Kaskinen", "id": 31000},
     "FIVAA": {"name": "Vaasa", "id": 31143},
     "FIOUL": {"name": "Oulu", "id": 32855},
@@ -155,9 +155,9 @@ clusters = {
 land_border_pairs = {
     "Vainikkala": [15106, 50120],
     "Vaalimaa": [19705, 50122],
-    "Vartius": [26946, 50121],
+    "Vartius": [26944, 50121],
     "Tornio": [28615, 50124],
-    "Kilpisjarvi": [30219, 50117]
+    "Kilpisjarvi": [30218, 50117]
 }
 
 # Print LOS for these pairs
