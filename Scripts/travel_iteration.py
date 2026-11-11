@@ -30,6 +30,7 @@ from utils.validate_assignment import validate_assignment
 
 DEMAND_MATRIX_FOLDER = "demand_matrices"
 LOS_MATRIX_FOLDER = "los_matrices"
+BUSINESS_AND_OVERNIGHT_FOLDER = "business_and_overnight"
 
 
 class ModelSystem:
@@ -113,13 +114,15 @@ class ModelSystem:
             ) for model_area in ["domestic"]}
 
         # Output data
+        subfolder = (BUSINESS_AND_OVERNIGHT_FOLDER
+                     if self.ass_model.use_free_flow_speeds else submodel)
         self.resultdata = ResultsData(
-            results_path / "aggregated_results" / submodel)
+            results_path / "aggregated_results" / subfolder)
         self.linkdata = ResultsData(results_path / "link_results")
         self.demand_matrices = MatrixData(
-            results_path / DEMAND_MATRIX_FOLDER / submodel)
+            results_path / DEMAND_MATRIX_FOLDER / subfolder)
         self.los_matrices = MatrixData(
-            results_path / LOS_MATRIX_FOLDER / submodel)
+            results_path / LOS_MATRIX_FOLDER / subfolder)
         parameters_path = Path(__file__).parent / "parameters" / "demand"
         foreign_external_path = self.basematrices.path / "ext_foreign_passenger_vrk.omx"
         home_based_purposes = []
