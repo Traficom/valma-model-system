@@ -1,5 +1,5 @@
 {
-    "name": "hb_other_shop",
+    "name": "hb_shop",
     "orig": "home",
     "dest": "wrk_shop",
     "generation_area": "domestic",
@@ -293,19 +293,19 @@
         },
         "calibration": {
             "car_drv": {
-                "constant": 0.0205
+                "constant": 0.0185
             },
             "car_pax": {
-                "constant": -0.0411
+                "constant": 0.2405
             },
             "transit": {
-                "constant": -0.0223
+                "constant": -0.5093
             },
             "bike": {
-                "constant": -0.001
+                "constant": -0.0567
             },
             "walk": {
-                "constant": -0.0828
+                "constant": -0.0958
             }
         }
     },
