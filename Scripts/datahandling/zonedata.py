@@ -164,14 +164,14 @@ class ZoneData:
             "hh2": 0.979,
             "hh3": 0.977,
         }
-        singles_no_children = self[f"{share}_hh1"]
-        singles_children = sum(
+        self.share['singles_no_children'] = self[f"{share}_hh1"]
+        self.share['singles_children'] = sum(
             (1-avg_two_adult_share[hh]) * self[f"{share}_{hh}"]
             for hh in avg_two_adult_share)
-        couples_no_children = avg_two_adult_share["hh2"] * self[f"{share}_hh2"]
-        couples_children = avg_two_adult_share["hh3"] * self[f"{share}_hh3"]
-        couples = couples_no_children + couples_children
-        singles = singles_no_children + singles_children
+        self.share['couples_no_children'] = avg_two_adult_share["hh2"] * self[f"{share}_hh2"]
+        self.share['couples_children'] = avg_two_adult_share["hh3"] * self[f"{share}_hh3"]
+        self.share['couples'] = self['couples_no_children'] + self['couples_children']
+        self.share['singles'] = self['singles_no_children'] + self['singles_children']
 
         # Simple combinatorial household license share calculations assuming
         # no correlation between license distribution in population and
@@ -181,23 +181,23 @@ class ZoneData:
         # - shares of population living in households ("sh_pop"),
         # with given number of *adults* and licenses.
         sh_lic = self["sh_adult_license"]
-        self.share[f"{share}_adults1_lic1"] = sh_lic * singles
-        self.share[f"{share}_adults2_lic1"] = 2 * sh_lic * (1-sh_lic) * couples
-        self.share[f"{share}_adults2_lic2"] = sh_lic**2 * couples
+        self.share[f"{share}_adults1_lic1"] = sh_lic * self['singles']
+        self.share[f"{share}_adults2_lic1"] = 2 * sh_lic * (1-sh_lic) * self['couples']
+        self.share[f"{share}_adults2_lic2"] = sh_lic**2 * self['couples']
 
         if share == "sh_pop":
             # Share of population in 1-adult households that
             # have / do not have children
             self.share["sh_hh_1_adult_children"] = divide(
-                singles_children, singles)
+                self['singles_children'], self['singles'])
             self.share["sh_hh_1_adult_no_children"] = divide(
-                singles_no_children, singles)
+                self['singles_no_children'], self['singles'])
             # Share of population in 2-adult households that
             # have / do not have children
             self.share["sh_hh_2_adults_children"] = divide(
-                couples_children, couples)
+                self['couples_children'], self['couples'])
             self.share["sh_hh_2_adults_no_children"] = divide(
-                couples_no_children, couples)
+                self['couples_no_children'], self['couples'])
 
     def dummy(self, division_type, name, bounds=slice(None)):
         if division_type == "zone":
