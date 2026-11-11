@@ -31,7 +31,7 @@ def main(args):
             columns=list(colxn.schema["properties"]))
 
     zonedata = ZoneData(
-        zone_data_file, data["input_zone_id"], args.submodel,
+        zone_data_file, data["zone_id"], args.submodel,
         car_dist_cost=0.12,
         electric_car_share={"default": {"bev": 0.05, "phev": 0.05}})
     resultdata = ResultsData(result_data_folder)

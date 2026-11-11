@@ -8,70 +8,70 @@
     "gen_model": "rate",
     "generation": {
         "no_car": {
-            "age_7_17": 0.0056,
-            "age_18_29": 0.2545,
-            "age_30_49": 0.345,
-            "age_50_64": 0.2157,
-            "age_65_99": 0.0062
+            "age_7_17": 0.0121,
+            "age_18_29": 0.2303,
+            "age_30_49": 0.3184,
+            "age_50_64": 0.21,
+            "age_65_99": 0.0069
         },
         "has_car": {
-            "age_7_17": 0.0069,
-            "age_18_29": 0.2942,
-            "age_30_49": 0.4014,
-            "age_50_64": 0.3191,
-            "age_65_99": 0.0175
+            "age_7_17": 0.0071,
+            "age_18_29": 0.2885,
+            "age_30_49": 0.3983,
+            "age_50_64": 0.3175,
+            "age_65_99": 0.019
         }
     },
     "sec_dest_rate": {
-        "car_driver": 1.0884,
-        "car_passenger": 1.1081,
-        "transit": 1.0575
+        "car_driver": 1.0830,
+        "car_passenger": 1.0841,
+        "transit": 1.0643
     },
     "impedance_share": {
         "car_driver": {
             "aht": [
-                0.7237,
-                0.0213
+                0.7191,
+                0.0227
             ],
             "pt": [
-                0.2546,
-                0.3495
+                0.2582,
+                0.3483
             ],
             "iht": [
-                0.0217,
-                0.6292
+                0.0227,
+                0.629
             ]
         },
         "car_passenger": {
             "aht": [
-                0.7237,
-                0.0213
+                0.7191,
+                0.0227
             ],
             "pt": [
-                0.2546,
-                0.3495
+                0.2582,
+                0.3483
             ],
             "iht": [
-                0.0217,
-                0.6292
+                0.0227,
+                0.629
             ]
         },
         "transit": {
             "aht": [
-                0.7237,
-                0.0213
+                0.7191,
+                0.0227
             ],
             "pt": [
-                0.1515,
-                0.1479
+                0.1451,
+                0.1582
             ],
             "iht": [
-                0.0217,
-                0.6292
+                0.0227,
+                0.629
             ],
             "it": [
-                0.1031,
-                0.2016
+                0.1131,
+                0.1901
             ]
         },
         "bike": {
@@ -91,8 +91,8 @@
     "parking_cost_share": 0.5,
     "car_cost_sharing": 0.0,
     "occupancy": {
-        "car_driver": 1.152,
-        "car_passenger": 2.055
+        "car_driver": 1.153,
+        "car_passenger": 2.052
     },
     "distance_boundaries": {
         "car_driver": [
@@ -120,12 +120,12 @@
         "car_driver": {
             "attraction": {},
             "impedance": {
-                "time": -0.0289,
-                "cost": -0.05374
+                "time": -0.02741,
+                "cost": -0.06305
             },
             "log": {
                 "attraction_size": 1,
-                "cost": -0.1856
+                "cost": -0.1724
             },
             "attraction_size": {
                 "workplaces": 1
@@ -134,12 +134,12 @@
         "car_passenger": {
             "attraction": { },
             "impedance": {
-                "time": -0.05884,
-                "cost": -0.05374
+                "time": -0.06071,
+                "cost": -0.06305
             },
             "log": {
                 "attraction_size": 1,
-                "cost": -0.1856
+                "cost": -0.1724
             },
             "attraction_size": {
                 "workplaces": 1
@@ -147,16 +147,15 @@
         },
         "transit": {
             "attraction": {
-                "within_zone_inf": -1,
-                "sh_office": 1.532
+                "within_zone_inf": -1
             },
             "impedance": {
-                "time": -0.0106,
-                "cost": -0.05374
+                "time": -0.01036,
+                "cost": -0.06305
             },
             "log": {
                 "attraction_size": 1,
-                "cost": -0.1856
+                "cost": -0.1724
             },
             "attraction_size": {
                 "workplaces": 1
@@ -164,10 +163,10 @@
         },
         "bike": {
             "attraction": {
-                "density_pop_wrk": -0.000021
+                "density_pop_wrk": -0.000025
             },
             "impedance": {
-                "dist": -0.142
+                "dist": -0.1486
             },
             "log": {
                 "attraction_size": 1
@@ -179,7 +178,7 @@
         "walk": {
             "attraction": {},
             "impedance": {
-                "dist": -0.4935
+                "dist": -0.4697
             },
             "log": {
                 "attraction_size": 1
@@ -191,57 +190,57 @@
     },
     "mode_choice": {
         "car_driver": {
-            "constant": -3.307,
+            "constant": -3.49,
             "generation": {},
             "attraction": {},
             "impedance": {},
             "log": {
-                "logsum": 0.8681
+                "logsum": 0.794
             },
             "individual_dummy": {
-                "sh_hh2_lic1_cars1": 4.243,
-                "sh_hh2_lic2_cars2": 4.243,
-                "sh_hh1_lic1_cars1": 4.243,
-                "sh_hh2_lic2_cars1": 2.813
+                "sh_hh2_lic1_cars1": 4.646,
+                "sh_hh2_lic2_cars2": 4.646,
+                "sh_hh1_lic1_cars1": 4.646,
+                "sh_hh2_lic2_cars1": 3.091
             }
         },
         "car_passenger": {
-            "constant": -4.505,
+            "constant": -4.537,
             "generation": {},
             "attraction": {},
             "impedance": {},
             "log": {
-                "logsum": 0.8681
+                "logsum": 0.794
             },
             "individual_dummy": {
-                "sh_hh2_lic2_cars1": 0.9291,
-                "sh_hh2_lic2_cars2": 0.9291,
-                "sh_hh2_lic1_cars1": 0.9291
+                "sh_hh2_lic2_cars1": 0.9479,
+                "sh_hh2_lic2_cars2": 0.9479,
+                "sh_hh2_lic1_cars1": 0.9479
             }
         },
         "transit": {
-            "constant": -2.565,
+            "constant": -1.84,
             "generation": {
-                "HSL": 1.32,
-                "Tampere": 0.5715,
-                "Turku": 0.4445
+                "HSL": 1.709,
+                "Tampere": 0.7141,
+                "Turku": 0.486
             },
             "attraction": {},
             "impedance": {},
             "log": {
-                "logsum": 0.8681
+                "logsum": 0.794
             },
             "individual_dummy": {}
         },
         "bike": {
-            "constant": -1.289,
+            "constant": -1.213,
             "generation": {
-                "Oulu": 0.8738
+                "Oulu": 0.9265
             },
             "attraction": {},
             "impedance": {},
             "log": {
-                "logsum": 0.8681
+                "logsum": 0.794
             },
             "individual_dummy": {}
         },
@@ -251,44 +250,44 @@
             "attraction": {},
             "impedance": {},
             "log": {
-                "logsum": 0.8681
+                "logsum": 0.794
             },
             "individual_dummy": {}
         },
         "scaling": {
             "car_driver": {
-                "constant": 0.8681,
+                "constant": 0.794,
                 "individual_dummy": {
-                    "sh_hh2_lic1_cars1": 0.8681,
-                    "sh_hh2_lic2_cars2": 0.8681,
-                    "sh_hh1_lic1_cars1": 0.8681,
-                    "sh_hh2_lic2_cars1": 0.8681
+                    "sh_hh2_lic1_cars1": 0.794,
+                    "sh_hh2_lic2_cars2": 0.794,
+                    "sh_hh1_lic1_cars1": 0.794,
+                    "sh_hh2_lic2_cars1": 0.794
                 }
             },
             "car_passenger": {
-                "constant": 0.8681,
+                "constant": 0.794,
                 "individual_dummy": {
-                    "sh_hh2_lic2_cars1": 0.8681,
-                    "sh_hh2_lic2_cars2": 0.8681,
-                    "sh_hh2_lic1_cars1": 0.8681
+                    "sh_hh2_lic2_cars1": 0.794,
+                    "sh_hh2_lic2_cars2": 0.794,
+                    "sh_hh2_lic1_cars1": 0.794
                 }
             },
             "transit": {
-                "constant": 0.8681,
+                "constant": 0.794,
                 "generation": {
-                    "HSL": 0.8681,
-                    "Tampere": 0.8681,
-                    "Turku": 0.8681
+                    "HSL": 0.794,
+                    "Tampere": 0.794,
+                    "Turku": 0.794
                 }
             },
             "bike": {
-                "constant": 0.8681,
+                "constant": 0.794,
                 "generation": {
-                    "Oulu": 0.8681
+                    "Oulu": 0.794
                 }
             },
             "walk": {
-                "constant": 0.8681
+                "constant": 0.794
             }
         },
         "calibration": {
@@ -312,30 +311,30 @@
     "demand_share": {
         "bike": {
             "aht": [
-                0.7237,
-                0.0213
+                0.7191,
+                0.0227
             ],
             "pt": [
-                0.2546,
-                0.3495
+                0.2582,
+                0.3483
             ],
             "iht": [
-                0.0217,
-                0.6292
+                0.0227,
+                0.629
             ]
         },
         "walk": {
             "aht": [
-                0.7237,
-                0.0213
+                0.7191,
+                0.0227
             ],
             "pt": [
-                0.2546,
-                0.3495
+                0.2582,
+                0.3483
             ],
             "iht": [
-                0.0217,
-                0.6292
+                0.0227,
+                0.629
             ]
         }
     }
