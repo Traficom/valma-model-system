@@ -9,6 +9,7 @@ os.environ["PROJ_DATA"] = (sys.exec_prefix
 import fiona
 from fiona.crs import from_epsg
 import pandas
+import utils.log as log
 
 
 class ResultsData:
@@ -102,6 +103,11 @@ class ResultsData:
         description : str
             Description of data
         """
+        rows = sum(df.count().sum() for df in data.values())
+        if rows > 1_000_000:
+            msg = f"Skip export for {filename} as there are more than 1M rows."
+            log.warn(msg)  
+            return
         stacked_matrices = pandas.concat(
              {(description, key): df.stack() for key, df in data.items()},
             names=["purpose", "mode", "orig", "dest"])
