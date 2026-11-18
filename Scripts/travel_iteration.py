@@ -499,7 +499,7 @@ class ModelSystem:
     def _export_accessibility(self):
         for purpose in self.dm.tour_purposes:
             for logsum in purpose.model.accessibility.values():
-                self.resultdata.print_data(logsum, f"accessibility.txt")
+                self.resultdata.print_data(logsum, f"zone_accessibility.txt")
     
     def _export_model_results(self):
         self.resultdata.print_data(
