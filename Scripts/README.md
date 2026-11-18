@@ -100,7 +100,13 @@ are found.
 
 ### `MUNICIPALITY_CALIBRATION_FILE`
 
-File path (.txt) where municipality calibration coefficients are found
+File path (.txt) where municipality calibration coefficients are found.
+The file is tab-separated. The first two columns are `generation` and
+`attraction` (municipality names as in the zone data), and each following
+column is named after a destination choice mode (e.g. `car_driver`, `bike`)
+and contains the coefficients added to the destination choice utility of that
+mode for the municipality pair. Columns that do not match any mode are
+ignored with a warning.
 
 ### `LONG_DIST_DEMAND_FORECAST`
 

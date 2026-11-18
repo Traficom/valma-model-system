@@ -18,7 +18,8 @@ from tests.integration.test_arguments import (
     RESULTS_PATH,
     ZONEDATA_PATH,
     COSTDATA_PATH,
-    LOS_MATRIX_FOLDER,
+    LOS_MATRIX_PATH,
+    DEMAND_MATRIX_PATH,
     BASE_MATRICES_PATH,
     MODE_DEST_CALIBRATION_FILE,
     MUNICIPALITY_CALIBRATION_FILE
@@ -50,14 +51,19 @@ def fake_skims(setup, zone_numbers, baseline):
     return result
 
 
+def mock_assignment_model():
+    return MockAssignmentModel(
+        MatrixData(LOS_MATRIX_PATH / "uusimaa"),
+        MatrixData(DEMAND_MATRIX_PATH / "uusimaa"))
+
+
 @unittest.skipIf(bike_and_walk is None, "valma_bike_and_walk not installed")
 class BikeAndWalkTest(unittest.TestCase):
 
     def _model(self, ass_model=None):
         log.initialize(Config())
         if ass_model is None:
-            ass_model = MockAssignmentModel(MatrixData(
-                RESULTS_PATH / LOS_MATRIX_FOLDER / "uusimaa"))
+            ass_model = mock_assignment_model()
         model = ModelSystem(
             ZONEDATA_PATH, COSTDATA_PATH, BASE_MATRICES_PATH, RESULTS_PATH,
             ass_model, "uusimaa", MODE_DEST_CALIBRATION_FILE,
@@ -102,10 +108,8 @@ class BikeAndWalkTest(unittest.TestCase):
     def test_emme_bike_end_assignment_is_skipped(self):
         # EMME creates its periods only in prepare_network, so flags set
         # on them any earlier would be lost.
-        ass_model = MockAssignmentModel(MatrixData(
-            RESULTS_PATH / LOS_MATRIX_FOLDER / "uusimaa"))
-        fresh = MockAssignmentModel(MatrixData(
-            RESULTS_PATH / LOS_MATRIX_FOLDER / "uusimaa")).assignment_periods
+        ass_model = mock_assignment_model()
+        fresh = mock_assignment_model().assignment_periods
         for ap in fresh:
             ap.assign_bikes_at_end = True
         prepare = ass_model.prepare_network

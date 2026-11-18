@@ -30,6 +30,7 @@ from utils.validate_assignment import validate_assignment
 
 DEMAND_MATRIX_FOLDER = "demand_matrices"
 LOS_MATRIX_FOLDER = "los_matrices"
+BUSINESS_AND_OVERNIGHT_FOLDER = "business_and_overnight"
 
 
 class ModelSystem:
@@ -118,13 +119,15 @@ class ModelSystem:
             ) for model_area in ["domestic"]}
 
         # Output data
+        subfolder = (BUSINESS_AND_OVERNIGHT_FOLDER
+                     if self.ass_model.use_free_flow_speeds else submodel)
         self.resultdata = ResultsData(
-            results_path / "aggregated_results" / submodel)
+            results_path / "aggregated_results" / subfolder)
         self.linkdata = ResultsData(results_path / "link_results")
         self.demand_matrices = MatrixData(
-            results_path / DEMAND_MATRIX_FOLDER / submodel)
+            results_path / DEMAND_MATRIX_FOLDER / subfolder)
         self.los_matrices = MatrixData(
-            results_path / LOS_MATRIX_FOLDER / submodel)
+            results_path / LOS_MATRIX_FOLDER / subfolder)
 
         # Walk and bike LOS and link volumes from valma_bike_and_walk.
         # Imported only when used, so the model runs without the package.
@@ -145,8 +148,10 @@ class ModelSystem:
         other_purposes = []
         foreign_purposes = []
         purpose_names = []
+        dest_choice_modes = set()
         for file in parameters_path.glob("*.json"):
             specification = json.loads(file.read_text("utf-8"))
+            dest_choice_modes.update(specification["destination_choice"] or [])
             for dummies in mode_dummies.values():
                 for subarea in dummies:
                     for mode, coeff in dummies[subarea].items():
@@ -176,6 +181,11 @@ class ModelSystem:
                     home_based_purposes.append(purpose)
                 else:
                     other_purposes.append(purpose)
+        for mode in municip_calib:
+            if mode not in dest_choice_modes:
+                log.warn(
+                    f"Municipality calibration column {mode} does not match "
+                    + "any destination choice mode and is not used")
         if len(purpose_names) != len(set(purpose_names)):
             msg = f"Duplicate tour purposes in demand parameters."
             log.error(msg)

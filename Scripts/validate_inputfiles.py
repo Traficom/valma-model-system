@@ -13,7 +13,10 @@ from assignment.mock_assignment import MockAssignmentModel
 from datahandling.matrixdata import MatrixData
 from datahandling.zonedata import ZoneData, FreightZoneData
 import parameters.assignment as param
-from valma_travel import LOS_MATRIX_FOLDER, DEMAND_MATRIX_FOLDER
+from valma_travel import (
+    LOS_MATRIX_FOLDER,
+    DEMAND_MATRIX_FOLDER,
+    BUSINESS_AND_OVERNIGHT_FOLDER)
 
 
 def main(args):
@@ -77,16 +80,22 @@ def main(args):
 
         # Check network
         if args.do_not_use_emme:
+            subfolder = (BUSINESS_AND_OVERNIGHT_FOLDER if calc_long_dist_demand
+                         else args.submodel[i])
             mock_result_path = Path(
                 args.result_data_folder, args.scenario_name[i],
-                LOS_MATRIX_FOLDER, args.submodel[i])
+                LOS_MATRIX_FOLDER, subfolder)
+            mock_demand_path = Path(
+                args.result_data_folder, args.scenario_name[i],
+                DEMAND_MATRIX_FOLDER, subfolder)
             if not mock_result_path.exists():
                 msg = "Mock Results directory {} does not exist.".format(
                     mock_result_path)
                 log.error(msg)
                 raise NameError(msg)
             assignment_model = MockAssignmentModel(
-                MatrixData(mock_result_path), time_periods=time_periods)
+                MatrixData(mock_result_path), MatrixData(mock_demand_path),
+                time_periods=time_periods)
             zone_numbers[args.submodel[i]] = assignment_model.zone_numbers
         else:
             if not os.path.isfile(emp_path):
@@ -212,7 +221,7 @@ def main(args):
         if long_dist == "calc":
             long_dist_result_paths.append(
                 Path(args.result_data_folder, name, DEMAND_MATRIX_FOLDER,
-                     "koko_suomi"))
+                     BUSINESS_AND_OVERNIGHT_FOLDER))
     model_types = (args.model_types if args.model_types
                    else ["passenger_transport" for _ in zone_data_files])
     electric_car_share = {"default": {"bev": 0.1, "phev": 0.2}}

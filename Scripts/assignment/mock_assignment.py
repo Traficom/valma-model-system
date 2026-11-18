@@ -14,6 +14,7 @@ from assignment.abstract_assignment import AssignmentModel, Period
 
 class MockAssignmentModel(AssignmentModel):
     def __init__(self, matrices: MatrixData,
+                 demand_matrices: MatrixData,
                  use_free_flow_speeds: bool = False,
                  time_periods: Dict[str, str]=param.time_periods,
                  delete_extra_matrices: bool = False,
@@ -29,7 +30,7 @@ class MockAssignmentModel(AssignmentModel):
             self.time_periods[tp] = (cls[class_name] if class_name in cls
                                      else MockPeriod)
         self.assignment_periods = [self.time_periods[tp](
-                tp, matrices, end_ass_classes)
+                tp, matrices, demand_matrices, end_ass_classes)
             for tp in time_periods]
 
     @property
@@ -70,9 +71,11 @@ class MockAssignmentModel(AssignmentModel):
 class MockPeriod(Period):
     def __init__(self,
                  name: str, matrices: MatrixData,
+                 demand_matrices: MatrixData,
                  end_assignment_classes: Iterable[str]):
         self.name = name
         self.matrices = matrices
+        self.demand_matrices = demand_matrices
         self.assignment_modes = param.simple_transport_classes
         self._end_assignment_classes = set(end_assignment_classes)
 
@@ -185,7 +188,9 @@ class MockPeriod(Period):
     def get_matrix(self,
                     ass_class: str,
                     matrix_type: str = "demand") -> numpy.ndarray:
-        with self.matrices.open(matrix_type, self.name) as mtx:
+        matrices = (self.demand_matrices if matrix_type == "demand"
+                    else self.matrices)
+        with matrices.open(matrix_type, self.name) as mtx:
             matrix = mtx[ass_class]
             new_zone_numbers = mtx.zone_numbers
         idx = numpy.where(numpy.isin(self.zone_numbers, new_zone_numbers))[0]
@@ -194,7 +199,7 @@ class MockPeriod(Period):
     def set_matrix(self,
                     ass_class: str,
                     matrix: numpy.ndarray):
-        with self.matrices.open("demand", self.name, self.zone_numbers, m='a') as mtx:
+        with self.demand_matrices.open("demand", self.name, self.zone_numbers, m='a') as mtx:
             mtx[ass_class] = matrix
 
 
