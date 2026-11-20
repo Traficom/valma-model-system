@@ -155,6 +155,11 @@ performance_settings = {
     "network_acceleration": True,
     "u_turns_allowed": True,
 }
+bike_performance_settings = {
+    "number_of_processors": "max",
+    "network_acceleration": False,
+    "u_turns_allowed": False,
+}
 congested_time_weight = 1.5
 freight_terminal_cost = {
     "freight_train": 5000,
