@@ -1,7 +1,5 @@
-import os
 from pathlib import Path
 import json
-import subprocess
 
 
 def read_from_file(path=Path(__file__).parent.parent / "dev-config.json"):
@@ -14,8 +12,8 @@ def read_from_file(path=Path(__file__).parent.parent / "dev-config.json"):
 
     Returns
     -------
-    Config
-        Config object with parameters set from file
+    dict
+        Configuration parameters read from file
     """
     with open(path, 'r', encoding='utf-8') as file:
         config = json.load(file)
@@ -43,26 +41,19 @@ def dump(args_dict: dict) -> str:
     return json.dumps(args_dump, indent=4)
 
 
-def create_config(config: dict):
-    """Container for config parameters.
-
-    The parameters are object variables with CAPS_LOCK,
-    which means they should not be modified.
-    For clarity the normally used parameters are explicitly initialized
-    (to None). However, during `Config` initialization, these variables are
-    read from a dictionary and hence strictly speaking modified once.
+def create_config(config: dict) -> dict:
+    """Create a configuration mapping with defaults applied.
 
     Parameters
     ----------
     config : dict
         key : str
-            Parameter name (e.g., HELMET_VERSION)
+            Parameter name (e.g., SCENARIO_NAME)
         value : str/bool/int/float
             Parameter value
     """
-    c = Config()
+    c = {}
     c.update({
-        "LEM_VERSION": None,
         "JSON": None,
         "SCENARIO_NAME": None,
         "ITERATIONS": None,
@@ -100,17 +91,3 @@ def create_config(config: dict):
     return c
 
 
-class Config(dict):
-
-    @property
-    def VERSION(self):
-        """LEM version number from git tag or dev_config.json."""
-        os.chdir(Path(__file__).parent)
-        try:
-            # If model system is in a git repo
-            return subprocess.check_output(
-                ["git", "describe", "--tags"], stderr=subprocess.STDOUT,
-                text=True)
-        except (subprocess.CalledProcessError, WindowsError):
-            # If model system is downloaded with lem-ui
-            return self["LEM_VERSION"]
