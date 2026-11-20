@@ -12,11 +12,6 @@ which can be used to setup the model run in advance.
 
 ## Configuring the model run with json
 
-### `LEM_VERSION`
-
-The version number is logged in model runs.
-This should not be changed unless model code is changed.
-
 ### `LOG_LEVEL`
 
 Model runs are logged to the command prompt and to a log file.
