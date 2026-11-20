@@ -342,8 +342,12 @@ class ModelSystem:
         if is_last_iteration and not self.ass_model.use_free_flow_speeds:
             for mode in daily_matrices:
                 daily_matrices[mode] += daily_matrices[mode].T # Convert from tours to trips
+            # Daily matrices are over the zone data's zones, which can be
+            # fewer than the network's (e.g. foreign zones without data)
             with self.demand_matrices.open(
-                    "demand", "vrk", self.zone_numbers, m='w') as mtx:
+                    "demand", "vrk",
+                    numpy.asarray(self._zone_datas["domestic"].zone_numbers),
+                    m='w') as mtx:
                 for mode in daily_matrices:
                     mtx[mode] = daily_matrices[mode]
 

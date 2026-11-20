@@ -136,7 +136,13 @@ class BikeMode(SoftMode):
                 "relative_gap": 1,
                 "normalized_gap": 1,
             },
-            "performance_settings": param.performance_settings
+            # Network acceleration makes the bike SOLA hang (>10 min, or
+            # crash) on the 8564-zone B network with EMME 25.00.01, whereas
+            # without it the assignment finishes in about one minute.
+            "performance_settings": {
+                **param.performance_settings,
+                "network_acceleration": False,
+            },
         }
 
 
