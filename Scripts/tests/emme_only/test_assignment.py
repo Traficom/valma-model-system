@@ -13,6 +13,7 @@ from datahandling.matrixdata import MatrixData
 from datahandling.resultdata import ResultsData
 from tests.integration.test_arguments import TEST_DATA_PATH, COSTDATA_PATH, LOS_MATRIX_PATH
 from datahandling.traversaldata import transform_traversal_data
+from travel_iteration import LOS_MATRIX_FOLDER
 try:
     from assignment.emme_bindings.emme_project import EmmeProject
     import inro.emme.desktop.app as _app

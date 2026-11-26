@@ -6,6 +6,7 @@ import numpy
 import utils.log as log
 from datahandling.zonedata import ZoneData
 from datahandling.matrixdata import MatrixData
+from travel_iteration import DEMAND_MATRIX_FOLDER
 import parameters.assignment as param
 from tests.integration.test_arguments import (
     TEST_DATA_PATH,
