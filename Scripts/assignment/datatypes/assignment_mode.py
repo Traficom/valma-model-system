@@ -136,7 +136,7 @@ class BikeMode(SoftMode):
                 "relative_gap": 1,
                 "normalized_gap": 1,
             },
-            "performance_settings": param.performance_settings
+            "performance_settings": param.bike_performance_settings
         }
 
 
