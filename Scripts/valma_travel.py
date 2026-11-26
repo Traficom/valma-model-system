@@ -5,6 +5,7 @@ import shutil
 
 import utils.config
 import utils.log as log
+from parameters.version import VALMA_VERSION, git_provenance
 from assignment.emme_assignment import EmmeAssignmentModel
 from assignment.mock_assignment import MockAssignmentModel
 from assignment.assignment_period import AssignmentPeriod
@@ -197,7 +198,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--version",
         action="version",
-        version="helmet " + str(config.VERSION))
+        version="VALMA " + VALMA_VERSION)
     parser.add_argument(
         "--json",
         type=str,
@@ -346,7 +347,8 @@ if __name__ == "__main__":
             args_dict[key.lower()] = val
 
     log.initialize(args)
-    log.debug("lem_version=" + str(config.VERSION))
+    log.info("VALMA_VERSION=" + VALMA_VERSION)
+    log.info("GIT_PROVENANCE=" + git_provenance())
     log.debug('sys.version_info=' + str(sys.version_info[0]))
     log.debug('sys.path=' + str(sys.path))
     json_dump = utils.config.dump(args_dict)
