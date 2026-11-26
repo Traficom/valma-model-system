@@ -2,7 +2,7 @@
 from pathlib import Path
 import subprocess
 
-VALMA_VERSION = "v1.0.0"
+VALMA_VERSION = "v1.0.1"
 
 def git_provenance() -> str:
     """Return the Git description, if available."""
