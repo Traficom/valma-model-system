@@ -307,19 +307,19 @@
         },
         "calibration": {
             "car_driver": {
-                "constant": 0.0271
+                "constant": 0.0224
             },
             "car_passenger": {
                 "constant": 0.2382
             },
             "transit": {
-                "constant": -0.4044
+                "constant": -0.3987
             },
             "bike": {
-                "constant": -0.1267
+                "constant": -0.1215
             },
             "walk": {
-                "constant": -0.1522
+                "constant": -0.1470
             }
         }
     },
